@@ -1,0 +1,186 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What vibe coding means</a></li>
+    <li><a href="#categories">The three categories of tool</a></li>
+    <li><a href="#prompt">Prompt-to-app platforms</a></li>
+    <li><a href="#agents">Agentic coding tools</a></li>
+    <li><a href="#assistants">In-editor assistants</a></li>
+    <li><a href="#choose">How to choose</a></li>
+    <li><a href="#works">Where vibe coding genuinely works</a></li>
+    <li><a href="#fails">Where it fails, predictably</a></li>
+    <li><a href="#wall">The wall, and how to avoid hitting it</a></li>
+    <li><a href="#discipline">Vibe coding with a seatbelt</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What vibe coding means</h2>
+
+<p>Vibe coding is building software by describing what you want and accepting what the model produces, without reading most of the code. The term was coined by Andrej Karpathy in early 2025 to describe a way of working he characterised as giving in to the vibes and forgetting that the code exists.</p>
+
+<p>It caught on because it named something people were already doing. It is now used loosely for any AI-assisted development, which muddies a distinction worth keeping:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Vibe coding</th><th>AI-assisted development</th></tr></thead>
+<tbody>
+<tr><td>Do you read the code?</td><td>Mostly not</td><td>Yes</td></tr>
+<tr><td>Who decides the architecture?</td><td>The model</td><td>You</td></tr>
+<tr><td>How do you know it works?</td><td>You try it</td><td>Tests, checks, verification</td></tr>
+<tr><td>What happens when it breaks?</td><td>Describe the bug, hope</td><td>Read, diagnose, fix</td></tr>
+<tr><td>Good for</td><td>Prototypes, throwaways, learning</td><td>Anything with users</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Both are legitimate. The failure is not choosing vibe coding; it is choosing it for something that later needs to be maintained, and not noticing the moment it stopped being a prototype.</p>
+
+<h2 id="categories">The three categories of tool</h2>
+
+<p>"Vibe coding tools" covers three groups that work differently enough that comparing them directly is a category error.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Category</th><th>What it does</th><th>You get</th></tr></thead>
+<tbody>
+<tr><td><strong>Prompt-to-app platforms</strong></td><td>Describe an app; it builds and hosts one</td><td>A running app, often on their infrastructure</td></tr>
+<tr><td><strong>Agentic coding tools</strong></td><td>Work in your repository with real tools</td><td>Commits in your own codebase</td></tr>
+<tr><td><strong>In-editor assistants</strong></td><td>Complete and edit as you type</td><td>Faster typing, you stay in control</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The question is not which is best. It is which stage you are at and whether you intend to own the result.</p>
+
+<h2 id="prompt">Prompt-to-app platforms</h2>
+
+<p>You describe an application in a browser and get a working one, usually deployed, often with a database and auth wired up. Lovable, Bolt, Base44, Replit and v0 sit here, along with a steady stream of newcomers.</p>
+
+<p><strong>What they are genuinely good at:</strong> going from nothing to something clickable in minutes. For validating an idea, showing a stakeholder a real interface instead of a mockup, or building an internal tool that ten people will use, they are excellent and hard to beat.</p>
+
+<p><strong>The trade you are making:</strong> the platform chooses the stack, the structure, and often the hosting. That is precisely why it is fast. It also means the exit is the thing to check <em>before</em> you commit — can you export the code, and is what you get something a developer would want to maintain? Some produce a clean repository. Others produce something that runs and nobody wants to touch.</p>
+
+<p><strong>The honest failure mode:</strong> the second month. The first version arrives startlingly fast. Then you need a specific integration, or a permissions model that does not fit the pattern, or a performance fix, and progress slows sharply — because the parts you did not read are now the parts you need to change.</p>
+
+<h2 id="agents">Agentic coding tools</h2>
+
+<p>These work in your actual repository. They read files, run commands, execute tests, and commit. <a href="/blogs/guides/how-to-build-a-website-with-claude-code">Claude Code</a> is one; Codex CLI, Cursor's agent mode, Aider and Gemini CLI occupy the same space. The comparison worth reading in full is <a href="/blogs/guides/claude-code-vs-cursor-web-development">Claude Code versus Cursor for web development</a>, which is less about which is better than about which failure each one makes easy.</p>
+
+<p><strong>What they are good at:</strong> real projects with existing code. They follow your conventions, work inside your architecture, and produce commits in your repository. Nothing about the output is proprietary to the tool — it is just your codebase.</p>
+
+<p><strong>The trade:</strong> you need a repository, and you need enough judgement to review what comes back. There is no browser preview that makes a bad decision look fine.</p>
+
+<p><strong>Where they beat prompt-to-app:</strong> everything after the prototype. Adding a feature to a real system, refactoring, debugging, migrations, audits. And critically — they scale with your discipline. Give one a good <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a>, real constraints, and a finishing procedure, and output quality goes up substantially. Prompt-to-app platforms have no equivalent lever.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>That discipline is the difference between a prototype and something you can ship. The Claude Code Website Launch System packages it: a production CLAUDE.md, a staged build prompt, 100 prompts, and the audits that catch what vibe coding misses. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="assistants">In-editor assistants</h2>
+
+<p>Autocomplete on a longer leash — GitHub Copilot, Cursor's inline mode, and the assistants now built into most editors. You are writing; they finish lines and blocks.</p>
+
+<p>This is barely vibe coding, because you read everything as it appears. It is also the lowest-risk of the three, and the easiest to adopt: nothing changes about how you work except speed.</p>
+
+<p>Worth noting that these compose with agentic tools rather than competing. Plenty of people use an in-editor assistant for the typing and an agent for the multi-file work.</p>
+
+<h2 id="choose">How to choose</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>If you...</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td>Need something clickable today, to validate an idea</td><td>Prompt-to-app</td></tr>
+<tr><td>Have a repository and real requirements</td><td>Agentic</td></tr>
+<tr><td>Write code daily and want it faster</td><td>In-editor</td></tr>
+<tr><td>Are building something with users and money attached</td><td>Agentic, with real verification</td></tr>
+<tr><td>Cannot read the language you are generating</td><td>Prompt-to-app, and keep the scope small</td></tr>
+<tr><td>Need to hand this to a developer later</td><td>Agentic, or check the export first</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Three questions settle most cases: <strong>Will anyone else maintain this? Does it touch money or personal data? Will it exist in a year?</strong> Any yes points toward owning the code in your own repository.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-vibe-coding-dial.png?v=1787892954" alt="A horizontal dial running from vibes on the left to disciplined on the right, with four stops: layout prototype, internal tool, customer feature, and auth and payments. The two right-hand stops are highlighted."
+       width="1000" height="430" loading="lazy" decoding="async">
+  <figcaption>Move it per task rather than picking a side once.</figcaption>
+</figure>
+
+<h2 id="works">Where vibe coding genuinely works</h2>
+
+<p>The critique of vibe coding is often overdone. It is the right tool for a real set of jobs:</p>
+
+<ul>
+  <li><strong>Throwaway prototypes.</strong> Building it properly would cost more than the answer is worth.</li>
+  <li><strong>Learning.</strong> Seeing a working example of something unfamiliar is a fast way in, as long as you then read it.</li>
+  <li><strong>Internal tools with a handful of users.</strong> The blast radius is small and the alternative is usually a spreadsheet.</li>
+  <li><strong>Scripts and one-offs.</strong> Data transformations, migrations you run once, glue.</li>
+  <li><strong>Exploring an approach</strong> before committing to it. Three rough versions tells you more than a week of design.</li>
+</ul>
+
+<p>The common thread: <strong>the cost of it being wrong is low, and you will find out quickly.</strong> That is the actual test — not the size of the project.</p>
+
+<h2 id="fails">Where it fails, predictably</h2>
+
+<p>These are not hypothetical risks. They are the recurring ones.</p>
+
+<p><strong>Security.</strong> The commonest serious flaw in generated applications is missing authorisation — checking that a user is logged in, but not that this particular record belongs to them. It is invisible in testing because you are testing as yourself. Change an ID in a URL and you find it.</p>
+
+<p><strong>Accessibility.</strong> Clickable divs, placeholders used as labels, focus states removed because they looked untidy, contrast that fails at a glance nobody took. Generated interfaces look fine and lock people out.</p>
+
+<p><strong>The states nobody described.</strong> Loading, empty, and error. You asked for a feature and got the happy path, because that is what you described.</p>
+
+<p><strong>Silent duplication.</strong> Ask for four things across four sessions and get four ways of doing the same thing. Nothing errors; the codebase just becomes harder to change every week.</p>
+
+<p><strong>Debugging what you did not read.</strong> The moment a bug arrives in code you never looked at, the speed advantage inverts. You are now reading it under pressure instead of at leisure.</p>
+
+<h2 id="wall">The wall, and how to avoid hitting it</h2>
+
+<p>Most vibe coding projects that fail follow the same arc. Fast start, real progress, genuine delight — then a change that requires understanding the whole thing, and a stop.</p>
+
+<p>The wall is not a limit of the tools. It is the accumulated cost of decisions nobody made deliberately. Every unread file is a decision that got made by default, and the bill arrives when you need to change one.</p>
+
+<p>Three habits push it a long way out, and none of them cost much:</p>
+
+<p><strong>Read the structure, even if not every line.</strong> You do not need to review every function. You do need to know what the files are, how data moves, and where the boundaries are. Ten minutes.</p>
+
+<p><strong>Verify the things that fail silently.</strong> Change an ID in a URL and confirm you get a 403. Tab through the interface. Check contrast. Load it at 320px. These take minutes and catch the failures that testing-as-yourself never will.</p>
+
+<p><strong>Write down the decisions once you have them.</strong> The moment a project outlives the afternoon, the constraints belong in a file rather than in your memory of what you typed.</p>
+
+<h2 id="discipline">Vibe coding with a seatbelt</h2>
+
+<p>The most useful reframing: vibe coding and disciplined development are not opposites, they are a dial. You can move it per task.</p>
+
+<p>Prototyping a layout? All the way to vibes. Touching authentication? All the way to disciplined. Most work sits between, and the skill worth developing is noticing which one you are on.</p>
+
+<p>Four things let you keep most of the speed while removing most of the risk:</p>
+
+<ol>
+  <li><strong>A file of constraints</strong> the tool reads every session, so conventions are stated once rather than re-guessed. That is what <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a> is.</li>
+  <li><strong>A finishing procedure</strong> — checks that run, output you see — so "done" is a procedure rather than a claim.</li>
+  <li><strong>Review in a fresh context.</strong> A session that wrote the code will defend it; a <a href="/blogs/guides/claude-code-subagents">subagent</a> with no memory of writing it will not.</li>
+  <li><strong>One automated check</strong> that fails the build on a regression. Break it once deliberately to confirm it works.</li>
+</ol>
+
+<p>That is perhaps an hour of setup. It is the difference between a prototype that becomes a product and one that becomes a rewrite.</p>
+
+<p>If you are weighing formal training as a way to build that judgement, <a href="/blogs/guides/claude-code-certification">is there a Claude Code certification?</a> covers what exists and whether it is the shortest path.</p>
+
+<h2>Where to go next</h2>
+
+<p>If the project you vibe-coded is already live and you want to know what it cost you, <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a> is the inspection method, and the free <a href="/pages/claude-code-website-audit-checklist">audit checklist</a> is the list it works through.</p>
+
+<p>If you have decided the project is worth owning properly, the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> is the disciplined end of the dial, start to finish. The <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> covers directing an agent so you get fewer surprises, <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a> covers the constraints file, and the <a href="/blogs/guides/claude-code-seo-website-optimization">SEO workflow</a> covers what generated sites almost always get wrong. Building a store rather than a site? See <a href="/blogs/guides/build-shopify-store-with-claude-code">building a Shopify store with Claude Code</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/overview" rel="noopener">Claude Code documentation</a></li>
+  <li><a href="https://owasp.org/www-project-top-ten/" rel="noopener">OWASP Top Ten</a> — the risk categories behind the security failures above</li>
+  <li><a href="https://www.w3.org/TR/WCAG22/" rel="noopener">W3C: WCAG 2.2</a> — the accessibility criteria generated interfaces most often miss</li>
+  <li><a href="https://developers.google.com/search/docs/fundamentals/creating-helpful-content" rel="noopener">Google: people-first content</a> — relevant if the generated site is meant to be found</li>
+</ul>

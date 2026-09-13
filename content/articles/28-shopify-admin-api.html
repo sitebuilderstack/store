@@ -1,0 +1,201 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#why">Why the API and not the admin</a></li>
+    <li><a href="#access">Getting access without leaking it</a></li>
+    <li><a href="#client">One client, and why it matters</a></li>
+    <li><a href="#products">Creating a product that is actually correct</a></li>
+    <li><a href="#errors">userErrors: the failure that returns HTTP 200</a></li>
+    <li><a href="#publish">Publishing, which is separate from creating</a></li>
+    <li><a href="#metafields">Metafields, and letting the theme read live data</a></li>
+    <li><a href="#files">Files and images: staged uploads</a></li>
+    <li><a href="#idempotent">Writing scripts you can run twice</a></li>
+    <li><a href="#guard">Guards worth writing before you need them</a></li>
+    <li><a href="#limits">Rate limits are a cost model, not an error</a></li>
+    <li><a href="#cannot">What the API cannot tell you</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">Why the API and not the admin</h2>
+
+<p>Anything you can do in the Shopify admin, you can do through the Admin API. The reason to prefer the API is not speed. It is that a change made in the admin has no history, no review, and no way to be repeated on another store or rolled back on this one.</p>
+
+<p>A product description typed into a textarea exists in exactly one place: someone else's database. Move it to a file in your repository and publish it with a script, and it becomes a diff. You can see what changed, when, and why. You can run a check before it ships. Claude Code can read it.</p>
+
+<p>That is the whole argument, and it is the same argument as for infrastructure as code. The API is how you get there.</p>
+
+<p>This assumes you already have a store and a theme. If you do not, <a href="/blogs/guides/build-shopify-store-with-claude-code">building a Shopify store with Claude Code</a> covers the theme workflow and the platform constraints first, and <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a> covers the parts that are not Shopify-specific.</p>
+
+<h2 id="access">Getting access without leaking it</h2>
+
+<p>Create a custom app in <strong>Settings &rarr; Apps and sales channels &rarr; Develop apps</strong>, choose its Admin API scopes, install it, and reveal the access token once. Shopify shows it a single time.</p>
+
+<p>Where that token goes is the decision that matters, and the wrong answer is expensive because a leaked Admin token is not a password &mdash; it is your whole store, including customers and orders.</p>
+
+<p>Keep it in a file <strong>outside the repository</strong> and read it by path. Not in <code>.env</code> at the project root where a careless <code>git add -A</code> can catch it. Not in a CI variable you also echo in a debug step. Outside the tree entirely, referenced by an environment variable that holds the <em>path</em> rather than the secret:</p>
+
+<pre>export SHOPIFY_TOKEN_PATH=/opt/shopify-admin-token.txt</pre>
+
+<p>Then tell Claude Code the rule explicitly, because it will not infer it:</p>
+
+<pre class="sbs-prompt">Credentials live outside this repository and are read by path from
+an environment variable. Never print a token, never write one into a
+file in the tree, never include one in a commit, a log line, a
+generated document, a screenshot, or an error message.
+
+If diagnostic output would contain a credential, redact it before
+printing.</pre>
+
+<p>That last sentence earns its place. The common leak is not a committed secret; it is a stack trace or a debug dump of a request that happens to include the header.</p>
+
+<p>Rules like this belong in <code>CLAUDE.md</code> rather than in the prompt you happen to be writing, so they apply to every session without being restated. <a href="/blogs/guides/production-claude-md-web-development">A production CLAUDE.md for web development</a> covers what belongs in that file and, more usefully, what does not.</p>
+
+<p>Add a check that fails the build if a token-shaped string appears anywhere in the tracked tree. Shopify tokens have recognisable prefixes, which makes the check cheap to write and worth having before you need it.</p>
+
+<h2 id="client">One client, and why it matters</h2>
+
+<p>Write one small module that owns the HTTP call and have every script import it. Not because it saves lines &mdash; it does not, at first &mdash; but because everything you will later want to be true of every request has exactly one place to live: the API version, the token, the timeout, retry on throttling, and the redaction that stops a token reaching a log.</p>
+
+<p>Pin the API version explicitly. Shopify releases quarterly and supports each version for a year, and an unpinned client is a script that breaks on a date you did not choose:</p>
+
+<pre>https://your-store.myshopify.com/admin/api/2025-07/graphql.json</pre>
+
+<p>Prefer GraphQL over REST for new work. Shopify has been moving functionality to GraphQL for years and some of it exists nowhere else &mdash; publications and staged uploads among them.</p>
+
+<h2 id="products">Creating a product that is actually correct</h2>
+
+<p>A digital product is not a physical one with the shipping switched off, and the fields that make the difference are not on the product. They are on the variant's inventory item:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Field</th><th>Value for a download</th><th>What goes wrong otherwise</th></tr></thead>
+<tbody>
+<tr><td><code>requiresShipping</code></td><td><code>false</code></td><td>Checkout asks for a shipping address and may add a rate</td></tr>
+<tr><td><code>tracked</code></td><td><code>false</code></td><td>The product sells out after one order</td></tr>
+<tr><td><code>weight</code></td><td><code>0</code></td><td>Weight-based rates apply to a file</td></tr>
+<tr><td><code>sku</code></td><td>Set it</td><td>Order exports and reconciliation have nothing to join on</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Those live under <code>productVariantsBulkUpdate</code>, not <code>productCreate</code>. Creating the product and never touching the variant is the single most common way a digital product ships wrong, and nothing about the storefront looks unusual until someone reaches checkout.</p>
+
+<p>Ask for the fields back in the mutation response and print them. A script that reports what the API returned, rather than that it did not throw, is the difference between knowing and assuming:</p>
+
+<pre class="sbs-prompt">After every write, request the fields you set in the mutation's
+response and print the returned values, not the values you sent.
+
+Report success only on the basis of what came back.</pre>
+
+<h2 id="errors">userErrors: the failure that returns HTTP 200</h2>
+
+<p>This is the one that catches everyone.</p>
+
+<p>A GraphQL mutation that fails validation returns <strong>HTTP 200</strong> with an empty result and a populated <code>userErrors</code> array. If your script checks the status code, it will report success while having changed nothing at all.</p>
+
+<pre>{
+  "data": {
+    "productCreate": {
+      "product": null,
+      "userErrors": [
+        { "field": ["handle"], "message": "Handle has already been taken" }
+      ]
+    }
+  }
+}</pre>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-shopify-mutation-errors.png" alt="Three rows sharing one HTTP 200 response. The first is the request. The second returns a null product with a populated userErrors array and changed nothing. The third returns a product id with an empty userErrors array and wrote. Only the array distinguishes them."
+       width="1000" height="494" loading="lazy" decoding="async">
+  <figcaption>Both outcomes are an HTTP 200. Only <code>userErrors</code> tells them apart.</figcaption>
+</figure>
+
+<p>Every mutation must have its <code>userErrors</code> checked and must stop on a non-empty array. Put it in the shared client so it cannot be forgotten, rather than in each script where it will be:</p>
+
+<pre class="sbs-prompt">Every GraphQL mutation returns userErrors. Check it after every
+mutation and raise on a non-empty array — a mutation that failed
+validation returns HTTP 200 and changes nothing.
+
+Do not treat a 200 as success.</pre>
+
+<p>Then prove the check works by sending a mutation you know is invalid and watching it stop. A guard nobody has seen fire is a guard you are trusting on faith.</p>
+
+<p>The prompts above are deliberately terse. <a href="/blogs/guides/best-claude-code-prompts-for-web-development">The prompt patterns that hold up in web development</a> covers why a constraint stated once in a session decays, and what to do about it.</p>
+
+<h2 id="publish">Publishing, which is separate from creating</h2>
+
+<p>A product created through the API is <code>ACTIVE</code> and invisible. Status and publication are different things: status says whether the product is live, and publication says which sales channels carry it. A new product is published to none of them.</p>
+
+<p>Publishing is <code>publishablePublish</code>, and it needs the publication's id, which you query for. Expect at least an Online Store publication; a store with the Shop channel or Point of Sale installed will have more.</p>
+
+<p>The symptom when you forget is distinctive and confusing: the product resolves in the admin, the API returns it happily, and the storefront 404s. If a product you just created cannot be found on the site, check publications before you check anything else.</p>
+
+<h2 id="metafields">Metafields, and letting the theme read live data</h2>
+
+<p>Metafields are where structured data belongs when it is not a native field: which topic hub an article belongs to, the ordered steps of a learning path, an SEO title that differs from the display title.</p>
+
+<p>Two things are worth knowing before you design around them.</p>
+
+<p><strong>Shopify rejects a blank metafield value outright.</strong> You cannot set a field to empty to mean absent. Omit it instead, and read it in Liquid with <code>!= blank</code>, which handles a missing metafield as nil. Trying to write <code>""</code> gets you a validation error at the worst possible moment, in a bulk write, halfway through.</p>
+
+<p><strong>The type is part of the identity.</strong> <code>number_integer</code> and <code>single_line_text_field</code> are different fields even with the same key, and changing a type after the fact means deleting and recreating. Decide types once, deliberately.</p>
+
+<p>The payoff is that the theme reads live values. A price rendered from <code>product.price</code> cannot go stale; a price typed into a section setting can, and will, on the day you run a sale.</p>
+
+<h2 id="files">Files and images: staged uploads</h2>
+
+<p>Uploading a file is three calls, not one, and the shape surprises people: ask Shopify for a staged upload target, POST the file to that target with the parameters it gave you, then reference the resulting URL in a <code>fileCreate</code> or <code>productCreateMedia</code>.</p>
+
+<p>Two practical notes. The parameters from step one must be sent <strong>in the order given</strong> and before the file part, because the target is S3-compatible and cares. And media is processed asynchronously: <code>productCreateMedia</code> returns <code>UPLOADED</code>, not <code>READY</code>. A script that immediately asserts the image is live will fail intermittently, which is the worst kind of failure to debug. Poll for status, or accept that the assertion belongs in a later step.</p>
+
+<h2 id="idempotent">Writing scripts you can run twice</h2>
+
+<p>Every publishing script should be safe to run again. Not as a nicety &mdash; because you will run it again, usually while something is half-finished and you are not certain what got through.</p>
+
+<p>The pattern is find-then-create-or-update, keyed on the handle:</p>
+
+<pre class="sbs-prompt">Every publish script must be idempotent, keyed on the handle:
+query for the resource, update it if it exists, create it if it
+does not. Never create unconditionally.
+
+Print which of the two happened.</pre>
+
+<p>That last line matters more than it looks. A script that says <code>updated</code> when you expected <code>created</code> has just told you something true about the store that you did not know.</p>
+
+<p>The same applies to a run that dies halfway. If each step is independently idempotent, recovery is running the script again. If it is not, recovery is reading the code to work out where it stopped.</p>
+
+<h2 id="guard">Guards worth writing before you need them</h2>
+
+<p>Some mistakes are cheap to prevent and expensive to make. These are worth putting in the tooling rather than in your memory:</p>
+
+<ul>
+  <li><strong>Refuse to write to the published theme.</strong> Theme pushes should target a development theme and fail loudly against the live one, with an override that has to be set deliberately.</li>
+  <li><strong>Refuse to upload the paid product to the CDN.</strong> Files uploaded through the Files API get a public URL, which bypasses checkout entirely. A filename check with no override flag is four lines and prevents an unrecoverable mistake.</li>
+  <li><strong>Never replace the generated sitemap.</strong> Shopify maintains it in real time. A hand-written replacement is stale the moment anything changes.</li>
+  <li><strong>Assert counts you assert publicly.</strong> If a product page claims a number of files, have the publish script count them and refuse to publish when the claim and the artefact disagree.</li>
+</ul>
+
+<p>The last one generalises. Any number that appears in two places will eventually disagree; the question is whether you find out from a check or from a customer.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes the Shopify build system these scripts came out of &mdash; the shared client, the idempotent publish pattern, and the guards above written out as prompts. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="limits">Rate limits are a cost model, not an error</h2>
+
+<p>The GraphQL Admin API uses a cost-based leaky bucket rather than a request count. Each query has a cost, the bucket refills at a fixed rate, and an expensive query costs more than a cheap one regardless of how many you send.</p>
+
+<p>Every response carries the current state under <code>extensions.cost</code>, including the points remaining and the restore rate. Read it rather than guessing: a client that backs off on the actual remaining budget is both faster and better behaved than one that sleeps a fixed interval between calls.</p>
+
+<p>Handle <code>THROTTLED</code> by waiting and retrying, in the shared client, once. Requesting fewer fields is usually the better fix &mdash; cost scales with what you ask for, and most scripts ask for far more of the object than they use.</p>
+
+<h2 id="cannot">What the API cannot tell you</h2>
+
+<p>Worth knowing before you build a check on top of it.</p>
+
+<p><strong>Whether a digital delivery app has a file attached.</strong> Third-party apps store their data privately, and the Admin API cannot see it. A product can be active, priced, published and completely undeliverable, and every API-based check will call it healthy. The only proof is a real paid order that gets fulfilled.</p>
+
+<p>That is not a gap you can close with better tooling, and pretending otherwise is how a store sells something it cannot deliver. Write the check so it fails honestly &mdash; "no fulfilled paid order proves delivery" &mdash; rather than passing on a technicality.</p>
+
+<p>More broadly: the API tells you what the store is configured to do, and almost nothing about what a customer experiences. Confirm the storefront by fetching the storefront &mdash; which is also where <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO workflow</a> starts, for the same reason: what the template intends and what the response body contains are different things, and only one of them is what search engines and customers get.</p>

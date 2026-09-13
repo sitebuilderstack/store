@@ -1,0 +1,131 @@
+{%- comment -%}
+  "Which product do I need?" — five questions, one recommendation.
+
+  Every result card is rendered server-side with a live title and price and
+  hidden; JavaScript reveals exactly one. No product data is duplicated into the
+  script, so a price change on the product is a price change here, and a product
+  that is drafted has no card to reveal rather than a dead link.
+
+  Ships in its working no-JS state: without the script the form is hidden and
+  the four products remain as a plain list with prices, which is a useful page.
+  A quiz that cannot score is worse than a list.
+
+  The scoring is in sbs.js next to the reveal so the two cannot drift, and it
+  is asserted by scripts/test-picker.js — including the case that matters
+  commercially: answering "traffic is not converting" must never return the
+  Launch System.
+{%- endcomment -%}
+
+{%- assign handles = 'claude-code-website-launch-system,claude-code-seo-website-audit-toolkit,claude-code-conversion-revenue-optimization-toolkit,claude-code-website-operations-maintenance-system,complete-site-builder-stack' | split: ',' -%}
+{%- assign keys = 'build,rank,convert,operate,all' | split: ',' -%}
+
+<section class="sbs-section sbs-section--alt" id="{{ section.settings.anchor | default: 'picker' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | default: 'Which Site Builder Stack product do I need?' | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} No-JS fallback: the same five products, as a readable list. {%- endcomment -%}
+    <ul class="sbs-grid sbs-grid--2 sbs-picker__fallback" data-sbs-picker-fallback>
+      {%- for h in handles -%}
+        {%- assign p = all_products[h] -%}
+        {%- if p != blank and p.available -%}
+          <li class="sbs-card">
+            <h3><a href="{{ p.url }}">{{ p.title | escape }}</a></h3>
+            <p>{{ p.price | money_without_trailing_zeros }}</p>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+    <div class="sbs-picker" data-sbs-picker hidden>
+      <form class="sbs-picker__form" data-sbs-picker-form>
+        {%- for block in section.blocks -%}
+          {%- assign qid = 'pick-' | append: forloop.index -%}
+          <fieldset class="sbs-picker__q">
+            <legend>{{ forloop.index }}. {{ block.settings.question | escape }}</legend>
+            <div class="sbs-picker__opts">
+              {%- assign labels = block.settings.options | split: '|' -%}
+              {%- assign scores = block.settings.scores | split: '|' -%}
+              {%- for label in labels -%}
+                <span class="sbs-picker__opt">
+                  <input type="radio" name="{{ qid }}" id="{{ qid }}-{{ forloop.index0 }}"
+                         value="{{ scores[forloop.index0] | strip | escape }}"
+                         {% if forloop.first %}checked{% endif %}>
+                  <label for="{{ qid }}-{{ forloop.index0 }}">{{ label | strip | escape }}</label>
+                </span>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+        {%- endfor -%}
+
+        <div class="sbs-picker__actions">
+          <button type="submit" class="sbs-btn sbs-btn--primary">
+            {{ section.settings.button_label | default: 'Show me' | escape }}
+          </button>
+          <button type="reset" class="sbs-btn sbs-btn--ghost">Start again</button>
+        </div>
+      </form>
+
+      <div class="sbs-picker__result" data-sbs-picker-result hidden
+           role="status" aria-live="polite" tabindex="-1">
+        <h3 class="sbs-picker__result-h">Based on your answers</h3>
+        {%- for key in keys -%}
+          {%- assign p = all_products[handles[forloop.index0]] -%}
+          {%- if p != blank and p.available -%}
+            <div class="sbs-picker__card" data-pick="{{ key }}" hidden>
+              <p class="sbs-picker__why" data-sbs-pick-why></p>
+              <h4><a href="{{ p.url }}" data-sbs-track="product_recommended">{{ p.title | escape }}</a></h4>
+              <p class="sbs-picker__price">{{ p.price | money_without_trailing_zeros }}</p>
+              <p>
+                <a class="sbs-btn sbs-btn--primary" href="{{ p.url }}"
+                   data-sbs-track="product_selector_cta_clicked">See what is included</a>
+              </p>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        <p class="sbs-picker__alt" data-sbs-picker-alt hidden></p>
+        <p class="sbs-picker__note">
+          This follows from your answers and nothing else. If it does not match
+          what you know about your own site, trust yourself over the quiz &mdash;
+          it only knows what you told it.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Product picker",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "picker" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Not sure which" },
+    { "type": "text", "id": "heading", "label": "Heading",
+      "default": "Which Site Builder Stack product do I need?" },
+    { "type": "textarea", "id": "intro", "label": "Intro" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Show me" }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "textarea", "id": "options", "label": "Options, pipe separated" },
+        { "type": "textarea", "id": "scores", "label": "Scores, pipe separated",
+          "info": "One per option, same order. Format: build:3,rank:0,convert:0,all:0" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "SBS — Product picker" }]
+}
+{% endschema %}

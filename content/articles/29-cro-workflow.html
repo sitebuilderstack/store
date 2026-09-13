@@ -1,0 +1,181 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#problem">Why "increase conversions" produces nonsense</a></li>
+    <li><a href="#modes">Separate the four modes</a></li>
+    <li><a href="#measure">Measure: check the number before you chase it</a></li>
+    <li><a href="#diagnose">Diagnose: find where people stop</a></li>
+    <li><a href="#labels">Label every finding by what you actually know</a></li>
+    <li><a href="#prioritise">Prioritise: impact and confidence over effort</a></li>
+    <li><a href="#change">Change: one concern at a time</a></li>
+    <li><a href="#validate">Validate, or admit you cannot</a></li>
+    <li><a href="#never">What never belongs in the output</a></li>
+    <li><a href="#start">Where to start on a real site</a></li>
+  </ol>
+</nav>
+
+<h2 id="problem">Why "increase conversions" produces nonsense</h2>
+
+<p>Ask a capable model to increase conversions on a page and a fair share of what comes back is a countdown timer, a fake stock warning, and a confident prediction that the change will lift revenue by some percentage.</p>
+
+<p>None of that is knowledge. Two thirds of it is a compliance risk in several jurisdictions, and the prediction is not something anyone can know in advance — not the model, not a consultant, not you.</p>
+
+<p>The quieter failure is more expensive. An audit that finds problems and fixes them in the same session leaves a diff across thirty files, no report, and no way to tell which finding was real. Six weeks later the number has moved and nobody can say which of the thirty changes did it. So you cannot repeat it, and you cannot undo the one that hurt.</p>
+
+<p>If the site is not built yet, this is premature — <a href="/blogs/guides/how-to-build-a-website-with-claude-code">building it properly</a> comes first, and <a href="/blogs/guides/claude-code-seo-website-optimization">getting it found</a> comes before optimising what happens once people arrive.</p>
+
+<p>Conversion work has an evidence problem before it has an ideas problem. Almost everyone has more ideas than they can test. Very few can say which of last quarter's changes worked.</p>
+
+<h2 id="modes">Separate the four modes</h2>
+
+<p>The single most useful constraint is to decide, before the session starts, which of four things you are doing — and to say so in the prompt.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Mode</th><th>What it may do</th><th>What it produces</th></tr></thead>
+<tbody>
+<tr><td><strong>Audit</strong></td><td>Read. Change nothing at all.</td><td>Findings with evidence</td></tr>
+<tr><td><strong>Plan</strong></td><td>Read, and rank what was found.</td><td>An ordered list with reasons</td></tr>
+<tr><td><strong>Implement</strong></td><td>Change one agreed thing.</td><td>A diff and a way to check it</td></tr>
+<tr><td><strong>Validate</strong></td><td>Measure what happened.</td><td>A verdict, including "cannot tell"</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The boundary that matters is the first one. Put it in the prompt in these words, or something close to them:</p>
+
+<pre class="sbs-prompt">This session is an AUDIT. It changes nothing.
+
+Do not edit, create or delete any file. Do not open a pull request.
+Produce findings. If you believe something must be fixed immediately,
+say so and stop.
+
+An audit whose fixes land in the same run leaves a diff and no
+report, and afterwards nobody can tell which finding was real.</pre>
+
+<p>The reason this constraint has to be explicit is that being helpful is the default. Left to itself, a session that finds a broken form will fix the broken form, and it will be right to — but you will have lost the record of what was wrong, which is the thing you were trying to produce.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-cro-modes.png?v=1788908798" alt="Four modes in a column: Audit reads and changes nothing, producing findings with evidence; Plan ranks them; Implement changes one agreed thing; Validate measures what happened. Audit is highlighted."
+       width="1000" height="518" loading="lazy" decoding="async">
+  <figcaption>Audit is the boundary that matters. Being helpful is the default, and a session left alone will fix what it finds.</figcaption>
+</figure>
+
+<h2 id="measure">Measure: check the number before you chase it</h2>
+
+<p>Before diagnosing anything, establish that the number you are about to spend weeks moving is real.</p>
+
+<p>Answer two questions about your conversion rate. What counts as a conversion, and what is the denominator — sessions, users, or something else? If you cannot answer both from memory, that is the first job, and it is not a formality: a meaningful share of "conversion rate" changes are actually changes to how it is counted.</p>
+
+<p>Then verify the event fires, and fires <strong>once</strong>. A purchase event that fires twice makes every number in the funnel wrong in the same direction, which is exactly the kind of wrong that never looks unusual. Nothing in the report is worth reading if this step was skipped.</p>
+
+<pre class="sbs-prompt">Before any analysis, verify the measurement itself.
+
+For each conversion event: where is it fired from, on which pages,
+and under what conditions? Load the page and confirm it fires
+exactly once. Report any event that fires zero times or more than
+once, and stop the analysis if the primary conversion event is
+among them.
+
+Report what you observed, not what the code appears to intend.</pre>
+
+<p>The <a href="/blogs/guides/google-search-console-claude-code">Search Console workflow</a> is the equivalent step on the traffic side: knowing whether the visitors arriving are the ones the page was written for.</p>
+
+<h2 id="diagnose">Diagnose: find where people stop</h2>
+
+<p>Map the funnel before auditing any single page. A page audit tells you what is wrong with a page; a funnel tells you whether that page matters.</p>
+
+<p>The order that works:</p>
+
+<ol>
+  <li><strong>List the steps</strong> a visitor must complete, in order, from arrival to conversion. Write them down even when they seem obvious — the writing is where the missing step usually appears.</li>
+  <li><strong>Attach a number to each step.</strong> If a step has no number, that is a finding in itself: you cannot diagnose a funnel you cannot see.</li>
+  <li><strong>Find the largest proportional drop</strong>, not the largest absolute one. A step that loses 60% of a small number is often a better target than one losing 20% of a large one, because the mechanism is usually more specific and easier to fix.</li>
+  <li><strong>Segment by device before concluding anything.</strong> A funnel that looks mediocre overall is frequently fine on desktop and broken on mobile, and the average hides it completely.</li>
+</ol>
+
+<p>Only then open the page that owns the worst step.</p>
+
+<h2 id="labels">Label every finding by what you actually know</h2>
+
+<p>This is the part that separates a usable report from a confident guess, and it costs one line per finding.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Label</th><th>Means</th><th>Needs a test?</th></tr></thead>
+<tbody>
+<tr><td><strong>Proven problem</strong></td><td>You reproduced it. A form that drops submissions, an event that never fires, a control unreachable by keyboard.</td><td>No. Fix it.</td></tr>
+<tr><td><strong>Strong heuristic</strong></td><td>Well-evidenced practice with a clear mechanism, observed here. Not proof of a lift on <em>this</em> site.</td><td>Usually not worth one</td></tr>
+<tr><td><strong>Experiment opportunity</strong></td><td>Plausible, genuinely unknown, and worth testing if you have the traffic.</td><td>Yes, if you can power it</td></tr>
+<tr><td><strong>Insufficient data</strong></td><td>You do not know. Saying so <em>is</em> the finding.</td><td>Get the data first</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The fourth label earns its place. Most conversion reports have no way to say "I don't know", so everything gets written up as though it were known, and the reader cannot tell the reproduced bug from the hunch. Once the labels exist, the report sorts itself: proven problems get fixed this week, and nothing else competes with them for attention.</p>
+
+<h2 id="prioritise">Prioritise: impact and confidence over effort</h2>
+
+<p>Rank by <strong>impact &times; confidence &divide; effort</strong>, scoring each from 1 to 5, rather than by how annoying each finding is.</p>
+
+<p>Confidence is doing the real work in that formula. It is what stops a plausible-sounding redesign of the hero outranking a form that silently drops one submission in twenty. The redesign might be worth more; you do not know that it is, and the form is a certainty.</p>
+
+<p>Two overrides worth keeping:</p>
+
+<ul>
+  <li><strong>Anything that loses data or money goes first</strong>, whatever it scores. A form dropping submissions is not a prioritisation question.</li>
+  <li><strong>Anything with a legal or accessibility dimension goes early.</strong> A checkout step that cannot be completed by keyboard is not a conversion optimisation, it is a defect with an exposure attached.</li>
+</ul>
+
+<h2 id="change">Change: one concern at a time</h2>
+
+<p>Implementation is a separate session with a separate instruction, and the reason is measurement rather than tidiness. Six changes shipped together produce one number, and the number tells you nothing about which of the six caused it.</p>
+
+<p>Where volume forces batching — and on a small site it usually does — say so explicitly in the record: "these five shipped together on this date; the change in the number cannot be attributed to any one of them." That sentence is worth more than a false attribution.</p>
+
+<h2 id="validate">Validate, or admit you cannot</h2>
+
+<p>An A/B test needs enough traffic to detect the size of effect you care about. If it does not have that, it does not return "no result" — it returns a <em>number</em>, and the number is noise wearing a decimal point.</p>
+
+<p>Work it out before building the variant. At a 2% baseline, detecting a 10% relative improvement needs roughly 30,000 visitors per arm for a conventionally powered test. At 500 visitors a week that is well over a year, by which point seasonality has eaten the result.</p>
+
+<p>So the honest output is often <strong>do not test this</strong>. Ship the change on the strength of the reasoning, write down what you expected, and check the trend later. Or fix the proven problems first, which need no test at all — a form that silently drops submissions is not a hypothesis.</p>
+
+<p>A workflow that cannot produce the answer "you do not have the traffic to know" will instead produce a confident wrong answer, which is worse than silence.</p>
+
+<p>The prompts for each of these stages, written out and organised by stage rather than by page type, are in <a href="/blogs/guides/claude-code-cro-prompts">the CRO prompt collection</a>. If the page you are auditing is a landing page specifically, <a href="/blogs/guides/claude-code-landing-page-audit">the landing page audit</a> covers message match and the measured fold, which do not apply to a product page in the same way.</p>
+
+<h2 id="never">What never belongs in the output</h2>
+
+<p>Some of this is ethics and some is straightforwardly illegal in the EU, the UK and a growing number of US states. All of it is worth forbidding in the prompt, because it is what a model reaches for when asked to increase conversions without constraints:</p>
+
+<ul>
+  <li>Countdown timers that reset, and urgency that is not real</li>
+  <li>Stock or scarcity messages not tied to actual stock</li>
+  <li>Invented customer numbers, testimonials or reviews</li>
+  <li>Confirmshaming — "No thanks, I don't like saving money"</li>
+  <li>Preselected paid options, and cancellation flows harder than signup</li>
+  <li>Button labels that misdescribe what the button does</li>
+  <li>Any predicted percentage lift, from anyone, in advance</li>
+</ul>
+
+<p>That last one is the one people argue about. The argument against it is simple: if the number could be known in advance, there would be no reason to run the experiment.</p>
+
+<h2 id="start">Where to start on a real site</h2>
+
+<p>In this order, and no further until each is done:</p>
+
+<ol>
+  <li>Verify the conversion event fires exactly once.</li>
+  <li>Map the funnel and attach a number to every step.</li>
+  <li>Audit the page owning the worst proportional drop, in audit mode, changing nothing.</li>
+  <li>Label every finding, and fix only the proven problems.</li>
+  <li>Work out whether you can power a test. If you cannot, say so in writing and stop pretending otherwise.</li>
+</ol>
+
+<p>Most sites find enough proven problems in step four to keep them busy for a month, and shipping those requires no experiment and no argument. If you want the version that also covers accessibility on the conversion path, the <a href="/blogs/guides/claude-code-accessibility-audit">accessibility audit workflow</a> overlaps here more than people expect — a control that cannot be operated is a conversion problem before it is a compliance one.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Conversion &amp; Revenue Optimization Toolkit is this method written out in full: thirteen modules, 70 workflows and 68 commands, including the master CRO audit, the finding format, the prioritisation scoring and the experimentation system that works out whether you can test at all. <a href="/products/claude-code-conversion-revenue-optimization-toolkit">See what is included</a>.</p>
+</aside>

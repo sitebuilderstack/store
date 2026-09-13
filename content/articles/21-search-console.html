@@ -1,0 +1,268 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#why">Let the data choose the work</a></li>
+    <li><a href="#metrics">What the four metrics actually mean</a></li>
+    <li><a href="#queries-pages">Queries against pages, both directions</a></li>
+    <li><a href="#windows">Windows, comparisons, and a new site</a></li>
+    <li><a href="#tiers">Position bands, and what to do in each</a></li>
+    <li><a href="#ctr">CTR opportunities</a></li>
+    <li><a href="#gaps">Content gaps, and when not to write</a></li>
+    <li><a href="#mapping">The query-to-page table</a></li>
+    <li><a href="#api">The Search Analytics API</a></li>
+    <li><a href="#analysis">Handing the data to Claude Code</a></li>
+    <li><a href="#existing">Improve the page that already ranks</a></li>
+    <li><a href="#links">Internal links, decided by data</a></li>
+    <li><a href="#indexing">Indexing states, read correctly</a></li>
+    <li><a href="#weekly">A weekly routine that survives contact</a></li>
+    <li><a href="#dont">What not to do</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">Let the data choose the work</h2>
+
+<p>The common failure in SEO with an AI assistant is not bad writing. It is <strong>writing the wrong thing enthusiastically</strong> — publishing a dozen more articles because publishing is what the tool makes cheap, while the pages that already have demand sit at position 50 with nobody touching them.</p>
+
+<p>Search Console fixes that, because it tells you what Google already associates with your domain. The loop:</p>
+
+<pre><code>Search Console  →  real queries and positions
+      ↓
+Analysis        →  which pages have demand and where they sit
+      ↓
+A short list    →  three to five specific changes
+      ↓
+Deploy          →  one at a time
+      ↓
+Measure         →  four to six weeks later, same report</code></pre>
+
+<p>This guide is about the middle. For <em>what to check on the site itself</em>, that is <a href="/blogs/guides/claude-code-seo-website-optimization">the Claude Code SEO workflow</a>; for <em>running the audit and submitting what changed</em>, that is <a href="/blogs/guides/claude-code-technical-seo-audit">the technical SEO audit guide</a>. Neither covers reading the performance data that comes back, which is the whole subject here.</p>
+
+<h2 id="metrics">What the four metrics actually mean</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Metric</th><th>What it is</th><th>The trap</th></tr></thead>
+<tbody>
+<tr><td><strong>Impressions</strong></td><td>Your URL appeared in a result set for that query</td><td>Appearing at position 80 counts. It is demand plus visibility, not interest</td></tr>
+<tr><td><strong>Clicks</strong></td><td>Somebody clicked through</td><td>The only one that is unambiguously a person doing something</td></tr>
+<tr><td><strong>CTR</strong></td><td>Clicks divided by impressions</td><td>Meaningless at a position nobody scrolls to</td></tr>
+<tr><td><strong>Average position</strong></td><td>The mean of the positions your URL appeared at</td><td>An average, over a period, across personalised and localised results</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>Average position is not a ranking.</strong> It is not a number you hold. One impression at position 6 and one at position 60 average to 33, describing a state the page was never in. Two consequences follow, and both matter more than they sound:</p>
+
+<p>A row with a handful of impressions has an average position that is essentially noise. Set a floor — roughly ten impressions — below which you read a row as a hint rather than a finding. And a movement from 51 to 44 is usually the query mix changing, not the page improving.</p>
+
+<h2 id="queries-pages">Queries against pages, both directions</h2>
+
+<p>Two questions, and most people only ever ask the first.</p>
+
+<p><strong>Query → page.</strong> For this query, which URL does Google show? If it is not the one you intended, you have either a cannibalisation problem or a page that has been misunderstood.</p>
+
+<p><strong>Page → queries.</strong> For this URL, what is it actually being shown for? This is where the surprises live. A page written about one thing frequently earns impressions for an adjacent thing it barely mentions — and that is the clearest content signal Search Console produces.</p>
+
+<p>A worked example from this site. The most-shown page was the guide on Claude Code skills, with 335 impressions in a month. Reading its queries rather than its position revealed that roughly a third were about <em>installing</em> a skill someone else wrote — "how to add skills to claude code", "how to download skills in claude code", "how to import skills to claude code" — an intent the article did not address anywhere. The fix was not a new article. It was three sections added to the page Google was already showing.</p>
+
+<h2 id="windows">Windows, comparisons, and a new site</h2>
+
+<p>The default comparison is the last 28 days against the previous 28. It smooths weekday effects and is long enough that one odd day does not dominate.</p>
+
+<p>Two adjustments worth knowing:</p>
+
+<p><strong>Data is not final immediately.</strong> Search Console finalises with a lag of roughly two days, so the most recent rows are provisional. In the API this is explicit: <code>dataState</code> takes <code>final</code> (the default) or <code>all</code>, and only the latter includes fresh data. If a report shows a cliff at the right-hand edge, check whether you are looking at incomplete days before concluding anything fell.</p>
+
+<p><strong>A young site has no 28-day comparison.</strong> Do not manufacture one. With three weeks of history the honest window is the whole of it, and the honest statement is that there is no trend yet. Say so in the report rather than presenting a comparison against a period of zeroes.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-gsc-position-tiers.png" alt="Five position bands and the action each deserves. Positions one to three should be left alone and protected. Four to ten are the cheapest gains and deserve optimisation. Eleven to twenty need a real gap in the page filled. Twenty-one to forty are topical signal and usually a content decision. Past forty, on-page work will not move the page."
+       width="1000" height="526" loading="lazy" decoding="async">
+  <figcaption>The band decides the action. Treating every row the same is how a Search Console export becomes busywork.</figcaption>
+</figure>
+
+<h2 id="tiers">Position bands, and what to do in each</h2>
+
+<p><strong>Positions 1–3 — leave alone.</strong> Editing a page that already ranks is the easiest way to lose the position, and there is little headroom above it. Protect these.</p>
+
+<p><strong>Positions 4–10 — optimise.</strong> The highest-value band. The page is already on page one and Google already considers it relevant. Gains here come from title and description alignment, a clearer answer in the first screenful, and internal links. This is the smallest work for the largest return.</p>
+
+<p><strong>Positions 11–20 — strengthen.</strong> Close, but Google is preferring something else. The cause is usually a genuine gap in coverage rather than metadata. Read the queries the page earns, find the sub-question it does not answer, and answer it.</p>
+
+<p><strong>Positions 21–40 — read as signal.</strong> Not close, but informative: Google associates your domain with this topic. Usually a content decision rather than an optimisation, and often the right answer is to wait for more data.</p>
+
+<p><strong>Past 40 — do not optimise.</strong> This is the band most people waste time on, because it is where the impressions often are. A page at position 55 does not reach page one through metadata. That distance is an authority problem, and rewriting the title will not close it.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes the SEO architecture, audit and search-engine modules this workflow feeds — one download, no subscription. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="ctr">CTR opportunities</h2>
+
+<p>The pattern to look for is <strong>respectable position, meaningful impressions, poor click rate.</strong> All three conditions, or you are chasing noise.</p>
+
+<p>A rough expectation by band is enough to spot outliers — position 1–3 in the tens of percent, 4–10 in the low single digits, past 20 fractions of a percent. Use it to flag rows that fall well below their band, then look at each one by hand.</p>
+
+<p>Two firm rules. <strong>A low CTR past position 20 is not a title problem</strong>; nobody scrolled that far. And <strong>never make a title more clickable than the page is accurate</strong> — you win a click and lose the visitor, and the pogo-stick back to the results is not a signal you want to send.</p>
+
+<p>When there genuinely is no qualifying row, the correct output is "no CTR opportunities in this window". On a young site that will be the answer for months, and inventing rewrites to fill the report is how good pages get damaged.</p>
+
+<h2 id="gaps">Content gaps, and when not to write</h2>
+
+<p>Impressions on a query your page barely covers mean Google has associated your domain with a topic you have not properly served. That is the cheapest content signal available, and it comes with a decision:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Situation</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>An existing page earns the impressions and could cover the intent</td><td><strong>Improve that page.</strong> It already has whatever authority earned the impressions</td></tr>
+<tr><td>The intent is genuinely separate and would need its own page</td><td>Write one, and link it both ways</td></tr>
+<tr><td>Two of your pages split the same query</td><td>Merge, or sharpen one and redirect the other. Not both</td></tr>
+<tr><td>One or two impressions, no pattern</td><td>Nothing. Wait for more data</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The default should be the first row. A new page starts from zero; an existing one starts from wherever Google already put it.</p>
+
+<h2 id="mapping">The query-to-page table</h2>
+
+<p>The artefact worth producing. One row per query/page pair, sorted by whatever score you choose:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Query</th><th>Page</th><th>Pos</th><th>Impr</th><th>Clicks</th><th>CTR</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td>claude code seo</td><td><code>/blogs/guides/claude-code-seo…</code></td><td>47.7</td><td>35</td><td>0</td><td>0%</td><td>Highest demand, wrong side of 40 — answer the query directly at the top</td></tr>
+<tr><td>how to add skills to claude code</td><td><code>/blogs/guides/claude-code-skills</code></td><td>76.5</td><td>2</td><td>0</td><td>0%</td><td>Intent not covered — add a section</td></tr>
+<tr><td>connect shopify to claude code</td><td><code>/blogs/guides/build-shopify…</code></td><td>60.0</td><td>6</td><td>0</td><td>0%</td><td>Add a direct answer</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Those are real rows from this site. Note that none of them is in a band where optimisation reliably moves position — which is itself the finding, and the reason the actions are about serving the intent properly rather than tuning a title.</p>
+
+<p>A simple score keeps the sort honest. Impressions carry the weight, because they are the only evidence demand exists; proximity multiplies rows in the 4–20 band where a gain is cheapest; commercial relevance breaks ties. <strong>Resist elaborating it.</strong> A score is a sort order, not a forecast, and a complicated one invites you to believe it.</p>
+
+<h2 id="api">The Search Analytics API</h2>
+
+<p>The interface is fine for looking. For anything repeatable, the API is better: it returns more rows, it can be diffed between runs, and it can be handed to a script without a manual export.</p>
+
+<p>Practical points from the <a href="https://developers.google.com/webmaster-tools/v1/searchanalytics/query" rel="noopener">Search Analytics query reference</a>:</p>
+
+<ul>
+  <li><strong>Dimensions</strong> are <code>query</code>, <code>page</code>, <code>date</code>, <code>country</code>, <code>device</code>, <code>searchAppearance</code> and <code>hour</code>, and can be combined.</li>
+  <li><strong><code>rowLimit</code></strong> has a valid range of 1–25,000, defaulting to 1,000.</li>
+  <li><strong><code>dataState</code></strong> is <code>final</code> by default. Pass <code>all</code> to include fresh, not-yet-finalised data.</li>
+  <li>The response carries a <code>metadata</code> object with <code>first_incomplete_date</code>, which is how you know where the provisional data begins rather than guessing.</li>
+  <li>Google states the API "does not guarantee to return all data rows but rather top ones" — so a query missing from a report is not proof it had no impressions.</li>
+  <li>If you group or filter by page, you cannot aggregate by property.</li>
+</ul>
+
+<p>On credentials: a service account with the property added as an owner is the least painful route for a script. Keep the key file outside the repository, readable only by its owner, and never let it reach a log, a commit, or a diagnostic paste. The same rules as any other secret, covered in <a href="/blogs/guides/claude-code-website-security-audit">the security audit guide</a>.</p>
+
+<h2 id="analysis">Handing the data to Claude Code</h2>
+
+<p>Once the data is a file, the analysis is exactly the kind of tedious sorting an agent does well:</p>
+
+<pre><code>Here is a Search Console export: query, page, clicks, impressions,
+CTR, average position.
+
+Produce:
+1. Rows at position 4-10 with at least 10 impressions, sorted by
+   impressions. For each, one specific change to the ranking page.
+2. Rows at 11-20 with at least 10 impressions. For each, the
+   sub-question the page appears not to answer.
+3. Rows where CTR is under half what the position band suggests,
+   AND position is 10 or better, AND impressions are at least 20.
+4. Any query where two or more of our URLs take impressions.
+5. Queries with real volume whose ranking page only partly covers
+   the intent.
+
+Rules:
+- Do not recommend a new page where an existing page could serve
+  the intent. Say which page and what to add.
+- Ignore any row under 10 impressions. Say how many you ignored.
+- Do not estimate traffic, difficulty, or volume. You do not have
+  that data.
+- If a category is empty, say so. Do not fill it.</code></pre>
+
+<p>The last three rules do most of the work. Without the volume prohibition you will get confident invented numbers, because keyword data is abundant in training data and absent from your export. Without "if a category is empty, say so" you get a plausible list either way.</p>
+
+<h2 id="existing">Improve the page that already ranks</h2>
+
+<p>Worth stating on its own because the instinct runs the other way.</p>
+
+<p>A page with impressions has something a new page does not: Google has crawled it, indexed it, and decided it is relevant enough to show. Adding a section to it inherits all of that. A new page starts from discovery and, on a young domain, may wait weeks to be crawled at all.</p>
+
+<p>So the order is: improve the ranking page; if the intent genuinely does not belong there, write a new page and link it from the ranking one; only then consider anything else.</p>
+
+<h2 id="links">Internal links, decided by data</h2>
+
+<p>Search Console also tells you where a link would help. Two patterns:</p>
+
+<p><strong>An emerging query on a page that mentions the topic in passing.</strong> Link from that mention to the page that covers it properly. You are telling Google which URL is the answer.</p>
+
+<p><strong>A page with impressions that no indexed page links to.</strong> On a young site this is the constraint that matters most — a link from a page Google has already indexed is worth considerably more than one from a page it has not yet crawled. Check which of your pages are actually indexed before deciding where to add links, or you may be linking from somewhere Google has never seen.</p>
+
+<h2 id="indexing">Indexing states, read correctly</h2>
+
+<p>The page indexing report is where the most misreading happens. Google's own definitions are worth quoting rather than paraphrasing:</p>
+
+<p><strong>"Discovered — currently not indexed"</strong>: "The page was found by Google, but not crawled yet. Typically, Google wanted to crawl the URL but this was expected to overload the site; therefore Google rescheduled the crawl."</p>
+
+<p><strong>"Crawled — currently not indexed"</strong>: "The page was crawled by Google but not indexed. It may or may not be indexed in the future; no need to resubmit this URL for crawling."</p>
+
+<p>Two things follow that contradict a lot of received advice. Neither state is an error, and <strong>neither is fixed by requesting indexing again.</strong> Google explicitly says no resubmission is necessary for the second. Repeated manual requests do nothing except consume your quota.</p>
+
+<p>What does help: making sure the page is genuinely worth indexing, that it is reachable from pages Google has already indexed, that it is in the sitemap, self-canonical, and not accidentally noindexed. Beyond that, on a new domain, the answer is authority and patience.</p>
+
+<p>Do check the mechanical causes before concluding it is patience: an unintended <code>noindex</code> in the rendered HTML, a canonical pointing elsewhere, a page missing from the sitemap, or a page nothing links to.</p>
+
+<h2 id="weekly">A weekly routine that survives contact</h2>
+
+<p>Ambitious routines get abandoned. This one takes about an hour.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>When</th><th>What</th></tr></thead>
+<tbody>
+<tr><td>Monday, 15 min</td><td>Pull the last 28 days. Look at totals and the coverage report. Note anything that moved by more than noise</td></tr>
+<tr><td>Monday, 15 min</td><td>Generate the query/page table. Pick <strong>at most three</strong> things to act on</td></tr>
+<tr><td>Tue–Wed</td><td>Make those three changes. One page at a time, one commit each</td></tr>
+<tr><td>Wednesday</td><td>Deploy. Validate the rendered result. Submit only the URLs that changed</td></tr>
+<tr><td>Then</td><td>Nothing. Do not look again until next Monday</td></tr>
+<tr><td>Week 4–6</td><td>Compare against the window before the change</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The discipline is in the last two rows. Search results move for reasons that have nothing to do with you, and checking daily converts that noise into work.</p>
+
+<h2 id="dont">What not to do</h2>
+
+<ul>
+  <li><strong>Do not track daily rank movement.</strong> It is noise, and reacting to it is how pages get edited into worse shape.</li>
+  <li><strong>Do not rewrite pages weekly.</strong> You destroy the ability to attribute any change to anything.</li>
+  <li><strong>Do not create an article per query.</strong> That is how a site ends up with forty pages competing with each other.</li>
+  <li><strong>Do not request indexing repeatedly.</strong> Google says it is unnecessary; it is also rate-limited.</li>
+  <li><strong>Do not chase average position without impressions.</strong> Position 4 on a query with one impression is not an achievement.</li>
+  <li><strong>Do not let an assistant invent search volume or difficulty.</strong> If the number did not come from a request, it came from nowhere.</li>
+  <li><strong>Do not act on a row with under ten impressions.</strong> Write down the floor and hold to it.</li>
+</ul>
+
+<h2>Where to go next</h2>
+
+<p>This guide covers reading performance data. For what to check on the site itself, read <a href="/blogs/guides/claude-code-seo-website-optimization">the Claude Code SEO workflow</a>; for running the audit and proving your checks can fail, <a href="/blogs/guides/claude-code-technical-seo-audit">the technical SEO audit</a>; and on a storefront, <a href="/blogs/guides/shopify-seo-with-claude-code">Shopify SEO with Claude Code</a>. The wider inspection is in <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a>, and the free short forms are the <a href="/pages/claude-code-seo-checklist">SEO checklist</a> and <a href="/pages/claude-code-website-audit-checklist">website audit checklist</a>.</p>
+
+<p>The Search Console workflows here are two of twenty in the <a href="/products/claude-code-seo-website-audit-toolkit">SEO &amp; Website Audit Toolkit</a>, sequenced against crawlability and indexation so you are not optimising metadata on URLs that are about to be canonicalised away.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://developers.google.com/webmaster-tools/v1/searchanalytics/query" rel="noopener">Google: Search Analytics query API</a> — dimensions, row limits, <code>dataState</code></li>
+  <li><a href="https://support.google.com/webmasters/answer/7440203" rel="noopener">Google: page indexing report</a> — the exact definitions of each state</li>
+  <li><a href="https://developers.google.com/search/docs/monitor-debug/search-console-start" rel="noopener">Google Search Central: getting started with Search Console</a></li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap" rel="noopener">Google: build and submit a sitemap</a></li>
+</ul>

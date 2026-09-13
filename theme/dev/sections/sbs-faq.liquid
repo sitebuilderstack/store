@@ -1,0 +1,168 @@
+<section class="sbs-section sbs-section--alt" id="{{ section.settings.anchor | default: 'faq' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      Ships expanded and readable with JavaScript disabled. sbs.js collapses
+      the panels and wires the buttons only once it loads.
+    {%- endcomment -%}
+    <div class="sbs-faq" data-sbs-faq>
+      {%- for block in section.blocks -%}
+        {%- assign panel_id = 'sbs-faq-panel-' | append: block.id -%}
+        <div class="sbs-faq__item" {{ block.shopify_attributes }}>
+          <h3 style="margin:0;">
+            <button type="button"
+                    class="sbs-faq__q"
+                    aria-expanded="true"
+                    aria-controls="{{ panel_id }}">
+              <span>{{ block.settings.question | escape }}</span>
+              <span class="sbs-faq__icon" aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="sbs-faq__a" id="{{ panel_id }}">
+            {{ block.settings.answer }}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}
+      FAQPage, emitted from the same blocks the section just rendered.
+
+      The site's rule has been no FAQPage anywhere, because marking prose up as
+      an FAQ to chase a rich result describes a page as something it is not.
+      That reasoning holds and is unchanged — it was about hubs that answer
+      questions in paragraphs. This section is a real question-and-answer list
+      that a visitor can see and expand, so the markup describes exactly what is
+      on the page.
+
+      Built by looping the same `section.blocks` above rather than from a second
+      list, so the visible text and the structured data cannot disagree. Opt-in
+      per section: a decorative FAQ-styled block elsewhere does not become an
+      FAQPage by accident.
+
+      Google restricted FAQ rich results to authoritative government and health
+      sites in 2023. This is not here for a rich result; it is here because it
+      is an accurate description of the page.
+    {%- endcomment -%}
+    {%- if section.settings.emit_schema and section.blocks.size > 0 -%}
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "@id": {{ request.origin | append: request.path | append: '#faq' | json }},
+        "mainEntity": [
+          {%- for block in section.blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.question | strip_html | strip | json }},
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": {{ block.settings.answer | strip_html | strip | json }}
+            }
+          }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+      </script>
+    {%- endif -%}
+
+    {%- if section.settings.more_url != blank -%}
+      <p class="sbs-faq__more">
+        <a class="sbs-tap" href="{{ section.settings.more_url }}">
+          {{ section.settings.more_label | default: 'See all the questions' | escape }}
+        </a>
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — FAQ",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "Anchor id",
+      "default": "faq"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Questions"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Before you buy"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro"
+    },
+    {
+      "type": "checkbox",
+      "id": "emit_schema",
+      "label": "Emit FAQPage structured data",
+      "default": false,
+      "info": "Only where the blocks are genuine questions a visitor can read. Built from the same blocks, so it cannot disagree with the page."
+    },
+    {
+      "type": "header",
+      "content": "Link to the full set"
+    },
+    {
+      "type": "paragraph",
+      "content": "Use this where a page carries a subset of the questions, so the shorter list is not a dead end."
+    },
+    {
+      "type": "url",
+      "id": "more_url",
+      "label": "URL"
+    },
+    {
+      "type": "text",
+      "id": "more_label",
+      "label": "Label",
+      "default": "See all the questions"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "qa",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [
+    {
+      "name": "SBS — FAQ"
+    }
+  ]
+}
+{% endschema %}

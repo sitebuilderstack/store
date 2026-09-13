@@ -1,0 +1,91 @@
+<p>Claude Code is a terminal application that reads and writes files in your repository, runs your commands, and works through multi-step tasks without you approving every keystroke. That is a different tool from an editor autocomplete, and it fails in different ways. Most of the difficulty people hit building websites with it has nothing to do with the model's ability to write HTML. It comes from working without the operational layer the tool assumes you have: a project context file it actually reads, prompts scoped to something it can finish, and checks capable of telling you when it got something wrong.</p>
+
+<p>This hub collects the guides on this site that cover that operational layer, in the order they become useful. Everything linked here is free to read and stays that way.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers who can read a diff and run a command, and who want to use Claude Code on real websites that other people will visit. It assumes you know your stack. It does not assume any particular framework, host or language, and none of the guides require the paid product.</p>
+
+<p>If you have never opened Claude Code, start at the terminal setup guide below and work forward. If you have used it for a few weeks and it keeps drifting away from your conventions, the CLAUDE.md guides are where the answer is. If it does what you ask but you cannot tell whether the result is correct, skip to the audit and production guides.</p>
+
+<h2 id="model">The part people skip</h2>
+
+<p>There is a predictable arc to using an agentic coding tool on a real project. It goes: impressive first session, productive second week, then a slow accumulation of small wrongnesses that nobody catches until something breaks in production. The fix is not better prompting. It is putting three things in place before you need them.</p>
+
+<h3>1. Context the tool reads on its own</h3>
+
+<p>Claude Code loads <code>CLAUDE.md</code> from your project root at the start of every session, as a message after its system prompt. You do not have to mention it, attach it, or remind Claude it exists. That is the single highest-leverage file in the project, and it is the one most people either skip or overfill.</p>
+
+<p>The failure mode is length. Every line in that file competes for attention with every other line, so a 400-line file is followed less reliably than a 120-line one. Rules that are mechanical and unconditional do not belong there at all — they belong in a hook, where they run whether or not anyone read them.</p>
+
+<h3>2. Prompts scoped to something checkable</h3>
+
+<p>"Build me a website" produces something that looks like a website. "Add a canonical tag to every template, then show me the rendered <code>&lt;head&gt;</code> of three different page types" produces something you can verify in ten seconds. The difference is not politeness or detail — it is whether the request has an observable finish line.</p>
+
+<p>This is why the prompt library on this site is organised by task rather than by topic. A prompt that names its deliverable and its evidence is worth more than a paragraph of context-setting.</p>
+
+<h3>3. Checks that can actually fail</h3>
+
+<p>The most expensive failure in agent-assisted work is a check that reports success because it never ran. A link crawler reporting "0 broken links" without ever having found one is not evidence of anything. Before trusting a passing result, break the thing it checks and confirm the check notices. This one habit catches more real problems than any amount of review.</p>
+
+<p>Every audit script behind this site was built that way, and it caught things that would otherwise have shipped: an SEO crawler that stripped query strings and therefore never saw paginated pages at all, and a tap-target checker missing the inline exception in WCAG 2.2, which flagged every link inside a paragraph.</p>
+
+<h2 id="extending">Extending Claude Code: what each mechanism is for</h2>
+
+<p>Claude Code has four extension points, and they are frequently confused with one another. They solve genuinely different problems.</p>
+
+<h3>Skills</h3>
+
+<p>A skill is a folder containing <code>SKILL.md</code> — a named procedure Claude can run on request, or start on its own when the description matches what you asked. Use one when you have a multi-step process you repeat: an SEO audit, an accessibility pass, a release check. The two ways a skill is silently ignored are a file not named <code>SKILL.md</code> exactly, and frontmatter that does not begin on line 1.</p>
+
+<h3>Hooks</h3>
+
+<p>A hook is a shell command the harness runs at a defined point in the session — before a tool call, after an edit, when the session ends. Hooks are for rules that must hold regardless of whether the model chose to follow them. "Never commit to main" belongs in a hook. "Prefer composition over inheritance" belongs in CLAUDE.md. Putting the first in CLAUDE.md is the most common version of this mistake.</p>
+
+<h3>Subagents</h3>
+
+<p>A subagent runs a task in its own context window and reports back a conclusion. The reason to use one is context economy: a broad search that would otherwise dump forty file excerpts into your main session returns one paragraph instead. The reason not to use one is that it cannot ask you a question mid-task.</p>
+
+<h3>MCP servers</h3>
+
+<p>MCP connects Claude Code to systems outside your repository — a database, an issue tracker, a hosting API. It is the right answer when the information Claude needs does not live in files. It is the wrong answer when a script would do, because every connected server is a new trust boundary and a new set of tool definitions competing for attention.</p>
+
+<h2 id="build">What a real build actually looks like</h2>
+
+<p>Roughly the order these get used on a production build:</p>
+
+<ol>
+  <li><strong>Before writing code</strong> — write <code>CLAUDE.md</code>, commit it, and test that it is working by asking Claude what it says about your testing conventions. A vague answer means a vague section.</li>
+  <li><strong>Early build</strong> — structure, templates, routing. Ask for one page type at a time and review the diff. This is where scope discipline pays: a session that touched forty files is a session you cannot review.</li>
+  <li><strong>Mid build</strong> — the operational layer. Hooks for the rules that must not be broken, skills for the procedures you have now repeated three times.</li>
+  <li><strong>Before deploying</strong> — the audits. SEO, accessibility, security, performance. Run them, fix what fails, then re-run to confirm the fix registered.</li>
+  <li><strong>After deploying</strong> — the same audits against the live URL, once DNS and caches have settled. A check that passes locally and fails in production is telling you something about your build pipeline.</li>
+</ol>
+
+<p>The step people skip is the last one. Local and production differ in ways that matter for exactly the things that are hardest to notice: canonical URLs, robots directives, redirect behaviour, and anything that depends on a response header.</p>
+
+<h2 id="mistakes">Four mistakes worth naming</h2>
+
+<p><strong>Treating CLAUDE.md as documentation.</strong> It is not a README for humans. It is context for a specific reader with a limited attention budget, and anything in it that is not actionable is spending that budget.</p>
+
+<p><strong>Asking for a whole feature in one message.</strong> The output is usually plausible and occasionally wrong in a way that takes an hour to find. Smaller requests are not slower overall.</p>
+
+<p><strong>Accepting a passing audit without ever having seen it fail.</strong> Covered above, and it is worth repeating, because it is the failure that produces confident wrong answers rather than obvious broken ones.</p>
+
+<p><strong>Letting the model choose the architecture.</strong> It will produce something coherent, and coherent is not the same as appropriate for your constraints. Decide the architecture; delegate the implementation.</p>
+
+<h2 id="sessions">Session hygiene, which nobody writes about</h2>
+
+<p>Two practical habits matter more than they sound.</p>
+
+<p><strong>Start a new session when the task changes.</strong> Context accumulates, and a session that has been debugging a build failure for an hour carries all of that into your next, unrelated request. The accumulated context is not free — it is the same attention budget your <code>CLAUDE.md</code> is competing for. A fresh session with a good project context file beats a long session with a stale one.</p>
+
+<p><strong>Ask for the evidence, not the conclusion.</strong> "Is the canonical tag correct?" invites an answer. "Show me the canonical tag from the rendered HTML of these three URLs" produces something you can check yourself. The second form costs one extra sentence and removes an entire class of confident-but-wrong outcomes.</p>
+
+<p>Both habits are versions of the same idea: the tool is good at doing work and less reliable at assessing its own work, so arrange the loop so that assessment happens where you can see it.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>The learning path below is the sequence I would actually follow, starting from a working terminal and ending with the extension mechanisms. Below that is every guide in this hub, including the reference pieces that do not belong in a sequence.</p>
+
+<p>If your work is specifically about search visibility, Shopify, or production hardening, those have their own hubs — they are linked at the bottom of this page.</p>

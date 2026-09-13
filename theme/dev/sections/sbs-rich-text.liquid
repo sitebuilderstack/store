@@ -1,0 +1,28 @@
+{%- comment -%}
+  Generic prose section, used for policy and content pages rendered through
+  the landing layout.
+{%- endcomment -%}
+<section class="sbs-section">
+  <div class="sbs-container">
+    <div style="max-width: var(--measure);">
+      {%- if section.settings.heading != blank -%}
+        <h1>{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
+      <div class="sbs-stack" style="margin-top: var(--sp-5);">
+        {{ section.settings.body }}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Rich text",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "richtext", "id": "body", "label": "Body" }
+  ],
+  "presets": [{ "name": "SBS — Rich text" }]
+}
+{% endschema %}

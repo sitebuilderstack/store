@@ -1,0 +1,41 @@
+{%- comment -%}
+  Renders the current page's admin content through the landing layout, so
+  policy and content pages match the rest of the site.
+{%- endcomment -%}
+<section class="sbs-section">
+  <div class="sbs-container">
+    <article style="max-width: var(--measure);">
+      <h1>{{ page.title | escape }}</h1>
+      <div class="sbs-stack sbs-rte" style="margin-top: var(--sp-6);">
+        {{ page.content }}
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .sbs-rte h2 { font-size: var(--step-2); margin-top: var(--sp-7); }
+  .sbs-rte h3 { font-size: var(--step-1); margin-top: var(--sp-6); }
+  .sbs-rte p, .sbs-rte li { color: var(--muted); }
+  .sbs-rte ul, .sbs-rte ol { padding-left: 1.25rem; margin-top: var(--sp-3); }
+  .sbs-rte ul { list-style: disc; }
+  .sbs-rte ol { list-style: decimal; }
+  .sbs-rte li + li { margin-top: var(--sp-2); }
+  .sbs-rte a { color: var(--accent); }
+  .sbs-rte strong { color: var(--text); }
+  .sbs-rte table { width: 100%; border-collapse: collapse; margin-top: var(--sp-4); }
+  .sbs-rte th, .sbs-rte td {
+    border: 1px solid var(--border); padding: var(--sp-3); text-align: left;
+    font-size: var(--step--1);
+  }
+  .sbs-rte th { background: var(--surface-2); color: var(--text); }
+</style>
+
+{% schema %}
+{
+  "name": "SBS — Page content",
+  "tag": "div",
+  "settings": [],
+  "presets": [{ "name": "SBS — Page content" }]
+}
+{% endschema %}

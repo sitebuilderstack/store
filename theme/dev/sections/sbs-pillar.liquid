@@ -1,0 +1,279 @@
+{%- comment -%}
+  Topic hub (pillar) pages.
+
+  Everything list-shaped on this page is read from metafields written by
+  scripts/publish-graph.py from content/content-graph.json, and resolved
+  against the live blog at render time. Only handles are stored, so a retitled
+  or re-excerpted guide updates here immediately and no metafield can hold a
+  stale label.
+
+  page.metafields.sbs.cluster  ordered list of article handles in this hub
+  page.metafields.sbs.steps    ordered list of handles in this hub's path
+  page.metafields.sbs.pillar   this hub's own handle
+
+  The editorial prose is page.content. The roadmap and guide list are rendered
+  around it rather than authored into it, so adding a guide to the graph adds
+  it here without anyone editing copy.
+{%- endcomment -%}
+
+{%- comment -%}
+  Article lookup, used three times below.
+
+  `article.handle` in Liquid is the QUALIFIED handle — "guides/claude-code-seo"
+  rather than "claude-code-seo" — so filtering the article list by a bare handle
+  matches nothing and silently renders an empty section. The graph stores bare
+  handles because that is what the URLs and the metafields use, so the qualified
+  form is composed here. The bare form is kept as a fallback: if that behaviour
+  ever changes, the lookup keeps working instead of emptying every hub page.
+{%- endcomment -%}
+{%- assign blog = blogs[section.settings.blog_handle] -%}
+{%- assign cluster = page.metafields.sbs.cluster.value -%}
+{%- assign steps = page.metafields.sbs.steps.value -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="{{ blog.url }}">{{ blog.title | escape }}</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">{{ section.settings.eyebrow | default: 'Topic hub' | escape }}</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+      {%- if cluster.size > 0 -%}
+        <p class="sbs-pillar__count">
+          {{ cluster.size }} guides in this hub{% if steps.size > 1 %}, including a {{ steps.size }}-step learning path{% endif %}.
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <div class="sbs-rte sbs-article__body">
+      {{ page.content }}
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  The learning path, in order. Rendered as an ordered list because the order is
+  the information — a screen reader announcing "list item 3 of 9" is telling
+  the reader exactly what the numbered badge tells a sighted reader.
+{%- endcomment -%}
+{%- if steps.size > 1 -%}
+  <section class="sbs-section sbs-section--alt" aria-labelledby="sbs-path-h">
+    <div class="sbs-container">
+      <div class="sbs-section-head">
+        <span class="sbs-eyebrow">Learning path</span>
+        <h2 id="sbs-path-h">{{ section.settings.path_heading | escape }}</h2>
+        {%- if section.settings.path_intro != blank -%}
+          <p class="sbs-lede">{{ section.settings.path_intro | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        Progress is filled in by JavaScript from localStorage. The markup ships
+        in its finished, working state: without the script the path is a
+        numbered list of guides, which is the thing people actually came for.
+        Nothing here is hidden by default and then revealed.
+      {%- endcomment -%}
+      <p class="sbs-path__progress" data-sbs-path-progress hidden>
+        <span data-sbs-path-count></span>
+        <span class="sbs-cl__bar" aria-hidden="true">
+          <span class="sbs-cl__fill" data-sbs-path-fill style="width:0%"></span>
+        </span>
+      </p>
+
+      <ol class="sbs-path" data-sbs-path="{{ page.handle | escape }}">
+        {%- for h in steps -%}
+          {%- assign qualified = blog.handle | append: '/' | append: h -%}
+          {%- assign a = blog.articles | where: 'handle', qualified | first -%}
+          {%- unless a -%}{%- assign a = blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+          {%- if a != blank -%}
+            <li class="sbs-path__item" data-sbs-lesson="{{ h | escape }}">
+              <span class="sbs-path__num" aria-hidden="true">{{ forloop.index }}</span>
+              <div class="sbs-path__body">
+                <h3><a href="{{ a.url }}" data-sbs-track="learning_path_step">{{ a.title | escape }}</a></h3>
+                {%- if a.excerpt != blank -%}
+                  <p>{{ a.excerpt | strip_html | truncate: 150 }}</p>
+                {%- endif -%}
+                <p class="sbs-meta-row">
+                  {%- if a.metafields.sbs.level != blank -%}
+                    <span class="sbs-pill">{{ a.metafields.sbs.level }}</span>
+                  {%- endif -%}
+                  {%- assign w = a.content | strip_html | split: ' ' | size -%}
+                  <span>{{ w | divided_by: 220 | plus: 1 }} min read</span>
+                </p>
+              </div>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+
+      {%- assign first_step = steps | first -%}
+      {%- assign first_qualified = blog.handle | append: '/' | append: first_step -%}
+      {%- assign fa = blog.articles | where: 'handle', first_qualified | first -%}
+      {%- unless fa -%}{%- assign fa = blog.articles | where: 'handle', first_step | first -%}{%- endunless -%}
+      {%- if fa != blank -%}
+        <p class="sbs-path__start">
+          <a class="sbs-btn sbs-btn--primary" href="{{ fa.url }}"
+             data-sbs-track="learning_path_started">
+            Start with {{ fa.title | escape | truncate: 46 }}
+          </a>
+        </p>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{%- comment -%}
+  Every guide in the hub, including the ones outside the path. Cards carry the
+  same metadata the library filters use, so a reader arriving from either
+  direction sees the same labels.
+{%- endcomment -%}
+{%- if cluster.size > 0 -%}
+  <section class="sbs-section" aria-labelledby="sbs-cluster-h">
+    <div class="sbs-container">
+      <div class="sbs-section-head">
+        <h2 id="sbs-cluster-h">{{ section.settings.cluster_heading | escape }}</h2>
+        {%- if section.settings.cluster_intro != blank -%}
+          <p class="sbs-lede">{{ section.settings.cluster_intro | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <ul class="sbs-grid sbs-grid--2">
+        {%- for h in cluster -%}
+          {%- assign qualified = blog.handle | append: '/' | append: h -%}
+          {%- assign a = blog.articles | where: 'handle', qualified | first -%}
+          {%- unless a -%}{%- assign a = blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+          {%- if a != blank -%}
+            <li class="sbs-card sbs-guide">
+              <h3><a href="{{ a.url }}" data-sbs-track="pillar_article_click">{{ a.title | escape }}</a></h3>
+              {%- if a.excerpt != blank -%}
+                <p>{{ a.excerpt | strip_html | truncate: 170 }}</p>
+              {%- endif -%}
+              <p class="sbs-meta-row">
+                {%- if a.metafields.sbs.content_type != blank -%}
+                  <span class="sbs-pill">{{ a.metafields.sbs.content_type }}</span>
+                {%- endif -%}
+                {%- if a.metafields.sbs.level != blank -%}
+                  <span class="sbs-pill sbs-pill--quiet">{{ a.metafields.sbs.level }}</span>
+                {%- endif -%}
+                {%- assign w = a.content | strip_html | split: ' ' | size -%}
+                <span>{{ w | divided_by: 220 | plus: 1 }} min read</span>
+              </p>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+
+      <p class="sbs-guides__all">
+        <a href="{{ blog.url }}">Browse the full guide library</a>
+      </p>
+    </div>
+  </section>
+{%- endif -%}
+
+{%- comment -%}
+  Contextual free resources and the other hubs.
+
+  Both are lists of page handles in metafields, resolved through the global
+  `pages` object, so the label and the URL come from the live page rather than
+  from a copy. One template therefore serves all four hubs: the differences
+  live in the data, not in four near-identical template files.
+
+  A handle that no longer resolves renders nothing rather than a dead link.
+{%- endcomment -%}
+{%- assign resource_handles = page.metafields.sbs.resources.value -%}
+{%- assign hub_handles = page.metafields.sbs.other_hubs.value -%}
+
+{%- if resource_handles.size > 0 -%}
+  <section class="sbs-section sbs-section--alt" aria-labelledby="sbs-pillar-res-h">
+    <div class="sbs-container">
+      <h2 id="sbs-pillar-res-h" class="sbs-article__related-h">{{ section.settings.resource_heading | escape }}</h2>
+      <ul class="sbs-grid sbs-grid--2">
+        {%- for h in resource_handles -%}
+          {%- assign r = pages[h] -%}
+          {%- if r != blank and r.title != blank -%}
+            <li class="sbs-card">
+              <h3><a href="{{ r.url }}" data-sbs-track="lead_magnet_clicked">{{ r.title | escape }}</a></h3>
+              {%- if r.metafields.global.description_tag != blank -%}
+                <p>{{ r.metafields.global.description_tag | strip_html | truncate: 160 }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{%- if hub_handles.size > 0 -%}
+  <section class="sbs-section sbs-section--tight" aria-labelledby="sbs-pillar-hubs-h">
+    <div class="sbs-container">
+      <h2 id="sbs-pillar-hubs-h" class="sbs-article__related-h">{{ section.settings.hubs_heading | escape }}</h2>
+      <ul class="sbs-grid sbs-grid--3">
+        {%- for h in hub_handles -%}
+          {%- assign o = pages[h] -%}
+          {%- if o != blank and o.title != blank -%}
+            <li class="sbs-card">
+              <h3><a href="{{ o.url }}" data-sbs-track="pillar_cross_link">{{ o.title | escape }}</a></h3>
+              {%- if o.metafields.global.description_tag != blank -%}
+                <p>{{ o.metafields.global.description_tag | strip_html | truncate: 160 }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{%- assign product = all_products[section.settings.product] -%}
+{%- if product != blank and section.settings.show_cta -%}
+  <div class="sbs-container">
+    <aside class="sbs-article__cta" aria-labelledby="sbs-pillar-cta-h">
+      <h2 id="sbs-pillar-cta-h">{{ section.settings.cta_heading | escape }}</h2>
+      <p>{{ section.settings.cta_body | escape }}</p>
+      <a class="sbs-btn sbs-btn--primary" href="{{ product.url }}" data-sbs-track="product_cta_clicked">
+        {{ section.settings.cta_label | escape }} &mdash; {{ product.price | money_without_trailing_zeros }}
+      </a>
+    </aside>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Pillar hub",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "blog_handle", "label": "Blog handle", "default": "guides" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Topic hub" },
+    { "type": "header", "content": "Learning path" },
+    { "type": "text", "id": "path_heading", "label": "Heading", "default": "Follow it in order" },
+    { "type": "textarea", "id": "path_intro", "label": "Intro" },
+    { "type": "header", "content": "Guides" },
+    { "type": "text", "id": "cluster_heading", "label": "Heading", "default": "Every guide in this hub" },
+    { "type": "textarea", "id": "cluster_intro", "label": "Intro" },
+    { "type": "header", "content": "Resources" },
+    { "type": "text", "id": "resource_heading", "label": "Heading", "default": "Free resources for this topic" },
+    { "type": "header", "content": "Other hubs" },
+    { "type": "text", "id": "hubs_heading", "label": "Heading", "default": "Related learning" },
+    { "type": "header", "content": "Product CTA" },
+    { "type": "checkbox", "id": "show_cta", "label": "Show the product CTA", "default": true },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "cta_heading", "label": "Heading", "default": "Want the whole workflow in one place?" },
+    { "type": "textarea", "id": "cta_body", "label": "Body" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "See the Launch System" }
+  ],
+  "presets": [{ "name": "SBS — Pillar hub" }]
+}
+{% endschema %}

@@ -1,0 +1,92 @@
+<p>Search engines do not care that a page was built with an AI coding tool. They care whether the page can be crawled, whether it says what it means, and whether a person who lands on it gets what they came for. What Claude Code changes is the cost of checking — a technical SEO audit that used to be a day of tab-switching becomes a script you can run on every deploy.</p>
+
+<p>That is also where it goes wrong. The failure mode in agent-assisted SEO is not bad advice. It is a check that reports success because it never actually ran, and a report that reads as authoritative because it is well formatted. This hub is about doing the work in a way that produces evidence rather than reassurance.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers who own the templates. Not marketers looking for keyword tooling, and not agencies looking for a reporting layer — this is about the parts of SEO that live in your codebase: canonicals, titles, structured data, sitemaps, robots directives, internal links, rendering, and speed.</p>
+
+<p>You will get the most out of it if you have Search Console verified for the site, because most of the interesting decisions depend on data you cannot get any other way.</p>
+
+<h2 id="order">Technical SEO has a dependency order</h2>
+
+<p>Most SEO checklists are alphabetical or grouped by tool. That is the wrong shape, because these checks depend on each other, and fixing them out of order wastes work. The order that matters:</p>
+
+<ol>
+  <li><strong>Can it be crawled?</strong> robots.txt, response codes, redirect chains, whether the content is in the initial HTML or arrives via JavaScript. Nothing below this matters if the answer is no.</li>
+  <li><strong>Is it the canonical version?</strong> Self-referencing canonicals, parameter handling, trailing slashes, HTTP versus HTTPS, www versus apex. Duplicate URLs split every signal you are about to work on.</li>
+  <li><strong>Should it be indexed?</strong> This is a decision, not a default. Tag archives, filtered listings, paginated pages past the end of a list, and internal search results usually should not be. Getting this wrong in the permissive direction fills the index with thin pages; getting it wrong in the strict direction hides real content.</li>
+  <li><strong>Does it say what it means?</strong> One <code>h1</code>, a title that matches the page's actual subject, a description written for a person deciding whether to click. Structured data that describes what is visibly on the page.</li>
+  <li><strong>Is it fast enough and usable enough?</strong> Core Web Vitals, at the 75th percentile, measured separately on mobile and desktop.</li>
+  <li><strong>Is it linked?</strong> An orphan page is a page Google has to be told about twice and still may not keep.</li>
+</ol>
+
+<p>Working in that order means each fix stays fixed. Working out of order means optimising titles on URLs that are about to be canonicalised away.</p>
+
+<h2 id="indexing">Indexing is the part nobody warns you about</h2>
+
+<p>A new site with no external links will have pages that Google crawls, records as "Discovered — currently not indexed", and then leaves. This is not a bug you can fix with better content, and it is not a technical error you can find with an audit script. It is Google deciding the page is not yet worth the storage.</p>
+
+<p>Three things genuinely help, and one thing does not.</p>
+
+<p><strong>Reduce crawl distance.</strong> A page linked from your most frequently recrawled URL — usually the homepage — is discovered faster than one sitting three hops down behind a page that is not itself indexed. This is the cheapest available lever and it is entirely under your control.</p>
+
+<p><strong>Make the sitemap honest.</strong> Every URL in it should be canonical, indexable and reachable. A sitemap containing noindexed or redirecting URLs teaches Google to trust it less.</p>
+
+<p><strong>Get one real external link.</strong> Not a directory, not a comment. A link from a page that is itself indexed changes how a young domain is treated more than any on-page change.</p>
+
+<p><strong>What does not help:</strong> the Indexing API. Google's Indexing API accepts <code>JobPosting</code> and <code>BroadcastEvent</code> only. There is no supported programmatic way to request indexing of an ordinary page, and tools that claim otherwise are either using the URL Inspection API's manual quota or doing nothing at all.</p>
+
+<h2 id="gsc">What Search Console will and will not tell you</h2>
+
+<p>The Search Analytics API is the most useful data source in technical SEO, and it has two properties that regularly mislead people.</p>
+
+<p>First, <code>dataState</code> defaults to <code>final</code>. On a site less than a few days old, that returns almost nothing, because none of the data has finalised yet. Passing <code>all</code> includes fresh data and is usually what you want when you are actively working.</p>
+
+<p>Second, and more importantly: Google states plainly that the API "does not guarantee to return all data rows but rather top ones". Your row totals will not reconcile with the summary numbers in the interface, and that is expected behaviour rather than a bug in your script. Treat query-level data as a ranked sample, not a ledger.</p>
+
+<p>The URL Inspection API has its own trap: called rapidly in sequence it returns degraded records — "URL is unknown to Google" with <code>sitemap: false</code> for URLs you know are in a sitemap Google downloaded. Re-inspected unhurriedly, the same URLs come back as "Discovered". Any tool built on that endpoint needs to retry and label an unconfirmed result as unmeasured rather than reporting it as fact.</p>
+
+<h2 id="striking">Where the actual opportunity is</h2>
+
+<p>The highest-return work in an established property is almost never new content. It is pages already ranking in positions roughly 4 to 20 for queries with real impression volume, where a better title, a clearer opening, or coverage of an obvious sub-question moves them into a position that gets clicked.</p>
+
+<p>To find them you need three numbers per page — impressions, average position, and click-through rate — and the judgement to tell a genuine gap from a query that will never convert. A page at position 6 with 500 impressions and a 0.5% click-through rate has a title problem. A page at position 45 has a different problem entirely, and rewriting its title will not fix it.</p>
+
+<p>On a young site this analysis produces an uncomfortable answer: nearly everything is at position 40 or worse, and no amount of on-page work moves it. That is honest information. It says the constraint is authority rather than optimisation, and it should change what you spend the week on.</p>
+
+<h2 id="schema">Structured data, minus the cargo cult</h2>
+
+<p>Structured data does one job: it tells a search engine what a page is, in a form it does not have to infer. It is not a ranking factor you can add more of.</p>
+
+<p>Three rules keep it useful:</p>
+
+<p><strong>Describe what is visible.</strong> Markup for content a visitor cannot see is a guidelines violation, and it is the single most common reason for a manual action on structured data.</p>
+
+<p><strong>Never invent the fields a validator asks for.</strong> A validator will happily suggest adding <code>aggregateRating</code>. If you have no reviews, adding it is fabrication with a schema.org wrapper. The same goes for return policies with invented windows and availability values that do not match your actual stock.</p>
+
+<p><strong>Generate values, do not type them.</strong> A price hard-coded into JSON-LD is correct until the day it is not. Read it from the same source the visible page reads, so the two cannot disagree.</p>
+
+<h2 id="architecture">Content architecture and internal links</h2>
+
+<p>Internal linking is the one ranking input you fully control, and it is usually the one left to whatever the theme happens to output. Most sites ship two kinds of internal link: navigation, which is identical on every page and therefore carries almost no topical signal, and "related posts", which on nearly every blog means "the three most recent articles" regardless of subject.</p>
+
+<p>A deliberate structure does three things a chronological feed cannot.</p>
+
+<p><strong>It tells search engines which page is the authority on a topic.</strong> If eight guides all link up to one hub page with descriptive anchor text, and that hub links back down to all eight, you have stated a relationship rather than hoped one is inferred.</p>
+
+<p><strong>It shortens the path to your deepest content.</strong> Crawl budget on a small site is not scarce, but crawl <em>distance</em> matters: a page four clicks from the homepage is recrawled far less often than one at two clicks, and a page nothing links to may never be indexed at all.</p>
+
+<p><strong>It keeps readers moving.</strong> This is the part that is not really SEO, and it is the part that pays. A reader who finishes a guide and finds the obviously correct next guide reads two. The same reader facing three unrelated recent posts leaves.</p>
+
+<p>Two things to avoid. Do not inject links to raise a count — an irrelevant link is worse than no link, both for the reader and for the topical signal. And do not generate faceted, filterable URLs as indexable pages; filtered views belong client-side unless a specific combination is worth curating as a landing page in its own right.</p>
+
+<h2 id="vitals">Core Web Vitals, stated precisely</h2>
+
+<p>The thresholds are LCP at or under 2.5 seconds, INP at or under 200 milliseconds, and CLS at or under 0.1 — assessed at the <strong>75th percentile</strong> of page loads, segmented across mobile and desktop. Both of those qualifiers matter. A median that looks fine can sit on a 75th percentile that fails, and a desktop pass says nothing about mobile.</p>
+
+<p>INP replaced FID and has been the stable responsiveness metric since 2024. Lab tools cannot measure it meaningfully, because it depends on what real people actually click.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>The path below runs from the general SEO workflow through the technical audit, into Search Console, and out to performance. Every guide in the hub is listed underneath, including the Shopify-specific one.</p>

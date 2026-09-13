@@ -1,0 +1,252 @@
+{%- comment -%}
+  Shopify has no `policy` template type &mdash; its own validation rejects
+  templates/policy.json, and the template list in the theme documentation does
+  not include one. Policy pages are therefore rendered by THIS layout with
+  `template` blank and no template file of their own.
+
+  So the branch below is the only way to give the legal pages the site's own
+  design instead of the purchased theme's. Everything that is not a policy page
+  falls through to ONE's original layout, byte-for-byte unchanged.
+
+  Rollback: replace this whole file with theme/one-live/layout/theme.liquid.
+{%- endcomment -%}
+{%- assign is_policy = false -%}
+{%- if template == blank and request.path contains '/policies/' -%}
+  {%- assign is_policy = true -%}
+{%- endif -%}
+{%- if is_policy -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0B0D12">
+    <link rel="canonical" href="{{ canonical_url }}">
+    {%- comment -%}
+      Referrer policy, set through the meta element because Shopify's storefront
+      does not expose response headers to the theme. `strict-origin-when-cross-origin`
+      is already the browser default when no policy is sent, so this codifies the
+      current behaviour and makes the intent auditable rather than changing what
+      browsers do today.
+
+      Only the policy branch is patched. Everything below `{% else %}` is ONE's
+      original layout, kept byte-for-byte so the rollback in the header comment
+      stays valid.
+    {%- endcomment -%}
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+    <title>{{ page_title }} &ndash; {{ shop.name }}</title>
+    {%- comment -%}
+      Shopify supplies no page_description for policy pages, so one is built
+      from the policy title. Emitted below, after seo_desc is captured, so the
+      description and og:description are the same string.
+    {%- endcomment -%}
+    {%- comment -%}
+      Open Graph and Twitter Card, kept at parity with layout/landing.liquid.
+      This layout serves the policy pages, which shipped without og:description,
+      og:image or a Twitter card because the tags were only ever added to the
+      other layout. A policy URL is a link people share when they are deciding
+      whether to buy, so an empty share preview is the worst place for one.
+
+      seo_desc is captured rather than reused from the meta tag above so both
+      come from one expression and cannot drift.
+    {%- endcomment -%}
+    {%- if page_description != blank -%}
+      {%- assign seo_desc = page_description -%}
+    {%- else -%}
+      {%- comment -%}
+        A literal em dash, not &mdash;. This string is run through `escape` for
+        og:description, which turns the entity's ampersand into &amp; and prints
+        the entity source into the tag. Same trap as the en dash in
+        layout/landing.liquid.
+      {%- endcomment -%}
+      {%- capture seo_desc -%}{{ page_title }} for {{ shop.name }} — a digital product delivered by download. Nothing is shipped.{%- endcapture -%}
+    {%- endif -%}
+    {%- assign og_title = page_title | escape -%}
+    {%- assign og_desc = seo_desc | strip_html | escape -%}
+    <meta name="description" content="{{ og_desc }}">
+    <meta property="og:site_name" content="{{ shop.name | escape }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:title" content="{{ og_title }}">
+    <meta property="og:description" content="{{ og_desc }}">
+    <meta property="og:type" content="website">
+    {%- if settings.share_image != blank -%}
+      <meta property="og:image" content="{{ settings.share_image | image_url: width: 1200 | prepend: 'https:' }}">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:alt" content="{{ og_title }}">
+    {%- endif -%}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ og_title }}">
+    <meta name="twitter:description" content="{{ og_desc }}">
+    {{ content_for_header }}
+    <link rel="stylesheet" href="{{ 'sbs.css' | asset_url }}">
+    <script src="{{ 'sbs.js' | asset_url }}" defer></script>
+  </head>
+
+  <body class="sbs sbs-template-policy">
+    <a class="sbs-skip" href="#main">Skip to content</a>
+
+    {% sections 'sbs-header-group' %}
+
+    <main id="main" tabindex="-1">
+      <section class="sbs-section">
+        <div class="sbs-container">
+          <nav class="sbs-crumbs" aria-label="Breadcrumb">
+            <a href="{{ routes.root_url }}">Home</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{{ page_title | escape }}</span>
+          </nav>
+
+          <article class="sbs-rte sbs-policy-body">
+            {{ content_for_layout }}
+          </article>
+
+          <nav class="sbs-policy-nav" aria-label="Other policies">
+            <h2>Other policies</h2>
+            <ul>
+              <li><a href="{{ routes.root_url }}policies/privacy-policy">Privacy Policy</a></li>
+              <li><a href="{{ routes.root_url }}policies/terms-of-service">Terms of Service</a></li>
+              <li><a href="{{ routes.root_url }}policies/refund-policy">Refund Policy</a></li>
+              <li><a href="{{ routes.root_url }}policies/shipping-policy">Shipping Policy</a></li>
+              <li><a href="{{ routes.root_url }}policies/contact-information">Contact Information</a></li>
+              <li><a href="{{ routes.root_url }}pages/licence">Product Licence</a></li>
+              <li><a href="{{ routes.root_url }}pages/disclaimer">Disclaimer</a></li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+    </main>
+
+    {% sections 'sbs-footer-group' %}
+  </body>
+</html>
+{%- else -%}
+<!doctype html>
+<!-- One Speaker v.1.1 -->
+{%- if settings.lang_iso_rtl != blank -%}
+  {% assign list_iso_rtl = settings.lang_iso_rtl | downcase %}
+  {% if list_iso_rtl contains request.locale.iso_code %}
+    {% assign iso_rtl = true %}
+  {% else %}
+    {% assign iso_rtl = false %}
+  {% endif %}
+{%- endif -%}
+<html class="no-js{% if settings.enable_rtl and iso_rtl %} lang-rtl{% endif %}"{% if settings.enable_rtl and iso_rtl %} dir="rtl"{% endif %} lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+    {%- unless settings.type_header_family.system? and settings.type_base_family.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+    {% if settings.type_google == true %}
+      {%- assign type_base = settings.type_base_family_google | strip | replace: ' ', '+' -%}
+      {%- assign type_header = settings.type_header_family_google | strip | replace: ' ', '+' -%}
+      <link rel="preload" href="https://fonts.googleapis.com/css?family={{ type_base }}:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+      {% if type_base != type_header %}
+        <link rel="preload" href="https://fonts.googleapis.com/css?family={{ type_header }}:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+      {% endif %}
+    {% endif %}
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+      {%- comment -%}
+        No suffix when the title already carries the brand, in either spelling:
+        a product's SEO title may end "| SiteBuilderStack", and appending
+        "– Site Builder Stack" to that names the shop twice.
+      {%- endcomment -%}
+      {%- assign brand_compact = shop.name | remove: ' ' -%}
+      {%- unless page_title contains shop.name or page_title contains brand_compact %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+    {% render 'social-meta-tags' %}
+    {{ content_for_header }}
+    {% render 'judgeme_core' %}
+    {% render 'css-variables' %}
+    {% render 'nov-head-css' %}
+    {% render 'nov-head-js' %}
+    {% render 'variant-options' %}
+    <script src="{{ 'vendor_global.js' | asset_url }}" defer="defer"></script>
+  </head>
+
+  <body class="template-{{ template | split: '.' | first }}">
+    {% if template.name != "index" and settings.enable_loadpage %}
+      <div class="preloader_nov">
+        <div class="nov_load"></div>
+      </div>
+    {% endif %}
+      {% sections 'header-group' %}
+      <main class="main-content" id="MainContent">
+        {{ content_for_layout }}
+      </main>
+      {% sections 'footer-group' %}
+    <div class="sidebar-overlay"></div>
+    {% render 'nov-cart-canvas' %}
+    {% render 'nov-popup-newsletter' %}
+    {% render 'nov-popup-login' %}
+    {% render 'nov-popup-faqs' %}
+    {% render 'nov-popup-video' %}
+    {% render 'nov-product-soldout-newsletter' %}
+    {% render 'icon-font' %}
+    {% render 'nov-cart-empty' %}
+    {% render 'nov-mobile-canvas' %}
+    {% render 'nov-block-account' %}
+    <div id="mobileVerticalMenu" class="site-nav-vertical list-unstyled"></div>
+    {% if settings.enable_stickymenu_mobile %}
+      {% include 'nov-stickymenu-mobile' %}
+    {% endif %}
+    {% if settings.show_fake_order_inner_page %}
+      {% render 'nov-popup-fake-order' %}
+    {% else %}
+      {% if template.name == 'index' %}
+        {% render 'nov-popup-fake-order' %}
+      {% endif %}
+    {% endif %}
+    {% render 'nov-popup-GDPR' %}
+    {% if template.name == 'product' %}
+      <div id="nov-sizeguide-product" nov-item-act data-act="CanvasSizeGuide">
+        <div class="pointer mb-40" nov-btn-close data-close="CanvasSizeGuide"><svg aria-hidden="true" viewBox="0 0 16 14"><path d="M15 0L1 14m14 0L1 0" stroke="currentColor" fill="none" fill-rule="evenodd"></path></svg></div>
+        {% section 'nov-page-sizeguide' %}
+      </div>
+    {% endif %}
+    {% if settings.wishlist_enable and settings.show_popup_wishlist %}
+      {% render 'nov-popup-wishlist' %}
+    {% endif %}
+    <div id="_desktop_back_top">
+      <div id="back-top">
+        <span><i class="zmdi zmdi-chevron-up"></i></span>
+      </div>
+    </div>
+    {% render 'nov-currency' %}
+    <script src="{{ 'nov-product-variants.js' | asset_url }}" defer="defer"></script>
+    {{ 'nuranium.js' | asset_url | script_tag }}
+      {% if request.design_mode %}
+        {% render 'purchasecode' %}
+      {% endif %}
+    <script>
+      $(window).on('load', function() {
+        var loader = $('.preloader_nov');
+        if ( loader.length ) {
+          $(window).on('beforeunload', function() {
+            loader.fadeIn(500);
+          });
+          loader.fadeOut(1500);
+        }
+      });
+    </script>
+  </body>
+</html>
+{%- endif -%}

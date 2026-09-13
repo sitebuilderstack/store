@@ -1,0 +1,106 @@
+{%- assign product = all_products[section.settings.product] -%}
+
+<section class="sbs-section" id="{{ section.settings.anchor | default: 'buy' | escape }}" data-sbs-buy>
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if product == blank -%}
+      {%- comment -%} Empty state: never render a broken form. {%- endcomment -%}
+      <div class="sbs-card">
+        <h3>Product not connected</h3>
+        <p>Select a product for this section in the theme editor.</p>
+      </div>
+
+    {%- else -%}
+      {%- assign variant = product.selected_or_first_available_variant -%}
+
+      <div class="sbs-buy">
+        <p class="sbs-eyebrow" style="margin-bottom: var(--sp-2);">{{ product.title | escape }}</p>
+
+        <div class="sbs-buy__price">
+          {{ variant.price | money }}
+          <small>{{ cart.currency.iso_code }} · one payment</small>
+        </div>
+
+        {%- if section.blocks.size > 0 -%}
+          <ul class="sbs-buy__list">
+            {%- for block in section.blocks -%}
+              <li {{ block.shopify_attributes }}>
+                <span class="sbs-buy__tick" aria-hidden="true">&#10003;</span>
+                <span>{{ block.settings.item | escape }}</span>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if variant.available -%}
+          {%- form 'product', product, id: 'sbs-buy-form', data-sbs-buy-form: '' -%}
+            <input type="hidden" name="id" value="{{ variant.id }}">
+            <input type="hidden" name="quantity" value="1">
+
+            <button type="submit"
+                    name="add"
+                    class="sbs-btn sbs-btn--primary sbs-btn--block"
+                    data-busy-label="Adding&hellip;">
+              {{ section.settings.button_label | default: 'Add to cart' | escape }}
+              &mdash; {{ variant.price | money_without_trailing_zeros }}
+            </button>
+
+            {{ form | payment_button }}
+          {%- endform -%}
+        {%- else -%}
+          <button type="button" class="sbs-btn sbs-btn--primary sbs-btn--block" disabled>
+            Currently unavailable
+          </button>
+        {%- endif -%}
+
+        {%- if section.settings.note != blank -%}
+          <p class="sbs-cta-note">{{ section.settings.note | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.delivery_note != blank -%}
+          <p class="sbs-dim" style="margin-top: var(--sp-4);">{{ section.settings.delivery_note | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Buy",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "buy" },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Get it" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Everything, one price" },
+    { "type": "textarea", "id": "intro", "label": "Intro" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "note", "label": "Note under the button",
+      "default": "Instant digital download. Nothing is shipped." },
+    { "type": "textarea", "id": "delivery_note", "label": "Delivery detail",
+      "info": "State plainly what the customer receives and when. Uncertainty here costs sales.",
+      "default": "After checkout you receive a download link for a single ZIP file. Unzip it and open START-HERE.md." },
+    { "type": "paragraph",
+      "content": "Do not add countdowns, scarcity claims, or a crossed-out price that was never charged." }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Included item",
+      "settings": [ { "type": "text", "id": "item", "label": "Item" } ]
+    }
+  ],
+  "max_blocks": 14,
+  "presets": [{ "name": "SBS — Buy" }]
+}
+{% endschema %}

@@ -1,0 +1,444 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 Getting started",
+            "meta": "3 files",
+            "highlight": true
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 Website health",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 Uptime",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 Security",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 Dependencies",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 Backups",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 Performance",
+            "meta": "3 files",
+            "highlight": false
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 SEO maintenance",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 Links & redirects",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 Forms & flows",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 Deployment",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 Diagnostics",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 Incidents",
+            "meta": "3 files",
+            "highlight": false
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "14 Monthly",
+            "meta": "2 files",
+            "highlight": true
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "15 Reporting",
+            "meta": "8 templates",
+            "highlight": false
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "16 Automation",
+            "meta": "4 files",
+            "highlight": false
+          }
+        },
+        "t17": {
+          "type": "tile",
+          "settings": {
+            "label": "17 Platforms",
+            "meta": "4 guides",
+            "highlight": false
+          }
+        },
+        "t18": {
+          "type": "tile",
+          "settings": {
+            "label": "Commands & scripts",
+            "meta": "19 commands · 11 scripts",
+            "highlight": true
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18"
+      ],
+      "settings": {
+        "summary": "Your website is live. Now keep it healthy. Monitoring, security, backups, updates, deployment gates, incident playbooks and monthly reporting for a production website — run inside Claude Code, with a safety system that never touches production without your yes.",
+        "button_label": "Get the Operations System",
+        "note": "One payment. Instant download. Licensed to one person for unlimited websites, including client work."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Seventeen numbered modules, 19 slash commands, 11 scripts, 9 checklists, 8 report templates, 4 platform guides and the CLAUDE.md template — about 63,000 words plus working code. Python 3 standard library only; nothing else to install.",
+            "code": "claude-code-website-operations-maintenance-system/\n  START-HERE.md\n  QUICK-START.md\n  01-getting-started/\n  02-website-health/\n  ...\n  17-platforms/\n  commands/\n  scripts/\n  templates/\n  checklists/\n  examples/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "The first ten minutes",
+            "body": "Copy the commands into .claude/commands/, the scripts into ops/, fill the site block at the top of CLAUDE.md, and run the first check. The report has a score, a list of anything broken, and the one to three things to do today.",
+            "code": "cp commands/*.md your-site/.claude/commands/\ncp -r scripts your-site/ops/\ncp templates/CLAUDE.md your-site/CLAUDE.md\n\ncd your-site && claude\n> /website-health-check"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "The scripts measure; the commands explain",
+            "body": "Ten checks — HTTP, TLS, DNS, headers, exposure, sitemap, redirects, links, endpoints, baseline — each a script with --help, --json and the same exit codes. One command runs the core set and merges them into a scored report. The slash commands run the scripts, read the JSON, and add the parts a script cannot see.",
+            "code": "$ python3 ops/scripts/generate_report.py --run https://your-site.example\nOverall Health Score: 94/100 — Healthy\n  Health       100  PASS\n  TLS/SSL      100  PASS\n  DNS           95  WARNING\n  Security      80  WARNING\n  Sitemap      100  PASS\n  Redirects    100  PASS\n  Links         85  WARNING\nwrote operations-report.md and operations-report.json"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Every change follows seven phases",
+            "body": "Discover, Analyze, Backup, Change, Test, Validate, Document — in that order, with no phase skipped. Audit commands stop after Analyze. The two commands that change things propose one change and wait for a yes.",
+            "code": "PROPOSED CHANGE\n  What:      Redirect /old-catalog to /collections/all (301)\n  Where:     Shopify admin → Navigation → URL redirects\n  Why:       47 inbound links return 404 (link-check, 2026-09-13)\n  Rollback:  Delete the redirect; ten seconds; no data affected\n  Risk:      Low. Affects only requests to a URL that 404s today.\nProceed? (yes / no / change it)"
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "The flagship audit scores every area",
+            "body": "/website-operations-audit runs the scriptable checks and then walks the seven areas a script cannot see — uptime, dependencies, backups, performance in the browser, SEO coverage, forms and flows, deployment readiness — and merges all of it into the master report and operations-report.json. An area that could not be checked is excluded from the score and listed, never marked as passing.",
+            "code": "# Website Operations Audit — Northwind Supply\nWebsite · Date · Environment · Overall Score: 88/100 — Needs attention\n\n| Area          | Score | Status  |\n| Health        | 100   | PASS    |\n| Backups       |  50   | FAIL    | never verified\n| Dependencies  |  45   | FAIL    | PHP 7.4; 4 reachable advisories\n| Forms & flows |  50   | NOT VERIFIED\n..."
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Deploys have a gate on both sides",
+            "body": "Before: nine questions — the change is enumerated, builds, tests pass, staging passes, production is healthy right now, the rollback point exists and is named. After: ten minutes, cheapest checks first, and the first line of the report is KEEP or ROLL BACK.",
+            "code": "> /pre-deploy-check main..release\n  1. What is changing?           3 commits, 5 files      ✓\n  ...\n  6. Rollback point?             deploy dpl_8f2…, 20 s    ✓\n  GO\n\n> /post-deploy-check\n  KEEP — 12/12 endpoints pass; baseline within tolerance; no new log messages"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Incidents: restore first, diagnose second",
+            "body": "The first ten minutes are written down: confirm from outside, name the layer (DNS, TLS, host, application), name the severity (SEV-1 to SEV-4), tell the owner, find the last change, propose the rollback. Ten playbooks cover the incidents every site eventually has. The diagnosis afterwards uses a fixed seven-section format.",
+            "code": "Executive Summary\nLikely Cause\nImmediate Checks\nDiagnostic Commands\nRemediation      (proposed, not applied)\nValidation\nRollback"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "Secrets stay where they are",
+            "body": "Read where they live; never printed, logged, committed, reported or pasted. Diagnostic output is redacted before it is quoted. The security check tests for the exposure of secrets — /.env, /.git/HEAD, backup files served publicly — without reading them. A build-time check refuses to package the product if a credential pattern is anywhere in it.",
+            "code": "postgres://app:••••••@db.internal/prod\nAuthorization: Bearer ••••••\n\n  CRITICAL  exposure  served as a file: /.env (text/plain, 1,204 bytes).\n            Block now, then rotate any credentials inside."
+          }
+        },
+        "s9": {
+          "type": "step",
+          "settings": {
+            "title": "A rhythm, on one page each",
+            "body": "Daily (three minutes, or zero with the automation), weekly (thirty to forty-five), every deploy (fifteen), monthly (two hours, including the restore test), quarterly (access, expiry, drift). Nine checklists. The monthly report carries the score, the three-month trend, and next month's three to five items.",
+            "code": "checklists/\n  DAILY.md   WEEKLY.md   MONTHLY.md   QUARTERLY.md\n  PRE-DEPLOYMENT.md   POST-DEPLOYMENT.md\n  INCIDENT.md   SECURITY.md   BACKUP.md\n\n16-automation/\n  run-checks.sh   crontab.sample\n  github/site-health.yml   github/post-deploy-check.yml"
+          }
+        },
+        "s10": {
+          "type": "step",
+          "settings": {
+            "title": "Four platforms, one method",
+            "body": "Shopify, WordPress, Astro and static hosts, Node.js. Each guide says what the platform handles for you, what it does not, where each lever is, and what every check adds there. The scripts and the commands are the same on all four.",
+            "code": "17-platforms/\n  SHOPIFY.md        apps and permissions · theme rollback · what to export\n  WORDPRESS.md      host vs you, item by item · plugins · PHP EOL · mail\n  ASTRO-STATIC.md   build-time risk · _headers · _redirects · bundle secrets\n  NODEJS.md         /healthz · logs · database backups · migrations"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the Website Operations & Maintenance System",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to the first scored health report.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real commands, and the real output the scripts produce.</p><p>The sample operations report inside the download is a real, unedited run against this store.</p>",
+        "sample_url": "",
+        "sample_label": ""
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Will this keep my site from going down?",
+            "answer": "<p>No system can promise that, and this one does not. What it does is make sure you find out within minutes rather than from a customer, that you know which layer failed, that you have a rollback point named before every change, and that the things that quietly break &mdash; certificates, forms, backups, dependencies &mdash; are checked on a schedule instead of discovered. Most outages are one of a short list of causes; the playbooks cover that list.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Is this a penetration testing tool?",
+            "answer": "<p>No. The security check reads TLS and headers and probes a fixed list of paths that must never be public. It attempts no logins, injection, fuzzing or load, and the product says so in every relevant file. It tells you the basics are in place so that an application security review, if the site needs one, does not spend its first day on headers.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it change my site automatically?",
+            "answer": "<p>Never. The checks are scheduled; the changes are not. Seventeen of the nineteen commands are audits that change nothing. The two that can change things &mdash; the update plan and the remediation inside incident diagnosis &mdash; propose one specific change with its rollback point and wait for your yes. That is the design, and the operating rules in the CLAUDE.md template enforce it on every run.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "How is this different from the Launch System's security and deployment material?",
+            "answer": "<p>The Launch System audits a site once, at launch, and sets up CI/CD. This system checks it every week for as long as it exists, with a baseline to compare against, a change log, incident playbooks, backup verification, dependency batches and a monthly report. Where they overlap, this one refers to the Launch System for the build-time setup and takes over from the first deploy onwards.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "What platforms does it cover?",
+            "answer": "<p>Shopify, WordPress (managed or self-hosted, including WooCommerce), Astro and other static sites on Netlify, Vercel, Cloudflare Pages or GitHub Pages, and Node.js applications on a server or a container platform. Each has its own guide. The scripts look at a site from the outside, so they work on anything with a URL.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need to install anything?",
+            "answer": "<p>Python 3.8 or newer, which almost every machine already has, and Claude Code. The scripts use only the standard library &mdash; no pip install, no virtual environment. The critical-flow examples use Playwright, which is optional and separately installed; the flows can be walked by hand.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "What exactly do I get?",
+            "answer": "<p>One ZIP: 17 numbered modules, 19 slash commands for .claude/commands/, 11 scripts, 9 checklists, 8 report templates, 4 platform guides, the CLAUDE.md template with the site block and operating rules, configuration templates, automation samples for cron and GitHub Actions, a real operations report from this store, and three worked examples. Every count is generated from the bundle at build time.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "Is it in the Complete Site Builder Stack?",
+            "answer": "<p>Not at present. The bundle is the three earlier stages &mdash; build, rank, convert. This is the fourth, and it is sold on its own. Buying it does not include the others, and there is no automatic upgrade credit.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it on client sites?",
+            "answer": "<p>Yes, without limit. The licence is one person, unlimited websites, including commercial and client work. Reports you produce with it are yours. You may not redistribute or resell the system itself.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The questions people ask about a maintenance product, answered plainly.",
+        "emit_schema": true
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Planning, platform build systems, a production CLAUDE.md, security and accessibility audits, 100 prompts and launch checklists.",
+            "flagship": false
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals and Search Console — twenty audits in dependency order.",
+            "flagship": false
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "Find where a site loses conversions, rank what to fix by evidence, and prove the fix worked — 70 workflows and 68 commands.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "The first three",
+            "product": "complete-site-builder-stack",
+            "body": "Build, rank and convert in one purchase — the three earlier stages, delivered as three downloads.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The other three",
+        "heading": "Operate is the stage that lasts longest",
+        "intro": "This system assumes the site exists, is found, and converts. Building it, ranking it and converting the traffic are the other three jobs.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Not built, found, or converting yet?",
+        "body": "The Complete Site Builder Stack is the three stages before this one — the Website Launch System, the SEO & Website Audit Toolkit and the Conversion & Revenue Optimization Toolkit — in one purchase.",
+        "cta_label": "See the Complete Stack",
+        "cta_url": "/products/complete-site-builder-stack",
+        "note": "A separate product. Buying this does not include it, and there is no automatic upgrade credit.",
+        "product": "complete-site-builder-stack"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

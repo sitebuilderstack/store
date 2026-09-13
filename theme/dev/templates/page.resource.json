@@ -1,0 +1,15 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-resource",
+      "settings": {
+        "crumb_parent": true,
+        "wide": false,
+        "show_cta": true,
+        "product": "claude-code-website-launch-system"
+      }
+    }
+  },
+  "order": ["main"]
+}

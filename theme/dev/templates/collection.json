@@ -1,0 +1,15 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-collection",
+      "settings": {
+        "heading": "Everything Site Builder Stack sells",
+        "body": "Four products, sold separately: build the site, get it found, turn the traffic into revenue, then keep it running. The methodology behind all four is published in full and free to read in the guides."
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

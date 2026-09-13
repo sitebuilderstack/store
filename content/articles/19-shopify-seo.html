@@ -1,0 +1,201 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#split">What Shopify does, and what is left to you</a></li>
+    <li><a href="#urls">One product, five URLs, one canonical</a></li>
+    <li><a href="#metadata">Titles and descriptions: the metafields that matter</a></li>
+    <li><a href="#homepage">The homepage title trap</a></li>
+    <li><a href="#thin">Thin pages Shopify creates for you</a></li>
+    <li><a href="#schema">Structured data on a Shopify theme</a></li>
+    <li><a href="#sitemap">The sitemap: validate, never replace</a></li>
+    <li><a href="#robots">robots.txt, and when to override it</a></li>
+    <li><a href="#images">Images</a></li>
+    <li><a href="#copy">Product copy that is worth ranking</a></li>
+    <li><a href="#console">Search Console, and Merchant Center for a digital product</a></li>
+    <li><a href="#validate">Validating after every theme push</a></li>
+  </ol>
+</nav>
+
+<h2 id="split">What Shopify does, and what is left to you</h2>
+
+<p>Shopify handles more of technical SEO than most hosted platforms, and the first useful thing an audit can do is stop you rebuilding what already works.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Shopify handles</th><th>You handle</th></tr></thead>
+<tbody>
+<tr><td>Sitemap generation, kept current in real time</td><td>Checking it lists what you expect</td></tr>
+<tr><td><code>robots.txt</code>, including crawl-trap rules</td><td>Deciding whether to override it at all</td></tr>
+<tr><td>Canonical tags, including parameter stripping</td><td>Confirming the theme actually emits <code>canonical_url</code></td></tr>
+<tr><td>HTTPS, HTTP/2, global CDN</td><td>Image sizes and third-party scripts</td></tr>
+<tr><td>Duplicate collection-product URLs</td><td>Thin pages the theme creates</td></tr>
+<tr><td>SEO title and description <em>fields</em></td><td>Actually filling them in, uniquely</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Every claim in this article about how Shopify behaves was measured by requesting the URL on a live storefront and reading the response, not taken from documentation. Some of it will change; the method for re-checking it will not.</p>
+
+<h2 id="urls">One product, five URLs, one canonical</h2>
+
+<p>The most common Shopify SEO worry is duplicate product URLs. Measured on a live store, it is mostly a solved problem.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-shopify-url-variants.png" alt="Five URLs for one Shopify product and how each resolves. The plain product URL returns 200 and canonicals to itself. The variant parameter and a UTM parameter both return 200 with the parameter stripped from the canonical. A collection-scoped product URL returns 200 and canonicals to the plain product URL. A collections-slash-all product URL returns a 301 redirect to the plain product URL."
+       width="1000" height="554" loading="lazy" decoding="async">
+  <figcaption>Measured by fetching each URL and reading the canonical tag out of the response. Shopify resolves all five; the job is to confirm it, not to rebuild it.</figcaption>
+</figure>
+
+<p>Two things follow. First, do not write theme code to "fix" collection-scoped product URLs — you would be duplicating platform behaviour and creating a second thing to maintain. Second, <strong>link internally to the clean <code>/products/handle</code> form anyway.</strong> A canonical resolves the duplicate for search engines; an internal link that points at a redirect still wastes a hop for everyone.</p>
+
+<p>The one thing you do control is whether your theme emits a canonical at all. A custom layout that forgets <code>{{ canonical_url }}</code> throws away everything above. Fetch a page and check.</p>
+
+<h2 id="metadata">Titles and descriptions: the metafields that matter</h2>
+
+<p>Shopify stores the SEO title and description as metafields on the resource — <code>global.title_tag</code> and <code>global.description_tag</code> — for products, collections, pages, blogs and articles alike. That matters for two reasons.</p>
+
+<p>First, they can be set programmatically, so keeping metadata unique across a growing catalogue is a script rather than an afternoon in the admin:</p>
+
+<pre><code>For every article in the guides blog, set:
+  global.title_tag        from the manifest's seoTitle
+  global.description_tag  from the manifest's seoDescription
+
+Then fetch each published URL and confirm the rendered title and meta
+description match the manifest. Report any that do not.</code></pre>
+
+<p>The second half is the part that matters. Setting a metafield and assuming the theme reads it is a check that cannot fail. Fetch the page.</p>
+
+<p>Second, a theme has to actually use them. Shopify's <code>page_title</code> and <code>page_description</code> resolve to these metafields when set and fall back to the resource title and body when not — so a theme that hard-codes something else silently ignores everything you entered in the admin.</p>
+
+<p>Two Shopify-specific gotchas worth knowing before you write the script: the Admin GraphQL <code>blog.articles</code> connection has <strong>no <code>query</code> argument</strong>, so finding an article by handle means listing and filtering locally; and <code>ShopPolicyInput</code> keys on <code>type</code>, not <code>id</code>, which is not what the surrounding API conventions lead you to expect.</p>
+
+<h2 id="homepage">The homepage title trap</h2>
+
+<p>This one is worth its own section because it is invisible and it hits the most valuable page on the store.</p>
+
+<p>Shopify's homepage title comes from <strong>Online Store → Preferences</strong>, not from the theme and not from any product. When that field is empty, <code>page_title</code> falls back to the store's raw <code>.myshopify.com</code> domain. The homepage then ships with a title like <code>kjhvcj-yi.myshopify.com</code>, which looks completely normal in a browser tab and is a disaster in a search result.</p>
+
+<p>There is no Admin API mutation for that preference field, so a script cannot set it and a script cannot check it in the admin. The workaround used on this site is to have the layout supply the homepage title from a theme setting instead:</p>
+
+<pre><code>{% if template.name == 'index' %}
+  {% assign seo_title = settings.home_seo_title | default: shop.name %}
+{% else %}
+  ... normal page_title handling ...
+{% endif %}</code></pre>
+
+<p>Either way, the check is the same and takes five seconds: fetch the homepage and read the <code>&lt;title&gt;</code> out of the response.</p>
+
+<h2 id="thin">Thin pages Shopify creates for you</h2>
+
+<p>A Shopify store generates indexable URLs nobody deliberately created. Two categories are worth auditing on every store.</p>
+
+<p><strong>Blog tag archives.</strong> Every tag on every article produces <code>/blogs/&lt;blog&gt;/tagged/&lt;tag&gt;</code>. These self-canonicalise, are indexable, and in most themes inherit the blog's own title and meta description — so a store with eight tags ships eight pages carrying the blog index's exact title tag. They also add no text of their own: each one lists a subset of articles the index already lists in full. On this site the fix was a distinct title and description for anyone who lands on one, plus <code>noindex, follow</code> so they stop competing with the index while still passing link equity to the articles.</p>
+
+<p><strong>Default collections.</strong> Shopify creates a <code>frontpage</code> collection, and it goes into the generated sitemap whether or not your theme uses it. On this store it was rendering through the purchased theme rather than the custom layout, with an <code>h1</code> of "Home page" and no title tag at all — a page in a different design, in the sitemap, that nothing on the site linked to. The fix was a collection template on the site's own layout so it is at least in-brand, and <code>noindex</code> because a one-product store's collection listing duplicates the homepage.</p>
+
+<p>Neither of these is exotic. Both were found by crawling the site and sorting the results by title.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes the Shopify workflow, the audit prompts behind these findings, and the launch checklist they feed. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="schema">Structured data on a Shopify theme</h2>
+
+<p>Most purchased themes ship Product markup. Before adding your own, check what is already in the rendered HTML, or you will end up with two Product entities on one page disagreeing about price.</p>
+
+<p>What a clean product page needs: one <code>Product</code> with <code>name</code>, <code>description</code>, <code>brand</code>, <code>url</code>, <code>image</code>, and one <code>Offer</code> carrying <code>price</code>, <code>priceCurrency</code>, <code>availability</code> and <code>url</code>. Build the price from the variant rather than a hard-coded string, so it cannot drift from what checkout charges.</p>
+
+<p>Three rules that matter more than completeness:</p>
+
+<ul>
+  <li><strong>No review, rating or aggregate markup without real reviews.</strong> Review apps sometimes inject it on stores with zero reviews. Check the rendered output rather than trusting the app.</li>
+  <li><strong>Do not add a return policy you do not have.</strong> If refunds are handled case by case, none of schema.org's return categories describes that, and inventing a window to satisfy a validator puts your markup in conflict with your published policy. Omit the property and write down why.</li>
+  <li><strong>A warning is not an error.</strong> Rich Results Test flags recommended-but-absent properties. Filling one in with a plausible guess is worse than leaving it out.</li>
+</ul>
+
+<p>Breadcrumb markup should mirror the breadcrumb the visitor can see. If the theme shows Home / Guides / Article, the markup says the same three, generated from the same condition so they cannot drift.</p>
+
+<h2 id="sitemap">The sitemap: validate, never replace</h2>
+
+<p><code>/sitemap.xml</code> on Shopify is an index that points at per-resource sitemaps for products, pages, collections and blogs, and it is regenerated as the catalogue changes. It cannot be edited by hand, and you should not want to: a hand-maintained sitemap goes stale the first time somebody adds a page.</p>
+
+<p>What to do instead is validate it:</p>
+
+<pre><code>Fetch /sitemap.xml, follow every child sitemap, and for each URL:
+- fetch it and record the status code
+- record the canonical, and whether it points at the URL itself
+- record any robots meta
+
+Report: any non-200, any URL whose canonical points elsewhere, any
+noindexed URL, and any page in the store that is missing entirely.
+Do not modify the sitemap.</code></pre>
+
+<p>The two findings that matter are a URL in the sitemap that should not be indexable, and a page that should be indexable and is missing. Both are real. Neither is fixed by editing XML.</p>
+
+<h2 id="robots">robots.txt, and when to override it</h2>
+
+<p>Shopify's generated <code>robots.txt</code> is better than most hand-written ones. It already disallows the cart, checkout, account and order paths, sort and filter parameter combinations, preview parameters, and internal endpoints, and it declares the sitemap.</p>
+
+<p>Shopify does allow an override through <code>robots.txt.liquid</code>. Almost nobody needs it, and the downside is asymmetric: a mistake here can remove your store from search results, and it will not be obvious. Use it only for a rule you can state in one sentence with a reason, and check the live file afterwards.</p>
+
+<h2 id="images">Images</h2>
+
+<p>Shopify's CDN handles format negotiation and resizing, so the work is on your side of the boundary.</p>
+
+<ul>
+  <li>Request the size you render, through <code>image_url: width: N</code>, and provide a <code>srcset</code> rather than one large file scaled down in the browser.</li>
+  <li>Set <code>width</code> and <code>height</code> on every image. Layout shift is the most common Core Web Vitals failure on a storefront.</li>
+  <li>The product's main image and an article's hero are the LCP element. Load them eagerly. Everything below the fold gets <code>loading="lazy"</code>.</li>
+  <li>Descriptive filenames and real alt text. Alt describes the image; it is not a place to repeat the product name with keywords attached.</li>
+  <li><code>image_url</code> returns a protocol-relative URL. Structured data and Open Graph need an absolute one, so prepend <code>https:</code> — not <code>http:</code>.</li>
+</ul>
+
+<h2 id="copy">Product copy that is worth ranking</h2>
+
+<p>The technical layer above is table stakes. The product page still has to answer the question somebody typed.</p>
+
+<p>An assistant is genuinely useful here and genuinely dangerous. Useful: restructuring a description so the specific answer comes first, finding the questions the copy never answers, catching claims the rest of the site contradicts. Dangerous: it will happily invent a specification, a dimension, a compatibility claim, or a customer count, because product copy in its training data is full of them.</p>
+
+<p>The rule that works: <strong>the assistant may rewrite what is there, and may tell you what is missing, but may not supply a fact.</strong> Anything it flags as missing, you answer.</p>
+
+<p>For a digital product specifically, the details that convert are also the details that rank: what is in the file, how many of them, the format, how delivery works, what the licence permits, and what happens if it does not work. That last one is a link to the refund policy, and it should be a real one.</p>
+
+<h2 id="console">Search Console, and Merchant Center for a digital product</h2>
+
+<p>Verify the property for the exact production hostname — the custom domain, not the <code>.myshopify.com</code> one — and submit <code>/sitemap.xml</code>. Then watch coverage rather than resubmitting: "Discovered — currently not indexed" is a quality signal, not a technical fault.</p>
+
+<p>Merchant Center deserves a straight answer, because a lot of advice assumes every store is eligible. Google's <a href="https://support.google.com/merchants/answer/6150006" rel="noopener">unsupported Shopping content</a> policy lists, verbatim, "eBooks and digital books (not including audiobooks)" with the examples "PDFs, EPUB books, MOBI", and separately lists services as "labour, time, effort, expertise or actions which don't result in ownership of a tangible product".</p>
+
+<p>A downloadable document product sits close enough to both of those that eligibility is genuinely uncertain. The correct action is to read the current policy against your specific product and decide, not to set up a feed and hope. If the answer is no, or unclear, <strong>do not add merchant markup or a product feed anyway</strong> — misrepresentation is the single most common cause of Merchant Center suspension, and there is no SEO benefit to markup for a programme you are not in.</p>
+
+<p>None of this affects organic search. A digital product ranks in web search on the same terms as anything else.</p>
+
+<p>For the storefront's performance specifically &mdash; apps, theme assets and what you genuinely control on a hosted platform &mdash; see <a href="/blogs/guides/claude-code-performance-core-web-vitals">the Core Web Vitals workflow</a>. For reading the Search Console data once it arrives, <a href="/blogs/guides/google-search-console-claude-code">Google Search Console with Claude Code</a>.</p>
+
+<h2 id="validate">Validating after every theme push</h2>
+
+<p>Shopify theme changes go live the moment they are pushed, and a broken Liquid tag does not produce a 500 — it renders the error as text on the page. So the check after every push is not "did it deploy" but "what does the page say now":</p>
+
+<ul>
+  <li>Fetch the affected URLs and search the response for <code>Liquid error</code></li>
+  <li>Confirm the title, description and canonical are what you expect</li>
+  <li>Parse every JSON-LD block</li>
+  <li>Re-run the internal-link crawl</li>
+</ul>
+
+<p>Write the search for <code>Liquid error</code> carefully. A naive pattern will match an article that mentions the phrase in prose — that happened here, and reported a perfectly healthy page as broken. Match Shopify's actual format, and control-test it against both a page with a real error and a page that merely talks about them.</p>
+
+<h2>Where to go next</h2>
+
+<p>For building the store in the first place, <a href="/blogs/guides/build-shopify-store-with-claude-code">how to build a Shopify store with Claude Code</a> covers the theme architecture, credentials, digital delivery and going live. For the platform-independent SEO work, <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO workflow</a> is the pillar this sits under, and <a href="/blogs/guides/claude-code-technical-seo-audit">running a technical SEO audit</a> covers proving your checks can fail. For auditing the whole storefront rather than its SEO, see <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a>. The platform rules worth writing down are in the Shopify example in <a href="/blogs/guides/production-claude-md-web-development">the CLAUDE.md guide</a>. The <a href="/pages/claude-code-seo-checklist">free SEO checklist</a> is the short form of all of it.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://shopify.dev/docs/storefronts/themes/architecture" rel="noopener">Shopify: theme architecture</a> — layouts, templates, sections and section groups</li>
+  <li><a href="https://shopify.dev/docs/api/liquid/objects/canonical_url" rel="noopener">Shopify: canonical_url</a></li>
+  <li><a href="https://help.shopify.com/en/manual/promoting-marketing/seo/hide-a-page-from-search-engines" rel="noopener">Shopify: robots.txt.liquid and hiding pages</a></li>
+  <li><a href="https://support.google.com/merchants/answer/6150006" rel="noopener">Google: unsupported Shopping content</a> — the eligibility question for digital products</li>
+  <li><a href="https://developers.google.com/search/docs/appearance/structured-data/product" rel="noopener">Google: product structured data</a></li>
+</ul>

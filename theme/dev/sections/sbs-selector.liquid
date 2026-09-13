@@ -1,0 +1,307 @@
+{%- comment -%}
+  The learning-path engine: "What are you trying to build?"
+
+  Three questions produce a seven-step roadmap through real pages on this site,
+  with progress the visitor can tick off and come back to.
+
+  Everything is server-rendered and hidden; JavaScript only reveals the matching
+  roadmap and restores saved progress. Nothing is fetched, nothing is templated
+  on the client, and the space is already in the document so there is no shift.
+
+  Without JavaScript the questions stay hidden and a real list of topic hubs is
+  shown instead — a control that does nothing is worse than a list of links. The
+  hub row above the questions is rendered unconditionally, so there is always a
+  visible route into the content.
+
+  Blocks are generated from content/workflow-selector.json by
+  scripts/publish-selector.py; every URL in that file is checked against the
+  published manifests by scripts/validate-selector.py in the test suite.
+
+  Step 1 varies by experience level. Steps 2 to 7 are fixed per goal. The stage
+  answer decides which step is marked "start here", so somebody whose site is
+  already live is not sent to the getting-started guide.
+{%- endcomment -%}
+
+{%- assign levels = 'beginner,intermediate,experienced' | split: ',' -%}
+{%- assign level_labels = 'New to Claude Code,Comfortable with it,Advanced developer' | split: ',' -%}
+{%- assign level_hints = 'Little or no experience,Used it on a few projects,Shipping with it already' | split: ',' -%}
+{%- assign stages = 'planning,building,optimizing,launching,live' | split: ',' -%}
+{%- assign stage_labels = 'Planning,Building,Optimizing,Launching,Already live' | split: ',' -%}
+{%- assign stage_entries = '1,2,4,6,5' | split: ',' -%}
+
+{%- comment -%} Step kind -> the words shown above the link. {%- endcomment -%}
+{%- assign kind_keys = 'guide,resource,workflow,audit,deploy,next' | split: ',' -%}
+{%- assign kind_words = 'Read this guide,Take this with you — free, no email,Run this workflow,Perform this audit,Deploy and validate,Continue to' | split: ',' -%}
+
+<section class="sbs-section" id="{{ section.settings.anchor | default: 'start' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      A permanent route to the hubs, independent of the questions. Deduplicated,
+      because eleven goals map to six hubs and Liquid has no set type.
+    {%- endcomment -%}
+    {%- assign seen_hubs = '|' -%}
+    <nav class="sbs-sel__browse" aria-label="Topic hubs">
+      <h3 class="sbs-sel__browse-h">{{ section.settings.browse_heading | default: 'Or browse by topic' | escape }}</h3>
+      <ul class="sbs-hublinks__list">
+        {%- for block in section.blocks -%}
+          {%- assign hu = block.settings.hub_url -%}
+          {%- if hu != blank and block.settings.hub_label != blank -%}
+            {%- capture probe -%}|{{ hu }}|{%- endcapture -%}
+            {%- unless seen_hubs contains probe -%}
+              {%- assign seen_hubs = seen_hubs | append: hu | append: '|' -%}
+              <li><a class="sbs-tap" href="{{ hu }}" data-sbs-track="pillar_view">{{ block.settings.hub_label | escape }}</a></li>
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    {%- comment -%} No-JS route. Hidden by the script when the engine starts. {%- endcomment -%}
+    <div class="sbs-sel__fallback" data-sbs-selector-fallback>
+      <p>Pick the hub that matches what you are building, or
+      <a href="{{ routes.all_products_collection_url | default: '/blogs/guides' }}">browse every guide</a>.</p>
+    </div>
+
+    <div class="sbs-sel" data-sbs-route hidden>
+      <form class="sbs-sel__form">
+        <fieldset class="sbs-sel__q">
+          <legend>What are you trying to accomplish?</legend>
+          <div class="sbs-sel__opts sbs-sel__opts--wide">
+            {%- for block in section.blocks -%}
+              {%- if block.settings.goal_value != blank -%}
+                <div class="sbs-sel__opt" {{ block.shopify_attributes }}>
+                  <input type="radio" name="sbs-goal" id="sbs-goal-{{ block.settings.goal_value }}"
+                         value="{{ block.settings.goal_value | escape }}">
+                  <label for="sbs-goal-{{ block.settings.goal_value }}">{{ block.settings.goal_label | escape }}</label>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </fieldset>
+
+        <div class="sbs-sel__pair">
+          <fieldset class="sbs-sel__q">
+            <legend>Where are you right now?</legend>
+            <div class="sbs-sel__opts">
+              {%- for st in stages -%}
+                <div class="sbs-sel__opt">
+                  <input type="radio" name="sbs-stage" id="sbs-stage-{{ st }}" value="{{ st }}"
+                         data-entry="{{ stage_entries[forloop.index0] }}">
+                  <label for="sbs-stage-{{ st }}">{{ stage_labels[forloop.index0] }}</label>
+                </div>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+
+          <fieldset class="sbs-sel__q">
+            <legend>How much Claude Code have you used?</legend>
+            <div class="sbs-sel__opts">
+              {%- for lv in levels -%}
+                <div class="sbs-sel__opt">
+                  <input type="radio" name="sbs-level" id="sbs-level-{{ lv }}" value="{{ lv }}">
+                  <label for="sbs-level-{{ lv }}">
+                    {{ level_labels[forloop.index0] }}
+                    <span class="sbs-sel__hint">{{ level_hints[forloop.index0] }}</span>
+                  </label>
+                </div>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+        </div>
+      </form>
+
+      <div class="sbs-sel__result" data-sbs-route-result role="region"
+           aria-live="polite" aria-label="Your roadmap" hidden>
+
+        <p class="sbs-sel__prompt" data-sbs-route-prompt>Answer all three to see your roadmap.</p>
+
+        {%- comment -%}
+          Progress toolbar. Rendered with the real total and a zero count, which
+          is accurate before the script runs and keeps the height stable.
+        {%- endcomment -%}
+        <div class="sbs-route__bar" data-sbs-route-bar hidden>
+          <div class="sbs-route__progress">
+            <p class="sbs-route__count" data-sbs-route-count>0 of 7 steps completed</p>
+            <span class="sbs-cl__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                  aria-valuenow="0" aria-label="Roadmap progress" data-sbs-route-track>
+              <span class="sbs-cl__fill" data-sbs-route-fill></span>
+            </span>
+          </div>
+          <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-route-change>Change goal</button>
+          <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-route-reset>Reset progress</button>
+          <p class="sbs-cl__note">Progress is kept in this browser only. No account, and nothing is sent anywhere.</p>
+        </div>
+
+        {%- for block in section.blocks -%}
+          {%- if block.settings.goal_value != blank -%}
+            {%- assign gv = block.settings.goal_value -%}
+            <div class="sbs-route" data-sbs-route-panel="{{ gv | escape }}" hidden>
+              <h3 class="sbs-route__h">Your Site Builder Stack roadmap: {{ block.settings.goal_label | escape }}</h3>
+
+              <ol class="sbs-route__steps">
+                {%- comment -%} Step 1 — one per experience level, one shown. {%- endcomment -%}
+                {%- for lv in levels -%}
+                  {%- capture uk -%}start_{{ lv }}_url{%- endcapture -%}
+                  {%- capture lk -%}start_{{ lv }}_label{%- endcapture -%}
+                  {%- assign su = block.settings[uk] -%}
+                  {%- if su != blank -%}
+                    <li class="sbs-route__step" data-sbs-step="1" data-step-level="{{ lv }}"
+                        data-step-id="{{ gv }}:1" hidden>
+                      <span class="sbs-route__num" aria-hidden="true">1</span>
+                      <div class="sbs-route__body">
+                        <p class="sbs-route__kind">Start here</p>
+                        <p class="sbs-route__link">
+                          <a href="{{ su }}" data-sbs-track="route_step_clicked">{{ block.settings[lk] | escape }}</a>
+                        </p>
+                      </div>
+                      <label class="sbs-route__done">
+                        <input type="checkbox" data-sbs-step-done="{{ gv }}:1">
+                        <span>Done</span>
+                      </label>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- comment -%} Steps 2 to 7 — fixed per goal. {%- endcomment -%}
+                {%- for i in (1..6) -%}
+                  {%- assign n = i | plus: 1 -%}
+                  {%- capture ku -%}step{{ i }}_url{%- endcapture -%}
+                  {%- capture kl -%}step{{ i }}_label{%- endcapture -%}
+                  {%- capture kk -%}step{{ i }}_kind{%- endcapture -%}
+                  {%- capture kn -%}step{{ i }}_note{%- endcapture -%}
+                  {%- assign su = block.settings[ku] -%}
+                  {%- if su != blank -%}
+                    {%- assign kind = block.settings[kk] -%}
+                    {%- assign kind_word = 'Read this guide' -%}
+                    {%- for k in kind_keys -%}
+                      {%- if k == kind -%}{%- assign kind_word = kind_words[forloop.index0] -%}{%- endif -%}
+                    {%- endfor -%}
+                    <li class="sbs-route__step" data-sbs-step="{{ n }}" data-step-id="{{ gv }}:{{ n }}">
+                      <span class="sbs-route__num" aria-hidden="true">{{ n }}</span>
+                      <div class="sbs-route__body">
+                        <p class="sbs-route__kind">{{ kind_word }}</p>
+                        <p class="sbs-route__link">
+                          <a href="{{ su }}" data-sbs-track="route_step_clicked">{{ block.settings[kl] | escape }}</a>
+                        </p>
+                        {%- if block.settings[kn] != blank -%}
+                          <p class="sbs-route__note">{{ block.settings[kn] | escape }}</p>
+                        {%- endif -%}
+                      </div>
+                      <label class="sbs-route__done">
+                        <input type="checkbox" data-sbs-step-done="{{ gv }}:{{ n }}">
+                        <span>Done</span>
+                      </label>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ol>
+
+              <p class="sbs-route__complete" data-sbs-route-complete hidden>
+                <strong>Roadmap complete.</strong> Every step ticked — the whole hub is below if you want to keep going.
+              </p>
+
+              {%- if block.settings.hub_url != blank -%}
+                <p class="sbs-sel__hublink">
+                  Everything on this topic:
+                  <a href="{{ block.settings.hub_url }}" data-sbs-track="pillar_view">{{ block.settings.hub_label | escape }}</a>
+                </p>
+              {%- endif -%}
+
+              {%- comment -%}
+                One product, chosen by intent. SEO and audit roadmaps offer the
+                toolkit; build-to-launch roadmaps offer the flagship. Never both.
+              {%- endcomment -%}
+              {%- assign rp = all_products[block.settings.product_handle] -%}
+              {%- if rp != blank -%}
+                <aside class="sbs-route__cta">
+                  <p class="sbs-route__kind">If you would rather have it packaged</p>
+                  <p class="sbs-route__link">
+                    <a href="{{ rp.url }}" data-sbs-track="product_cta_clicked">{{ rp.title | escape }}</a>
+                    &mdash; {{ rp.price | money_without_trailing_zeros }}
+                  </p>
+                  {%- if block.settings.product_note != blank -%}
+                    <p class="sbs-route__note">{{ block.settings.product_note | escape }}</p>
+                  {%- endif -%}
+                </aside>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Learning path",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "start" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Find your route" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What are you trying to build?" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Three questions, then a seven-step route through the free guides for exactly that job. Tick steps off as you go — your progress is saved in this browser, with no account." },
+    { "type": "text", "id": "browse_heading", "label": "Browse heading", "default": "Or browse by topic" }
+  ],
+  "blocks": [
+    {
+      "type": "goal",
+      "name": "Goal",
+      "settings": [
+        { "type": "text", "id": "goal_value", "label": "Value (slug)" },
+        { "type": "text", "id": "goal_label", "label": "Label" },
+        { "type": "header", "content": "Step 1 — varies by experience" },
+        { "type": "url",  "id": "start_beginner_url", "label": "Beginner link" },
+        { "type": "text", "id": "start_beginner_label", "label": "Beginner label" },
+        { "type": "url",  "id": "start_intermediate_url", "label": "Intermediate link" },
+        { "type": "text", "id": "start_intermediate_label", "label": "Intermediate label" },
+        { "type": "url",  "id": "start_experienced_url", "label": "Experienced link" },
+        { "type": "text", "id": "start_experienced_label", "label": "Experienced label" },
+        { "type": "header", "content": "Steps 2 to 7" },
+        { "type": "text", "id": "step1_kind", "label": "Step 2 kind" },
+        { "type": "url",  "id": "step1_url", "label": "Step 2 link" },
+        { "type": "text", "id": "step1_label", "label": "Step 2 label" },
+        { "type": "text", "id": "step1_note", "label": "Step 2 note" },
+        { "type": "text", "id": "step2_kind", "label": "Step 3 kind" },
+        { "type": "url",  "id": "step2_url", "label": "Step 3 link" },
+        { "type": "text", "id": "step2_label", "label": "Step 3 label" },
+        { "type": "text", "id": "step2_note", "label": "Step 3 note" },
+        { "type": "text", "id": "step3_kind", "label": "Step 4 kind" },
+        { "type": "url",  "id": "step3_url", "label": "Step 4 link" },
+        { "type": "text", "id": "step3_label", "label": "Step 4 label" },
+        { "type": "text", "id": "step3_note", "label": "Step 4 note" },
+        { "type": "text", "id": "step4_kind", "label": "Step 5 kind" },
+        { "type": "url",  "id": "step4_url", "label": "Step 5 link" },
+        { "type": "text", "id": "step4_label", "label": "Step 5 label" },
+        { "type": "text", "id": "step4_note", "label": "Step 5 note" },
+        { "type": "text", "id": "step5_kind", "label": "Step 6 kind" },
+        { "type": "url",  "id": "step5_url", "label": "Step 6 link" },
+        { "type": "text", "id": "step5_label", "label": "Step 6 label" },
+        { "type": "text", "id": "step5_note", "label": "Step 6 note" },
+        { "type": "text", "id": "step6_kind", "label": "Step 7 kind" },
+        { "type": "url",  "id": "step6_url", "label": "Step 7 link" },
+        { "type": "text", "id": "step6_label", "label": "Step 7 label" },
+        { "type": "text", "id": "step6_note", "label": "Step 7 note" },
+        { "type": "header", "content": "Topic hub and product" },
+        { "type": "url",  "id": "hub_url", "label": "Hub link" },
+        { "type": "text", "id": "hub_label", "label": "Hub label" },
+        { "type": "text", "id": "product_handle", "label": "Product handle" },
+        { "type": "textarea", "id": "product_note", "label": "Product note" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "SBS — Learning path" }]
+}
+{% endschema %}

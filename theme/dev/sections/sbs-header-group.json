@@ -1,0 +1,91 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "SBS Header",
+  "type": "header",
+  "sections": {
+    "announcement": {
+      "type": "sbs-announcement",
+      "settings": {
+        "text": "<p>Launch websites faster with Claude Code.</p>"
+      }
+    },
+    "header": {
+      "type": "sbs-header",
+      "blocks": {
+        "n1": {
+          "type": "link",
+          "settings": {
+            "label": "Guides",
+            "url": "/blogs/guides"
+          }
+        },
+        "n2": {
+          "type": "link",
+          "settings": {
+            "label": "Free resources",
+            "url": "/pages/resources"
+          }
+        },
+        "n3": {
+          "type": "link",
+          "settings": {
+            "label": "What's included",
+            "url": "/#included"
+          }
+        },
+        "n4": {
+          "type": "link",
+          "settings": {
+            "label": "How it works",
+            "url": "/#how"
+          }
+        },
+        "n6": {
+          "type": "link",
+          "settings": {
+            "label": "FAQ",
+            "url": "/#faq"
+          }
+        },
+        "m1": {
+          "type": "menu",
+          "settings": {
+            "label": "Products",
+            "product_1": "claude-code-website-launch-system",
+            "product_2": "claude-code-seo-website-audit-toolkit",
+            "product_3": "claude-code-conversion-revenue-optimization-toolkit",
+            "product_4": "claude-code-website-operations-maintenance-system",
+            "product_5": "complete-site-builder-stack"
+          }
+        }
+      },
+      "block_order": [
+        "m1",
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n6"
+      ],
+      "settings": {
+        "logo_text": "Site Builder Stack",
+        "logo_mark": "SBS",
+        "cta_label": "Get it",
+        "cta_url": "/#buy",
+        "product": "claude-code-website-launch-system"
+      }
+    }
+  },
+  "order": [
+    "announcement",
+    "header"
+  ]
+}

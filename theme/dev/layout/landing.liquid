@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="sbs-html">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0B0D12">
+    <link rel="canonical" href="{{ canonical_url }}">
+    {%- comment -%}
+      Referrer policy, set through the meta element because Shopify's storefront
+      does not expose response headers to the theme. `strict-origin-when-cross-origin`
+      is already the browser default when no policy is sent, so this codifies the
+      current behaviour and makes the intent auditable rather than changing what
+      browsers do today.
+
+      Permissions-Policy has no meta equivalent — it is a response header only —
+      so it cannot be set from here at all. That is recorded as a known gap in
+      docs/seo/SECURITY-HEADERS.md rather than left to look like an oversight.
+    {%- endcomment -%}
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {%- comment -%}
+      On the homepage Shopify's `page_title` falls back to the myshopify domain
+      when the Online Store > Preferences title is unset, and there is no API to
+      set that. So the homepage uses theme settings instead; every other
+      template uses its own resource title as normal.
+    {%- endcomment -%}
+    {%- if template.name == 'index' -%}
+      {%- assign seo_title = settings.home_seo_title | default: shop.name -%}
+      {%- assign seo_desc = settings.home_seo_description | default: shop.description -%}
+    {%- else -%}
+      {%- comment -%}
+        A literal en dash, not &ndash;. og:title runs this through a filter,
+        which would turn the entity's ampersand into &amp; and print the
+        entity source into the tag.
+      {%- endcomment -%}
+      {%- comment -%}
+        No suffix when the title already carries the brand in either spelling:
+        a product's SEO title may end "| SiteBuilderStack", and appending
+        "– Site Builder Stack" would name the shop twice in one title.
+      {%- endcomment -%}
+      {%- assign brand_compact = shop.name | remove: ' ' -%}
+      {%- capture seo_title -%}
+        {%- if page_title contains shop.name or page_title contains brand_compact -%}
+          {{ page_title }}
+        {%- else -%}
+          {{ page_title }} – {{ shop.name }}
+        {%- endif -%}
+      {%- endcapture -%}
+      {%- assign seo_desc = page_description -%}
+      {%- if seo_desc == blank and template == blank -%}
+        {%- comment -%} policy pages: Shopify supplies no page_description {%- endcomment -%}
+        {%- assign seo_desc = page_title | append: ' for ' | append: shop.name | append: '. Digital products, delivered by download.' -%}
+      {%- endif -%}
+      {%- comment -%}
+        Shopify generates the "All" collection with no description, so
+        /collections/all shipped with no meta description at all. Built from the
+        live catalogue rather than hard-coded, so it cannot go stale when a
+        product is added or a price changes.
+      {%- endcomment -%}
+      {%- if seo_desc == blank and template.name == 'collection' -%}
+        {%- assign n_products = collection.all_products_count -%}
+        {%- if n_products == 1 -%}
+          {%- assign product_noun = ' downloadable product: ' -%}
+        {%- else -%}
+          {%- assign product_noun = ' downloadable products: ' -%}
+        {%- endif -%}
+        {%- assign seo_desc = 'Claude Code systems for building, ranking and converting websites. ' | append: n_products | append: product_noun | append: 'the workflows, prompts and audits, run in your own terminal.' -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      Tag archives on the blog reuse the blog's own title and description, so
+      every /blogs/guides/tagged/* URL shipped an exact duplicate of the index's
+      title tag. They are also thin: each lists a subset of articles that the
+      index already lists in full, and adds no text of its own.
+
+      Two changes, both deliberate: a distinct title and description so the
+      pages are honestly labelled for anyone who lands on one, and
+      `noindex, follow` so they stop competing with the index while still
+      passing link equity through to the articles.
+    {%- endcomment -%}
+    {%- if template.name == 'blog' and current_tags != blank -%}
+      {%- assign tag_label = current_tags | join: ' and ' -%}
+      {%- capture seo_title -%}{{ tag_label }} guides – {{ blog.title }} – {{ shop.name }}{%- endcapture -%}
+      {%- capture seo_desc -%}Every {{ blog.title }} article tagged {{ tag_label }}. The full set of guides is at {{ blog.title }}.{%- endcapture -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      Page two onwards of a paginated list shipped the same title and
+      description as page one, which is a duplicate across two indexable URLs.
+      Both now carry the page number. The pages stay indexable and
+      self-canonicalising, which is what Google asks for — pointing every page
+      at page one hides the articles that only appear later in the list.
+    {%- endcomment -%}
+    {%- if current_page > 1 -%}
+      {%- assign seo_title = seo_title | strip | prepend: '' -%}
+      {%- capture seo_title -%}{{ seo_title | strip }} – Page {{ current_page }}{%- endcapture -%}
+      {%- capture seo_desc -%}Page {{ current_page }} of {{ seo_desc | strip_html | strip }}{%- endcapture -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      A page number past the end of a list still returns 200 on Shopify with an
+      empty result set, which is a thin page a crawler can reach by guessing.
+      BLOG_PER_PAGE must match `paginate blog.articles by N` in
+      sections/sbs-blog.liquid; tests/run-all.sh asserts the two agree, because
+      a silent drift here would put a real paginated page out of the index.
+    {%- endcomment -%}
+    {%- assign BLOG_PER_PAGE = 48 -%}
+    {%- if template.name == 'blog' and current_page > 1 -%}
+      {%- assign last_page = blog.articles_count | divided_by: BLOG_PER_PAGE -%}
+      {%- assign remainder = blog.articles_count | modulo: BLOG_PER_PAGE -%}
+      {%- if remainder > 0 -%}{%- assign last_page = last_page | plus: 1 -%}{%- endif -%}
+      {%- if current_page > last_page -%}
+        {%- assign blog_page_empty = true -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    <title>{{ seo_title | strip }}</title>
+
+    {%- if template.name == 'blog' and current_tags != blank -%}
+      <meta name="robots" content="noindex, follow">
+    {%- elsif blog_page_empty -%}
+      <meta name="robots" content="noindex, follow">
+    {%- endif -%}
+
+    {%- comment -%}
+      There is deliberately no blanket noindex on collections.
+
+      /collections/frontpage used to be a duplicate of the homepage sitting in
+      the sitemap, and was noindexed to keep it out of the index. It has since
+      been unpublished from the Online Store channel instead, which removes it
+      from the storefront and the sitemap outright — a better answer than a
+      noindexed URL Google still has to fetch to discover the directive.
+
+      A blanket rule here would silently hide any collection published later,
+      so it is gone. templates/collection.json and sections/sbs-collection.liquid
+      stay, so a future collection renders in the site's own design rather than
+      falling through to the purchased theme.
+    {%- endcomment -%}
+
+    {%- if seo_desc != blank -%}
+      {%- comment -%}
+        escape_once, not escape. Shopify hands back `page_description` already
+        HTML-escaped, so escaping it again turns "SEO & Audit" into
+        "SEO &amp;amp; Audit" in the served markup. og:description was fixed
+        for this in an earlier cycle and this line was missed, so any page whose
+        description contained an ampersand shipped the double-escaped version.
+
+        escape_once is also correct for the homepage, whose description comes
+        from a theme setting and is NOT pre-escaped: a raw "&" still becomes
+        "&amp;" exactly once.
+      {%- endcomment -%}
+      <meta name="description" content="{{ seo_desc | strip_html | escape_once }}">
+    {%- endif -%}
+
+    {% comment %}
+      Open Graph and Twitter Card. Built here rather than in a snippet so the
+      landing layer has no dependency on the parent theme's social meta.
+    {% endcomment %}
+    {%- comment -%}
+      escape_once, not escape. Shopify's page_title arrives already escaped for
+      a resource whose title contains an ampersand, so `escape` produced
+      &amp;amp; in og:title and twitter:title — which social previews and link
+      unfurlers render as the literal text "&amp;". The <title> tag was
+      correct because it prints page_title unfiltered; only the meta tags were
+      wrong, which is why it survived a year unnoticed.
+
+      escape_once escapes a bare & and leaves an existing entity alone, which
+      is right for this string: it is a mix of Shopify's escaped page_title and
+      the theme's own unescaped shop.name.
+    {%- endcomment -%}
+    {%- assign og_title = seo_title | strip | escape_once -%}
+    {%- assign og_desc = seo_desc | strip_html | escape_once -%}
+    <meta property="og:site_name" content="{{ shop.name | escape }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:title" content="{{ og_title }}">
+    <meta property="og:description" content="{{ og_desc }}">
+    <meta property="og:type" content="{% if template.name == 'product' %}product{% elsif template.name == 'article' %}article{% else %}website{% endif %}">
+    {%- comment -%}
+      image_url returns a protocol-relative URL, so prepend https (not http).
+      Guarded on the image object itself: a settings value with no matching
+      image_picker in settings_schema stays a plain string, and image_url then
+      emits a Liquid error straight into the tag.
+    {%- endcomment -%}
+    {%- assign og_image = nil -%}
+    {%- if template.name == 'product' and product.featured_media != blank -%}
+      {%- assign og_image = product.featured_media -%}
+    {%- elsif template.name == 'article' and article.image != blank -%}
+      {%- assign og_image = article.image -%}
+    {%- elsif settings.share_image != blank -%}
+      {%- assign og_image = settings.share_image -%}
+    {%- endif -%}
+    {%- if og_image != blank -%}
+      <meta property="og:image" content="{{ og_image | image_url: width: 1200 | prepend: 'https:' }}">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:alt" content="{{ og_title }}">
+    {%- endif -%}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ og_title }}">
+    <meta name="twitter:description" content="{{ og_desc }}">
+
+    {{ content_for_header }}
+
+    <link rel="stylesheet" href="{{ 'sbs.css' | asset_url }}">
+    <script src="{{ 'sbs.js' | asset_url }}" defer></script>
+
+    {% render 'sbs-schema' %}
+  </head>
+
+  <body class="sbs sbs-template-{{ template.name }}">
+    <a class="sbs-skip" href="#main">Skip to content</a>
+
+    {% sections 'sbs-header-group' %}
+
+    <main id="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'sbs-footer-group' %}
+  </body>
+</html>

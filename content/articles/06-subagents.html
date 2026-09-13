@@ -1,0 +1,327 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What an AI coding agent actually is</a></li>
+    <li><a href="#subagents">What a subagent is in Claude Code</a></li>
+    <li><a href="#why">The three reasons to use one</a></li>
+    <li><a href="#builtin">The built-in subagents</a></li>
+    <li><a href="#writing">Writing your own</a></li>
+    <li><a href="#frontmatter">The frontmatter fields that matter</a></li>
+    <li><a href="#invoke">Three ways to invoke one</a></li>
+    <li><a href="#patterns">Patterns that earn their keep</a></li>
+    <li><a href="#roster">A roster worth having</a></li>
+    <li><a href="#resume">Resuming a subagent</a></li>
+    <li><a href="#limits">Limits, and where they bite</a></li>
+    <li><a href="#antipatterns">When not to use a subagent</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What an AI coding agent actually is</h2>
+
+<p>The phrase gets used for two quite different things, and the difference is the whole story.</p>
+
+<p>An <strong>autocomplete tool</strong> predicts the next few lines while you type. You remain the one who opens files, runs commands, and decides what happens. It is a faster keyboard.</p>
+
+<p>An <strong>agent</strong> is given a goal and a set of tools, and it decides what to do. It reads files you did not name, runs commands you did not type, and keeps going until it judges the task finished. You describe the destination; it picks the route.</p>
+
+<p>That second definition is what makes agents useful and what makes them risky. An agent will act on an assumption rather than surfacing it. Everything below is about controlling that — not by making the agent less capable, but by putting boundaries around what any single piece of work can touch.</p>
+
+<p>If you are still choosing between categories of tool rather than configuring one, <a href="/blogs/guides/vibe-coding-tools">vibe coding tools and platforms</a> compares them.</p>
+
+<h2 id="subagents">What a subagent is in Claude Code</h2>
+
+<p>A subagent is a specialised assistant that Claude Code can hand a task to. It runs in its <strong>own context window</strong>, with its own system prompt, its own tool permissions, and optionally its own model.</p>
+
+<p>The important consequence: only the <em>summary</em> comes back to your main conversation. If a subagent reads forty files to answer one question, those forty files never enter your context. You get the answer.</p>
+
+<p>That is the core value. Context is finite, and the fastest way to degrade a long session is to fill it with material that mattered for two minutes.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-subagent-isolation.png?v=1787892939" alt="Two panels. Your session holds the plan, the decisions, and one summary back. The subagent context holds 40 files read, 12 greps, 3 command runs and dead ends explored, all discarded. An arrow sends the task out, and only a summary returns."
+       width="1000" height="470" loading="lazy" decoding="async">
+  <figcaption>Only the summary crosses back. Everything the subagent read to produce it stays out of your session.</figcaption>
+</figure>
+
+<h2 id="why">The three reasons to use one</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Reason</th><th>What it buys you</th></tr></thead>
+<tbody>
+<tr><td><strong>Context isolation</strong></td><td>Exploration, search, and research happen elsewhere. Your main thread keeps the plan and the decisions.</td></tr>
+<tr><td><strong>Enforced constraints</strong></td><td>A subagent given only <code>Read</code>, <code>Glob</code>, and <code>Grep</code> cannot edit anything. That is a guarantee, not an instruction.</td></tr>
+<tr><td><strong>Cost control</strong></td><td>Mechanical work can be routed to a cheaper model without changing the model your main session uses.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The second one deserves emphasis. "Please don't change any files" is a request. A subagent whose <code>tools</code> list contains no write tool is a wall. When the cost of a mistake is high, prefer the wall.</p>
+
+<h2 id="builtin">The built-in subagents</h2>
+
+<p>Claude Code ships with four, and knowing what each is for saves you writing your own:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Name</th><th>Use it for</th><th>Notable</th></tr></thead>
+<tbody>
+<tr><td><strong>Explore</strong></td><td>Searching and analysing a codebase</td><td>Read-only. Skips <code>CLAUDE.md</code> and git status, so it starts light.</td></tr>
+<tr><td><strong>Plan</strong></td><td>Gathering context during plan mode</td><td>Read-only tools. Also skips <code>CLAUDE.md</code> and git status.</td></tr>
+<tr><td><strong>General-purpose</strong></td><td>Multi-step work needing both exploration and action</td><td>Every available tool.</td></tr>
+<tr><td><strong>Claude</strong></td><td>Anything that fits no specialised agent</td><td>The catch-all.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Reach for <strong>Explore</strong> far more than feels natural. "Find every place that depends on this function" is a question whose answer is one paragraph and whose research is fifty file reads. That trade is exactly what Explore exists for.</p>
+
+<h2 id="writing">Writing your own</h2>
+
+<p>A subagent is a Markdown file with YAML frontmatter. Where you put it determines who gets it:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Location</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Managed settings</td><td>Organisation-wide, deployed by IT</td></tr>
+<tr><td><code>--agents</code> CLI flag</td><td>The current session only</td></tr>
+<tr><td><code>.claude/agents/</code></td><td>This project — commit it, and the team gets it</td></tr>
+<tr><td><code>~/.claude/agents/</code></td><td>All your projects, yours alone</td></tr>
+<tr><td>A plugin's <code>agents/</code> directory</td><td>Wherever that plugin is enabled</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>They resolve in that order, highest first. Project-level is where team-shared agents belong, for the same reason <a href="/blogs/guides/production-claude-md-web-development">project <code>CLAUDE.md</code></a> beats personal: a convention that lives on one machine is a preference.</p>
+
+<p>The file itself:</p>
+
+<pre><code>---
+name: security-reviewer
+description: Reviews changes for security problems. Use before merging
+  anything that touches authentication, input handling, or data access.
+tools: Read, Glob, Grep, Bash
+model: sonnet
+---
+
+You review code for security defects. You do not fix them.
+
+For every finding, give: the file and line, the exact request or input
+that would exploit it, and the fix. A finding you cannot demonstrate
+is a hypothesis — say so.
+
+Check, in this order:
+1. Authorisation — is ownership verified, not just authentication?
+2. Input validation at the boundary
+3. Output encoding
+4. Secrets in source, history, config, or client bundles
+5. Anything logged that should not be
+
+If you find nothing, say so plainly. Do not manufacture findings.</code></pre>
+
+<p>Two things make this work. The <code>description</code> is what Claude reads when deciding whether to delegate, so it should say <em>when to use this</em>, not what it is. And the tool list contains no <code>Edit</code> or <code>Write</code> — a reviewer that can rewrite the code it is reviewing is not a reviewer.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Writing a good set of agents takes a few iterations to get the boundaries right. The Claude Code Website Launch System ships ready-made review, audit, and security agents alongside the prompts they pair with &mdash; <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="frontmatter">The frontmatter fields that matter</h2>
+
+<p>There are many. These are the ones that change outcomes:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Field</th><th>Why you would set it</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td>Required. Lowercase and hyphens.</td></tr>
+<tr><td><code>description</code></td><td>Required, and the highest-leverage line in the file. It decides whether the agent gets used at all.</td></tr>
+<tr><td><code>tools</code></td><td>An allowlist. Omit it and the agent inherits everything — rarely what you want.</td></tr>
+<tr><td><code>disallowedTools</code></td><td>A denylist, when an allowlist would be tediously long.</td></tr>
+<tr><td><code>model</code></td><td><code>haiku</code> for mechanical work, <code>opus</code> for hard reasoning. Defaults to <code>inherit</code>.</td></tr>
+<tr><td><code>permissionMode</code></td><td><code>plan</code> forces it to propose rather than act.</td></tr>
+<tr><td><code>maxTurns</code></td><td>A hard stop. Useful for anything that could loop.</td></tr>
+<tr><td><code>isolation</code></td><td><code>worktree</code> runs it in its own git worktree — the answer when several agents edit files in parallel.</td></tr>
+<tr><td><code>skills</code></td><td>Preloads skills into the agent's context. See the <a href="/blogs/guides/claude-code-skills">skills guide</a>.</td></tr>
+<tr><td><code>memory</code></td><td><code>user</code>, <code>project</code>, or <code>local</code> — persistent memory across runs.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The single highest-value habit here is writing <code>tools</code> deliberately on every agent. It takes ten seconds and converts a hope into a property of the system.</p>
+
+<h2 id="invoke">Three ways to invoke one</h2>
+
+<p><strong>Natural language</strong> — name it and let Claude decide:</p>
+
+<pre class="sbs-prompt">Use the security-reviewer subagent on the auth changes.</pre>
+
+<p><strong>@-mention</strong> — guarantee that specific agent runs, no judgement involved:</p>
+
+<pre class="sbs-prompt">@"security-reviewer (agent)" look at the changes in src/auth/</pre>
+
+<p><strong>Session-wide</strong> — run the whole session as that agent:</p>
+
+<pre><code>claude --agent security-reviewer</code></pre>
+
+<p>Or pin it in <code>.claude/settings.json</code>:</p>
+
+<pre><code>{ "agent": "security-reviewer" }</code></pre>
+
+<p>Use the @-mention form whenever it matters that the right agent ran. Natural language is a hint; @-mention is an instruction.</p>
+
+<h2 id="patterns">Patterns that earn their keep</h2>
+
+<h3>Review in a fresh context</h3>
+
+<p>A session that wrote the code will defend it. A subagent starts clean, with no memory of the reasoning that produced the bug. This is the most valuable subagent pattern there is, and it costs one file.</p>
+
+<p>The same argument applies in CI, where the reviewer never wrote anything by definition &mdash; see <a href="/blogs/guides/claude-code-github-actions">Claude Code and GitHub</a>.</p>
+
+<h3>Research without polluting the plan</h3>
+
+<p>Mid-build, you need to know how something works elsewhere in the codebase. Ask Explore. Forty file reads happen somewhere else; one paragraph comes back. Your main thread still holds the plan.</p>
+
+<h3>Parallel work in worktrees</h3>
+
+<p>Several independent changes at once, each in its own git worktree via <code>isolation: worktree</code>. They cannot collide because they are not sharing a working tree. Worth knowing that a worktree costs real setup time and disk, so use it when agents genuinely write in parallel — not by default.</p>
+
+<h3>Cheap models for mechanical passes</h3>
+
+<p>Renaming across a hundred files, extracting a list, reformatting data — none of that needs your best model. <code>model: haiku</code> on the agent, and the cost of the pass drops without touching the session model.</p>
+
+<h3>Constrained agents as safety rails</h3>
+
+<p>An agent for anything that touches production, with <code>permissionMode: plan</code> and no write tools. It can only tell you what it would do. For deploy paths and migrations, that is the correct default.</p>
+
+<h2 id="roster">A roster worth having</h2>
+
+<p>Most web projects are well served by four agents. More than that and they start competing for the delegation decision; fewer and you are writing constraints into every prompt.</p>
+
+<h3>1. Reviewer — read-only, fresh eyes</h3>
+
+<pre><code>---
+name: reviewer
+description: Reviews uncommitted changes or a diff before merge. Use when
+  work is finished and needs checking by something that did not write it.
+tools: Read, Glob, Grep, Bash
+model: opus
+---
+
+Review in this order: does it do what it claims; does it break anything
+that works; is it secure; is it accessible; does it follow the conventions
+already in this codebase; is it tested; will it be readable in six months.
+
+Skip anything a linter or formatter settles.
+
+Cite file and line for every point. If nothing is wrong, say so — do not
+manufacture findings to appear thorough.</code></pre>
+
+<h3>2. Explorer — for questions, not changes</h3>
+
+<p>The built-in <strong>Explore</strong> usually covers this. Write your own only if you want a house style for how findings are reported.</p>
+
+<h3>3. Auditor — one per standard you actually hold</h3>
+
+<pre><code>---
+name: a11y-auditor
+description: Audits rendered pages for WCAG 2.2 AA problems. Use before
+  shipping any UI change.
+tools: Read, Glob, Grep, Bash
+model: sonnet
+---
+
+Audit the RENDERED output, not the source. Templated markup is not what
+the browser gets, and contrast has to be computed against the backdrop
+that actually paints.
+
+Report measured numbers: contrast ratios, target sizes in CSS px,
+scrollWidth against clientWidth at 320px.
+
+State which findings you verified in a browser and which you inferred
+from markup. Do not assert compliance without the numbers.</code></pre>
+
+<p>That last instruction is the one that makes an audit trustworthy. Much of accessibility cannot be determined from source, and being told which half is inference is what makes the report usable rather than reassuring.</p>
+
+<h3>4. Migrator — constrained, for the dangerous stuff</h3>
+
+<pre><code>---
+name: migrator
+description: Plans database migrations. Use before any schema change.
+tools: Read, Glob, Grep
+permissionMode: plan
+model: opus
+---
+
+You plan migrations. You do not write or run them.
+
+Additive first, always. Never add and remove in one step: add, backfill
+in batches, switch reads, drop in a later release.
+
+Every plan includes a tested down migration, expected duration against
+realistic data volumes, and what breaks if it runs mid-traffic.
+
+If a migration would lose data, stop and say so before planning further.</code></pre>
+
+<p>No write tools and <code>permissionMode: plan</code>. It is structurally incapable of running the thing you are worried about.</p>
+
+<h2 id="resume">Resuming a subagent</h2>
+
+<p>A finished subagent can be picked back up. It keeps its full conversation history, so you are continuing rather than re-briefing:</p>
+
+<pre class="sbs-prompt">Continue that review and now look at the authorisation logic specifically.</pre>
+
+<p>This matters more than it sounds. The expensive part of a subagent run is the context it built — the files it read, the structure it worked out. Resuming reuses all of it. Starting a second agent to ask a follow-up throws that away and pays for it again.</p>
+
+<p>The practical habit: when a subagent gives you a report and you have a follow-up question about the same territory, resume it rather than spawning a fresh one.</p>
+
+<h2 id="limits">Limits, and where they bite</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Limit</th><th>Default</th><th>Override</th></tr></thead>
+<tbody>
+<tr><td>Concurrent subagents</td><td>20</td><td><code>CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS</code></td></tr>
+<tr><td>Nesting depth</td><td>3 below the main conversation</td><td><code>CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH</code></td></tr>
+<tr><td>Combined descriptions</td><td>Under 15,000 tokens</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That last one is the one that surprises people. Every custom agent's <code>description</code> is loaded so Claude can decide when to delegate. Thirty agents with paragraph-long descriptions is a real context cost paid on every session. Keep descriptions to a sentence or two, and delete agents you stopped using.</p>
+
+<p>Also worth knowing: subagents do not get the full tool set. <code>AskUserQuestion</code> is removed, among others — a subagent cannot stop and ask you something. It has to decide or report back. Write their instructions accordingly: tell them what to do when uncertain, because "ask me" is not available to them.</p>
+
+<h2 id="antipatterns">When not to use a subagent</h2>
+
+<h3>For a task you will need the details of</h3>
+<p>Only the summary returns. If you need the file contents to make the next decision, read them in the main thread.</p>
+
+<h3>For something trivial</h3>
+<p>Spinning up an isolated context to read one file is slower than reading it.</p>
+
+<h3>As a way to avoid writing constraints</h3>
+<p>An agent with a vague system prompt is a vague session with extra steps. The prompt is still the work — see the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> for what a good one contains.</p>
+
+<h3>Thirty agents where three would do</h3>
+<p>Every description competes for attention, and a crowded roster makes delegation worse, not better. Most projects need a handful.</p>
+
+<h3>For work that needs your judgement mid-flight</h3>
+<p>Subagents cannot ask you questions. Anything with a decision point belongs in the main conversation.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Agents are one layer of a working setup; the prompts, the project context, and the launch checklists are the rest. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>Subagents package <em>who</em> does the work. <a href="/blogs/guides/claude-code-skills">Skills</a> package <em>how</em> a procedure runs, and <a href="/blogs/guides/claude-code-plugins">plugins</a> package both for distribution. The persistent project context they all inherit is covered in <a href="/blogs/guides/production-claude-md-web-development">creating a production CLAUDE.md</a>, and where all of this fits in a real build is in the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a>. For rolling agents out across a team, see <a href="/blogs/guides/claude-code-enterprise">Claude Code for teams and enterprise</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/sub-agents" rel="noopener">Claude Code: subagents</a> — file locations, frontmatter fields, built-ins, and limits</li>
+  <li><a href="https://code.claude.com/docs/en/common-workflows" rel="noopener">Claude Code: common workflows</a></li>
+  <li><a href="https://code.claude.com/docs/en/settings" rel="noopener">Claude Code: settings</a></li>
+</ul>

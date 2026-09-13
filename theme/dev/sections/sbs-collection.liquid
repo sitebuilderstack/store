@@ -1,0 +1,71 @@
+{%- comment -%}
+  Collection pages on the landing layout.
+
+  Without this template a collection falls through to the purchased theme,
+  which renders it in a different design, with a 424 KB stylesheet and an h1
+  of the collection's admin title ("Home page"). /collections/frontpage was
+  doing exactly that while sitting in Shopify's generated sitemap.
+
+  The page is kept in-brand here. It was originally noindexed as a thin
+  duplicate, back when the store had a single product and the listing repeated
+  the homepage. With three products the listing carries something neither the
+  homepage nor any product page does — the comparison — so that rule was
+  removed from layout/landing.liquid and this page is indexable.
+{%- endcomment -%}
+
+<section class="sbs-section">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ collection.title | escape }}</span>
+    </nav>
+
+    <div class="sbs-article__head">
+      <h1>{{ section.settings.heading | default: collection.title | escape }}</h1>
+      {%- if section.settings.body != blank -%}
+        <p class="sbs-lede">{{ section.settings.body | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if collection.products_count > 0 -%}
+      <ul class="sbs-grid sbs-grid--3" style="margin-top: var(--sp-6);">
+        {%- for p in collection.products -%}
+          <li class="sbs-card">
+            <h2><a href="{{ p.url }}">{{ p.title | escape }}</a></h2>
+            {%- comment -%}
+              Prefer the product's SEO description. Stripping the body HTML
+              produced a card that opened with the heading text — "Who this is
+              for Developers, founders and agencies who…" — because every
+              description starts with an h2. The SEO description is already a
+              one-sentence summary written for exactly this purpose.
+            {%- endcomment -%}
+            {%- assign blurb = p.metafields.global.description_tag | default: p.description -%}
+            {%- if blurb != blank -%}
+              <p>{{ blurb | strip_html | truncate: 160 }}</p>
+            {%- endif -%}
+            <p><strong>{{ p.price | money_without_trailing_zeros }}</strong></p>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p style="margin-top: var(--sp-5);">Nothing in this collection yet.</p>
+    {%- endif -%}
+
+    <p style="margin-top: var(--sp-6);">
+      <a class="sbs-btn sbs-btn--primary" href="{{ routes.root_url }}">Back to the homepage</a>
+    </p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Collection",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading override" },
+    { "type": "textarea", "id": "body", "label": "Intro" }
+  ],
+  "presets": [{ "name": "SBS — Collection" }]
+}
+{% endschema %}

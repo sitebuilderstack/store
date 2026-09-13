@@ -1,0 +1,754 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#anatomy">What separates a prompt that works</a></li>
+    <li><a href="#six-parts">The six parts</a></li>
+    <li><a href="#four-additions">Four additions that improve almost any prompt</a></li>
+    <li><a href="#discovery">Repository discovery</a></li>
+    <li><a href="#planning">Planning and architecture</a></li>
+    <li><a href="#frontend">Frontend development</a></li>
+    <li><a href="#backend">Backend and data</a></li>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#refactoring">Refactoring</a></li>
+    <li><a href="#seo">SEO</a></li>
+    <li><a href="#accessibility">Accessibility</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#git">Git and deployment</a></li>
+    <li><a href="#slash-commands">Turning prompts into slash commands</a></li>
+    <li><a href="#antipatterns">Prompt patterns that waste your time</a></li>
+  </ol>
+</nav>
+
+<h2 id="anatomy">What separates a prompt that works</h2>
+
+<p>Most advice about AI prompts is about wording. For agentic coding it is mostly about <em>structure</em>, and specifically about constraints.</p>
+
+<p>Consider two ways of asking for the same thing.</p>
+
+<pre class="sbs-prompt">Add a contact form to the site.</pre>
+
+<p>You will get a contact form. It may use a pattern that exists nowhere else in the codebase, validate only on the client, use a placeholder as a label, and hard-code an email address. None of that is the model being careless — you did not say otherwise, and every one of those choices is defensible in isolation.</p>
+
+<p>Now the same request with the decisions made in advance:</p>
+
+<pre class="sbs-prompt">Build a contact form.
+
+Fields: name (optional), email (required), message (required).
+
+Before writing anything, look at how forms are already built in this
+codebase and follow that pattern.
+
+Requirements:
+- Every control has a visible, programmatically associated label.
+  A placeholder is not a label.
+- Correct input types and autocomplete attributes
+- Client-side validation for speed, server-side for truth
+- Errors in text, next to the field, saying how to fix the problem
+- Submit button disabled and labelled during submission
+- Keyboard operable throughout
+- Works without JavaScript if the platform allows it
+
+Tell me what happens to the data after submission, and confirm
+nothing sensitive is logged.</pre>
+
+<p>The second is longer, but almost none of the extra length is description. It is <em>constraint</em> — decisions moved from implicit to explicit. That is the entire technique.</p>
+
+<p>This matters more with an agentic tool than with chat, because the agent will act on its assumptions rather than showing them to you first. The constraints are how you get a vote.</p>
+
+<h2 id="six-parts">The six parts</h2>
+
+<p>Prompts that consistently produce usable output tend to contain the same six things. Not every prompt needs all six; the more consequential the task, the more of them you want.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Part</th><th>What it does</th><th>What goes wrong without it</th></tr></thead>
+<tbody>
+<tr><td><strong>Context</strong></td><td>What this project is and what already exists</td><td>Code that ignores your conventions</td></tr>
+<tr><td><strong>Objective</strong></td><td>The specific outcome, not the general area</td><td>A plausible answer to a different question</td></tr>
+<tr><td><strong>Constraints</strong></td><td>What must and must not happen</td><td>Reasonable-looking choices you did not want</td></tr>
+<tr><td><strong>Process</strong></td><td>The order of work, and where to stop</td><td>A twelve-file diff you cannot review</td></tr>
+<tr><td><strong>Validation</strong></td><td>How to prove it worked</td><td>"Done" meaning "I stopped writing"</td></tr>
+<tr><td><strong>Deliverables</strong></td><td>What you want back and in what form</td><td>A wall of prose where you wanted a table</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The two that people most often leave out are <strong>Process</strong> and <strong>Validation</strong>, and they are the two that matter most. Process is what stops a task from becoming an unreviewable diff. Validation is what stops the model from being the sole judge of whether it succeeded.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-prompt-anatomy.png?v=1787803709" alt="The six parts of a prompt, each with what it does and what goes wrong without it: Context, Objective, Constraints, Process, Validation, and Deliverables. Process and Validation are highlighted as the two most often missing."
+       width="1000" height="562" loading="lazy" decoding="async">
+  <figcaption>Process and Validation are highlighted because they are the two people leave out, and the two that make a result checkable.</figcaption>
+</figure>
+
+<h2 id="four-additions">Four additions that improve almost any prompt</h2>
+
+<p>Before the examples, four short instructions that work on nearly everything and cost one line each.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Add this</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>"Cite the file and line for every finding."</td><td>Eliminates most plausible-sounding invention, because a fabricated claim has nowhere to point</td></tr>
+<tr><td>"Tell me what you could not verify."</td><td>Surfaces blind spots that otherwise arrive as confident assertions</td></tr>
+<tr><td>"Do not change anything yet — show me the plan first."</td><td>Prevents unwanted edits; pairs with plan mode</td></tr>
+<tr><td>"If you are uncertain, say so rather than guessing."</td><td>Genuinely reduces confident errors on version-specific facts</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The first one is the highest-leverage sentence in this article. An audit that cites nothing is a list of things that sound like problems.</p>
+
+<h2 id="discovery">Repository discovery</h2>
+
+<h3>Map an unfamiliar codebase</h3>
+
+<p><strong>When:</strong> the first session in any repository you did not write, or have not touched in months.</p>
+
+<pre class="sbs-prompt">Analyse this repository. Do not modify anything.
+
+Map: structure and the convention behind it; stack with versions read
+from the manifest and lockfile, not inferred from directory names;
+entry points for run, build, test and deploy; where data comes from;
+expected environment variables; the conventions actually in force; and
+what tests exist and whether they currently pass.
+
+Then tell me the three things I most need to understand before making
+a change, anything that looks unusual and whether it seems deliberate,
+and anything you are uncertain about.
+
+Cite file paths for every claim.</pre>
+
+<p><strong>Why it works:</strong> "do not modify anything" makes the first session safe. "Read the manifest and lockfile" blocks a specific and common failure — inferring the stack from folder names. "Cite file paths" makes the whole thing checkable.</p>
+
+<p><strong>Verify:</strong> spot-check two or three cited paths. If any is wrong, the rest of the report is suspect and you should say so and re-run.</p>
+
+<h3>Find where the documentation lies</h3>
+
+<p><strong>When:</strong> inheriting a project, before you trust its README.</p>
+
+<pre class="sbs-prompt">Compare this project's documentation against what the code actually
+does. Check the README, any docs directory, and code comments.
+
+Look for: commands that no longer work — actually run them where it is
+safe; renamed or removed configuration options; described behaviour
+that has changed; documented files that no longer exist; and
+environment variables read by the code but missing from .env.example.
+
+List every discrepancy with both sources cited.</pre>
+
+<p><strong>Why it works:</strong> "actually run them where it is safe" converts a reading exercise into a test. The gap between documentation and code is reliably where the bugs are.</p>
+
+<p><strong>Verify:</strong> run one of the commands it reported as broken and confirm it is.</p>
+
+<h3>Blast radius of a change</h3>
+
+<p><strong>When:</strong> before touching anything shared.</p>
+
+<pre class="sbs-prompt">I am considering changing [FILE or FUNCTION].
+
+Find everything that depends on it, directly or indirectly: imports,
+call sites, tests, configuration references, and anything that depends
+on its current behaviour rather than just its signature.
+
+Tell me what would break, what would break silently, and what I should
+check that static analysis would not catch.
+
+Do not change anything.</pre>
+
+<p><strong>Why it works:</strong> "what would break <em>silently</em>" is the part that matters. Anything a compiler catches you would have found anyway.</p>
+
+<p><strong>Verify:</strong> check the dynamic cases yourself — string-based lookups, config references, anything reached by route rather than import.</p>
+
+<h2 id="planning">Planning and architecture</h2>
+
+<h3>Plan before code</h3>
+
+<p><strong>When:</strong> any change large enough that you would not want to read the diff cold.</p>
+
+<pre class="sbs-prompt">Create an implementation plan for [FEATURE].
+
+Break it into steps that are each independently reviewable and
+independently revertible. For each: what changes, which files, what
+"done" means, and how to verify it.
+
+Order by dependency — nothing before what it depends on.
+
+Also give me the risks, what could go wrong at each step, and the
+rollback. If any part of this is larger than it appears, say so now
+rather than halfway through.
+
+Do not implement anything. I want the plan first.</pre>
+
+<p><strong>Why it works:</strong> "independently revertible" forces genuinely small steps. "If any part is larger than it appears" invites the model to flag scope it would otherwise quietly absorb.</p>
+
+<p><strong>Verify:</strong> check that no step depends on a later one, and that every step has a real verification rather than "confirm it works".</p>
+
+<h3>Compare approaches honestly</h3>
+
+<p><strong>When:</strong> a decision that will be expensive to reverse.</p>
+
+<pre class="sbs-prompt">I need to [GOAL]. Give me three genuinely different approaches.
+
+For each: how it works, what it costs, what it makes easy, what it
+makes hard, and what it forecloses.
+
+Then recommend one, and be explicit about what you are trading away
+to get it.
+
+Do not give me three variations of the same idea. If there is genuinely
+only one reasonable approach, say so and explain why the others fail.</pre>
+
+<p><strong>Why it works:</strong> asking for the cost is the whole trick. Models default to advocacy; "what are you trading away" produces engineering.</p>
+
+<p><strong>Verify:</strong> if the three options are minor variants of each other, push back — the question was not answered.</p>
+
+<h3>Decide whether to build it at all</h3>
+
+<p><strong>When:</strong> before planning a feature nobody has validated.</p>
+
+<pre class="sbs-prompt">I am considering building [FEATURE]. Before planning it, help me
+decide whether to.
+
+Ask me: what problem it solves, who has that problem, how they solve
+it now, and what happens if we do not build it.
+
+Then tell me honestly: does this seem worth building? What is the
+simplest version that would tell us whether it is? What would you
+build instead?
+
+Push back if the answer is that this is not worth building. That is
+more useful to me than a plan.</pre>
+
+<p><strong>Why it works:</strong> explicitly licensing a negative answer. Without that line you will get a plan, because you asked for one.</p>
+
+<p><strong>Verify:</strong> nothing to verify — but notice whether it actually pushed back. If everything gets approved, the permission was not read.</p>
+
+<h2 id="frontend">Frontend development</h2>
+
+<h3>Build a component that matches the codebase</h3>
+
+<pre class="sbs-prompt">Build a [COMPONENT] component. Requirements: [WHAT IT DOES]
+
+Before writing anything, check whether something similar already exists
+in this codebase and follow its pattern.
+
+Regardless of the requirements above:
+- Semantic HTML — the element that carries the meaning, never a
+  clickable div
+- Keyboard operable with a visible focus state
+- Every value from the design tokens; hard-code nothing that exists
+  as a token
+- Handle the loading, empty, and error states
+- Responsive from 320px up
+- No new dependency without telling me what it costs and why the
+  platform cannot do it
+
+Show me the plan before you write the code.</pre>
+
+<p><strong>Why it works:</strong> "check whether something similar already exists" prevents the single most common form of AI-generated tech debt — a fourth implementation of something the codebase already has three of.</p>
+
+<p><strong>Verify:</strong> search for near-duplicates yourself. Tab through the component. Check that no literal colour or spacing value appears in the diff.</p>
+
+<h3>Make it work at 320px</h3>
+
+<pre class="sbs-prompt">Make [COMPONENT or PAGE] work correctly from 320px to wide desktop.
+Check at 320, 375, 390, 430, 768, 1024, and 1440.
+
+Requirements: no horizontal overflow at any width; text readable
+without zooming; tap targets at least 24x24 CSS px with adequate
+spacing; content reflows rather than shrinking; nothing depends on
+hover; no fixed pixel heights on anything containing text.
+
+Work mobile-first. Tell me what you changed and what compromises
+you made.</pre>
+
+<p><strong>Why it works:</strong> naming the exact widths turns a vague instruction into a checklist. "What compromises you made" surfaces the trade-offs instead of hiding them.</p>
+
+<p><strong>Verify:</strong> measure it. In a browser console, <code>document.documentElement.scrollWidth</code> against <code>clientWidth</code> at 320px tells you the truth in one line. A common cause of failure here is that grid and flex children default to <code>min-width: auto</code>, so anything with intrinsically wide content cannot shrink — no linter reports it.</p>
+
+<h3>Add the states everyone forgets</h3>
+
+<pre class="sbs-prompt">Add loading, empty, and error states to [AREA].
+
+For each: what the user sees, what they can do next, and how it is
+announced to assistive technology.
+
+Errors should explain what went wrong and how to fix it — no
+apologies, no vagueness. Empty states should tell the user how to
+get out of the empty state.
+
+Never leave a user staring at a blank region with no explanation.</pre>
+
+<p><strong>Why it works:</strong> these three states are most of the difference between a demo and a product, and they are almost never in the original request.</p>
+
+<p><strong>Verify:</strong> force each state — throttle the network, empty the data, break the endpoint.</p>
+
+<h2 id="backend">Backend and data</h2>
+
+<h3>Create an endpoint that is not a liability</h3>
+
+<pre class="sbs-prompt">Create an endpoint for [PURPOSE].
+
+Requirements:
+- Validate input against a schema at the boundary
+- Authorise on the server — check both authentication and whether
+  this user may act on this specific resource
+- Correct status codes; a 200 with an error body is a bug
+- Consistent error shape, matching the rest of this API
+- Paginate if it returns a list, with a maximum page size
+- Never return more data than the caller needs — check what the
+  response actually exposes
+- Parameterise every database query
+- No sensitive data in logs
+
+Follow the patterns already in this codebase. Show me the plan first.</pre>
+
+<p><strong>Why it works:</strong> "whether this user may act on this <em>specific</em> resource" is the distinction between authentication and authorisation, and skipping it produces the most common serious vulnerability in web applications.</p>
+
+<p><strong>Verify:</strong> change an ID in the request and confirm you get a 403, not someone else's data.</p>
+
+<h3>Write a migration that cannot lose data</h3>
+
+<pre class="sbs-prompt">Write a migration to [CHANGE].
+
+Rules:
+- Additive first. Never add and remove in one step. If this changes an
+  existing column, split it: add, backfill in batches, switch reads,
+  then drop in a later release.
+- Include a tested down migration
+- Assume it runs against a live system — no long table locks
+- Batch any backfill, with a pause between batches
+- Tell me the expected duration against realistic data volumes
+
+If this migration would lose data, stop and tell me before writing it.</pre>
+
+<p><strong>Why it works:</strong> the additive-first rule prevents most production database incidents on its own. The final line is a circuit breaker.</p>
+
+<p><strong>Verify:</strong> run the down migration. An untested rollback is not a rollback.</p>
+
+<h2 id="debugging">Debugging</h2>
+
+<h3>Find the cause, not a plausible fix</h3>
+
+<pre class="sbs-prompt">I am getting this error:
+
+[PASTE THE FULL ERROR AND STACK TRACE]
+
+It happens when: [WHEN]
+
+Find the cause before proposing a fix.
+
+Read the relevant code. Trace the path that produces this. Tell me
+what is actually happening, not what usually causes errors that look
+like this.
+
+If you cannot determine the cause from what you can see, tell me what
+information you need rather than guessing.
+
+Then propose a fix and explain why it addresses the cause rather than
+the symptom.</pre>
+
+<p><strong>Why it works:</strong> "not what usually causes errors that look like this" blocks pattern-matching to a common cause that happens not to be yours. That single clause saves a lot of wasted fixes.</p>
+
+<p><strong>Verify:</strong> ask it to explain why the error stopped. If the explanation is vague, the fix probably masked a symptom.</p>
+
+<h3>It works locally and fails in production</h3>
+
+<pre class="sbs-prompt">[BEHAVIOUR] works locally and fails in production.
+
+Systematically compare the two environments: runtime and dependency
+versions; which environment variables are set and which are missing;
+whether production is actually running the same build; configuration
+differences; data differences, since production has real data;
+timing, since production is slower and race conditions surface there;
+and case sensitivity, since many local filesystems are
+case-insensitive and production is not.
+
+Tell me the most likely cause and how to confirm it before changing
+anything.</pre>
+
+<p><strong>Why it works:</strong> it enumerates the actual difference space. The case-sensitivity item alone explains a surprising share of these.</p>
+
+<p><strong>Verify:</strong> confirm the hypothesis before deploying a fix built on it.</p>
+
+<h3>Reproduce it reliably</h3>
+
+<pre class="sbs-prompt">I cannot reliably reproduce [PROBLEM]. Help me build a reproduction.
+
+Based on the code, what conditions would produce this? What inputs,
+what state, what timing, what sequence?
+
+Give me the smallest set of steps most likely to trigger it, ordered
+by likelihood. If it depends on data, tell me what shape of data. If
+it depends on timing, tell me how to force the timing.
+
+Once we can reproduce it reliably, we can fix it. Until then we are
+guessing.</pre>
+
+<p><strong>Why it works:</strong> it targets the actual blocker. Intermittent bugs are not hard to fix; they are hard to observe.</p>
+
+<p><strong>Verify:</strong> the reproduction should fail before the fix and pass after. If it does not fail beforehand, it is not a reproduction.</p>
+
+<h2 id="refactoring">Refactoring</h2>
+
+<h3>Refactor without changing behaviour</h3>
+
+<pre class="sbs-prompt">Refactor [FILE or FUNCTION] for clarity.
+
+Constraints:
+- Behaviour must be identical. Anything that changes behaviour is out
+  of scope.
+- Do not change the public interface
+- Do not add features
+- Do not "improve" anything I did not ask about
+
+Before you start, tell me what tests currently cover this. If there
+are none, write them first so we can prove behaviour is unchanged.
+
+Show me the diff and explain what each change improves.</pre>
+
+<p><strong>Why it works:</strong> "do not improve anything I did not ask about" is doing real work. Unrequested improvements widen the diff and make the review harder for no benefit.</p>
+
+<p><strong>Verify:</strong> tests pass before and after, and the diff contains nothing outside the stated scope.</p>
+
+<h3>Find dead code without deleting working code</h3>
+
+<pre class="sbs-prompt">Find dead code in this project: unused exports, unreferenced files,
+unreachable branches, commented-out blocks, feature flags for
+features that fully shipped, unused CSS, unused dependencies, and
+orphaned assets.
+
+For each, tell me how confident you are that it is genuinely unused
+and what would confirm it. Be careful with dynamic imports,
+string-based references, anything referenced from configuration, and
+anything reachable only from a route.
+
+Do not delete anything yet — false positives here delete working
+code. Give me the list with confidence levels.</pre>
+
+<p><strong>Why it works:</strong> naming the false-positive sources is the difference between a useful list and an outage.</p>
+
+<p><strong>Verify:</strong> grep for each candidate by name before removing it.</p>
+
+<h2 id="seo">SEO</h2>
+
+<h3>Technical SEO audit with evidence</h3>
+
+<pre class="sbs-prompt">Perform a technical SEO audit of this project.
+
+Check: indexability (robots.txt, noindex, blocked resources);
+canonicalisation (self-referencing canonicals, www vs apex, trailing
+slashes); status codes and redirect chains; sitemap contents;
+metadata uniqueness; heading hierarchy; structured data validity;
+internal linking; and rendering without JavaScript.
+
+For every finding: the evidence — file and line, or the actual
+response. Rank by real impact. Do not report a missing nice-to-have
+as critical. Tell me what you could not check and why.
+
+Do not invent search volumes, difficulty scores, traffic estimates,
+or ranking positions. If you have not measured it, say "not measured".</pre>
+
+<p><strong>Why it works:</strong> the last paragraph is essential. Ask an AI for SEO analysis without it and you will get confident, entirely fictional search volumes.</p>
+
+<p><strong>Verify:</strong> fetch two or three of the URLs it reports on and confirm the status codes and canonicals independently.</p>
+
+<h3>Check the sitemap by sampling it</h3>
+
+<pre class="sbs-prompt">Check this site's sitemap.
+
+Confirm it returns 200 with the correct content type and is valid XML.
+
+Then sample at least ten URLs from it and fetch each one. For each,
+report the actual status code and whether it is canonical and
+indexable.
+
+Flag any URL that redirects, returns anything other than 200, carries
+noindex, or is not canonical. Each of those is a finding.
+
+Also: are important pages missing? Is it generated automatically, or
+was it written by hand and now stale?</pre>
+
+<p><strong>Why it works:</strong> "sample and fetch" turns an assumption into a measurement. Most sitemap problems are invisible until someone actually requests the URLs.</p>
+
+<p><strong>Verify:</strong> the sampled URLs and their status codes should be in the output. If they are not, it did not fetch them.</p>
+
+<h2 id="accessibility">Accessibility</h2>
+
+<h3>Keyboard review</h3>
+
+<pre class="sbs-prompt">Review this project for keyboard accessibility.
+
+Check: is every interactive element reachable by Tab? Is the tab order
+logical? Is there a visible focus indicator everywhere, on every
+background? Is outline:none used anywhere without a stronger
+replacement? Are there positive tabindex values? Can focus always
+leave anything it can enter? Does Escape close dialogs and menus? Is
+there a skip link, and does it actually move focus rather than just
+the scroll position?
+
+Look specifically for clickable divs and spans — an element with a
+click handler that is not a button or a link is not keyboard
+accessible.
+
+Also check whether a sticky header would hide the focused element as
+someone tabs down the page.
+
+Tell me which of these you verified in a browser and which you
+inferred from markup.</pre>
+
+<p><strong>Why it works:</strong> the last line is the important one. Much of this cannot be determined from source, and being told which half is inference is what makes the report usable.</p>
+
+<p><strong>Verify:</strong> do the keyboard pass yourself. It takes ten minutes and it is the highest-yield accessibility test there is.</p>
+
+<h3>Measure contrast rather than asserting it</h3>
+
+<pre class="sbs-prompt">Check colour contrast throughout this project.
+
+For every foreground and background pair that carries text or meaning,
+compute the actual ratio and report it in a table.
+
+Required: 4.5:1 normal text, 3:1 large text and interactive component
+boundaries.
+
+Also check focus indicators against every background they appear on,
+and whether colour is ever the only means of conveying information —
+error states, required fields, links within body text, status
+indicators.
+
+Compute the ratios. Do not assert compliance without the numbers.</pre>
+
+<p><strong>Why it works:</strong> "do not assert compliance without the numbers" prevents the most common failure, which is a confident "meets AA" with nothing behind it.</p>
+
+<p><strong>Verify:</strong> the real check is computed against the <em>rendered</em> backdrop, not the declared one. Inherited and composited backgrounds are where this goes wrong — and where a CSS specificity conflict can make text the same colour as the surface behind it while the source looks perfectly correct.</p>
+
+<h2 id="security">Security</h2>
+
+<h3>Scan for secrets in all four places</h3>
+
+<pre class="sbs-prompt">Scan this repository for exposed credentials.
+
+Check: the working tree; tracked files that should never be committed;
+the full git history, all branches and tags — a secret removed in a
+later commit is still in history and still compromised; deleted files
+in history; commit messages; the build output and client bundles,
+because anything in a client bundle is public; source maps; CI/CD
+configuration; test fixtures and seed data.
+
+Be over-inclusive. A false positive costs me thirty seconds; a missed
+key costs an incident.
+
+Do not print any discovered secret in full — show enough to identify
+it and redact the rest.
+
+For each finding tell me where to rotate it. Rotation comes first:
+removing a secret from the repository does not un-expose it.</pre>
+
+<p><strong>Why it works:</strong> most secret scans check the working tree only. History and build output are where the real ones hide.</p>
+
+<p><strong>Verify:</strong> rotate anything found, immediately, before cleaning anything up.</p>
+
+<h3>Authorisation review</h3>
+
+<pre class="sbs-prompt">Review authorisation in this application.
+
+For every endpoint and every data access:
+1. Is authorisation checked on the server?
+2. Is ownership verified — does this user have the right to this
+   specific record, not just to this type of record?
+3. Could a user access another user's data by changing an ID in a
+   URL, a form field, or a JSON body? Trace it and tell me.
+4. Could a normal user reach an admin function by requesting its URL?
+5. Is anything enforced only in the UI? A hidden button is not
+   access control.
+
+For each finding: the exact request that would exploit it, and the fix.</pre>
+
+<p><strong>Why it works:</strong> asking for "the exact request that would exploit it" separates real findings from theoretical ones.</p>
+
+<p><strong>Verify:</strong> make that request. If it returns data, the finding is real.</p>
+
+<h2 id="performance">Performance</h2>
+
+<h3>Baseline before optimising</h3>
+
+<pre class="sbs-prompt">Establish a performance baseline for this project.
+
+Build the production bundle and measure, reporting real numbers:
+bundle sizes by chunk for JS and CSS; total image weight and the
+largest individual images; font payload; third-party bytes and the
+origins contacted; request count; build duration.
+
+Then identify the LCP element on each key template, and every
+render-blocking resource.
+
+State how you measured and under what conditions. Do not estimate a
+number and present it as measured.
+
+Do not optimise anything yet.</pre>
+
+<p><strong>Why it works:</strong> "do not optimise anything yet" is the point. Without a baseline you cannot tell whether the next hour helped.</p>
+
+<p><strong>Verify:</strong> the numbers should be specific. Round numbers across the board suggest estimation.</p>
+
+<h3>Audit third-party scripts</h3>
+
+<pre class="sbs-prompt">Audit every third-party script on this site.
+
+For each: what it is, what it costs in bytes and requests, which
+origins it contacts, whether it blocks rendering, whether it loads on
+every page or only where needed, and what business value it delivers.
+
+Flag anything loading on every page for a feature used on one page,
+anything from a service no longer in use, and anything that could be
+deferred.
+
+For each candidate for removal, state exactly what functionality is
+lost. Do not remove anything that drives revenue to improve a score —
+give me the trade-off; the decision is mine.</pre>
+
+<p><strong>Why it works:</strong> the last sentence keeps a performance exercise from quietly deleting the analytics or the payment widget.</p>
+
+<p><strong>Verify:</strong> check the network panel before and after. Confirm the removed script's functionality is genuinely gone or genuinely unused.</p>
+
+<h2 id="testing">Testing</h2>
+
+<h3>Tests that would actually catch the bug</h3>
+
+<pre class="sbs-prompt">Add tests for [AREA].
+
+Test behaviour through the public interface, not implementation
+details — a test that breaks on every refactor is a liability.
+
+Cover the happy path, invalid input, empty input, boundary values,
+and the error paths.
+
+Do not write a test that passes without asserting anything. Do not
+weaken an assertion to make something pass — if a test fails, tell me
+whether the code or the test is wrong.
+
+Tell me what is still untested and why.</pre>
+
+<p><strong>Why it works:</strong> the two "do not" lines block the two ways generated tests fail — asserting nothing, and being weakened until they pass.</p>
+
+<p><strong>Verify:</strong> break the code deliberately and confirm the test fails. A test that passes against broken code is worse than no test.</p>
+
+<h2 id="git">Git and deployment</h2>
+
+<h3>Review a diff before merging</h3>
+
+<pre class="sbs-prompt">Review these changes: [DIFF or "the current uncommitted changes"]
+
+In this order:
+1. Does it do what it claims?
+2. Does it break anything that currently works?
+3. Is it secure — input validated, output encoded, authorisation
+   checked, no secrets, nothing new logged that should not be?
+4. Is it accessible — semantics, labels, keyboard, contrast?
+5. Does it follow the conventions already in this codebase?
+6. Is it tested?
+7. Will it be understandable in six months?
+
+Skip anything a linter or formatter would settle.
+
+If there is nothing wrong, say so plainly. Do not manufacture findings
+to appear thorough — a review that always finds something teaches me
+to ignore it.</pre>
+
+<p><strong>Why it works:</strong> the ordering matters — correctness before style. The last paragraph prevents review inflation, which is what makes reviews get ignored.</p>
+
+<p><strong>Verify:</strong> run it in a <em>fresh session</em>. A session reviewing its own work will defend it.</p>
+
+<h3>Deployment readiness</h3>
+
+<pre class="sbs-prompt">Assess whether this project is ready to deploy to production.
+
+Check: does it build from a clean checkout? Do tests pass — report the
+actual result. Is there a secret anywhere in source, config, client
+bundles, or git history? Are all environment variables documented and
+set in the target? Is there a rollback procedure, and has anyone read
+it? Is monitoring in place before traffic rather than after?
+
+For each: pass, fail, or not verified. "Not verified" is a legitimate
+answer and more useful than an unearned pass.
+
+Give me a clear go or no-go with the blockers named in the first
+sentence. Do not hedge.</pre>
+
+<p><strong>Why it works:</strong> making "not verified" an explicitly allowed answer is what stops the checklist becoming a formality of unearned ticks.</p>
+
+<p><strong>Verify:</strong> anything marked "not verified" is your remaining risk. Decide about each one consciously.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The examples above are a selection. The Claude Code Website Launch System includes 100 prompts organised by build phase, plus the CLAUDE.md templates and checklists that go with them &mdash; <a href="/products/claude-code-website-launch-system">see the full library</a>.</p>
+</aside>
+
+<h2 id="slash-commands">Turning prompts into slash commands</h2>
+
+<p>Copying prompts from an article into a terminal gets old fast. Save the ones you use as slash commands and they become part of the tool.</p>
+
+<pre><code>mkdir -p .claude/commands
+
+cat > .claude/commands/audit-seo.md &lt;&lt;'CMD'
+Perform a technical SEO audit of this project. Check indexability,
+canonicalisation, metadata uniqueness, heading hierarchy, structured
+data, sitemap contents, and internal linking.
+
+For every finding give evidence — the file and line, or the actual
+response. Rank by impact. Tell me what you could not check.
+CMD</code></pre>
+
+<p>Then in any session in that project: <code>/audit-seo</code>.</p>
+
+<p>Put project-specific commands in <code>.claude/commands/</code> so they travel with the repository and your team gets them. Put personal ones in <code>~/.claude/commands/</code> to have them everywhere.</p>
+
+<p>Commands and skills are now the same system, and the skill form adds a folder for supporting files plus frontmatter that controls when Claude may invoke it on its own. For anything consequential that second part matters — see <a href="/blogs/guides/claude-code-skills">Claude Code skills</a>.</p>
+
+<p>Doing this for your five most-used prompts is the single change that most alters how the whole workflow feels — the friction of "which prompt was that again" disappears, and you stop skipping steps because they were tedious to type.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>If you would rather start from a working set than assemble your own, the Launch System's prompts are already written as slash commands, ready to drop into <code>.claude/commands/</code>. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="antipatterns">Prompt patterns that waste your time</h2>
+
+<h3>Asking for everything at once</h3>
+<p>"Build the whole site" produces a diff nobody reviews. The failure is not the model's output quality; it is that you cannot check it. Stage the work.</p>
+
+<h3>Describing the solution instead of the problem</h3>
+<p>"Add a Redis cache here" forecloses the possibility that the query needs an index. Describe the symptom and the constraint, and ask for approaches.</p>
+
+<h3>Leaving conventions implicit</h3>
+<p>Every unstated convention is a coin flip. This is what <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a> is for — say it once, in a file, instead of in every prompt.</p>
+
+<h3>Accepting "done" without evidence</h3>
+<p>"Tests pass" is a claim. Ask for the output.</p>
+
+<h3>Politeness instead of constraints</h3>
+<p>"Please be careful with the database" does nothing. "Never write a migration that drops a column without asking first" does.</p>
+
+<h3>Re-explaining the project every session</h3>
+<p>If you are typing the same context repeatedly, it belongs in a file. That is the signal.</p>
+
+<h3>Auditing in the session that wrote the code</h3>
+<p>It will defend its own work. Fresh session, every time.</p>
+
+<h2>Where to go next</h2>
+
+<p>Two of these prompt patterns now have guides of their own: <a href="/blogs/guides/claude-code-website-audit">auditing a site that already exists</a> covers the four-pass inspection method, and <a href="/blogs/guides/claude-code-technical-seo-audit">running a technical SEO audit</a> covers writing checks that are capable of failing. The free <a href="/pages/claude-code-launch-checklist">website launch checklist</a> is the run-up-to-launch version of the same discipline.</p>
+
+<p>These prompts are individual tools. The <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> shows where each one fits in a full build, from definition through to post-launch monitoring. For the persistent context that stops you repeating constraints in every prompt, see <a href="/blogs/guides/production-claude-md-web-development">creating a production CLAUDE.md</a>. Platform-specific applications are in the <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify guide</a> and the <a href="/blogs/guides/claude-code-seo-website-optimization">SEO guide</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/common-workflows" rel="noopener">Claude Code: common workflows</a> — plan mode, subagents, worktrees, headless mode</li>
+  <li><a href="https://code.claude.com/docs/en/memory" rel="noopener">Claude Code: memory and CLAUDE.md</a></li>
+  <li><a href="https://www.w3.org/TR/WCAG22/" rel="noopener">W3C: WCAG 2.2</a> — the criteria referenced in the accessibility prompts</li>
+  <li><a href="https://owasp.org/www-project-top-ten/" rel="noopener">OWASP Top Ten</a> — the risk categories behind the security prompts</li>
+</ul>

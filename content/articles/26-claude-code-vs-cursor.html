@@ -1,0 +1,234 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#scope">What this comparison is, and what it is not</a></li>
+    <li><a href="#shape">The difference that produces every other difference</a></li>
+    <li><a href="#pricing">What each one costs, as of September 2026</a></li>
+    <li><a href="#understanding">Understanding a codebase you did not write</a></li>
+    <li><a href="#multifile">Multi-file changes</a></li>
+    <li><a href="#modes">Interactive editing versus delegated work</a></li>
+    <li><a href="#terminal">The terminal, and everything reachable from it</a></li>
+    <li><a href="#context">Context management</a></li>
+    <li><a href="#debugging">Debugging</a></li>
+    <li><a href="#refactoring">Refactoring</a></li>
+    <li><a href="#tests">Tests</a></li>
+    <li><a href="#extend">Extensibility</a></li>
+    <li><a href="#git">Git and code review</a></li>
+    <li><a href="#audits">SEO, accessibility and security audits</a></li>
+    <li><a href="#deploy">Deployment and CI</a></li>
+    <li><a href="#large">Large repositories</a></li>
+    <li><a href="#curve">Learning curve</a></li>
+    <li><a href="#weaknesses">Where each one is genuinely weak</a></li>
+    <li><a href="#decide">A decision framework</a></li>
+    <li><a href="#both">Using both</a></li>
+  </ol>
+</nav>
+
+<h2 id="scope">What this comparison is, and what it is not</h2>
+
+<p>Two disclosures first, because they should change how you read everything below.</p>
+
+<p><strong>This site sells material for Claude Code.</strong> That is a commercial interest in one of the two tools, and you should weigh the conclusions accordingly. What I can offer against it is specificity: where Cursor is better I say so plainly, and where I have not tested something I say that instead of implying I have.</p>
+
+<p><strong>There are no benchmark numbers here.</strong> I have not run a controlled head-to-head — same tasks, same repository, same day, multiple trials — and without that, any figure I gave you would be an anecdote wearing a percentage sign. Most published comparisons of these two tools are exactly that. Be suspicious of any article claiming one is "40% faster" without describing the task set, the repository, the number of runs, and the model each was configured to use, because that last variable alone can swamp the difference between the products.</p>
+
+<p>What this is: a comparison from the specific perspective of building and maintaining production <em>websites</em> — content sites, storefronts, marketing sites, small applications — by someone who has used Claude Code daily to build and operate one, and who has read the current documentation and pricing for both. Where a claim depends on a fast-moving fact, it is dated.</p>
+
+<h2 id="shape">The difference that produces every other difference</h2>
+
+<p>Almost every practical distinction between these tools follows from one architectural choice.</p>
+
+<p><strong>Cursor is an editor.</strong> It is a fork of VS Code with AI integrated throughout: inline completion, chat with your file open, a multi-file agent, and now cloud agents. Its centre of gravity is the buffer you are looking at. It is exceptionally good at the loop where you are actively writing code and want help writing the next part of it.</p>
+
+<p><strong>Claude Code is a terminal process.</strong> It reads and writes files, runs commands, and works through multi-step tasks in your shell. It has no editor of its own and does not care which one you use. Its centre of gravity is the repository and everything you can reach from a command line.</p>
+
+<p>Neither is a better idea in the abstract. They are optimised for different halves of the work. Writing a component is an editor task. Auditing forty templates for a missing canonical tag, running the crawler, reading the output, and fixing what it found is a terminal task.</p>
+
+<p>Website work happens to contain an unusual amount of the second kind. That is the honest reason a site like this one leans on Claude Code — not because it writes better JavaScript, but because "run this check, read the output, fix what failed, run it again" is the shape of most of the job.</p>
+
+<h2 id="pricing">What each one costs, as of September 2026</h2>
+
+<p>Pricing on both products has changed repeatedly and will change again. Verify before you decide; these figures were read from the vendors' own pricing pages in September 2026.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Claude Code</th><th>Cursor</th></tr></thead>
+<tbody>
+<tr><td>Free tier</td><td>Not included on the free Claude plan</td><td>Hobby, free, with limited agent requests</td></tr>
+<tr><td>Individual entry</td><td>Pro, $20/month monthly or $17/month billed annually</td><td>Pro, $20/month</td></tr>
+<tr><td>Higher individual tiers</td><td>Max, from $100/month</td><td>Pro+ and Ultra, at multiples of Pro's agent limits</td></tr>
+<tr><td>Team</td><td>Standard $25/seat monthly or $20 annually; Premium $125/$100</td><td>Teams from $40/user/month</td></tr>
+<tr><td>Enterprise</td><td>Custom, from $20/seat with usage-based scaling</td><td>Custom</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two things this table does not capture. Claude Code is included with any paid Claude subscription and shares that subscription's usage limits, so if you already pay for Claude you already have it. And both products meter "agent requests" or usage in ways that make the headline price a poor predictor of what heavy use costs — the only reliable way to know is a month of your own actual work.</p>
+
+<p>Cursor's free tier is a genuine advantage for evaluation. You can try it properly without a card. Claude Code has no free tier of its own.</p>
+
+<h2 id="understanding">Understanding a codebase you did not write</h2>
+
+<p>This is where the architectural difference shows up first.</p>
+
+<p>Cursor indexes your repository and retrieves relevant chunks into context. That works well and it is fast: ask about a symbol and you get an answer without waiting for a search. The limitation is that retrieval finds things that look similar to your question, which is not always the same as things that are causally relevant. Asking "why is this page rendering the wrong template" retrieves template files; the answer is often in a filter registered somewhere that mentions neither.</p>
+
+<p>Claude Code searches the way you would — grep, glob, reading files, following the thread — and can also run the project's own tooling to answer the question. That is slower per query and better at causal questions, because the tool can execute things: run the build and read the error, run the test and read the failure, print the resolved value rather than reasoning about what it probably is.</p>
+
+<p>For website work specifically, the ability to fetch a rendered page and grep it is a bigger advantage than it sounds. A great many questions about a site cannot be answered from source at all — what the deployed <code>&lt;head&gt;</code> contains, whether a cache is serving something stale, what a redirect actually does. An editor cannot answer those. A terminal can.</p>
+
+<h2 id="multifile">Multi-file changes</h2>
+
+<p>Both handle these. The difference is in what happens when the change is large enough to be wrong somewhere.</p>
+
+<p>Cursor's agent applies changes across files and presents them as diffs in the editor, which is a genuinely superior review surface. Reviewing a twelve-file change is simply nicer in an editor with syntax highlighting and inline accept-or-reject than in a terminal.</p>
+
+<p>Claude Code applies changes and can then immediately run the thing that proves whether they were right. The review is worse; the verification is better. For a refactor with a test suite, that is decisive — the diff mattering less than whether the suite still passes.</p>
+
+<p>The practical rule I have landed on: if I will judge the change by reading it, an editor is better. If I will judge it by running something, a terminal is better. Website work is disproportionately the second, because "does the page still render correctly at 320 pixels" is not a question you answer by reading a diff.</p>
+
+<h2 id="modes">Interactive editing versus delegated work</h2>
+
+<p>Cursor's inline completion is excellent and Claude Code has no equivalent. If a large share of your day is typing code with an assistant filling in the next few lines, that is a real and continuous benefit that no amount of terminal capability replaces.</p>
+
+<p>Claude Code is built around delegation: describe a task with a checkable finish line, let it work, review the result. Both products now offer cloud or background agents for longer-running work, so this distinction is narrowing, but the ergonomics still differ. Delegation in a terminal feels natural; delegation from an editor feels like the editor is doing something else while you wait.</p>
+
+<p>The question worth asking about your own work is what fraction of it is "help me write this" versus "go do this and tell me what happened". A front-end engineer building a component library is mostly the former. Someone maintaining a production website is mostly the latter.</p>
+
+<h2 id="terminal">The terminal, and everything reachable from it</h2>
+
+<p>This is Claude Code's structural advantage and it is worth being concrete about why, because "it runs in the terminal" sounds like a preference rather than a capability.</p>
+
+<p>Anything with a command-line interface becomes available. On the site this guide is published on, that has meant an agent that can run the Shopify Admin API, query Google Search Console, hit the Bing Webmaster API, submit URLs to IndexNow, drive a headless browser to check accessibility at five viewport widths, and crawl the live site for broken links — because all of those are scripts, and it can run scripts.</p>
+
+<p>None of that required an integration with the AI tool. It required the tool to be able to execute <code>python3 scripts/audit-seo-site.py</code> and read what came back.</p>
+
+<p>Cursor can run terminal commands too, and its agent uses them. The difference is one of centre of gravity rather than capability: in Cursor the terminal is a panel the agent sometimes reaches into; in Claude Code the terminal is where the agent lives. For a workflow that is mostly "run the check, read the output, act on it", that difference compounds.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System is built around exactly that loop — audits that run as commands and produce evidence rather than summaries. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="context">Context management</h2>
+
+<p>Both tools now have a project-instructions mechanism, and both suffer the same failure when it is misused: a long file of rules is followed less reliably than a short one, because every line competes with every other line for attention.</p>
+
+<p>Claude Code reads <code>CLAUDE.md</code> from the project root at the start of a session, without being asked. Cursor uses rules files that can be scoped to path patterns, which is a genuinely nice feature — a rule that only applies to <code>src/api/**</code> does not spend attention on the front end.</p>
+
+<p>Claude Code has path-scoped rules too, and subagents that run a task in a separate context window and report back a conclusion, which is the more consequential difference. The reason is context economy: a broad search that would otherwise dump forty file excerpts into your session returns one paragraph instead. On a large repository that is the difference between a session that stays coherent and one that does not.</p>
+
+<p>Whichever you use, the discipline is the same. Keep the instructions file short, put mechanical and unconditional rules in a hook where they run whether or not anyone read them, and start a new session when the task changes rather than accumulating an hour of unrelated debugging context.</p>
+
+<h2 id="debugging">Debugging</h2>
+
+<p>Slight edge to Claude Code, for a mundane reason: it can run the failing thing repeatedly and read the output each time, which is what debugging is. Cursor can too, but the loop is smoother where the terminal is the primary surface.</p>
+
+<p>The bigger factor is neither tool. It is whether you ask for the evidence or the conclusion. "Why is this failing?" invites a plausible narrative. "Run it, show me the full stack trace, then tell me which frame is ours" produces something you can check. That reframing improves both tools by more than the gap between them.</p>
+
+<h2 id="refactoring">Refactoring</h2>
+
+<p>Cursor is better at the mechanical kind. Rename a symbol across a large codebase, extract a component, change a signature and update the callers — an editor with a language server has real type information, and that is a stronger foundation than text search.</p>
+
+<p>Claude Code is better at the kind with a verifiable outcome. "Every template should use the shared head component, and the check for a canonical tag on every page should still pass" is a task with a finish line it can drive itself to.</p>
+
+<p>If your refactor is defined by types, use the tool with the type information. If it is defined by behaviour, use the tool that can run the behaviour.</p>
+
+<h2 id="tests">Tests</h2>
+
+<p>Both tools write tests competently and both write the same characteristic bad test: one that asserts the code does what the code does. A test generated by reading an implementation encodes the implementation's bugs as expectations, and it passes forever.</p>
+
+<p>The mitigation is identical for both and it is worth stating as a rule rather than a preference: <strong>make the test fail before you accept it.</strong> Break the thing under test, watch the assertion go red, then restore it and watch it go quiet. A test that has never failed is a line in a log file that says "PASS" for reasons nobody has established.</p>
+
+<p>Where the tools differ is how cheap that verification is. Claude Code can run the suite, break the code, run it again, and restore — a four-command loop it can do unattended and report on. In Cursor the same loop involves the terminal panel and more of your attention. It is a small difference repeated many times.</p>
+
+<p>On websites the highest-return tests are rarely unit tests. They are structural: every internal link resolves, every page has exactly one <code>h1</code>, no credential pattern appears in the tree, the configured page size matches the constant the layout uses to decide what to noindex. Those are shell one-liners, which again favours the tool whose home is a shell.</p>
+
+<h2 id="extend">Extensibility</h2>
+
+<p>Both products have grown extension mechanisms, and they have converged more than they have diverged. Cursor's plans list MCP support, skills and hooks; Claude Code has skills, hooks, subagents and MCP servers. The concepts now line up closely enough that the choice rarely turns on which features exist.</p>
+
+<p>What still differs is where the extension runs. A Claude Code skill is a folder containing a <code>SKILL.md</code> — a named procedure you invoke or that starts itself when the description matches. Because it executes in a terminal, a skill can be an entire operational procedure: run these four scripts, read their output, produce a findings report, and refuse to fix anything in the same run. That last constraint is the useful part, and it is only expressible because the procedure controls what commands run.</p>
+
+<p>The two ways a skill is silently ignored are worth knowing whichever tool you use, because the failure produces no error at all: the file must be named <code>SKILL.md</code> exactly and live in a directory named for the skill, and its frontmatter must begin on line 1. A loose <code>seo-audit.md</code> in a skills folder does nothing. The <a href="/blogs/guides/claude-code-skills">skills guide</a> covers authoring them properly, and <a href="/blogs/guides/claude-code-hooks">hooks</a> covers the rules that should be enforced rather than requested.</p>
+
+<p>One rule applies to extensions from anyone, including the five published free on this site: read the file before running it. A skill is a prompt that runs against your repository and can carry a pre-approved tool list.</p>
+
+<h2 id="git">Git and code review</h2>
+
+<p>Both write commits and both can open pull requests. Claude Code has a first-party GitHub Action, which changes what is possible: reviews and fixes that run in CI rather than on your machine, triggered by a comment or a push. That is a different capability from "the assistant can write a commit message", and for a team it is the more valuable one. The setup is covered in the <a href="/blogs/guides/claude-code-github-actions">GitHub Actions guide</a>.</p>
+
+<p>Cursor has agentic code review through Bugbot on its paid plans. Both are useful and both should be treated the same way: as a hypothesis to verify, not a verdict. An AI reviewer that finds six issues has found six things worth looking at, of which some number are real.</p>
+
+<h2 id="audits">SEO, accessibility and security audits</h2>
+
+<p>This is the most one-sided category in the comparison, and it is also the least generalisable — it matters enormously for website work and barely at all for building an internal tool.</p>
+
+<p>An audit is a loop: run a check, read structured output, decide what is real, fix it, run the check again to confirm the fix registered. Every step except "decide what is real" is a command. A tool whose native mode is running commands and reading output does this better than a tool whose native mode is editing a buffer.</p>
+
+<p>Concretely, on this site, that loop is what caught things review did not: an SEO crawler that stripped query strings and so never fetched page two, a tap-target checker missing the inline exception in WCAG 2.2 that flagged every link inside a paragraph, and a rendered-accessibility audit that had been raising on every invocation for weeks and therefore reporting nothing at all.</p>
+
+<p>None of those was found by reading code. All of them were found by running something and looking hard at what came back. If that is a large part of your job, weight this category heavily. If it is not, ignore it.</p>
+
+<h2 id="deploy">Deployment and CI</h2>
+
+<p>Both can write a workflow file. The distinction again is what happens next: Claude Code can run the pipeline's steps locally, read the failure, and iterate, which shortens the miserable cycle of pushing a commit to find out whether the YAML was right.</p>
+
+<p>Claude Code's GitHub Action also means it can operate inside CI itself. Whether you want that is a real decision with a security dimension — an agent with repository write access and a token is a capability you are choosing to create, and it deserves scoped permissions and a human approval gate on anything that deploys.</p>
+
+<h2 id="large">Large repositories</h2>
+
+<p>Cursor's indexing gives faster answers on a large codebase. That is a genuine advantage and it grows with repository size.</p>
+
+<p>Claude Code's answer is subagents — delegate the search, get back a conclusion instead of forty excerpts. It works well and it costs a round trip.</p>
+
+<p>For a website repository, this is mostly moot. A theme with fifty Liquid files, an Astro site with a hundred components, a WordPress child theme — none of these is large enough for the difference to decide anything. If you work in a monorepo with thousands of files, test both on your actual repository, because this is the category where your codebase matters more than the products do.</p>
+
+<h2 id="curve">Learning curve</h2>
+
+<p>Cursor is easier to start with, straightforwardly. If you use VS Code you already know most of it, and the free tier means you can find out whether you like it this afternoon.</p>
+
+<p>Claude Code is harder at first and the difficulty is not the interface, which is a prompt. It is that delegation is a skill. "Build me a contact form" produces something plausible; "build a contact form with these fields, this validation, this markup convention, and then show me the rendered HTML of the error state" produces something you can check. Learning to write the second kind of request is most of the learning curve, and nothing about the tool teaches it to you.</p>
+
+<p>People who bounce off Claude Code usually bounce off exactly there. They ask for large vague things, get large plausible things, and conclude the tool is unreliable. The tool is doing what it was asked.</p>
+
+<h2 id="weaknesses">Where each one is genuinely weak</h2>
+
+<p><strong>Claude Code has no inline completion.</strong> If you want a model finishing your lines as you type, it does not do that, and no amount of terminal capability substitutes for it.</p>
+
+<p><strong>Claude Code has no free tier.</strong> Evaluating it costs money.</p>
+
+<p><strong>Claude Code's review surface is a terminal.</strong> Reading a large diff is worse than in an editor. In practice this pushes you toward smaller changes, which is a good habit arrived at for an annoying reason.</p>
+
+<p><strong>Cursor's centre of gravity is the file you are looking at.</strong> Questions whose answer is not in any file — what the deployed page contains, what the cache is serving, what the API returned — are awkward.</p>
+
+<p><strong>Cursor's retrieval finds similar, not causal.</strong> Good for "where is this defined", weaker for "why does this happen".</p>
+
+<p><strong>Both will confidently report success on work they did not verify.</strong> This is not a differentiator; it is the defining risk of the category. Neither tool is reliable at assessing its own output, and the fix is the same for both: ask for evidence rather than conclusions, and never trust a check you have not seen fail.</p>
+
+<h2 id="decide">A decision framework</h2>
+
+<p><strong>Choose Cursor when</strong> most of your day is writing code in an editor; you want inline completion; your work is application development where the codebase is the whole system; you are onboarding a team already fluent in VS Code; or you want to evaluate an agentic tool for free before paying.</p>
+
+<p><strong>Choose Claude Code when</strong> most of your day is operating a system rather than typing into it; your work involves running checks and acting on their output; you maintain production websites where the deployed artefact differs from the source; you want an agent that can drive your existing scripts and APIs without an integration; you want AI review running in CI; or you already pay for Claude, in which case it is included.</p>
+
+<p><strong>Choose either, honestly,</strong> if you are building a small site from scratch and none of the above applies strongly. Both will do it. The differences discussed here matter at the margins of a real workflow, not in the first week of a greenfield project.</p>
+
+<h2 id="both">Using both</h2>
+
+<p>They are not mutually exclusive and the combination is coherent, because they are strong in different halves of the job. A pattern that works:</p>
+
+<ul>
+  <li><strong>Cursor for the writing loop.</strong> Building components, working through a feature, mechanical refactors with type information behind them.</li>
+  <li><strong>Claude Code for the operating loop.</strong> Audits, checks, releases, "why is production different from local", anything with a command-line interface.</li>
+  <li><strong>One instructions file, kept short.</strong> Both read project instructions; keeping the rules in one place with one voice avoids the two tools being told different things about the same repository.</li>
+  <li><strong>Mechanical rules in hooks, not prose.</strong> "Never commit to main" enforced by a hook works regardless of which tool is running.</li>
+</ul>
+
+<p>The cost is two subscriptions. Whether that is worth it depends on how much of your week is each kind of work, which is a question you can answer in a month and not by reading a comparison — including this one.</p>
+
+<p>If you want the operating loop written down as something runnable rather than described, the <a href="/pages/claude-code-production">production engineering hub</a> collects the audits and release discipline behind this site, and the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete build guide</a> covers the full workflow from an empty directory.</p>
+
+<h3>Verification note</h3>
+
+<p>Pricing and plan structures in this article were read from <a href="https://claude.com/pricing" rel="noopener nofollow">claude.com/pricing</a> and <a href="https://cursor.com/pricing" rel="noopener nofollow">cursor.com/pricing</a> in September 2026. Both products change quickly. Check the current pages before making a purchasing decision, and treat any comparison article — this one included — as dated from the day it was written.</p>

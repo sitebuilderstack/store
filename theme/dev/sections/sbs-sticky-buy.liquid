@@ -1,0 +1,24 @@
+{%- assign product = all_products[section.settings.product] -%}
+{%- if product != blank and product.available -%}
+  {%- assign variant = product.selected_or_first_available_variant -%}
+  <div class="sbs-sticky" data-sbs-sticky data-visible="false">
+    <div class="sbs-sticky__text">
+      <div class="sbs-sticky__title">{{ product.title | escape }}</div>
+      <div class="sbs-sticky__price">{{ variant.price | money }} · instant download</div>
+    </div>
+    <a class="sbs-btn sbs-btn--primary" href="{{ routes.root_url }}#buy">Get it</a>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Sticky buy bar",
+  "tag": "div",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "paragraph",
+      "content": "Shown on small screens only, after the hero scrolls away, and hidden again over the buy section so it never covers the form." }
+  ],
+  "presets": [{ "name": "SBS — Sticky buy bar" }]
+}
+{% endschema %}

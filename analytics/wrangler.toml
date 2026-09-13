@@ -1,0 +1,12 @@
+name = "sbs-events"
+main = "collector-worker.js"
+compatibility_date = "2026-01-01"
+
+# Create with:  npx wrangler kv namespace create SBS_EVENTS
+# then paste the returned id here.
+[[kv_namespaces]]
+binding = "SBS_EVENTS"
+id = "REPLACE_WITH_NAMESPACE_ID"
+
+# Set with:  npx wrangler secret put READ_KEY
+# Never commit it. /report refuses every request without it.

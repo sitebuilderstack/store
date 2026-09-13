@@ -1,0 +1,80 @@
+{
+ "cdn": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/",
+ "hub": {
+  "handle": "resources",
+  "file": "_hub.html",
+  "raw": true,
+  "templateSuffix": "resources",
+  "title": "Free Claude Code Website Development Resources",
+  "seoTitle": "Free Claude Code Developer Resources",
+  "seoDescription": "Free, ungated production resources for developers building websites with Claude Code: a CLAUDE.md starter, plus launch, SEO, security and audit checklists."
+ },
+ "pages": [
+  {
+   "handle": "production-claude-md-starter",
+   "file": "production-claude-md-starter.md",
+   "download": "production-claude-md-starter.md",
+   "downloadSource": "production-claude-md-starter/CLAUDE.md",
+   "downloadLabel": "Download CLAUDE.md",
+   "title": "Production CLAUDE.md Starter",
+   "seoTitle": "Production CLAUDE.md Starter",
+   "seoDescription": "A free production CLAUDE.md starter for web projects: architecture rules, coding standards, testing, security, SEO, accessibility and a definition of done."
+  },
+  {
+   "handle": "claude-code-launch-checklist",
+   "file": "claude-code-launch-checklist.md",
+   "download": "claude-code-launch-checklist.md",
+   "downloadLabel": "Download the checklist",
+   "title": "Claude Code Website Launch Checklist",
+   "seoTitle": "Website Launch Checklist",
+   "seoDescription": "A free 18-section website launch checklist: requirements, accessibility, technical SEO, structured data, performance, security, commerce and post-launch."
+  },
+  {
+   "handle": "claude-code-seo-checklist",
+   "file": "claude-code-seo-checklist.md",
+   "download": "claude-code-seo-checklist.md",
+   "downloadLabel": "Download the checklist",
+   "title": "Claude Code SEO Checklist",
+   "seoTitle": "Claude Code SEO Checklist",
+   "seoDescription": "A free technical SEO checklist in dependency order: crawlability, indexing, canonicals, sitemaps, metadata, schema, internal links and Core Web Vitals."
+  },
+  {
+   "handle": "claude-code-security-checklist",
+   "file": "claude-code-security-checklist.md",
+   "download": "claude-code-security-checklist.md",
+   "downloadLabel": "Download the checklist",
+   "title": "Claude Code Security Checklist",
+   "seoTitle": "Website Security Checklist",
+   "seoDescription": "A free website security checklist: secrets, headers, input handling, authentication, sessions, authorisation, webhooks, dependencies and CI/CD."
+  },
+  {
+   "handle": "claude-code-website-audit-checklist",
+   "file": "claude-code-website-audit-checklist.md",
+   "download": "claude-code-website-audit-checklist.md",
+   "downloadLabel": "Download the checklist",
+   "title": "Claude Code Website Audit Checklist",
+   "seoTitle": "Website Audit Checklist",
+   "seoDescription": "A free website audit checklist for sites that already exist: UX, conversion, broken links, technical SEO, accessibility, performance and security."
+  },
+  {
+   "handle": "sample-technical-seo-audit",
+   "file": "sample-technical-seo-audit.md",
+   "download": "sample-technical-seo-audit.md",
+   "downloadSource": "sample-technical-seo-audit.md",
+   "downloadLabel": "Download the workflow",
+   "title": "Sample: Crawlability Audit Workflow",
+   "seoTitle": "Free Crawlability Audit Workflow",
+   "seoDescription": "One complete audit workflow from the Claude Code SEO & Website Audit Toolkit, free: response codes, soft 404s, redirect chains and rendering."
+  },
+  {
+   "handle": "sample-landing-page-conversion-audit",
+   "file": "sample-landing-page-conversion-audit.md",
+   "download": "sample-landing-page-conversion-audit.md",
+   "downloadSource": "sample-landing-page-conversion-audit.md",
+   "downloadLabel": "Download the workflow",
+   "title": "Sample: Landing Page Conversion Audit",
+   "seoTitle": "Free Landing Page Conversion Audit",
+   "seoDescription": "One complete workflow from the Claude Code Conversion & Revenue Optimization Toolkit, free: audit mode, evidence, and honesty labels on every finding."
+  }
+ ]
+}

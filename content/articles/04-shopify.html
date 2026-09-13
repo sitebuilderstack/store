@@ -1,0 +1,715 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#connect">How to connect Claude Code to Shopify</a></li>
+    <li><a href="#reality">What Claude Code can and cannot do here</a></li>
+    <li><a href="#paths">Two ways in: the CLI and the Admin API</a></li>
+    <li><a href="#setup">Setting up safely</a></li>
+    <li><a href="#credentials">Credentials without leaking them</a></li>
+    <li><a href="#architecture">The theme architecture Claude needs to know</a></li>
+    <li><a href="#claudemd">A CLAUDE.md for a theme project</a></li>
+    <li><a href="#layout">What the repository actually looks like</a></li>
+    <li><a href="#workflow">The development loop</a></li>
+    <li><a href="#themecheck">Theme Check and machine-readable output</a></li>
+    <li><a href="#build">Building the storefront</a></li>
+    <li><a href="#product">Creating the product</a></li>
+    <li><a href="#digital">Digital products and delivery</a></li>
+    <li><a href="#policies">Policies and legal pages</a></li>
+    <li><a href="#schema">Structured data without lying</a></li>
+    <li><a href="#a11y">Accessibility on a Shopify theme</a></li>
+    <li><a href="#storedata">Store data beyond products</a></li>
+    <li><a href="#perf">Performance: what you actually control</a></li>
+    <li><a href="#seo">SEO: what Shopify does for you</a></li>
+    <li><a href="#agents">Agent discovery: agents.md and llms.txt</a></li>
+    <li><a href="#qa">QA before you take money</a></li>
+    <li><a href="#golive">Going live</a></li>
+    <li><a href="#gotchas">Gotchas that cost real time</a></li>
+  </ol>
+</nav>
+
+<h2 id="connect">How to connect Claude Code to Shopify</h2>
+
+<p>There are exactly two connections, and knowing which one you need saves a lot of confusion:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>You want to change…</th><th>Use</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td>Theme files — Liquid, CSS, JS, JSON</td><td>The theme files themselves</td><td>Ordinary files in a directory Claude Code can read, edit and push</td></tr>
+<tr><td>Store data — products, pages, policies, redirects, metafields</td><td>The Admin API</td><td>A GraphQL endpoint you call with an access token</td></tr>
+<tr><td>Payments, tax, domains, app installs</td><td>The Shopify admin, by hand</td><td>Deliberately not available to either of the above</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Neither connection is a plugin or an integration you install. There is no "Shopify mode". You give Claude Code a directory of theme files and a script that can call the Admin API, and it works with both the way it works with any other codebase.</p>
+
+<p>The one thing to get right before anything else is credentials. The access token must never reach a Liquid template, a commit, a log line, or the terminal output you paste somewhere — the section on <a href="#credentials">credentials without leaking them</a> below is the part to read first.</p>
+
+<h2 id="reality">What Claude Code can and cannot do here</h2>
+
+<p>Shopify is a hosted platform, which changes the shape of the work. You are not building a web application; you are building a theme that runs inside someone else's rendering pipeline, plus a catalogue of data that lives in someone else's database. Both are reachable programmatically, and both have limits worth knowing before you start.</p>
+
+<p><strong>What works well.</strong> Theme code is just files — Liquid templates, CSS, JavaScript, JSON — in a directory that Claude Code can read, edit, and push. That part behaves like any other codebase and benefits from the same workflow. Store data — products, variants, pages, policies, navigation, redirects, metafields — is reachable through the Admin API, so creating a product or fixing thirty page titles is scriptable rather than a click-through.</p>
+
+<p><strong>What does not.</strong> Checkout is not yours. On most plans you cannot edit it, and even where you can the surface is deliberately narrow. Payment configuration, tax settings, shipping profiles, domain verification, and app installation are admin-only, often deliberately, and no amount of API access changes that.</p>
+
+<p><strong>What needs care.</strong> A theme push affects a live storefront. An Admin API mutation changes real data. There is no local database to reset — the development store <em>is</em> a store. This is the main way an otherwise ordinary session becomes an incident, and most of the safety practice below exists because of it.</p>
+
+<h2 id="paths">Two ways in: the CLI and the Admin API</h2>
+
+<p>There are two distinct access paths and they solve different problems. Using the wrong one is a common source of friction.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Shopify CLI</th><th>Admin API</th></tr></thead>
+<tbody>
+<tr><td>Best for</td><td>Theme files</td><td>Store data</td></tr>
+<tr><td>Typical use</td><td>Pull, push, preview, lint themes</td><td>Products, pages, policies, navigation, redirects</td></tr>
+<tr><td>Auth</td><td>Interactive login</td><td>App credentials, scope-gated</td></tr>
+<tr><td>Works headless</td><td>Awkwardly</td><td>Yes</td></tr>
+<tr><td>Bulk operations</td><td>No</td><td>Yes</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Four things carry Shopify's name and they are not interchangeable, which matters because a session told to "use the Shopify API" will pick one:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Surface</th><th>What it is for</th><th>Wrong tool when</th></tr></thead>
+<tbody>
+<tr><td><strong>Shopify CLI</strong></td><td>Theme development: pull, push, preview, Theme Check</td><td>You need catalogue or order data</td></tr>
+<tr><td><strong>Admin API</strong></td><td>Everything behind the login: products, metafields, orders, files, publications</td><td>You are changing how a page looks</td></tr>
+<tr><td><strong>Storefront API</strong></td><td>Building a custom front end that is not a Shopify theme &mdash; headless</td><td>You have a theme; it cannot change the theme</td></tr>
+<tr><td><strong>Liquid</strong></td><td>The theme's own templating, running on Shopify's servers</td><td>You need data the theme does not expose</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The mistake worth naming: the Storefront API is for headless builds. On a themed store it is the wrong answer to almost every question, and it is the one a session reaches for when asked to "fetch products from the API" without more context.</p>
+
+<p>In practice you want both. The CLI for the theme development loop, where its hot reload and preview are genuinely useful; the Admin API for everything that is data rather than code, and for anything you want to script or verify repeatedly.</p>
+
+<p>The Admin API's GraphQL endpoint is the current one — the REST Admin API is legacy. Ask for GraphQL explicitly, because there is a great deal of older REST example code in the world and a session left to its own devices may well reach for it.</p>
+
+<pre class="sbs-prompt">Use the Shopify Admin GraphQL API, not REST. Pin the API version
+explicitly in the URL rather than relying on a default.
+
+Every mutation response includes a userErrors field. Check it. A
+GraphQL request can return HTTP 200 with a populated userErrors
+array and no change made — treating 200 as success is a bug.
+
+Handle throttling: the API is cost-based, and the response includes
+the query cost and remaining budget. On a throttled response, back
+off and retry rather than failing.</pre>
+
+<p>That last paragraph is worth setting up once. Shopify's GraphQL rate limiting is calculated on query cost rather than request count, and the response tells you what you have left — which means a well-written client can pace itself instead of guessing.</p>
+
+<h2 id="setup">Setting up safely</h2>
+
+<p>Before any of the interesting work, three decisions that determine whether a mistake is recoverable.</p>
+
+<h3>Develop against a theme that is not live</h3>
+
+<p>Shopify themes have roles. Exactly one is <code>MAIN</code> — the live storefront. Everything else is unpublished. All development happens against an unpublished theme, and publishing is a separate, deliberate act.</p>
+
+<p>This is important enough to enforce mechanically rather than remember. Whatever push mechanism you use, make it refuse the live theme unless something explicit overrides it:</p>
+
+<pre><code>if theme["role"] == "MAIN" and os.environ.get("ALLOW_LIVE") != "1":
+    sys.exit("Refusing to push to the live theme.")</code></pre>
+
+<p>Five lines. It converts "I hope nobody passes the wrong theme ID" into a thing that cannot happen by accident. I would not run a theme workflow without it.</p>
+
+<h3>Keep the theme in version control</h3>
+
+<p>Shopify keeps a limited number of themes and its own history is not a substitute for git. Pull the theme into a repository first, commit, and work from there. The repository is the source of truth; the store is a deployment target.</p>
+
+<h3>Take a backup before the first push</h3>
+
+<p>Duplicate the live theme in the admin before you touch anything. It costs one click and it is the difference between "revert the commit and push" and "rebuild from memory".</p>
+
+<h2 id="credentials">Credentials without leaking them</h2>
+
+<p>An Admin API token can read customer data and change your catalogue. Treat it accordingly, and be aware that a coding agent introduces a specific new way to leak one: it will happily write a working script that hard-codes the token, because that is the shortest path to the thing you asked for.</p>
+
+<p>Say otherwise, explicitly:</p>
+
+<pre class="sbs-prompt">Credentials are in [PATH], which is outside this repository and
+gitignored.
+
+Read them at runtime from that path or from the environment. Never
+hard-code a credential. Never write one into a file in this
+repository. Never write one into a theme file — everything under the
+theme directory is publicly served. Never print one in full; redact
+it in any diagnostic output. Never include one in a commit.
+
+If you need to show me a request for debugging, redact the
+authorisation header.</pre>
+
+<p>Two Shopify-specific consequences worth stating separately.</p>
+
+<p><strong>Theme files are public.</strong> Anything in a theme's assets, snippets, sections, or templates is served to browsers. A token in a Liquid file is not merely committed, it is published. This is a different and worse failure than the usual one.</p>
+
+<p><strong>Token caching needs a home outside the repo.</strong> If you use a credential flow that mints short-lived access tokens, they need to be cached somewhere or you will mint a new one per request. Put the cache outside the repository — under <code>~/.cache/</code> — with restrictive file permissions. A gitignored file inside the repo is one <code>git add -f</code> from being public.</p>
+
+<p>Finally, scope narrowly. A custom app's access scopes are chosen when you configure it, and a token limited to what you actually need is a much smaller problem if it escapes. If a task fails with a permission error, the correct response is to consider whether it should be permitted, not to reflexively widen the scope.</p>
+
+<h2 id="architecture">The theme architecture Claude needs to know</h2>
+
+<p>Shopify themes have a specific structure, and a session that does not know it will produce code that looks right and does not render. Worth stating up front:</p>
+
+<pre><code>layout/          Wraps everything. theme.liquid is the default.
+templates/       One per page type. JSON files list which sections
+                 render; .liquid files contain markup directly.
+sections/        Modular, reorderable blocks. Configurable through
+                 a {% schema %} block at the bottom of the file.
+snippets/        Reusable fragments, included with {% render %}.
+assets/          CSS, JS, images. Publicly served.
+config/          settings_schema.json defines theme settings;
+                 settings_data.json holds their values.
+locales/         Translations.</code></pre>
+
+<p>Four things about this are non-obvious enough to be worth telling a session directly.</p>
+
+<p><strong>JSON templates can choose their layout.</strong> A template can specify <code>"layout": "landing"</code> to render inside <code>layout/landing.liquid</code> instead of the default. This is how you give one page type entirely different chrome without touching the rest of the theme, and it is much cleaner than conditionals inside the main layout.</p>
+
+<p><strong>Section schemas define the settings.</strong> The <code>{% schema %}</code> block at the bottom of a section is what produces its controls in the theme editor. Settings have types, and the type determines what a valid value looks like — which matters more than it sounds, as the gotchas section explains.</p>
+
+<p><strong>Section groups are JSON.</strong> Headers and footers are typically section groups: JSON files listing which sections appear and in what order. They reference sections by filename, which creates an ordering dependency at push time.</p>
+
+<p><strong><code>{% render %}</code>, not <code>{% include %}</code>.</strong> The older <code>include</code> tag is deprecated and has different, worse scoping behaviour. Say so, because plenty of older examples still use it.</p>
+
+<h2 id="claudemd">A CLAUDE.md for a theme project</h2>
+
+<p>Put all of the above where it does not have to be repeated. A theme project's <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a> has a distinctive shape because the prohibitions are unusually load-bearing — there is a fuller version of this file, alongside three for other project shapes, in <a href="/blogs/guides/claude-md-examples-web-development">CLAUDE.md examples</a>:</p>
+
+<pre><code># CLAUDE.md
+
+## Project
+Shopify theme for a one-product store. Source of truth is
+theme/dev/. The store is live and taking orders.
+
+## Commands
+- `scripts/theme_pull.py` — pull the theme from the store
+- `scripts/theme_push.py` — push to the development theme
+- `shopify theme check` — lint Liquid
+- `tests/run-all.sh` — full local check
+
+## Do not
+- Never push to the live theme. Push to development and preview.
+- Never put a credential in any file under theme/ — theme files are
+  publicly served.
+- Never use {% include %}. Use {% render %}.
+- Never hard-code a colour, spacing, or font value that exists as a
+  CSS custom property.
+- Never replace the generated sitemap. Shopify maintains it.
+- Never add review or rating structured data. We have no reviews.
+- Never edit the vendor theme's own files. Additions go in
+  sbs-prefixed files so they survive a vendor update.
+
+## Conventions
+- Our sections and snippets are prefixed `sbs-`
+- All CSS in assets/sbs.css, all JS in assets/sbs.js
+- Design tokens are CSS custom properties on :root
+
+## Before finishing
+1. `shopify theme check` — zero offences in our files
+2. Push to development and fetch the affected preview URLs
+3. Report the actual status codes, not "should work"
+
+## Gotchas
+- Push order: .liquid assets, layouts, snippets and sections must
+  land before section-group JSON that references them.
+- `policy` is not a template type. See docs/STORE-ARCHITECTURE.md.
+- Theme setting values must match their schema type. An empty
+  product_list is [], not "".</code></pre>
+
+<p>The "never edit the vendor theme's own files" rule is worth adopting even if you never update the theme. Prefixing everything you add means the diff between your work and the vendor's is always obvious, which makes an update survivable and makes it clear which offences from the linter are yours to fix.</p>
+
+<p>If you build more than one Shopify store, this setup is worth packaging rather than copying. A <a href="/blogs/guides/claude-code-plugins">plugin</a> can carry the push guard, the audits, and the theme agents so the next store starts with them installed.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>This safety setup &mdash; the push guard, the credential handling, the theme <code>CLAUDE.md</code> &mdash; is packaged as a Shopify workflow module in the Claude Code Website Launch System. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="layout">What the repository actually looks like</h2>
+
+<p>A Shopify project is not a normal web project, and the folder layout is where that first shows. Shopify decides the theme's internal structure &mdash; <code>sections/</code>, <code>snippets/</code>, <code>templates/</code>, <code>layout/</code>, <code>assets/</code>, <code>config/</code>, <code>locales/</code> &mdash; and you cannot rename or nest those. What you <em>do</em> control is everything around the theme, and that is the part worth deciding deliberately.</p>
+
+<p>This is the layout this store actually uses. It is public, so you can read the whole thing rather than take the diagram on trust:</p>
+
+<pre>store/
+  theme/dev/          the files we author — the source of truth
+    assets/           one CSS file, one JS file
+    layout/           theme.liquid, landing.liquid
+    sections/         our own sbs-* sections
+    snippets/
+    templates/        JSON templates, one per page type
+    config/
+  theme/dev-full/     a full pulled snapshot, gitignored
+  content/            articles, pages, products as source
+  scripts/            the API and audit tooling
+  tests/run-all.sh    every check, in one command
+  docs/               decisions and workflows
+  product/            the paid downloads, gitignored</pre>
+
+<p>Three decisions in there are worth stealing.</p>
+
+<p><strong>Author a subset, not the whole theme.</strong> <code>theme/dev/</code> holds only the files we wrote. A purchased theme ships thousands of files you will never touch, and committing them means every diff is noise and every merge is a negotiation. The full theme is pulled into a gitignored directory when a tool needs it &mdash; <code>shopify theme check</code> wants the whole thing &mdash; and is never edited there.</p>
+
+<p><strong>Content lives outside the theme.</strong> Articles, page copy and product descriptions are files in <code>content/</code>, published to Shopify by a script. Writing them in the Shopify admin means the only copy of your content is in someone else's database, with no history and no review. This way a product description is a pull request.</p>
+
+<p><strong>The paid product is gitignored, and something enforces it.</strong> <code>product/</code> and <code>dist/</code> never reach the public mirror, and the upload script refuses any filename containing a paid product's slug outright &mdash; there is no override flag. A public CDN URL bypasses checkout, and that is not a mistake you want to rely on remembering.</p>
+
+<p>The repository is at <a href="https://github.com/sitebuilderstack/store" rel="noopener">github.com/sitebuilderstack/store</a>. It is a single-commit mirror rather than the working history, because the working history contains the paid product.</p>
+
+<h2 id="workflow">The development loop</h2>
+
+<p>The loop that works:</p>
+
+<ol>
+  <li>Edit files locally in the repository</li>
+  <li>Lint with <code>shopify theme check</code></li>
+  <li>Push to the <strong>development</strong> theme</li>
+  <li>Fetch the preview URL and check the actual response</li>
+  <li>Commit</li>
+  <li>Publish only when a batch of work is verified</li>
+</ol>
+
+<p>Step four is the one that gets skipped and the one that matters. Liquid fails softly: a broken tag frequently renders as empty output or as visible text rather than an error, so a push can succeed while the page is wrong. "The push returned success" is not evidence that anything works.</p>
+
+<p>Make the check explicit in the instruction:</p>
+
+<pre class="sbs-prompt">After pushing, fetch the preview URL for each affected page and
+confirm: HTTP 200; the expected content is present in the response
+body; no Liquid error text appears in the output; no template
+placeholder rendered literally.
+
+Report the actual status codes and the specific strings you found.
+Do not report success on the basis of the push result.</pre>
+
+<h3 id="themecheck">Theme Check, and getting output an agent can read</h3>
+
+<p>Theme Check is the Liquid linter. It ships inside the Shopify CLI rather than as a separate install, so there is nothing extra to add:</p>
+
+<pre>npm install -g @shopify/cli@latest
+shopify theme check --path .</pre>
+
+<p>You can skip the global install and run it through <code>npx @shopify/cli@latest theme check</code>, which is the better choice in CI because it pins nothing to the machine.</p>
+
+<p>The flag that matters for agent work is <code>--output json</code>. The default text format is built for a human reading a terminal; JSON is what you want when Claude Code has to decide whether the theme is clean:</p>
+
+<pre>shopify theme check --path . --output json</pre>
+
+<p>The shape is a list of files, each with its own counts and offences:</p>
+
+<pre>[
+  {
+    "path": "/abs/path/sections/example.liquid",
+    "offenses": [
+      {
+        "check": "UndefinedObject",
+        "severity": "warning",
+        "start_row": 42,
+        "start_column": 10,
+        "end_row": 42,
+        "end_column": 23,
+        "message": "Undefined object 'foo'"
+      }
+    ],
+    "errorCount": 0,
+    "warningCount": 1,
+    "infoCount": 0
+  }
+]</pre>
+
+<p><code>severity</code> is the field to branch on, not <code>errorCount</code> alone — a theme with zero errors and ninety warnings is not a theme you want to publish without looking. Note that <code>path</code> is absolute, so anything comparing it against repository-relative paths needs to normalise first.</p>
+
+<p>For CI, <code>--fail-level</code> sets the severity at which the command exits non-zero. It defaults to <code>error</code>, which is more permissive than most people assume:</p>
+
+<pre>shopify theme check --path . --output json --fail-level suggestion</pre>
+
+<p>The accepted levels are <code>crash</code>, <code>error</code>, <code>suggestion</code>, <code>style</code>, <code>warning</code> and <code>info</code>. Use <code>--init</code> once to write a <code>.theme-check.yml</code> you can then narrow, and <code>--list</code> to see which checks are actually enabled rather than guessing from the documentation.</p>
+
+<p>The loop that keeps the linter useful, rather than something you learn to skim:</p>
+
+<ol>
+<li><strong>Claude changes Liquid.</strong> One concern per change.</li>
+<li><strong>Run Theme Check with <code>--output json</code></strong> and keep the raw result.</li>
+<li><strong>Capture the offences</strong>, filtered to the files you actually author.</li>
+<li><strong>Classify each one</strong> before fixing anything: a real defect, or a known false positive. The two look identical in the output and only the first is worth a change.</li>
+<li><strong>Fix one.</strong> Not the batch &mdash; a batch fix on a linter you have not yet calibrated is how real findings get "fixed" away.</li>
+<li><strong>Re-run</strong> and confirm the count moved by exactly one.</li>
+<li><strong>Push to the development theme</strong> and fetch the preview URL.</li>
+<li><strong>Check the rendered page</strong> at 375px and at desktop, and confirm no Liquid error text appears in the body.</li>
+<li><strong>Confirm the section still renders its schema settings</strong> &mdash; Shopify discards a template setting whose schema has not propagated, silently.</li>
+</ol>
+
+<p>Step four is the one people skip and the one that decides whether the linter is worth running. Make the classification explicit in the instruction:</p>
+
+<pre class="sbs-prompt">Run theme check with --output json. Filter to files under
+theme/dev/ only.
+
+For each offence, state whether it is a real defect or a known
+false positive, and why. Do not fix anything in this step.
+
+Known false positives on this theme:
+  MissingTemplate for files kept outside version control
+  LiquidHTMLSyntaxError where a tag is built across a loop
+
+Anything not on that list is real until shown otherwise.</pre>
+
+<p>The check to write is not "zero offences" but "zero offences outside this known list", with the list short enough that adding to it feels like a decision.</p>
+
+<p>Two things will surprise you the first time you parse the output. If you keep only part of a theme in Git — which is the sensible thing to do with a vendor theme — every <code>{% render %}</code> pointing at a file you did not check in reports as a <code>MissingTemplate</code> error, and there can be dozens. And the HTML parser occasionally rejects valid Liquid: a template that builds a tag across a loop boundary, such as emitting <code>&lt;h2</code> and its attributes separately, is reported as a syntax error on a page that renders perfectly. Both are worth confirming individually rather than either trusting or dismissing as a group. The check to write is not "zero offences" but "zero offences outside this known list", with the list short enough that adding to it feels like a decision.</p>
+
+<p>One further note on <code>theme check</code>. On a vendor theme it will report offences in files you did not write and should not touch. Filter to your own files and hold those at zero — a linter whose output you have learned to skim is not doing anything for you. It is worth deliberately introducing an error once to confirm your filtering actually catches things; a clean report from a broken filter looks identical to a clean report.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-theme-push-order.png?v=1787803716" alt="Theme push order in four stages: first assets, layout, snippets and sections; then section-group JSON; then templates; then config. Each stage references the one before it."
+       width="1000" height="546" loading="lazy" decoding="async">
+  <figcaption>Each stage references the one before it, which is why the order is not interchangeable.</figcaption>
+</figure>
+
+<h2 id="build">Building the storefront</h2>
+
+<p>With the safety and workflow in place, the actual construction. A few things specific to doing this on Shopify with an agent.</p>
+
+<h3>Work section by section</h3>
+
+<p>Sections are the natural unit — self-contained, individually previewable, individually revertible. Build one, verify it renders, commit, move on. A session asked to build an entire page in one pass produces a diff you cannot check against a live storefront in any meaningful way.</p>
+
+<h3>Give the theme editor real controls</h3>
+
+<p>A section with hard-coded copy is a section that requires a developer to change a headline. Put text, images, and links in the schema:</p>
+
+<pre class="sbs-prompt">Build this as a section with a schema, so everything editable is
+editable in the theme editor: heading, body, button label, button
+link, and image.
+
+Give every setting a sensible default so the section renders
+correctly the moment it is added, before anyone configures it.
+
+Use setting types that match the data — url for links, image_picker
+for images, richtext where formatting is wanted. Do not use text for
+something that should be a URL.</pre>
+
+<p>"Renders correctly before anyone configures it" prevents a specific annoyance: a section that appears completely broken in the editor until you fill in six fields.</p>
+
+<h3>Keep styling on tokens, including Shopify's own elements</h3>
+
+<p>Some elements come from Shopify rather than from you — the add-to-cart button in some contexts, form controls, checkout-adjacent UI. These carry the vendor theme's styling, which will not match yours and may not meet your contrast standard. Styling them onto your tokens is legitimate and usually necessary; on this build, the default add-to-cart button measured 3.59:1 against its background, below the 4.5:1 required for text.</p>
+
+<h2 id="product">Creating the product</h2>
+
+<p>The Admin API is deep enough to be its own subject, and the parts that bite are not the ones you would guess. <a href="/blogs/guides/shopify-admin-api-claude-code">Automating Shopify with the Admin API and Claude Code</a> covers them: a mutation that fails validation returns HTTP 200 and changes nothing, publishing is a separate call from creating, and a product that looks perfect through the API can be completely undeliverable.</p>
+
+<p>Products are data, so this is Admin API work rather than theme work. A product has fields that are easy to set and easy to forget, and several of them are only discovered as wrong when a customer hits them.</p>
+
+<pre class="sbs-prompt">Create the product via the Admin GraphQL API.
+
+Set: title, descriptionHtml, product type, vendor, tags, handle,
+SEO title and description, and the variant price.
+
+Then verify by reading it back and confirming each field.
+
+Check specifically:
+- The handle is what we intended, not an auto-generated variant
+- It is published to the sales channels we need
+- The variant's requiresShipping flag is correct
+- The status is what we expect
+
+Report what the API actually returned, not what you sent.</pre>
+
+<p>"Report what the API returned, not what you sent" catches partial successes, which are the awkward case: a mutation that succeeds while silently ignoring one field is indistinguishable from a full success unless you read it back.</p>
+
+<p>Two fields matter more than their prominence suggests. <strong>The handle</strong> becomes the product URL, and changing it later means a redirect and a period of split search signals — get it right the first time. <strong>Publication to sales channels</strong> is separate from the product's status: a product can be "active" and invisible on your storefront because it is not published to the online store.</p>
+
+<h2 id="digital">Digital products and delivery</h2>
+
+<p>If you are selling a file, this section is the one that decides whether the business works.</p>
+
+<p>Two things must be true.</p>
+
+<p><strong>The variant must not require shipping.</strong> Otherwise checkout asks for a shipping address and may attempt to calculate rates for a download. This is a single boolean and it is easy to leave at its default.</p>
+
+<p><strong>Something must actually deliver the file.</strong> Shopify's core product does not do digital delivery. It is handled by an app — Shopify's own free digital downloads app or a third-party equivalent — which attaches a file to the variant and issues a download link on order completion.</p>
+
+<p>That second point deserves emphasis because of the failure mode. Everything else can be correct — the product live, the price right, the checkout working, the payment captured — and the customer receives nothing. There is no error. The order looks successful from every angle except the customer's.</p>
+
+<p>App installation is admin-only, so this is a step an agent cannot complete for you. What it can do is verify it:</p>
+
+<pre class="sbs-prompt">Verify digital delivery is configured for this product.
+
+Check: which apps are installed on this store; whether a digital
+delivery app is among them; whether a file is attached to the
+product or its variant; and whether requiresShipping is false on
+the variant.
+
+If any of these is not satisfied, say so plainly. This is the
+difference between a customer receiving the product and paying for
+nothing.</pre>
+
+<p>Run that check <em>before</em> the store accepts its first order, not after. And place a real test order end to end — pay, receive the email, click the link, open the file. Every intermediate step can be correct while the last one fails.</p>
+
+<p>One related note on where files live. It is tempting to upload the product file through the Files API and link to its CDN URL. Do not: files uploaded that way are publicly accessible to anyone with the URL, which bypasses checkout entirely. Paid files belong in the delivery app, which gates access behind an order.</p>
+
+<h2 id="policies">Policies and legal pages</h2>
+
+<p>Shopify has built-in policy documents — refund, privacy, terms of service, shipping, contact information — that live at <code>/policies/&lt;handle&gt;</code> and are managed as store data rather than as pages. They are also linked automatically from checkout, which is why using the built-ins matters rather than creating ordinary pages with the same names.</p>
+
+<p>Both are settable through the Admin API, so this is scriptable. Two things to watch.</p>
+
+<p><strong>Digital goods change what the policies must say.</strong> A refund policy written for physical returns is wrong for a download, and a shipping policy on a store that ships nothing should say so explicitly rather than being absent. Consumer law in several jurisdictions treats digital goods specifically — including how a right to cancel interacts with immediate access to a download — so this is a place to write what is actually true about your product and take advice if the stakes warrant it, not to accept a generated template.</p>
+
+<p><strong>If you previously had pages at other URLs, redirect them.</strong> A store that once had <code>/pages/privacy</code> and now has <code>/policies/privacy-policy</code> needs a redirect, or the old URL 404s for anyone who bookmarked or linked it. URL redirects are Admin API data and take a moment to create in bulk.</p>
+
+<h2 id="schema">Structured data without lying</h2>
+
+<p>Product structured data is worth having; it is also the easiest place on a store to publish something false without noticing.</p>
+
+<pre class="sbs-prompt">Add Product structured data to the product template.
+
+Use values from the actual Liquid objects — never hard-code a price,
+availability, or currency.
+
+Include: name, description, image, sku if present, brand, and an
+offer with price, priceCurrency, availability, and url.
+
+Do NOT include aggregateRating or review. We have no reviews.
+Marking up reviews that do not exist is a policy violation and can
+result in a manual action.
+
+Validate the output against Google's Rich Results Test and report
+the result.</pre>
+
+<p>The review prohibition is not hypothetical. Fake review markup is one of the more reliably penalised structured data abuses, and a helpful session generating a "5.0 from 127 reviews" placeholder for a store with no reviews is an entirely plausible accident.</p>
+
+<p>The other rule — values from Liquid objects, never hard-coded — is what keeps the markup true after the first price change. Hard-coded structured data is correct exactly once.</p>
+
+<h2 id="a11y">Accessibility on a Shopify theme</h2>
+
+<p>Themes bring their own accessibility baseline, and it varies. Assume nothing and check.</p>
+
+<p>The areas that most often fail on a commercial theme: colour contrast in buttons and on promotional backgrounds; focus states removed for aesthetic reasons; carousels and slideshows that are not keyboard operable; mobile menus that trap focus or fail to return it; form fields labelled with placeholders; and quantity selectors built from unlabelled buttons.</p>
+
+<p>Two things make an audit here worth trusting.</p>
+
+<p><strong>Audit the rendered page, not the source.</strong> Liquid means the source is not the output. Contrast in particular has to be computed against the backdrop that actually renders, and a specificity conflict between two stylesheets can produce text the same colour as its background while both files look entirely correct in isolation. On this build a primary call-to-action rendered at 1:1 contrast — invisible — because a generic link rule outranked the button rule by a single point of specificity. Nothing in the source suggested it.</p>
+
+<p><strong>Test the states that only exist after interaction.</strong> An open mobile menu, a focused field, an expanded accordion, an error state. Static analysis sees none of these.</p>
+
+<pre class="sbs-prompt">Audit the rendered storefront for accessibility, not the Liquid
+source.
+
+Load each key page in a real browser at 320px and 1280px. For each:
+compute contrast for every text and background pair from computed
+styles; check every interactive element is keyboard reachable with a
+visible focus indicator; verify form controls have programmatically
+associated labels via label[for], aria-label, or aria-labelledby;
+check heading order; check for horizontal overflow.
+
+Then open the mobile menu and re-check focus behaviour.
+
+Report measured ratios. Do not assert compliance without numbers.</pre>
+
+<h2 id="storedata">Store data beyond products</h2>
+
+<p>Several things that feel like theme work are actually store data, which means they are Admin API work and are scriptable. Knowing which is which saves a lot of searching through Liquid for something that was never there.</p>
+
+<p><strong>Navigation menus</strong> are data. The theme renders whatever menu handle it is pointed at; the menu's contents live in the store. This is why editing the theme never changes the header links, and why building the navigation is an API call rather than a template edit.</p>
+
+<p><strong>URL redirects</strong> are data, and bulk-creatable. Any time you change a handle, move a page, or consolidate URLs, the redirect is one mutation. Worth building into the same script as the change itself, so the two cannot get separated.</p>
+
+<p><strong>Metafields</strong> are custom fields on products, collections, pages, and the shop itself. They are the right answer whenever you find yourself wanting to encode structured information — a specification table, a file version, a release date — that has no native field. Define them with a type, and the theme can render them safely:</p>
+
+<pre class="sbs-prompt">Define a metafield definition on the product with an explicit type
+and a clear namespace and key, then set its value on our product.
+
+In the theme, render it defensively: check the metafield exists
+before rendering the block that displays it, so a product without
+the value renders nothing rather than an empty heading.
+
+Confirm by reading the product back and by fetching the rendered
+page.</pre>
+
+<p>The defensive rendering note matters because metafields are per-record. A section that assumes the value exists renders a stray label on every product that lacks it.</p>
+
+<h2 id="perf">Performance: what you actually control</h2>
+
+<p>You do not control Shopify's infrastructure, and you do not need to — it is fast. What you control is what the theme loads, and that is where storefront performance is usually lost.</p>
+
+<p>Four things account for most of it.</p>
+
+<p><strong>Apps.</strong> Every installed app can inject script into the storefront, and they rarely remove it cleanly when uninstalled. An app added for a two-week experiment eighteen months ago may still be loading on every page. Audit what is actually being requested rather than what you believe is installed.</p>
+
+<p><strong>Images.</strong> Shopify's CDN will resize on request, so an image should be requested at the size it renders, with a responsive <code>srcset</code>, explicit width and height to prevent layout shift, and lazy loading below the fold. A theme that requests one large image and lets CSS shrink it is the most common single cause of a slow product page.</p>
+
+<p><strong>Fonts.</strong> Shopify's font picker handles loading sensibly. A custom font added by hand often does not — check for a render-blocking stylesheet and an unnecessary weight or two.</p>
+
+<p><strong>Your own JavaScript.</strong> Defer it. Almost nothing in a storefront needs to block rendering.</p>
+
+<pre class="sbs-prompt">Audit this storefront's loaded resources on the home and product
+pages.
+
+Report the actual bytes: JavaScript by origin, CSS, images with the
+largest named individually, and fonts. Identify every third-party
+origin contacted and which app it belongs to. Identify the LCP
+element and every render-blocking resource.
+
+Flag images requested larger than they render, and any script
+loading on every page for a feature used on one.
+
+Measure it — do not estimate. Do not change anything yet.</pre>
+
+<p>Then act on it in order of bytes saved, and re-measure. Note that removing an app's script tag from the theme is not the same as uninstalling the app, and an app you still use may legitimately need its script — the trade-off is yours, not the agent's.</p>
+
+<h2 id="seo">SEO: what Shopify does for you</h2>
+
+<p>Shopify handles several things automatically, and knowing which ones prevents a well-meaning session from breaking them.</p>
+
+<p><strong>The sitemap is generated and maintained.</strong> Shopify produces <code>/sitemap.xml</code> as an index pointing to child sitemaps for products, collections, pages, and blogs, and updates it as content changes. Do not replace it with a hand-written file. A static sitemap is correct on the day it is written and wrong thereafter. The right action is to validate it — fetch it, fetch the children, and confirm your important URLs are present and return 200.</p>
+
+<p><strong>Canonical tags are emitted</strong> by the theme's <code>canonical_url</code> object. Check they are correct rather than adding your own.</p>
+
+<p><strong><code>/robots.txt</code> is generated</strong> with defaults that block the cart, checkout, and various internal paths. It is customisable through a template, but the default is sensible and changing it is a good way to deindex yourself. Verify it does not block anything you want crawled, then leave it alone.</p>
+
+<p>What is genuinely yours: page titles and meta descriptions, heading structure, internal linking, image alt text, content quality, and structured data. That is where the work should go.</p>
+
+<p>One theme-level detail that is easy to miss: if your layout builds the <code>&lt;title&gt;</code> from a theme setting that has never been filled in, it may fall back to the <code>.myshopify.com</code> domain. That is a real title tag on a real indexed homepage, and nobody notices because the page looks fine. Fetch the homepage and read the actual title.</p>
+
+<p>The <a href="/blogs/guides/claude-code-seo-website-optimization">SEO workflow guide</a> covers the rest of this ground in detail.</p>
+
+<h2 id="agents">Agent discovery: agents.md and llms.txt</h2>
+
+<p>A newer consideration, and one worth a few minutes because it is cheap and few stores have done it. AI assistants and agents increasingly fetch a machine-readable description of a site rather than parsing its HTML, and Shopify supports serving one from the theme.</p>
+
+<p>A single theme template can back all three of the conventional discovery URLs — <code>/agents.md</code>, and as a fallback <code>/llms.txt</code> and <code>/llms-full.txt</code>. What belongs in it is a plain-Markdown summary: what the store sells, the key URLs, the policies, and how to buy.</p>
+
+<p>The one thing that catches people is that this template renders in a <strong>restricted Liquid context</strong>. Most global objects are unavailable — there is no <code>collections</code>, no <code>pages</code>, no <code>settings</code>. You get the <code>request</code> object and an <code>agents</code> object exposing store-level values like the store name, URL, currency, and sitemap URL. Anything else renders empty, silently, and the file looks fine locally because you were reading the source rather than the output.</p>
+
+<pre class="sbs-prompt">Create the agents.md template for this theme.
+
+It renders in a restricted context: only the `request` and `agents`
+objects are available. Do not reference collections, pages, settings,
+or any other global — they render empty with no error.
+
+Use the agents object for store name, URL, currency, and sitemap.
+Hard-code the specific page paths, since no object exposes them.
+
+Output plain Markdown, no HTML. Then fetch /agents.md, /llms.txt,
+and /llms-full.txt on the live domain and show me the actual bodies
+returned.</pre>
+
+<p>The final instruction is the whole test. Because failures here are silent, reading the rendered output is the only way to know whether half your template evaluated to nothing.</p>
+
+<p>Getting found and getting bought are different jobs. <a href="/blogs/guides/shopify-conversion-audit-claude-code">The Shopify conversion audit</a> covers the second: duplicated app analytics events, the product page at 375px, and the parts of checkout the platform will not let you change.</p>
+
+<h2 id="qa">QA before you take money</h2>
+
+<p>A storefront has a specific failure that ordinary sites do not: it can look perfect and take payments without delivering anything. QA accordingly.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Check</th><th>How</th></tr></thead>
+<tbody>
+<tr><td>Every page returns 200</td><td>Crawl the site; report actual status codes</td></tr>
+<tr><td>No broken internal links</td><td>Extract every href, fetch each, check anchors resolve</td></tr>
+<tr><td>No Liquid errors rendering as text</td><td>Grep response bodies for <code>{{</code>, <code>{%</code>, and error strings</td></tr>
+<tr><td>Product page correct</td><td>Price, availability, images, description headings</td></tr>
+<tr><td>Add to cart works</td><td>Manually, in a browser</td></tr>
+<tr><td>Checkout completes</td><td>Real test order</td></tr>
+<tr><td>Delivery works</td><td>Receive the email, click the link, open the file</td></tr>
+<tr><td>Policies present and linked</td><td>Fetch each <code>/policies/</code> URL</td></tr>
+<tr><td>Mobile at 320px</td><td>No horizontal overflow; measure it</td></tr>
+<tr><td>Structured data valid</td><td>Rich Results Test; no review markup</td></tr>
+<tr><td>Claims match reality</td><td>Cross-check every number on the page against the product</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That last row is unusual and worth explaining. If your storefront makes specific claims — a page count, a file count, a number of templates — those are checkable assertions about a real artefact, and they drift as the product changes. Verifying them mechanically is a short script and it prevents shipping a page that overstates what the customer receives:</p>
+
+<pre class="sbs-prompt">Extract every numeric claim from the storefront copy — counts,
+sizes, quantities, durations.
+
+For each, find what the actual value is in the product bundle and
+compare. Report every claim with its stated value, its actual value,
+and whether they match.
+
+Any mismatch is a defect. An overstatement is worse than an
+understatement, but flag both.</pre>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The full go-live sequence, the QA matrix above, and the digital-delivery verification step are all in the Launch System's launch checklists &mdash; <a href="/products/claude-code-website-launch-system">browse the contents</a>.</p>
+</aside>
+
+<h2 id="golive">Going live</h2>
+
+<p>The order matters, because each step is easier to fix while nobody is watching.</p>
+
+<ol>
+  <li><strong>Publish the theme.</strong> Development theme verified, then publish. Keep the previous theme; it is your rollback.</li>
+  <li><strong>Verify the live storefront.</strong> Re-run the crawl against the real domain. Different theme role, different URLs, occasionally different behaviour.</li>
+  <li><strong>Confirm delivery.</strong> Before the password comes off. This is the last moment it is free to be wrong.</li>
+  <li><strong>Place a real order.</strong> With the password still on if your setup allows it. Complete payment, receive the file, then refund yourself.</li>
+  <li><strong>Remove the storefront password.</strong> The store is now public.</li>
+  <li><strong>Verify the domain.</strong> Both apex and <code>www</code> resolve, HTTPS works, one canonically redirects to the other.</li>
+  <li><strong>Check the sitemap and robots.txt</strong> on the live domain.</li>
+  <li><strong>Submit to Search Console</strong> — after verifying ownership, and only if you intend to manage it.</li>
+  <li><strong>Watch the first real orders.</strong> Manually confirm the first few customers actually received the product.</li>
+</ol>
+
+<p>Step nine is not optional. Automated verification tells you the mechanism worked in the case you tested. The first genuine customer is the case you did not test.</p>
+
+<h2 id="gotchas">Gotchas that cost real time</h2>
+
+<p>These are from building this store, not from documentation.</p>
+
+<h3>Policy pages are not a template type</h3>
+
+<p>If you want policy pages styled differently, the obvious approach is a <code>templates/policy.json</code>. Shopify rejects it with an explicit error: template type <code>policy</code> does not support JSON templates. The natural next move is <code>templates/policy.liquid</code> — which uploads successfully and is then silently ignored, because <code>policy</code> is not a template type at all. You get a successful push and an unchanged page, which reads exactly like a caching problem and is not one. The working approach is to branch inside the layout on the page type.</p>
+
+<h3>Push order matters</h3>
+
+<p>Section-group JSON files reference sections by filename. Push the JSON before the section file exists and the push fails on an unknown section. Order: assets, layouts, snippets, and sections first; then section-group JSON; then templates; then configuration. Worth encoding in your push script rather than rediscovering.</p>
+
+<h3>Theme setting values must match their schema type</h3>
+
+<p>Writing <code>settings_data.json</code> programmatically, it is natural to clear a setting by writing an empty string. Shopify rejects this for typed settings — a <code>product_list</code> expects an array, and <code>""</code> is an error, not an empty value. The push fails with a message about the setting rather than about the type, which sends you looking in the wrong place. Map each setting to its schema type's correct empty value.</p>
+
+<h3>Missing vendor snippets throw Liquid errors</h3>
+
+<p>Some commercial themes reference snippets that ship conditionally. If one is absent, <code>{% render %}</code> produces a visible Liquid error on the page. An empty stub file with the expected name fixes it without touching vendor code.</p>
+
+<h3>Fragment links break on every page but one</h3>
+
+<p>A call-to-action linking to <code>#buy</code> works on the page containing that element and silently does nothing everywhere else — no error, no navigation, just a click with no effect. Root-relative links (<code>/#buy</code>) work from anywhere. This is easy to miss because it works perfectly on the page you were building.</p>
+
+<h3>The default theme's contrast may not meet AA</h3>
+
+<p>Commercial themes are designed to look good in a screenshot. Measure rather than assume, including on elements Shopify renders rather than your theme.</p>
+
+<h3>Liquid fails quietly</h3>
+
+<p>The recurring theme in all of the above. A broken tag renders as nothing or as visible text; a wrong object renders as empty; an ignored template renders the previous version. The push succeeds either way. This is why "fetch the URL and check the response body" belongs in your finishing procedure rather than in your intentions.</p>
+
+<h2>Where to go next</h2>
+
+<p>Free companions for a storefront build: the <a href="/pages/claude-code-launch-checklist">website launch checklist</a> for the run-up to going live, and the <a href="/pages/claude-code-website-audit-checklist">website audit checklist</a> for reviewing a store that already exists.</p>
+
+<p>The general workflow this sits inside is in <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a>. The prompts here are Shopify-specific applications of the patterns in the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a>, and the theme <code>CLAUDE.md</code> above is a specialised version of the structure in <a href="/blogs/guides/production-claude-md-web-development">creating a production CLAUDE.md</a>. Once the store is live, the <a href="/blogs/guides/claude-code-seo-website-optimization">SEO optimisation workflow</a> covers making it findable, and <a href="/blogs/guides/shopify-seo-with-claude-code">Shopify SEO with Claude Code</a> covers the platform-specific half: which duplicate URLs Shopify already resolves, the SEO metafields, the thin pages it creates without being asked, and whether a digital product is eligible for Merchant Center at all.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://shopify.dev/docs/storefronts/themes/architecture" rel="noopener">Shopify: theme architecture</a> — layouts, templates, sections, section groups</li>
+  <li><a href="https://shopify.dev/docs/api/admin-graphql" rel="noopener">Shopify: Admin GraphQL API</a> — the current Admin API</li>
+  <li><a href="https://shopify.dev/docs/api/usage/rate-limits" rel="noopener">Shopify: API rate limits</a> — cost-based throttling</li>
+  <li><a href="https://shopify.dev/docs/storefronts/themes/tools/cli" rel="noopener">Shopify CLI for themes</a></li>
+  <li><a href="https://developers.google.com/search/docs/appearance/structured-data/product" rel="noopener">Google: product structured data</a></li>
+  <li><a href="https://www.w3.org/TR/WCAG22/" rel="noopener">W3C: WCAG 2.2</a></li>
+</ul>

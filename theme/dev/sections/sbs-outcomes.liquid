@@ -1,0 +1,103 @@
+{%- comment -%}
+  "What are you trying to build?" — outcome-led entry points.
+
+  Every card describes a path that exists in the product. The stage chain is the
+  real WEBSITE-LAUNCH-WORKFLOW sequence, and "starts with" names the actual file
+  a buyer opens, taken from the START-HERE workflow table. If a module is ever
+  renamed, these strings have to change with it.
+
+  Each card links to the free guide covering the same ground, not to the product.
+  Five identical product links on one section would be a sitewide exact-match
+  anchor pattern, and the guides are genuinely the better next click for someone
+  still deciding. One product CTA sits below the grid.
+{%- endcomment -%}
+
+<section class="sbs-section sbs-section--alt" id="{{ section.settings.anchor | default: 'outcomes' }}">
+  <div class="sbs-container">
+    <header class="sbs-outcomes__head">
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.body != blank -%}
+        <p class="sbs-lede">{{ section.settings.body | escape }}</p>
+      {%- endif -%}
+    </header>
+
+    <ul class="sbs-grid sbs-grid--3 sbs-outcomes">
+      {%- for block in section.blocks -%}
+        <li class="sbs-card sbs-outcome" {{ block.shopify_attributes }}>
+          <p class="sbs-outcome__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+          <h3>{{ block.settings.title | escape }}</h3>
+
+          {%- if block.settings.stages != blank -%}
+            {%- assign stages = block.settings.stages | split: ',' -%}
+            <ol class="sbs-outcome__path" aria-label="Workflow stages">
+              {%- for s in stages -%}
+                <li>{{ s | strip | escape }}</li>
+              {%- endfor -%}
+            </ol>
+          {%- endif -%}
+
+          {%- if block.settings.starts_with != blank -%}
+            <p class="sbs-outcome__file">
+              <span class="sbs-outcome__file-label">Starts with</span>
+              <code>{{ block.settings.starts_with | escape }}</code>
+            </p>
+          {%- endif -%}
+
+          {%- if block.settings.link_url != blank -%}
+            <p class="sbs-outcome__more">
+              <a class="sbs-tap" href="{{ block.settings.link_url }}">
+                {{ block.settings.link_label | default: 'Read the free guide' | escape }}
+              </a>
+            </p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- assign product = all_products[section.settings.product] -%}
+    {%- if product != blank and section.settings.show_cta -%}
+      <p class="sbs-outcomes__cta">
+        <a class="sbs-btn sbs-btn--primary" href="{{ product.url }}">
+          {{ section.settings.cta_label | escape }} &mdash; {{ product.price | money_without_trailing_zeros }}
+        </a>
+        <span class="sbs-cta-note">{{ section.settings.cta_note | escape }}</span>
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Outcomes",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "outcomes" },
+    { "type": "text", "id": "heading", "label": "Heading",
+      "default": "What are you trying to build?" },
+    { "type": "textarea", "id": "body", "label": "Intro",
+      "default": "Start with your outcome. The Launch System supplies the workflow, the prompts and the checks for each one." },
+    { "type": "header", "content": "Product CTA" },
+    { "type": "checkbox", "id": "show_cta", "label": "Show the product CTA", "default": true },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Get the Launch System" },
+    { "type": "text", "id": "cta_note", "label": "Note under the button",
+      "default": "Every workflow above is in the same download. One price, no subscription." }
+  ],
+  "blocks": [
+    {
+      "type": "outcome",
+      "name": "Outcome",
+      "settings": [
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "text", "id": "stages", "label": "Stages (comma separated)" },
+        { "type": "text", "id": "starts_with", "label": "File the buyer opens first" },
+        { "type": "url", "id": "link_url", "label": "Free guide URL" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Read the free guide" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Outcomes" }]
+}
+{% endschema %}

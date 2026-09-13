@@ -1,0 +1,501 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "MASTER PROMPT",
+            "meta": "15 phases",
+            "highlight": true
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "CLAUDE.md",
+            "meta": "production",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "SEO SYSTEM",
+            "meta": "10 files",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "SHOPIFY",
+            "meta": "7 files",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "WORDPRESS",
+            "meta": "5 files",
+            "highlight": false
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "ASTRO",
+            "meta": "5 files",
+            "highlight": false
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "SAAS",
+            "meta": "6 files",
+            "highlight": false
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "SECURITY",
+            "meta": "6 files",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "ACCESSIBILITY",
+            "meta": "5 files",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "DEPLOYMENT",
+            "meta": "GitHub + CF",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "100 PROMPTS",
+            "meta": "11 categories",
+            "highlight": true
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "CHECKLISTS",
+            "meta": "11 files",
+            "highlight": false
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12"
+      ],
+      "settings": {
+        "summary": "The complete prompt, architecture, SEO, deployment, security, and launch system for turning Claude Code into your AI web-development team.",
+        "button_label": "Add to cart",
+        "note": "Instant digital download. Nothing is shipped."
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Ready to start?",
+        "body": "Unzip it and open START-HERE.md.",
+        "cta_label": "Get the Launch System",
+        "cta_url": "/#buy",
+        "note": "Instant digital access.",
+        "product": "claude-code-website-launch-system"
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Seventeen numbered modules and a START-HERE that tells you which one to open. Nothing to install, no account with us, no subscription.",
+            "code": "Claude-Code-Website-Launch-System/\n  START-HERE.md\n  01-Master-System/\n  02-Claude-Code-Configuration/\n  03-SEO-System/\n  04-Shopify/\n  ...\n  15-Claude-Code-Prompt-Library/\n  16-Templates/\n  17-Bonus/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "START-HERE picks your path",
+            "body": "Sixteen short sections, about six minutes. The one that matters is a table: find your situation on the left, open the file on the right.",
+            "code": "| Your situation          | Start here                                   |\n| New site, any stack     | 01-Master-System/MASTER-WEBSITE-BUILDER-PROMPT.md |\n| Shopify store or theme  | 04-Shopify/SHOPIFY-MASTER-BUILD-PROMPT.md    |\n| Existing site           | 17-Bonus/EXISTING-WEBSITE-AUDIT-PROMPT.md    |"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Set the project context first",
+            "body": "Module 02 is the step people skip. A CLAUDE.md that states the commands, the boundaries and the definition of done, before a single prompt is run.",
+            "code": "02-Claude-Code-Configuration/\n  CLAUDE-MD-GUIDE.md\n  PRODUCTION-CLAUDE.md\n  CODING-STANDARDS-TEMPLATE.md"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Run the master prompt",
+            "body": "Open Claude Code in the project and paste the master prompt for your situation. It runs as staged work, not one wish.",
+            "code": "$ claude\n\n> Read 01-Master-System/MASTER-WEBSITE-BUILDER-PROMPT.md\n> and work through it stage by stage. Stop at the end of\n> each stage and show me what you have."
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "Thirteen stages, in dependency order",
+            "body": "The workflow is ordered so each stage can be checked before the next one depends on it. Skipping ahead is how a build becomes unverifiable.",
+            "code": "Research → Plan → Architect → Design → Build → Write\n → Optimize → Secure → Test → Deploy → Index\n → Monitor → Improve"
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Audits that produce evidence",
+            "body": "Each specialist module ends in something measurable rather than an opinion — the SEO audit, the security review, the accessibility pass, the launch checklists.",
+            "code": "03-SEO-System/TECHNICAL-SEO-AUDIT-PROMPT.md\n11-Security/…\n12-Accessibility/…\n14-Checklists/PRE-LAUNCH-CHECKLIST.md"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "And 100 prompts for the rest",
+            "body": "The library covers the work between the big stages: discovery, planning, development, debugging, performance, content, SEO, security, accessibility, deployment and maintenance.",
+            "code": "15-Claude-Code-Prompt-Library/\n  DISCOVERY-PROMPTS.md      SEO-PROMPTS.md\n  PLANNING-PROMPTS.md       SECURITY-PROMPTS.md\n  DEVELOPMENT-PROMPTS.md    ACCESSIBILITY-PROMPTS.md\n  DEBUGGING-PROMPTS.md      DEPLOYMENT-PROMPTS.md"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "What you end up with",
+            "body": "113 files across 17 modules, more than 110,000 words, and 100 reusable prompts — one repeatable production system rather than a folder of tips.",
+            "code": ""
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "What the download actually looks like",
+        "body": "The folders, the entry point, and the workflow you run — before you buy it rather than after.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to a finished build.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real entry point, and the real thirteen-stage workflow.</p><p>For the system applied to a real build, read <a href=\"/pages/case-study\">how this store was built with it</a>.</p>"
+      }
+    },
+    "workflows": {
+      "type": "sbs-outcomes",
+      "blocks": {
+        "o1": {
+          "type": "outcome",
+          "settings": {
+            "eyebrow": "NEW BUILD",
+            "title": "Build a new website",
+            "stages": "Research, Plan, Architect, Build, Optimize, Secure, Test, Deploy",
+            "starts_with": "01-Master-System/MASTER-WEBSITE-BUILDER-PROMPT.md",
+            "link_url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+            "link_label": "Read the free build guide"
+          }
+        },
+        "o2": {
+          "type": "outcome",
+          "settings": {
+            "eyebrow": "ECOMMERCE",
+            "title": "Build a Shopify store",
+            "stages": "Theme, Catalogue, Digital delivery, Policies, Schema, SEO, Launch",
+            "starts_with": "04-Shopify/SHOPIFY-MASTER-BUILD-PROMPT.md",
+            "link_url": "/blogs/guides/build-shopify-store-with-claude-code",
+            "link_label": "Read the free Shopify guide"
+          }
+        },
+        "o3": {
+          "type": "outcome",
+          "settings": {
+            "eyebrow": "APPLICATION",
+            "title": "Build a SaaS product",
+            "stages": "Architecture, Auth, Data, Security, CI/CD, Deploy",
+            "starts_with": "07-SaaS/SAAS-APPLICATION-BUILD-PROMPT.md",
+            "link_url": "/blogs/guides/claude-md-examples-web-development",
+            "link_label": "See the SaaS CLAUDE.md example"
+          }
+        },
+        "o4": {
+          "type": "outcome",
+          "settings": {
+            "eyebrow": "EXISTING SITE",
+            "title": "Improve a site you already have",
+            "stages": "Audit, Diagnose, Prioritise, Fix, Validate",
+            "starts_with": "17-Bonus/EXISTING-WEBSITE-AUDIT-PROMPT.md",
+            "link_url": "/blogs/guides/claude-code-website-audit",
+            "link_label": "Read the free audit guide"
+          }
+        },
+        "o5": {
+          "type": "outcome",
+          "settings": {
+            "eyebrow": "SEARCH",
+            "title": "Improve Google rankings",
+            "stages": "Technical SEO, Architecture, Internal links, Schema, Search Console, Validate",
+            "starts_with": "03-SEO-System/SEO-ARCHITECTURE-PROMPT.md",
+            "link_url": "/blogs/guides/claude-code-seo-website-optimization",
+            "link_label": "Read the free SEO guide"
+          }
+        }
+      },
+      "block_order": [
+        "o1",
+        "o2",
+        "o3",
+        "o4",
+        "o5"
+      ],
+      "settings": {
+        "anchor": "workflows",
+        "show_cta": false,
+        "product": "claude-code-website-launch-system",
+        "heading": "Which workflow you would start with",
+        "body": "Every one of these is in the same download. Find the row that matches what you are building."
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "settings": {
+        "anchor": "questions",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The questions worth answering before money changes hands.",
+        "emit_schema": true
+      },
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "What exactly do I receive?",
+            "answer": "<p>One ZIP file containing 113 files across 17 modules — over 700&nbsp;KB of Markdown, more than 110,000 words. Prompts, workflows, templates, and checklists. A manifest inside lists every count, and a SHA-256 checksum is published with the download.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Is this an ebook?",
+            "answer": "<p>No. Nothing here is designed to be read cover to cover. It is meant to be pasted into a terminal while Claude Code is running, then edited to fit the job in front of you. Four documents are written to you rather than to Claude; the rest are working files.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need Claude Code?",
+            "answer": "<p>Yes. This is a system for directing Claude Code, and it does nothing on its own.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "Is a paid Claude plan required?",
+            "answer": "<p>Per Anthropic's current documentation, Claude Code requires a Pro, Max, Team, Enterprise, or Console account — the free Claude.ai plan does not include Claude Code access. It can also run against Amazon Bedrock, Google Cloud's Agent Platform, or Microsoft Foundry. Anthropic changes plans and features regularly, so check <a href=\"https://code.claude.com/docs\" rel=\"noopener\">code.claude.com/docs</a> before relying on this.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need to know how to code?",
+            "answer": "<p>Not professionally. You do need to be comfortable in a terminal and willing to read what Claude produces and push back when it is wrong — the whole system is built around that habit. If you will not review the output, this will not help you.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Can experienced developers use it?",
+            "answer": "<p>Yes, and they tend to get the most out of it. The value for an experienced developer is the structure: gated phases, stated constraints, and completion criteria that stop long unreviewed stretches of generated code.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it work with an existing website?",
+            "answer": "<p>Yes. There is a dedicated audit prompt for existing sites, a rescue prompt for broken or compromised ones, and a redesign prompt built around not losing the traffic you already have.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it for client projects?",
+            "answer": "<p>Yes. The licence covers unlimited projects including paid client work, and you may adapt anything. You may not redistribute, resell, or repackage the files themselves, and it is a single-user licence — each person using the files directly needs their own.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "Which platforms does it cover?",
+            "answer": "<p>Dedicated build systems for Shopify, WordPress, Astro, SaaS applications, and landing pages. The master prompt and the security, accessibility, SEO, and checklist material are platform-agnostic. It is not a claim of universal compatibility with every framework.</p>"
+          }
+        },
+        "q10": {
+          "type": "qa",
+          "settings": {
+            "question": "Can it build a SaaS application?",
+            "answer": "<p>There is a full SaaS module covering tenancy, authorisation, authentication, database migrations, API design, billing webhooks, observability, and a production readiness gate. It will not build a business for you.</p>"
+          }
+        },
+        "q11": {
+          "type": "qa",
+          "settings": {
+            "question": "Are updates included?",
+            "answer": "<p>Updates within version 1.x, where issued, are made available through your original purchase channel at no extra cost. No update schedule is promised. Version 2.0 and later may be offered separately.</p>"
+          }
+        },
+        "q12": {
+          "type": "qa",
+          "settings": {
+            "question": "How is it delivered?",
+            "answer": "<p>Digitally, immediately after checkout. Nothing is shipped. You receive a download link for the ZIP file.</p>"
+          }
+        },
+        "q13": {
+          "type": "qa",
+          "settings": {
+            "question": "Is this affiliated with Anthropic?",
+            "answer": "<p>No. Site Builder Stack is an independent product and is not affiliated with, sponsored by, or endorsed by Anthropic. “Claude” and “Claude Code” are product names and trademarks of Anthropic, PBC, referenced here only to describe what this system works with.</p>"
+          }
+        },
+        "q14": {
+          "type": "qa",
+          "settings": {
+            "question": "Will this guarantee rankings, traffic, or revenue?",
+            "answer": "<p>No, and anyone promising that is selling something that does not exist. This is a professional system for directing Claude Code through planning, development, optimisation, deployment, and launch. Search engines decide what to index and rank; customers decide what to buy.</p>"
+          }
+        },
+        "q15": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I redistribute or resell the files?",
+            "answer": "<p>No. You may use them on unlimited projects and keep everything you produce, but the files themselves may not be shared, resold, published, or repackaged. Full terms are in LICENSE.md inside the download.</p>"
+          }
+        },
+        "q16": {
+          "type": "qa",
+          "settings": {
+            "question": "What if it is not what I expected?",
+            "answer": "<p>See the refund policy in the footer. It states plainly how digital purchases are handled, and your statutory rights under consumer law are not affected by it.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9",
+        "q10",
+        "q11",
+        "q12",
+        "q13",
+        "q14",
+        "q15",
+        "q16"
+      ]
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals, Search Console and content auditing. For a site that exists and is not ranking.",
+            "flagship": false
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert & grow",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "Funnels, page audits, forms, analytics, experimentation and conversion copy. For traffic that already arrives and does not turn into revenue.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "The first three",
+            "product": "complete-site-builder-stack",
+            "body": "Build, rank and convert in one purchase — the three earlier systems on this site, delivered as three downloads.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Monitoring, security checks, backups, dependency updates, deployment gates, incident playbooks and monthly reporting. For the stage after launch, which lasts longest.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p2",
+        "p3",
+        "p5",
+        "p4"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "After launch",
+        "heading": "Three narrower systems — or the first three together",
+        "intro": "The Launch System takes a site from nothing to live. These pick up afterwards, and go considerably deeper in their areas than the Launch System does.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "workflows",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

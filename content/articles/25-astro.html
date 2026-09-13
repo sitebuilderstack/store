@@ -1,0 +1,401 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#fit">Why Astro is the easiest platform to hand an agent</a></li>
+    <li><a href="#start">Starting: a new project, or one that already exists</a></li>
+    <li><a href="#architecture">The architecture worth stating out loud</a></li>
+    <li><a href="#collections">Content collections, as they actually are now</a></li>
+    <li><a href="#routing">Routing, layouts, and the shape of a page</a></li>
+    <li><a href="#typescript">TypeScript, and using it as a check</a></li>
+    <li><a href="#images">Images and assets</a></li>
+    <li><a href="#integrations">Integrations, and how few you need</a></li>
+    <li><a href="#seo">SEO</a></li>
+    <li><a href="#schema">Structured data</a></li>
+    <li><a href="#a11y">Accessibility</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#claudemd">A CLAUDE.md for Astro</a></li>
+    <li><a href="#testing">Testing, and checks that can fail</a></li>
+    <li><a href="#cloudflare">Deploying to Cloudflare</a></li>
+    <li><a href="#validate">Production validation</a></li>
+    <li><a href="#mistakes">The mistakes that cost the most</a></li>
+    <li><a href="#example">End to end: a documentation site in one sitting</a></li>
+  </ol>
+</nav>
+
+<h2 id="fit">Why Astro is the easiest platform to hand an agent</h2>
+
+<p>Astro is close to the best-case platform for agent-assisted development, and the reason is structural rather than aesthetic: almost everything the site does is visible in files. There is no database, no plugin layer filtering your output on the way out, and no admin interface quietly overriding what you wrote. Read the repository and you know what the site renders.</p>
+
+<p>That single property changes the working relationship. On WordPress, the hard part is establishing which of three sources of truth is in charge. On Astro, the hard part is the ordinary one — being specific about what you want and having a check that can tell you whether you got it.</p>
+
+<p>The second reason is the output. Astro ships zero JavaScript by default, so the failure mode where an agent adds a client-side dependency to solve a problem that did not need one is loudly visible: the bundle appears where there was none. That is a much better feedback loop than a framework where a little more JavaScript is invisible.</p>
+
+<p>This guide covers a production build end to end. It assumes Astro 7, which is the current major line, and it flags the places where behaviour has changed enough that older advice is actively wrong.</p>
+
+<h2 id="start">Starting: a new project, or one that already exists</h2>
+
+<p>For a new project, let the official scaffold do the scaffolding. An agent writing project boilerplate from memory reproduces whatever version it learned, and Astro's has changed materially between majors.</p>
+
+<pre><code>npm create astro@latest</code></pre>
+
+<p>Then hand the agent a repository that already runs, and start from reconnaissance rather than from features. The first session should change nothing:</p>
+
+<pre class="sbs-prompt">Analyse this Astro repository. Do not modify anything.
+
+Report, with the file and line as evidence for each point:
+
+1. The Astro version from package.json and the lockfile, and whether
+   they agree.
+2. The output mode in astro.config: static, server, or hybrid, and
+   which adapter is configured if any.
+3. Every integration installed, and what each one adds to the build.
+4. Whether content collections are defined, where the config lives,
+   and which loader each collection uses.
+5. Every route, grouped into static and dynamic, and for dynamic
+   routes the getStaticPaths source.
+6. Every component that carries a client:* directive, with the
+   directive used and the framework it pulls in.
+7. Whether TypeScript is in strict mode.
+8. The build, dev, and any test or lint commands.
+
+Then state in one paragraph how much JavaScript this site ships to a
+visitor on the homepage, and where it comes from. If you cannot tell
+without building, say so and stop.</pre>
+
+<p>That last question is the one worth asking first. An Astro site shipping 200 KB of client JavaScript is an Astro site being used as a worse React app, and it is better to know before you add to it.</p>
+
+<h2 id="architecture">The architecture worth stating out loud</h2>
+
+<p>Three ideas do most of the work, and an agent will produce better output if the project context file names them explicitly rather than leaving them to be inferred.</p>
+
+<p><strong>Components render at build time by default.</strong> An <code>.astro</code> component runs its frontmatter on the server, produces HTML, and ships no JavaScript. This is the default and it should stay the default. Most interactive-looking things — a details/summary disclosure, a navigation menu, a form — do not need a framework component at all.</p>
+
+<p><strong>Islands are opt-in and directive-scoped.</strong> A framework component becomes interactive only when you add a <code>client:*</code> directive, and which directive you choose is a performance decision: <code>client:load</code> hydrates immediately, <code>client:idle</code> waits for the main thread, <code>client:visible</code> waits until it scrolls into view, and <code>client:only</code> skips server rendering entirely. Agents reach for <code>client:load</code> because it always works. Most components should be <code>client:visible</code>.</p>
+
+<p><strong>Output mode decides what is possible.</strong> A statically built site has no server at request time, so anything needing a request — reading a cookie, personalising a response, handling a form POST — requires either a server-rendered route or a separate endpoint. Deciding this late is expensive; deciding it in the first session is free.</p>
+
+<h2 id="collections">Content collections, as they actually are now</h2>
+
+<p>This is the part where stale advice does the most damage, because the API changed and the old shape still appears in a great deal of writing.</p>
+
+<p>Collections are defined in <code>src/content.config.ts</code>, and every collection now requires a <strong>loader</strong>. The built-in ones are <code>glob()</code> for many files matching a pattern and <code>file()</code> for a single file containing multiple entries; custom loaders can pull from anywhere. The schema remains optional and is written with Zod.</p>
+
+<pre><code>import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+const guides = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  schema: z.object({
+    title: z.string().max(70),
+    description: z.string().min(70).max(158),
+    published: z.coerce.date(),
+    updated: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides };</code></pre>
+
+<p>Query them with <code>getCollection()</code> and <code>getEntry()</code>, and turn an entry's body into HTML with <code>render()</code>. Astro 7 adds <strong>live collections</strong> — <code>getLiveCollection()</code> and <code>getLiveEntry()</code> — which fetch at request time rather than at build, for data that must be fresh. Build-time collections and live collections use similar APIs and run at different stages; picking the wrong one produces either stale content or a site that cannot be statically built.</p>
+
+<p>The schema is the most useful thing on this page for agent-assisted work, and it is underused. It is a check that runs on every build and cannot be skipped. The example above will fail the build if a description is shorter than 70 characters or longer than 158 — which means "every guide has a meta description of a sensible length" stops being a review item and becomes a build error.</p>
+
+<pre class="sbs-prompt">Add three new guides to the `guides` collection from the outlines in
+`/tmp/outlines.md`.
+
+The collection schema is authoritative. Do not modify
+`src/content.config.ts` to make content fit — if a value will not
+validate, fix the content.
+
+After writing them, run `npm run build` and show me the output. If the
+build fails on schema validation, fix the frontmatter and build again.
+Do not relax the schema.</pre>
+
+<p>"Do not relax the schema" belongs in the project context file permanently. Loosening a constraint to make a build pass is the agent-assisted equivalent of deleting a failing test, and it is just as tempting.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes an Astro build system with the schema-first approach baked in, plus the audits that run against the built output rather than the source — <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="routing">Routing, layouts, and the shape of a page</h2>
+
+<p>Routing is file-based: <code>src/pages/about.astro</code> becomes <code>/about</code>. Dynamic routes use bracket syntax and, in a static build, must export <code>getStaticPaths()</code> to enumerate every page that will exist.</p>
+
+<pre><code>---
+// src/pages/guides/[...slug].astro
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Guide.astro';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+&lt;Layout title={entry.data.title} description={entry.data.description}&gt;
+  &lt;Content /&gt;
+&lt;/Layout&gt;</code></pre>
+
+<p>Two things in that snippet are worth making rules. The draft filter belongs in <code>getStaticPaths()</code>, not in the template — filtering in the template still generates the page, it just renders it empty, which produces a thin indexable URL. And every page's title and description flow from the collection schema into the layout, which means the schema constraint reaches the rendered <code>&lt;head&gt;</code>.</p>
+
+<p>Layouts are ordinary components that accept a slot. One layout owning the <code>&lt;head&gt;</code> is the single most valuable structural decision in an Astro project, because it makes "every page has a canonical URL" a property of the codebase rather than a thing to check.</p>
+
+<h2 id="typescript">TypeScript, and using it as a check</h2>
+
+<p>Astro ships TypeScript configuration presets and <code>astro check</code> to run them. Turn on the strict preset, and treat <code>astro check</code> as part of the build rather than an optional nicety:</p>
+
+<pre><code>npm run astro check &amp;&amp; npm run build</code></pre>
+
+<p>The reason this matters more with an agent in the loop than without one: type errors are the cheapest possible feedback signal, and they catch exactly the class of mistake an agent makes most often — a property renamed in one place and not another, a possibly-undefined value used directly, a component prop that no longer exists. Without the check, those surface as a blank region on a page nobody looked at.</p>
+
+<p>Content collections generate types from the schema, so a typo in <code>entry.data.titel</code> is a compile error rather than <code>undefined</code> rendered into a title tag.</p>
+
+<h2 id="images">Images and assets</h2>
+
+<p>Astro's <code>&lt;Image /&gt;</code> component handles format conversion, responsive sizes and, importantly, emits <code>width</code> and <code>height</code> so the browser reserves space. Layout shift from unsized images is the most common CLS failure on content sites, and using the component makes it structurally impossible for images it handles.</p>
+
+<pre><code>---
+import { Image } from 'astro:assets';
+import diagram from '../assets/build-pipeline.png';
+---
+&lt;Image src={diagram} alt="..." widths={[400, 800, 1200]}
+       sizes="(min-width: 60rem) 800px, 92vw" loading="lazy" /&gt;</code></pre>
+
+<p>Three rules to put in project context:</p>
+
+<ul>
+  <li>Images imported from <code>src/</code> are processed and hashed. Images in <code>public/</code> are copied verbatim and are not optimised — that directory is for files that must keep an exact path, like <code>robots.txt</code> or a verification file.</li>
+  <li>The element that will be the largest contentful paint must not be lazy-loaded. Everything below the fold should be.</li>
+  <li><code>alt</code> is required by the component's types, which is a small piece of accessibility enforced by the compiler. Do not defeat it with <code>alt=""</code> on a meaningful image; empty alt is correct only for genuinely decorative images.</li>
+</ul>
+
+<h2 id="integrations">Integrations, and how few you need</h2>
+
+<p>Every integration is build-time code, a dependency to update, and a thing that can break on the next major. The set worth having on a content site is small:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Integration</th><th>Worth it when</th></tr></thead>
+<tbody>
+<tr><td><code>@astrojs/sitemap</code></td><td>Almost always. Generates <code>sitemap-index.xml</code> at build; needs <code>site</code> set in the config.</td></tr>
+<tr><td><code>@astrojs/mdx</code></td><td>Content genuinely needs components inline. Plain Markdown is faster and simpler if it does not.</td></tr>
+<tr><td>A UI framework</td><td>Only when a component is genuinely interactive. One framework, not two.</td></tr>
+<tr><td>An adapter</td><td>Only if the output mode is server or hybrid.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Setting <code>site</code> in <code>astro.config.mjs</code> is not optional. Without it, the sitemap integration produces nothing useful and <code>Astro.site</code> is undefined, which means canonical URLs silently render as relative paths. That is a real SEO defect that produces no error at build time.</p>
+
+<h2 id="seo">SEO</h2>
+
+<p>The whole of a static site's SEO surface lives in a layout you control, which is why Astro sites can be genuinely excellent at this with very little work. Put the head in one component and make every page pass through it.</p>
+
+<pre><code>---
+// src/components/Head.astro
+interface Props { title: string; description: string; image?: string; }
+const { title, description, image } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+&lt;title&gt;{title}&lt;/title&gt;
+&lt;meta name="description" content={description} /&gt;
+&lt;link rel="canonical" href={canonical} /&gt;
+&lt;meta property="og:title" content={title} /&gt;
+&lt;meta property="og:description" content={description} /&gt;
+&lt;meta property="og:url" content={canonical} /&gt;
+&lt;meta property="og:type" content="article" /&gt;
+{image &amp;&amp; &lt;meta property="og:image" content={new URL(image, Astro.site)} /&gt;}</code></pre>
+
+<p>Building the canonical from <code>Astro.url.pathname</code> and <code>Astro.site</code> means it is correct on every page by construction, including dynamic routes, and it is absolute — a relative canonical is ignored by some crawlers and is a common silent failure.</p>
+
+<p>The remaining decisions are editorial rather than technical: one <code>h1</code> per page that names the page's actual subject, heading order that does not skip levels, and a decision about which generated listing pages should be indexed. Tag and category archives on a small site usually should not be — they duplicate the main listing without adding text. The <a href="/blogs/guides/claude-code-technical-seo-audit">technical SEO audit workflow</a> covers how to verify the output rather than trusting the source.</p>
+
+<h2 id="schema">Structured data</h2>
+
+<p>Emit JSON-LD from the same layout, built from the same data the page renders, so the markup and the visible content cannot disagree. That is the entire discipline. A price, a date or a headline typed into a JSON-LD block by hand is correct until the day it is not.</p>
+
+<pre><code>&lt;script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.published.toISOString(),
+  dateModified: (entry.data.updated ?? entry.data.published).toISOString(),
+  mainEntityOfPage: canonical.href,
+})} /&gt;</code></pre>
+
+<p><code>set:html</code> is the correct directive here — it inserts the string without escaping, which is what a JSON-LD block needs and would be dangerous for user content. Two rules: never mark up something a visitor cannot see, and never add a field because a validator suggested it. A validator will happily propose <code>aggregateRating</code>; adding it without reviews is fabrication with a schema.org wrapper.</p>
+
+<h2 id="a11y">Accessibility</h2>
+
+<p>Astro's default output is semantic HTML, which starts you in a good position. The failures that do appear are the ones introduced by islands: a component that renders as a <code>div</code> with a click handler, a modal that does not trap focus, a disclosure built from JavaScript state rather than <code>details</code>/<code>summary</code>.</p>
+
+<p>The most effective single rule is to prefer native elements, and to make the agent justify not using one:</p>
+
+<pre class="sbs-prompt">Add a frequently-asked-questions section to the pricing page, with each
+answer collapsible.
+
+Use native `&lt;details&gt;` and `&lt;summary&gt;`. Do not add a client:* directive
+and do not introduce a framework component — if you believe this cannot
+be done without JavaScript, stop and explain why rather than adding it.
+
+All answers must be present in the HTML whether or not they are open,
+so the content is readable without JavaScript and crawlable.</pre>
+
+<p>Then split the audit the way any accessibility audit should be split: what a machine can answer — contrast, labels, heading order, alt presence, target size — from what needs a person, which is whether alt text is useful and whether a flow can be completed by keyboard. The <a href="/blogs/guides/claude-code-accessibility-audit">WCAG workflow</a> covers the division and the exceptions that trip up automated checkers.</p>
+
+<h2 id="performance">Performance</h2>
+
+<p>A static Astro site starts fast and gets slower only through decisions you make. The three that matter:</p>
+
+<p><strong>Hydration.</strong> Every <code>client:*</code> directive is a bundle. Audit them as a list rather than one at a time — the question is not "is this island justified" but "how many islands does this page have and do they need to hydrate at the same moment".</p>
+
+<p><strong>Fonts.</strong> A web font is render-blocking or it causes a swap, and either way it is the most common cause of layout shift on an otherwise clean build. Self-host, preload the one face that appears above the fold, and set <code>font-display: swap</code> with a metric-compatible fallback stack.</p>
+
+<p><strong>Third-party scripts.</strong> One analytics tag is a decision; four tag-manager containers are a performance problem you cannot fix in your own code. Astro makes your own JavaScript small enough that third-party scripts become the dominant cost, which is a good problem and still a problem.</p>
+
+<p>The targets are unchanged: LCP at or under 2.5 seconds, INP at or under 200 milliseconds, CLS at or under 0.1, each at the 75th percentile of real loads, segmented across mobile and desktop. Lab tools cannot meaningfully measure INP because it depends on what real people click. The <a href="/blogs/guides/claude-code-performance-core-web-vitals">Core Web Vitals workflow</a> covers diagnosis in detail.</p>
+
+<h2 id="claudemd">A CLAUDE.md for Astro</h2>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Astro 7 content site. Static output, deployed to Cloudflare Workers.
+Content lives in `src/content/guides` as Markdown with a Zod schema.
+
+## Commands
+- `npm run dev` — local dev server
+- `npm run build` — production build, must pass before any commit
+- `npm run astro check` — TypeScript and Astro diagnostics, must be clean
+- `npm run preview` — serve the built output locally
+
+## Architecture
+- Components are `.astro` and render at build time. This is the default
+  and stays the default.
+- A `client:*` directive is a performance decision, not a convenience.
+  Default to `client:visible`. Never `client:load` without a reason
+  stated in the pull request.
+- One UI framework only. Do not add a second.
+- `site` is set in astro.config and canonical URLs are built from it.
+  Never write a relative canonical.
+
+## Content
+- `src/content.config.ts` is authoritative. If content will not validate,
+  fix the content. Do not relax the schema to make a build pass.
+- Drafts are filtered in `getStaticPaths()`, never in the template —
+  filtering in the template still generates an empty page.
+
+## Images
+- Import from `src/` and use `<Image />` so dimensions are emitted.
+- `public/` is only for files that need an exact path (robots.txt,
+  verification files). Nothing there is optimised.
+- The LCP image is never lazy-loaded. Everything below the fold is.
+
+## Prohibited
+- No new dependency without saying what it replaces and what it costs
+  in shipped bytes.
+- No `any` in TypeScript. If a type is genuinely unknown, use `unknown`
+  and narrow it.
+- No structured data for content that is not visible on the page.
+
+## Definition of done
+- `astro check` clean, `npm run build` succeeds.
+- No new client-side JavaScript unless it was the point of the change.
+- Verified in `npm run preview`, not only in dev — the dev server and
+  the built output differ in ways that matter.</code></pre>
+
+<p>The last line is worth dwelling on. The Astro dev server does not produce the same output as a build: image processing, prerendering and integration behaviour all differ. A change verified only in <code>dev</code> has not been verified.</p>
+
+<h2 id="testing">Testing, and checks that can fail</h2>
+
+<p>The most valuable checks on a content site are structural and cheap. In rough order of return:</p>
+
+<ol>
+  <li><strong>The build passes.</strong> With a schema on every collection, this already covers a great deal.</li>
+  <li><strong><code>astro check</code> is clean.</strong> Types catch renames and undefined access.</li>
+  <li><strong>Every internal link resolves.</strong> Crawl the built output in <code>dist/</code> — a link checker that runs against source is checking the wrong artefact.</li>
+  <li><strong>Every page has a title, a description and a canonical.</strong> Three greps over <code>dist/</code>, and they will find the one page that slipped past the layout.</li>
+  <li><strong>No page has more than one <code>h1</code>.</strong> Same method, same cost.</li>
+</ol>
+
+<p>Whatever you write, prove it can fail before you trust it passing. Break a link deliberately, run the checker, confirm it goes red, then restore it and confirm it goes quiet. A link crawler reporting "0 broken links" that has never found one is not evidence of anything — and on a static site it is very easy to write one that silently checks nothing because it was pointed at the wrong directory.</p>
+
+<h2 id="cloudflare">Deploying to Cloudflare</h2>
+
+<p>This is the part of Astro deployment advice most likely to be out of date, so it is worth being precise. Cloudflare's documentation now states plainly that <strong>Workers supports most Pages use cases and is Cloudflare's primary platform for building applications, and that new projects should start with Workers.</strong> Pages still exists and existing projects still work; it is simply no longer the default recommendation.</p>
+
+<p>For a statically built Astro site, that means deploying the build output as Workers Static Assets. The configuration is a <code>wrangler.jsonc</code> naming the directory the build produced:</p>
+
+<pre><code>{
+  "name": "acme-site",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./dist" }
+}</code></pre>
+
+<p>Deploying uploads the Worker and the assets in one operation. From CI, the supported action is <code>cloudflare/wrangler-action@v3</code>, which defaults to Wrangler v4 and authenticates with an API token and an account ID supplied as repository secrets — CI is non-interactive, so there is no browser login to fall back on.</p>
+
+<pre><code>- name: Deploy
+  uses: cloudflare/wrangler-action@v3
+  with:
+    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}</code></pre>
+
+<p>If the site needs server-rendered routes, add <code>@astrojs/cloudflare</code> as the adapter and set the output mode accordingly. Do not add the adapter to a purely static site: it changes the build target for no benefit and makes a simple deployment more complicated. The full pipeline — branch strategy, validation gates, previews, rollback — is covered in the <a href="/blogs/guides/claude-code-github-actions-cloudflare">GitHub Actions and Cloudflare CI/CD guide</a>.</p>
+
+<h2 id="validate">Production validation</h2>
+
+<p>Check the deployed URL, not the preview, after caches have settled. The differences that matter between a local preview and production are precisely the ones that are hardest to see: canonical URLs, redirect behaviour, robots directives, and response headers.</p>
+
+<pre><code>curl -sI https://example.com/ | head -1
+curl -s https://example.com/ | grep -o 'rel="canonical" href="[^"]*"'
+curl -s https://example.com/robots.txt
+curl -sI https://example.com/does-not-exist | head -1   # expect 404, not 200
+curl -s https://example.com/sitemap-index.xml | head -3</code></pre>
+
+<p>That fourth line catches a specific and common static-hosting misconfiguration: a single-page-app fallback that serves the index page with a <code>200</code> for every unknown path. On a content site that turns every typo and every stale external link into an indexable duplicate of the homepage.</p>
+
+<h2 id="mistakes">The mistakes that cost the most</h2>
+
+<p><strong>Relaxing the schema to make a build pass.</strong> The schema was the check. Loosening it converts a build failure into a silent content defect.</p>
+
+<p><strong><code>client:load</code> everywhere.</strong> It always works, which is why it is the default an agent reaches for, and it is the reason an Astro site ends up shipping more JavaScript than the React app it replaced.</p>
+
+<p><strong>Forgetting <code>site</code> in the config.</strong> No error, no warning, and canonical URLs quietly become relative while the sitemap integration produces nothing useful.</p>
+
+<p><strong>Verifying in <code>dev</code> only.</strong> Image handling and prerendering differ between the dev server and the build. Preview the built output.</p>
+
+<p><strong>Putting images in <code>public/</code>.</strong> They bypass optimisation entirely, and the problem is invisible until someone measures the page weight.</p>
+
+<p><strong>Filtering drafts in the template.</strong> The page is still generated. It is simply empty, indexable, and thin.</p>
+
+<h2 id="example">End to end: a documentation site in one sitting</h2>
+
+<p>A realistic sequence, with the checks in the places they belong:</p>
+
+<ol>
+  <li><strong>Scaffold.</strong> <code>npm create astro@latest</code>, minimal template, TypeScript strict. Commit before anything else, so the diff of everything that follows is readable.</li>
+  <li><strong>Write <code>CLAUDE.md</code> first.</strong> Commands, architecture rules, the schema-is-authoritative rule, the hydration rule. Then ask Claude what the file says about hydration; a vague answer means a vague section.</li>
+  <li><strong>Define the collection before writing any content.</strong> Schema with title and description length limits, published and updated dates, a draft flag. The constraints you want on every page become build failures rather than review comments.</li>
+  <li><strong>Build the layout and the head component.</strong> One component owns title, description, canonical, Open Graph and JSON-LD, built from the entry data. Every page routes through it.</li>
+  <li><strong>Add the dynamic route.</strong> <code>getStaticPaths()</code> filtering drafts, <code>render()</code> for the body.</li>
+  <li><strong>Content.</strong> Now the schema is doing work: a description that is too short fails the build.</li>
+  <li><strong>The listing page and navigation.</strong> Plain <code>.astro</code>, no islands.</li>
+  <li><strong>Sitemap and <code>robots.txt</code>.</strong> Set <code>site</code>, add the integration, put <code>robots.txt</code> in <code>public/</code>.</li>
+  <li><strong>Checks.</strong> <code>astro check</code>, a build, a link crawl over <code>dist/</code>, and the head-tag greps. Break one thing deliberately and confirm each check notices.</li>
+  <li><strong>Deploy.</strong> Wrangler config with <code>assets.directory</code> pointing at <code>dist</code>, deploy from CI with the wrangler action.</li>
+  <li><strong>Validate live.</strong> Response codes, canonicals, the 404 behaviour, the sitemap. Then again the next day, once a crawler has had a turn.</li>
+</ol>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Launch System ships this as runnable material — an Astro build prompt, a production <code>CLAUDE.md</code>, the SEO and accessibility audits, and the deployment checklists — rather than a method to adapt by hand. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<p>The reason Astro rewards this way of working is that its defaults agree with it. A build that fails on a bad description, a type checker that catches a renamed property, and a bundle that visibly grows when someone adds an island are all checks you did not have to invent. Use them, and the agent's output becomes something you can verify rather than something you have to trust.</p>

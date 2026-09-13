@@ -1,0 +1,701 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What CLAUDE.md actually is</a></li>
+    <li><a href="#loading">How the file actually reaches Claude</a></li>
+    <li><a href="#where">Where the files live and which wins</a></li>
+    <li><a href="#test">The test for what belongs in it</a></li>
+    <li><a href="#length">Why length is the main failure mode</a></li>
+    <li><a href="#anatomy">Anatomy of a production CLAUDE.md</a></li>
+    <li><a href="#template">The template, section by section</a></li>
+    <li><a href="#full">The complete file</a></li>
+    <li><a href="#init">Starting from /init</a></li>
+    <li><a href="#real">A real one: the theme behind this site</a></li>
+    <li><a href="#imports">Splitting large files with imports</a></li>
+    <li><a href="#rules">Path-scoped rules, and the real fix for a long file</a></li>
+    <li><a href="#monorepo">Monorepos and nested files</a></li>
+    <li><a href="#personal">Personal preferences vs. team rules</a></li>
+    <li><a href="#boundaries">CLAUDE.md, settings, and hooks</a></li>
+    <li><a href="#writing">How to write a rule that gets followed</a></li>
+    <li><a href="#validate">Testing whether it works</a></li>
+    <li><a href="#maintain">Keeping it true</a></li>
+    <li><a href="#agentsmd">AGENTS.md and other tools</a></li>
+    <li><a href="#automemory">Auto memory: the file Claude writes</a></li>
+    <li><a href="#antipatterns">Anti-patterns</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What CLAUDE.md actually is</h2>
+
+<p><code>CLAUDE.md</code> is a Markdown file that Claude Code loads automatically at the start of every session in your project. Its contents become part of the context for every request you make, without you pasting anything.</p>
+
+<p>That is the whole mechanism. What makes it worth writing carefully is a consequence of how agentic coding fails.</p>
+
+<p>An agent working in your repository has to make dozens of small decisions you never stated: which HTTP client to use, whether errors throw or return, how files are named, whether new dependencies are acceptable, what "done" means. It will make each of those decisions reasonably. Reasonable is not the same as consistent with your project, and inconsistency compounds — a session that guessed wrong about error handling on Monday produces code that the Wednesday session then imitates.</p>
+
+<p><code>CLAUDE.md</code> is where you answer those questions once, in a file, instead of in every prompt or not at all.</p>
+
+<p>The useful mental model: it is the onboarding document you would write for a competent engineer joining your team who is going to start committing on their first day. Not a tutorial, not a description of the codebase — the things they could not work out by reading it, and the things they would get wrong if nobody told them.</p>
+
+<h2 id="loading">How the file actually reaches Claude</h2>
+
+<p>Worth understanding before you write a line of it, because almost every question people have about <code>CLAUDE.md</code> — why a rule was ignored, why the file seemed to vanish, why two files disagree — is answered by the loading mechanism.</p>
+
+<p><strong>It is loaded at the start of every session, into the context window.</strong> Not fetched when relevant, not summarised. The whole file is put in front of Claude before you type anything, and it consumes tokens alongside your conversation for the rest of the session. That is the direct reason length matters: every line is paid for on every turn.</p>
+
+<p><strong>It arrives as a user message after the system prompt, not as part of it.</strong> This is the single most clarifying fact about the file, and it explains the behaviour people find most frustrating. Anthropic's documentation is explicit that Claude "reads it and tries to follow it, but there's no guarantee of strict compliance". A <code>CLAUDE.md</code> rule is a strongly-placed instruction, not a setting. If something must happen every time regardless of what Claude decides, it belongs in a <a href="/blogs/guides/claude-code-hooks">hook</a>, which runs as a shell command at a lifecycle event.</p>
+
+<p><strong>Files are concatenated, not overridden.</strong> Claude Code reads <code>CLAUDE.md</code> from your working directory and every directory above it, and joins them. The order runs from the filesystem root down to where you launched, so the file closest to your working directory is read last. Within a directory, <code>CLAUDE.local.md</code> is appended after <code>CLAUDE.md</code>.</p>
+
+<p><strong>Subdirectory files load lazily.</strong> A <code>CLAUDE.md</code> below your working directory is not loaded at launch. It is pulled in when Claude reads a file in that directory — which is what makes per-package files work in a monorepo, and also why one can appear to do nothing until Claude touches the right folder.</p>
+
+<p><strong>You can check rather than guess.</strong> Run <code>/context</code> and look under <strong>Memory files</strong>. That lists what actually loaded in this session. If a file is not there, Claude cannot see it, and no amount of rewriting the rule will help. <code>/memory</code> lists the file locations and opens them for editing.</p>
+
+<p>Three smaller behaviours that save time when they come up:</p>
+
+<ul>
+  <li><strong>Block-level HTML comments are stripped</strong> before the content reaches Claude. <code>&lt;!-- note to maintainers --&gt;</code> costs no tokens, so notes for humans are free.</li>
+  <li><strong>A file over 4&nbsp;MiB is skipped entirely</strong> — not truncated. If you have somehow built one that large, it is doing nothing at all.</li>
+  <li><strong>The project-root file survives <code>/compact</code>.</strong> Claude re-reads it from disk and re-injects it. If an instruction disappeared after compaction it was given in conversation, not in the file — which is a good argument for writing recurring corrections down.</li>
+</ul>
+
+<h2 id="where">Where the files live and which wins</h2>
+
+<p>Claude Code reads memory from several locations, and they combine rather than replace one another. From broadest to narrowest:</p>
+
+<p>If you have no <code>CLAUDE.md</code> yet, the free <a href="/pages/claude-md-generator">CLAUDE.md starter generator</a> will produce one from a few answers about your project. It deliberately leaves out anything you did not fill in rather than padding the file with plausible defaults &mdash; a generated line saying <code>npm test</code> for a project with no tests is worse than silence, because it is an instruction the agent will try to follow.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Scope</th><th>Location</th><th>Use it for</th></tr></thead>
+<tbody>
+<tr><td>Enterprise</td><td>A managed system path, deployed by IT</td><td>Organisation-wide policy</td></tr>
+<tr><td>Project</td><td><code>./CLAUDE.md</code> at the repo root</td><td>Team conventions — committed to git</td></tr>
+<tr><td>User</td><td><code>~/.claude/CLAUDE.md</code></td><td>Your personal preferences, every project</td></tr>
+<tr><td>Directory</td><td><code>CLAUDE.md</code> in a subdirectory</td><td>Rules specific to that part of the tree</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The project file is the one that matters most, and the one this article is about. It lives at the repository root and it is <strong>committed to version control</strong>. That is not incidental — the entire value of a project <code>CLAUDE.md</code> is that everyone on the team, and every future session, gets the same instructions. A conventions file that only exists on your machine is a preference, not a convention.</p>
+
+<p>Subdirectory files are loaded when work happens in that part of the tree. This is what makes monorepos manageable — the frontend package can carry its own rules without every backend session paying for them.</p>
+
+<p>Two commands are worth knowing. <code>/init</code> bootstraps a <code>CLAUDE.md</code> by analysing the project — a reasonable starting point that you should then rewrite, because what it produces is largely descriptive and the value is in the prescriptive parts. <code>/memory</code> opens the memory files for editing during a session.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-memory-precedence.png?v=1787803706" alt="Four memory scopes loaded together: enterprise policy from a managed system path, project memory from ./CLAUDE.md, user memory from ~/.claude/CLAUDE.md, and directory memory from a CLAUDE.md inside a subtree. Project is highlighted."
+       width="1000" height="510" loading="lazy" decoding="async">
+  <figcaption>The four scopes combine rather than replace one another. The project file, highlighted, is the one your team shares.</figcaption>
+</figure>
+
+<h2 id="test">The test for what belongs in it</h2>
+
+<p>One question decides almost every case:</p>
+
+<p><strong>Could this be worked out by reading the codebase?</strong></p>
+
+<p>If yes, leave it out. Directory structures, what each module does, the list of dependencies, how a function works — all of that is visible in the code, and the code is the source of truth. Documenting it in <code>CLAUDE.md</code> buys you nothing and creates a second thing to keep in sync, which will drift, and drifted instructions are worse than absent ones.</p>
+
+<p>If no, it belongs. Conventions, prohibitions, non-obvious constraints, decisions with history behind them, the commands that are not discoverable, and the mistakes people reliably make.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Belongs in CLAUDE.md</th><th>Does not</th></tr></thead>
+<tbody>
+<tr><td>"Use the shared <code>apiClient</code>; never call <code>fetch</code> directly"</td><td>A description of what <code>apiClient</code> does</td></tr>
+<tr><td>"Never edit files in <code>generated/</code> — they are rebuilt"</td><td>A list of the files in <code>generated/</code></td></tr>
+<tr><td>"Run <code>npm run check</code> before saying a task is complete"</td><td>The contents of <code>package.json</code></td></tr>
+<tr><td>"We use tabs, not spaces"</td><td>Anything your formatter already enforces</td></tr>
+<tr><td>"Ask before adding a dependency"</td><td>The current dependency list</td></tr>
+<tr><td>"Migrations are additive-only; never drop a column in the same release"</td><td>How to write a migration in general</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The fourth row deserves emphasis. If a linter or formatter enforces something automatically, it does not need to be in <code>CLAUDE.md</code> — it will be corrected mechanically. Spend the space on things no tool checks.</p>
+
+<p>The same reasoning extends past your own machine. Rules that must hold on every run &mdash; not only the ones you are present for &mdash; belong where they are enforced, which is why a project that <a href="/blogs/guides/claude-code-github-actions">runs Claude Code in GitHub Actions</a> usually wants a shorter CLAUDE.md and a more explicit workflow prompt: the file sets the standing conventions, and the workflow states the job.</p>
+
+<h2 id="length">Why length is the main failure mode</h2>
+
+<p>The common failure is not an incomplete <code>CLAUDE.md</code>. It is a bloated one.</p>
+
+<p>Claude Code's own documentation suggests keeping memory files under roughly 200 lines. That guidance exists because of how instructions actually behave in a long context: as the file grows, individual rules get less attention, not more. A 600-line file where forty of the lines matter is worse at communicating those forty lines than a 90-line file containing only them. You have diluted your own signal.</p>
+
+<p>There is a second cost. The file is loaded into every session, so every line is paid for on every request, forever. A paragraph explaining your company's history is a rounding error once and a real expense across a thousand sessions.</p>
+
+<p>A good production <code>CLAUDE.md</code> for a web project is typically 80 to 150 lines. If yours is longer, the fix is almost never to trim wording — it is to find the sections that describe rather than instruct, and delete them entirely.</p>
+
+<h2 id="anatomy">Anatomy of a production CLAUDE.md</h2>
+
+<p>Ten sections cover essentially every web project. Not all are needed every time; skip the ones with nothing real to say rather than filling them with generalities.</p>
+
+<ol>
+  <li><strong>Project</strong> — two or three sentences on what this is and who it is for</li>
+  <li><strong>Stack</strong> — the technologies and versions, no commentary</li>
+  <li><strong>Commands</strong> — how to run, build, test, check, deploy</li>
+  <li><strong>Conventions</strong> — how code in this project is written</li>
+  <li><strong>Architecture rules</strong> — the structural decisions that must hold</li>
+  <li><strong>Do not</strong> — the explicit prohibitions</li>
+  <li><strong>Quality bar</strong> — what "done" means here</li>
+  <li><strong>Before finishing</strong> — the checklist for every task</li>
+  <li><strong>Gotchas</strong> — the non-obvious things that catch people</li>
+  <li><strong>Ask first</strong> — where the agent should stop and check</li>
+</ol>
+
+<p>Sections six, eight, and ten do the heaviest lifting, and they are the three most often missing.</p>
+
+<h2 id="template">The template, section by section</h2>
+
+<h3>Project</h3>
+
+<pre><code>## Project
+
+Customer-facing storefront for a single digital product. Static
+marketing pages plus a checkout flow. Traffic is roughly 70% mobile.
+Optimised for conversion and organic search, in that order.</code></pre>
+
+<p>Three sentences. The mobile share and the stated priority order both change decisions later — they are not filler. Anything that does not change a decision is filler.</p>
+
+<h3>Stack</h3>
+
+<pre><code>## Stack
+
+- TypeScript 5.x, strict mode
+- Astro 4.x, static output
+- Tailwind CSS 3.x
+- Playwright for end-to-end tests
+- Deployed to Cloudflare Pages</code></pre>
+
+<p>A list. No explanation of what Astro is. Version families matter because they change what APIs exist; patch versions do not and will make the file stale.</p>
+
+<h3>Commands</h3>
+
+<pre><code>## Commands
+
+- `npm run dev` — local dev server on :4321
+- `npm run build` — production build to dist/
+- `npm run check` — types, lint, and format in one pass
+- `npm run test` — Playwright, requires a build first
+- `npm run deploy` — production deploy; ask before running</code></pre>
+
+<p>This is the section that pays for itself immediately. Without it, every session spends a turn reading <code>package.json</code> to find out how to run the tests. Note the last line: the prohibition lives with the command it applies to, where it will actually be read.</p>
+
+<h3>Conventions</h3>
+
+<pre><code>## Conventions
+
+- Components in `src/components/`, PascalCase files
+- Routes in `src/pages/`, kebab-case files
+- Every colour, spacing, and font value comes from the Tailwind
+  config. Never hard-code a hex value or a pixel value that exists
+  as a token.
+- No inline styles
+- Named exports only, no default exports
+- Errors return a Result type; they do not throw across a
+  module boundary</code></pre>
+
+<p>Only conventions no tool enforces. Whether your formatter would fix it is the filter.</p>
+
+<h3>Architecture rules</h3>
+
+<pre><code>## Architecture rules
+
+- All data fetching happens at build time. This site ships no
+  client-side data fetching; if a feature seems to need it, raise it
+  rather than adding it.
+- JavaScript is progressive enhancement. Every page must be usable
+  with JS disabled.
+- No new runtime dependency without discussing it first. Build-time
+  dependencies are lower risk but still worth mentioning.</code></pre>
+
+<p>These are the decisions that shape everything downstream. "If a feature seems to need it, raise it" is important — a rule stated without an escape hatch will eventually be violated silently, because the alternative was to fail. Naming the escape hatch keeps the violation visible.</p>
+
+<h3>Do not</h3>
+
+<pre><code>## Do not
+
+- Edit anything in `dist/` — build output
+- Edit `src/generated/` — regenerated from the schema
+- Commit to `main` — always branch
+- Add a CSS framework, UI kit, or component library
+- Use `!important`
+- Add analytics, tag managers, or third-party scripts without asking
+- Change the build configuration without explaining why first</code></pre>
+
+<p>Prohibitions are the highest-value lines in the file because they are the ones that cannot be inferred. Every reasonable-looking action you did not want needs to be here or it will eventually happen.</p>
+
+<h3>Quality bar</h3>
+
+<pre><code>## Quality bar
+
+- WCAG 2.2 AA. Semantic HTML, visible focus states, keyboard
+  operable, 4.5:1 contrast on text.
+- Works from 320px wide with no horizontal overflow
+- Every page has a unique title and meta description
+- Images have explicit width and height
+- Lighthouse performance 90+ on mobile for the templates in
+  `docs/perf-baseline.md`</code></pre>
+
+<p>Concrete and checkable. "Make it accessible" is a sentiment; "4.5:1 contrast on text" is a test. Anything in this section that cannot be verified is decoration.</p>
+
+<h3>Before finishing</h3>
+
+<pre><code>## Before finishing any task
+
+1. Run `npm run check` and show me the output
+2. Run `npm run build` and confirm it succeeds
+3. Tell me what you changed and why
+4. Tell me what you did not verify
+
+Do not say a task is complete without steps 1 and 2. If a check
+fails, fix it or tell me — do not report success.</code></pre>
+
+<p>This is the single most valuable section in the file. It converts "done" from a self-assessment into a procedure with evidence attached. Step 4 is the one people leave out and the one that surfaces the most.</p>
+
+<h3>Gotchas</h3>
+
+<pre><code>## Gotchas
+
+- The `dev` server does not reflect changes to `astro.config.mjs`.
+  Restart it after editing that file.
+- Cloudflare Pages is case-sensitive; macOS local dev is not. A
+  wrong-case import works locally and 404s in production.
+- The contact form posts to a Worker, not a route in this repo. It
+  is in `../worker/`.
+- Tests need a fresh build. `npm run test` against a stale `dist/`
+  passes while testing the previous version.</code></pre>
+
+<p>Each of these is a real hour someone lost. That is the bar for inclusion — not "might be confusing", but "has actually cost someone time".</p>
+
+<h3>Ask first</h3>
+
+<pre><code>## Ask before
+
+- Adding any dependency
+- Changing anything under `src/checkout/`
+- Modifying the build or deploy configuration
+- Deleting files
+- Any change touching pricing, legal pages, or policy text
+- Anything that would change a published URL</code></pre>
+
+<p>Draw this boundary around blast radius rather than difficulty. Changing a URL is a two-character edit that can cost you months of accumulated search equity — it belongs here; a hard refactor of an internal module does not.</p>
+
+<h2 id="full">The complete file</h2>
+
+<p>Assembled, the whole thing is short. This is roughly 95 lines, which is where a real one should land:</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Customer-facing storefront for a single digital product. Static
+marketing pages plus a checkout flow. Traffic is ~70% mobile.
+Optimised for conversion and organic search, in that order.
+
+## Stack
+- TypeScript 5.x, strict mode
+- Astro 4.x, static output
+- Tailwind CSS 3.x
+- Playwright for end-to-end tests
+- Deployed to Cloudflare Pages
+
+## Commands
+- `npm run dev` — local dev server on :4321
+- `npm run build` — production build to dist/
+- `npm run check` — types, lint, format
+- `npm run test` — Playwright; requires a build first
+- `npm run deploy` — production deploy; ask before running
+
+## Conventions
+- Components in `src/components/`, PascalCase
+- Routes in `src/pages/`, kebab-case
+- Every colour and spacing value from the Tailwind config.
+  Never hard-code a value that exists as a token.
+- No inline styles
+- Named exports only
+- Errors return a Result type; do not throw across module boundaries
+
+## Architecture rules
+- All data fetching at build time. No client-side data fetching;
+  if a feature seems to need it, raise it rather than adding it.
+- JavaScript is progressive enhancement. Every page usable with
+  JS disabled.
+- No new runtime dependency without discussing it first.
+
+## Do not
+- Edit `dist/` or `src/generated/`
+- Commit to `main` — always branch
+- Add a CSS framework, UI kit, or component library
+- Use `!important`
+- Add analytics or third-party scripts without asking
+- Change build configuration without explaining why first
+
+## Quality bar
+- WCAG 2.2 AA: semantic HTML, visible focus, keyboard operable,
+  4.5:1 contrast on text
+- Works from 320px with no horizontal overflow
+- Unique title and meta description per page
+- Explicit width and height on images
+- Lighthouse mobile performance 90+ on the templates listed in
+  docs/perf-baseline.md
+
+## Before finishing any task
+1. Run `npm run check` and show me the output
+2. Run `npm run build` and confirm it succeeds
+3. Tell me what changed and why
+4. Tell me what you did not verify
+
+Do not report a task complete without steps 1 and 2. If a check
+fails, fix it or tell me — do not report success.
+
+## Gotchas
+- The dev server ignores changes to `astro.config.mjs`. Restart it.
+- Cloudflare Pages is case-sensitive; local macOS is not. A
+  wrong-case import works locally and 404s in production.
+- The contact form posts to a Worker in `../worker/`, not this repo.
+- Tests need a fresh build. Running against a stale `dist/` passes
+  while testing the previous version.
+
+## Ask before
+- Adding any dependency
+- Changing anything under `src/checkout/`
+- Modifying build or deploy configuration
+- Deleting files
+- Any change touching pricing, legal, or policy text
+- Anything that would change a published URL</code></pre>
+
+<p>Adapt the specifics; keep the shape.</p>
+
+<h2 id="init">Starting from /init</h2>
+
+<p>You do not have to write the first version by hand. Running <code>/init</code> in a project analyses the codebase and generates a starting <code>CLAUDE.md</code>.</p>
+
+<p>What it produces is a reasonable inventory: the stack, the structure, the scripts it found. What it cannot produce is the prescriptive half — it does not know which of your patterns are deliberate and which are accidents nobody has cleaned up yet, and it has no way to know what people get wrong.</p>
+
+<p>So treat the generated file as a first draft with a specific editing job attached:</p>
+
+<ol>
+  <li><strong>Delete the description.</strong> Anything that restates the directory tree or explains what a dependency is goes. This is usually half the file and it is the half with no value.</li>
+  <li><strong>Verify the commands.</strong> Generated command lists are read from configuration and are often right; they are also often stale, aspirational, or missing the one command that actually matters. Run each one.</li>
+  <li><strong>Add the prohibitions.</strong> There will be none. This is the section with the highest return and <code>/init</code> cannot write it, because prohibitions come from things that went wrong, not from things in the repository.</li>
+  <li><strong>Add the finishing procedure.</strong> Also absent. What must run before a task is complete, and what evidence you want.</li>
+  <li><strong>Add the gotchas.</strong> Every one of these is knowledge that exists only in someone’s head.</li>
+</ol>
+
+<p>A useful way to get the raw material for steps three to five, in a session that has already worked in the repository for a while:</p>
+
+<pre class="sbs-prompt">Based on what you have seen in this codebase, what would you have
+done wrong if I had not corrected you? What conventions did you have
+to infer rather than being told? What surprised you?
+
+I want to add the answers to CLAUDE.md. Be specific and be honest
+about what was genuinely ambiguous.</pre>
+
+<p>The answers tend to be more accurate than what you would have written from memory, because the ambiguities you have internalised are invisible to you and are exactly the ones that need writing down.</p>
+
+<h2 id="real">A real one: the theme behind this site</h2>
+
+<p>The template above is a generic web project. It is worth seeing what changes when the project is a specific platform, because the useful lines get much more specific.</p>
+
+<p>This site is a Shopify theme, and its <code>CLAUDE.md</code> contains rules that would look strange out of context but that each exist because of something that actually went wrong:</p>
+
+<pre><code>## Do not
+- Never push to the live theme. Push to the development theme and
+  preview. The push script refuses the live role unless an explicit
+  environment flag is set.
+- Never write a credential into a Liquid template, a JS asset, or
+  any file under theme/. Theme files are publicly served.
+- Never replace the generated sitemap. Shopify maintains it.
+- Never add review or rating structured data. We have no reviews;
+  it would be false.
+
+## Gotchas
+- `policy` is not a Shopify template type. Neither templates/
+  policy.json nor templates/policy.liquid will be used. Policy page
+  styling has to branch inside layout/theme.liquid.
+- Push order matters. Liquid assets, layouts, snippets, and sections
+  must land before the section-group JSON that references them, or
+  the push fails on an unknown section.
+- The agents.md template renders in a restricted context. Only the
+  `request` and `agents` objects exist — no `collections`, no
+  `pages`, no `settings`. Anything else silently renders empty.
+
+## Before finishing
+1. Run tests/run-all.sh and show the output
+2. Run theme check and confirm zero offences in authored files
+3. Fetch the affected live URLs and report the actual status codes</code></pre>
+
+<p>None of that is inferable from the repository. The first gotcha in particular cost an hour of confusion — Shopify rejects <code>templates/policy.json</code> with an explicit error, and then silently ignores <code>templates/policy.liquid</code>, which reads like the fix worked until you load the page.</p>
+
+<p>That is the shape of a mature <code>CLAUDE.md</code>. It is mostly a record of specific mistakes, written so they only have to happen once.</p>
+
+<h2 id="imports">Splitting large files with imports</h2>
+
+<p>Claude Code supports importing other files into memory with an <code>@path</code> reference:</p>
+
+<pre><code>## Detailed standards
+
+See @docs/code-style.md and @docs/accessibility.md</code></pre>
+
+<p>Imports resolve relative and absolute paths, and can nest a few levels deep. Used well, this keeps the root file scannable while letting genuinely long reference material live elsewhere.</p>
+
+<p>Used badly, it is a way to pretend your file is short while loading 800 lines anyway. The dilution problem does not care which file the lines came from.</p>
+
+<p>The distinction worth holding: import <strong>reference material you occasionally need</strong>, not <strong>rules that should always apply</strong>. A detailed style guide is a good import. Your list of prohibitions is not — it should be in the root file where it cannot be missed.</p>
+
+<h2 id="rules">Path-scoped rules, and the real fix for a long file</h2>
+
+<p>Imports split a long file across several files. They do not make it shorter in context, because every imported file is expanded and loaded at launch just the same. If the problem is size rather than tidiness, imports are the wrong tool.</p>
+
+<p><code>.claude/rules/</code> is the right one. Markdown files placed there are loaded alongside the project <code>CLAUDE.md</code> — but a rule can carry <code>paths</code> frontmatter, and then it only enters context when Claude works with a matching file:</p>
+
+<pre><code>---
+paths:
+  - "src/api/**/*.ts"
+---
+
+# API rules
+
+- Every endpoint validates its input at the boundary
+- Errors use the standard response shape</code></pre>
+
+<p>The layout that follows from that:</p>
+
+<pre><code>your-project/
+├── CLAUDE.md              # always loaded, keep it short
+└── .claude/
+    └── rules/
+        ├── testing.md     # no paths: — always loaded
+        ├── api.md         # paths: src/api/** — loaded on demand
+        └── frontend/
+            └── react.md   # discovered recursively</code></pre>
+
+<p>A rule without <code>paths</code> loads unconditionally, at the same priority as the project file. So the useful split is: <strong>rules that apply everywhere stay in <code>CLAUDE.md</code>, rules that apply to one area become path-scoped</strong>, and the always-loaded file gets shorter without losing anything.</p>
+
+<p>Personal rules go in <code>~/.claude/rules/</code> and apply to every project on your machine. They load before project rules, so project rules take priority.</p>
+
+<p>One boundary worth keeping clear: a path-scoped rule still loads into context whenever a matching file is touched. If something is a procedure you run occasionally rather than a standard that applies continuously, it is a <a href="/blogs/guides/claude-code-skills">skill</a> — and a skill costs nothing until it is invoked.</p>
+
+<h2 id="monorepo">Monorepos and nested files</h2>
+
+<p>In a monorepo, put shared rules at the root and package-specific rules in each package:</p>
+
+<pre><code>CLAUDE.md                      # commit conventions, shared standards
+packages/web/CLAUDE.md         # frontend rules
+packages/api/CLAUDE.md         # backend rules
+packages/shared/CLAUDE.md      # "changes here affect everything"</code></pre>
+
+<p>Rules load additively as work moves into a subtree, so a session working in <code>packages/web/</code> gets the root rules plus the web rules and does not carry the API rules it will never use.</p>
+
+<p>Two things to keep straight. Do not repeat root rules in child files — you now have two copies to maintain and they will disagree. And a shared package's file should state its blast radius explicitly, because that is exactly the context a session working only inside it lacks:</p>
+
+<pre><code># packages/shared/CLAUDE.md
+
+Everything here is consumed by web and api. A breaking change here
+breaks both. Before changing any exported signature, find every
+consumer and tell me what breaks.</code></pre>
+
+<h2 id="personal">Personal preferences vs. team rules</h2>
+
+<p>Keep the two apart. Anything that is genuinely about how <em>you</em> like to work — commit message style, how much explanation you want, tone — belongs in <code>~/.claude/CLAUDE.md</code>, where it applies across all your projects and does not impose your habits on your colleagues.</p>
+
+<p>The project file is for things that would be true regardless of who is sitting at the keyboard.</p>
+
+<p>There is an older pattern of a <code>CLAUDE.local.md</code> for machine-specific settings; the current recommendation is to use imports instead, since a local file does not travel with worktrees. If you have machine-specific paths or credentials locations, import them from a gitignored file rather than maintaining a parallel memory file.</p>
+
+<h2 id="boundaries">CLAUDE.md, settings, and hooks</h2>
+
+<p>Not everything you want enforced belongs in a Markdown file. Claude Code has three mechanisms and they differ in one important respect: whether compliance is guaranteed.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Mechanism</th><th>What it is</th><th>Enforcement</th></tr></thead>
+<tbody>
+<tr><td><code>CLAUDE.md</code></td><td>Instructions in context</td><td>Followed, but not guaranteed</td></tr>
+<tr><td><code>.claude/settings.json</code></td><td>Permission rules and configuration</td><td>Enforced by the tool</td></tr>
+<tr><td>Hooks</td><td>Shell commands on tool events</td><td>Enforced by your own code</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That distinction should drive where a rule goes.</p>
+
+<p>"Never commit directly to <code>main</code>" in <code>CLAUDE.md</code> is an instruction that will usually be respected. As a permission rule in <code>settings.json</code>, it is a wall. If the consequence of the rule being missed is serious, put it where it cannot be missed — and keep the line in <code>CLAUDE.md</code> as well, so the reason is visible rather than just the refusal.</p>
+
+<p>Hooks cover the third case: things that should happen every time regardless of whether anyone remembered. A formatter that runs after every edit does not need to be a rule anybody follows; it needs to be a hook. The general principle is that anything mechanical and unconditional is better as automation than as an instruction, and moving it out of <code>CLAUDE.md</code> also shortens the file, which helps everything left in it.</p>
+
+<p>There is a fourth home worth knowing about. Anything that reads as a <em>procedure</em> rather than a rule belongs in a <a href="/blogs/guides/claude-code-skills">skill</a>, whose body loads only when used rather than on every request. And in an organisation, rules that must not be switched off locally belong in managed settings — see <a href="/blogs/guides/claude-code-enterprise">Claude Code for teams and enterprise</a>.</p>
+
+<p>What genuinely belongs in <code>CLAUDE.md</code> is the judgement layer — the conventions, the reasons, the standards, the things that need a human-readable "why". Those cannot be automated, which is exactly why they need writing down.</p>
+
+<h2 id="writing">How to write a rule that gets followed</h2>
+
+<p>The difference between a rule that changes behaviour and one that does not is usually specificity.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Weak</th><th>Strong</th></tr></thead>
+<tbody>
+<tr><td>Write clean code</td><td>Functions under 40 lines; extract rather than nest past three levels</td></tr>
+<tr><td>Be careful with the database</td><td>Migrations are additive-only. Never drop a column in the same release that stops using it.</td></tr>
+<tr><td>Follow accessibility best practices</td><td>Every control has a visible associated label. A placeholder is not a label.</td></tr>
+<tr><td>Test your changes</td><td>Run <code>npm run check</code> and show me the output before reporting complete</td></tr>
+<tr><td>Don't add unnecessary dependencies</td><td>Ask before adding any dependency. Say what it costs and why the platform cannot do it.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Four properties make the right-hand column work: they are <strong>specific</strong> enough to have a clear boundary, <strong>checkable</strong> so compliance is observable, <strong>actionable</strong> in that they say what to do rather than what to value, and <strong>bounded</strong> so it is clear when they apply.</p>
+
+<p>One more thing helps more than its length suggests: give a reason for the rules that look arbitrary.</p>
+
+<pre><code>- No client-side data fetching. This site is statically generated and
+  served from the edge; a client fetch reintroduces the latency the
+  architecture exists to remove.</code></pre>
+
+<p>A rule with a reason survives contact with an edge case, because the reason tells you whether the edge case is actually an exception. A bare prohibition either gets applied where it does not belong or gets abandoned at the first inconvenience.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes production <code>CLAUDE.md</code> templates for several project types &mdash; static sites, applications, and Shopify themes &mdash; each with the prohibitions and finishing procedures already written. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="validate">Testing whether it works</h2>
+
+<p>A <code>CLAUDE.md</code> nobody has tested is a hypothesis. Three checks, each taking a couple of minutes.</p>
+
+<h3>1. Ask what it thinks the rules are</h3>
+
+<p>In a fresh session:</p>
+
+<pre class="sbs-prompt">Without reading any other files: what are the rules for this project?
+What should you never do? What do you run before saying a task is
+complete? What should you ask me about first?</pre>
+
+<p>If the answers are vague where your file is specific, the file is too long, buried, or ambiguous. Anything missing from the answer is not currently working.</p>
+
+<h3>2. Give it a task that touches a rule</h3>
+
+<p>Ask for something small in an area with a prohibition attached. Then see whether the prohibition holds without you mentioning it. A rule that only works when you restate it is not doing its job.</p>
+
+<h3>3. Check the finishing procedure</h3>
+
+<p>Ask for any change at all and watch what happens at the end. Did it run the checks? Did it show you the output? Did it tell you what it could not verify? If not, that section needs to be more explicit or more prominent.</p>
+
+<p>Rerun these after any significant edit to the file. Adding lines can push existing ones below the threshold where they get acted on — which is not intuitive, and is the reason the "just add another rule" instinct eventually backfires.</p>
+
+<h2 id="maintain">Keeping it true</h2>
+
+<p>The failure mode for a good <code>CLAUDE.md</code> is not neglect; it is drift. Commands get renamed, rules get relaxed, gotchas get fixed. A file that describes a project as it was eight months ago actively misleads every session, and it does so confidently.</p>
+
+<p>Three habits keep it honest:</p>
+
+<p><strong>Update it when it fails.</strong> The moment you find yourself correcting the same thing twice, that correction belongs in the file. This is the primary source of good rules — not planning, but repeated annoyance.</p>
+
+<p><strong>Review it when the project changes shape.</strong> New framework, new deploy target, new team member — read the file top to bottom and delete what is no longer true. Deleting is most of the work.</p>
+
+<p><strong>Audit it quarterly.</strong> Takes five minutes:</p>
+
+<pre class="sbs-prompt">Review CLAUDE.md against this repository.
+
+For each statement, tell me whether it is still true. Check the
+commands actually exist and run. Check the referenced paths exist.
+Check the conventions still match what the code does.
+
+Flag anything that is stale, contradicted by the code, or that a
+linter now handles automatically and could be removed.
+
+Then tell me what a new contributor would get wrong that the file
+does not currently cover.</pre>
+
+<p>That last paragraph is the useful half. The gaps are harder to notice than the staleness, because nothing goes wrong visibly — you just quietly get worse output than you could have.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Maintaining these files across projects is easier with a starting point that has already been through a real build. <a href="/products/claude-code-website-launch-system">Get the Launch System</a>.</p>
+</aside>
+
+<h2 id="agentsmd">AGENTS.md, and repositories that serve more than one tool</h2>
+
+<p>If your repository already has an <code>AGENTS.md</code> for other coding agents, the important fact is blunt: <strong>Claude Code reads <code>CLAUDE.md</code>, not <code>AGENTS.md</code>.</strong> Leaving only the latter means Claude starts every session with no project context at all.</p>
+
+<p>Two ways to serve both without maintaining the file twice. Import it, which lets you add Claude-specific instructions underneath:</p>
+
+<pre><code>@AGENTS.md
+
+## Claude Code
+
+Use plan mode for changes under `src/billing/`.</code></pre>
+
+<p>Or symlink it, if there is nothing Claude-specific to add:</p>
+
+<pre><code>ln -s AGENTS.md CLAUDE.md</code></pre>
+
+<p>The symlink is the cleaner of the two when it fits, though on Windows it needs Administrator rights or Developer Mode, so the import is the safer default for a shared repository. Either way, confirm it worked with <code>/context</code> rather than assuming.</p>
+
+<p><code>/init</code> also reads other tools' configuration — Cursor rules and Copilot instructions — and folds the relevant parts into what it generates.</p>
+
+<h2 id="automemory">Auto memory: the file Claude writes</h2>
+
+<p>There is a second memory mechanism, and it is easy to miss because you do not create it. Alongside the <code>CLAUDE.md</code> files you write, Claude keeps notes of its own.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th><code>CLAUDE.md</code></th><th>Auto memory</th></tr></thead>
+<tbody>
+<tr><td>Written by</td><td>You</td><td>Claude</td></tr>
+<tr><td>Contains</td><td>Instructions and rules</td><td>Learnings, corrections, preferences</td></tr>
+<tr><td>Scope</td><td>Project, user, or organisation</td><td>Per repository, on this machine</td></tr>
+<tr><td>Shared with the team</td><td>Yes, through version control</td><td>No — it is machine-local</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>It lives in <code>~/.claude/projects/&lt;project&gt;/memory/</code>, as a <code>MEMORY.md</code> index plus one file per topic. <strong>Only the index is loaded at session start</strong> — the first 200 lines or 25&nbsp;KB, whichever comes first — and the topic files are read on demand when Claude needs them. Content past that threshold is silently dropped on the next load, which is the one failure mode to know about.</p>
+
+<p>It is on by default. <code>/memory</code> browses it, and everything in there is plain markdown you can edit or delete. Turn it off per project with <code>"autoMemoryEnabled": false</code> in that project's settings.</p>
+
+<p>The practical consequence for the file you write: <strong>auto memory is not a substitute for <code>CLAUDE.md</code>, and it is not shared.</strong> Claude deliberately skips anything your <code>CLAUDE.md</code> already says, and nothing it records reaches your colleagues. Anything the team needs still has to be written down and committed.</p>
+
+<h2 id="antipatterns">Anti-patterns</h2>
+
+<h3>The everything file</h3>
+<p>Six hundred lines covering architecture, history, style, tutorials, and a glossary. Every rule competes with every other rule and none of them win. Cut to the prescriptive lines.</p>
+
+<h3>Documenting what the code says</h3>
+<p>A directory listing in Markdown. It cost you space, it will drift, and the code was already authoritative.</p>
+
+<h3>Restating the formatter</h3>
+<p>If Prettier fixes it, the file does not need an opinion about it.</p>
+
+<h3>Aspirational rules</h3>
+<p>"All code must have 100% test coverage" in a repository at 12%. Rules that are visibly not followed teach that rules here are decorative. Write the standard you actually hold.</p>
+
+<h3>Vague values</h3>
+<p>"Write maintainable, high-quality code." Nobody was planning otherwise. It occupies space that a real constraint could use.</p>
+
+<h3>Rules with no scope</h3>
+<p>"Always validate input" — everywhere? Client and server both? Say where.</p>
+
+<h3>Contradictions</h3>
+<p>"Move fast, ship quickly" three sections above "every change needs tests and review". One of these will be followed and you do not get to choose which.</p>
+
+<h3>Never testing it</h3>
+<p>Writing the file and assuming it works. It takes two minutes to check and the result is frequently surprising.</p>
+
+<h2>Where to go next</h2>
+
+<p>Related free resources: the <a href="/pages/production-claude-md-starter">production CLAUDE.md starter</a> as a blank file to adapt, and the <a href="/pages/resources">rest of the free resources</a> &mdash; launch, SEO, security and audit checklists, all ungated.</p>
+
+<p>A <code>CLAUDE.md</code> is the persistent half of instructing an agent; the per-task half is the prompt. The <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> covers that side, and the two are complementary — anything you find yourself repeating across prompts is a candidate for the file. To see where it fits in a whole build, read the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a>. For platform-specific rules, the <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify guide</a> covers what a theme project's file should contain, and the <a href="/blogs/guides/claude-code-seo-website-optimization">SEO guide</a> covers the standards worth encoding so they survive every future change.</p>
+
+<p>If you would rather start from a finished file than a set of principles, <a href="/blogs/guides/claude-md-examples-web-development">CLAUDE.md examples for production web development</a> gives four filled-in files — an Astro marketing site, a Next.js application with a database, a Shopify theme, and a package in a monorepo — with a note on what changes between them. The blank version is free at <a href="/pages/production-claude-md-starter">the production CLAUDE.md starter</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/memory" rel="noopener">Claude Code: manage Claude's memory</a> — file locations, precedence, imports, the length guidance</li>
+  <li><a href="https://code.claude.com/docs/en/common-workflows" rel="noopener">Claude Code: common workflows</a> — <code>/init</code> and session patterns</li>
+  <li><a href="https://code.claude.com/docs/en/settings" rel="noopener">Claude Code: settings</a> — configuration that sits alongside memory</li>
+</ul>

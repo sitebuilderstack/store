@@ -1,0 +1,123 @@
+<section class="sbs-section">
+  <div class="sbs-container">
+    <div class="sbs-hero__grid">
+      <article style="max-width: var(--measure);">
+        <h1>{{ page.title | escape }}</h1>
+        <div class="sbs-stack sbs-rte" style="margin-top: var(--sp-6);">
+          {{ page.content }}
+        </div>
+      </article>
+
+      <div>
+        <div class="sbs-card" style="border-color: var(--border-strong);">
+          <h2 style="font-size: var(--step-2); letter-spacing: -.02em;">
+            {{ section.settings.form_heading | default: 'Send a message' | escape }}
+          </h2>
+
+          {%- form 'contact', id: 'sbs-contact-form' -%}
+            {%- if form.posted_successfully? -%}
+              <p class="sbs-cta-note" role="status"
+                 style="color: var(--mono-accent); margin-top: var(--sp-4);">
+                {{ section.settings.success_message
+                   | default: 'Thanks — your message has been sent. We aim to reply within a few business days.'
+                   | escape }}
+              </p>
+            {%- endif -%}
+
+            {%- if form.errors -%}
+              <div role="alert" class="sbs-card"
+                   style="margin-top: var(--sp-4); border-color: var(--accent); background: var(--accent-soft);">
+                <p style="color: var(--text); font-size: var(--step--1);">
+                  Please check the following:
+                </p>
+                <ul style="margin-top: var(--sp-2);">
+                  {%- for field in form.errors -%}
+                    <li style="color: var(--text); font-size: var(--step--1);">
+                      {{ form.errors.messages[field] }}
+                      {%- if field != 'form' %} ({{ field }}){% endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            <div class="sbs-field">
+              <label for="contact-name">Name</label>
+              <input id="contact-name" type="text" name="contact[name]"
+                     autocomplete="name" value="{{ form.name }}">
+            </div>
+
+            <div class="sbs-field">
+              <label for="contact-email">Email <span aria-hidden="true">*</span></label>
+              <input id="contact-email" type="email" name="contact[email]"
+                     autocomplete="email" required
+                     aria-describedby="contact-email-hint"
+                     value="{{ form.email }}">
+              <span id="contact-email-hint" class="sbs-dim">Required, so we can reply.</span>
+            </div>
+
+            <div class="sbs-field">
+              <label for="contact-order">Order number</label>
+              <input id="contact-order" type="text" name="contact[Order number]"
+                     aria-describedby="contact-order-hint">
+              <span id="contact-order-hint" class="sbs-dim">
+                If your message is about an order. Saves a round trip.
+              </span>
+            </div>
+
+            <div class="sbs-field">
+              <label for="contact-body">Message <span aria-hidden="true">*</span></label>
+              <textarea id="contact-body" name="contact[body]" rows="6" required>{{ form.body }}</textarea>
+            </div>
+
+            <button type="submit" class="sbs-btn sbs-btn--primary sbs-btn--block"
+                    style="margin-top: var(--sp-4);">
+              {{ section.settings.button_label | default: 'Send message' | escape }}
+            </button>
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sbs-field { margin-top: var(--sp-5); }
+  .sbs-field label {
+    display: block; font-weight: 600; font-size: var(--step--1);
+    margin-bottom: var(--sp-2); color: var(--text);
+  }
+  .sbs-field input, .sbs-field textarea {
+    width: 100%;
+    padding: var(--sp-3);
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    min-height: 2.75rem;
+  }
+  .sbs-field textarea { min-height: 8rem; resize: vertical; }
+  .sbs-field input::placeholder, .sbs-field textarea::placeholder { color: var(--dim); }
+  .sbs-field .sbs-dim { display: block; margin-top: var(--sp-2); }
+  .sbs-rte h2 { font-size: var(--step-2); margin-top: var(--sp-7); }
+  .sbs-rte p, .sbs-rte li { color: var(--muted); }
+  .sbs-rte ul { list-style: disc; padding-left: 1.25rem; margin-top: var(--sp-3); }
+  .sbs-rte li + li { margin-top: var(--sp-2); }
+  .sbs-rte strong { color: var(--text); }
+</style>
+
+{% schema %}
+{
+  "name": "SBS — Contact",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "form_heading", "label": "Form heading", "default": "Send a message" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Send message" },
+    { "type": "textarea", "id": "success_message", "label": "Success message",
+      "default": "Thanks — your message has been sent. We aim to reply within a few business days." },
+    { "type": "paragraph",
+      "content": "Submissions go to the store contact email set in Settings > Store details. Send a test message after launch to confirm it arrives." }
+  ],
+  "presets": [{ "name": "SBS — Contact" }]
+}
+{% endschema %}

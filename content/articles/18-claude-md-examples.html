@@ -1,0 +1,315 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#how">How to use these</a></li>
+    <li><a href="#changes">What actually changes between them</a></li>
+    <li><a href="#static">Example 1: Astro marketing site</a></li>
+    <li><a href="#webapp">Example 2: Next.js application with a database</a></li>
+    <li><a href="#shopify">Example 3: Shopify theme</a></li>
+    <li><a href="#monorepo">Example 4: shared package in a monorepo</a></li>
+    <li><a href="#diff">Reading the four side by side</a></li>
+    <li><a href="#notbelong">Rules that belong in none of them</a></li>
+    <li><a href="#test">Testing yours</a></li>
+  </ol>
+</nav>
+
+<h2 id="how">How to use these</h2>
+
+<p>These are filled-in files, not templates with blanks. Each one describes a plausible real project, because a <code>CLAUDE.md</code> full of angle brackets teaches you the shape but not the judgement, and the judgement is the part worth copying.</p>
+
+<p>Take the one closest to your project, replace the specifics, and then <strong>delete about a third of it.</strong> That last step is not a joke. Length is the main failure mode: every line competes for attention with every other line, and a 400-line file is followed less reliably than a 120-line one. If you are unsure which third to cut, cut the rules you have never actually seen broken.</p>
+
+<p>For the reasoning behind the structure — where the files live, which one wins, and how to write a rule that gets followed — the full treatment is in <a href="/blogs/guides/production-claude-md-web-development">the production CLAUDE.md guide</a>. This article is the worked examples that guide refers to.</p>
+
+<h2 id="changes">What actually changes between them</h2>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-claude-md-by-project.png" alt="A matrix of CLAUDE.md sections against four project types: static site, web app, Shopify theme and monorepo package. Architecture differs in all four and deployment in three. Commands differ for the Shopify theme and the monorepo package. Accessibility, SEO and the do-not list carry over largely unchanged, and several sections are omitted entirely for a monorepo package."
+       width="1000" height="614" loading="lazy" decoding="async">
+  <figcaption>Architecture and deployment carry nearly all of the difference. Most other sections are copied and trimmed.</figcaption>
+</figure>
+
+<p>The useful consequence: when you write your second <code>CLAUDE.md</code>, you are not starting over. You are rewriting two sections and pruning the rest.</p>
+
+<h2 id="static">Example 1: Astro marketing site</h2>
+
+<p>A static marketing site for a product. Mostly content, heavily indexed, no server.</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Marketing site for Northgate. Five pages plus a blog. No application code —
+the product lives at app.northgate.dev and is a separate repository.
+Roughly 70% of traffic is mobile, most of it from organic search.
+
+## Stack
+Astro 4, static output. Plain CSS with custom properties, no framework.
+Content in Markdown under src/content/. Deployed to Netlify from main.
+
+## Commands
+- `pnpm dev`        local server on :4321
+- `pnpm build`      static output to dist/
+- `pnpm check`      astro check + eslint + prettier
+- `pnpm test`       Playwright; requires a build first
+
+## Architecture
+- One route per file in src/pages/. Do not add a router.
+- Shared UI in src/components/. Astro components by default;
+  a .tsx island only when it genuinely needs interactivity.
+- No client-side JavaScript on a page unless it has an island.
+- Blog posts are Markdown with frontmatter validated by a content
+  collection schema. Adding a field means updating the schema.
+
+## Content and SEO
+- Every page sets title and description through the shared <Seo> component.
+  A page without both fails the build.
+- One h1 per page. Headings descend without skipping.
+- Internal links use descriptive anchor text.
+- No structured data for anything not on the page. No review or rating
+  markup — there are no reviews.
+
+## Accessibility
+- Semantic elements. Visible focus everywhere. 4.5:1 text contrast.
+- Images: descriptive alt, or alt="" if decorative. Always width and height.
+
+## Performance
+- The hero image is the LCP element. Never lazy-load it.
+- No third-party script without a note here saying why it earns its cost.
+
+## Do not
+- Do not add a dependency without asking.
+- Do not commit or push unless asked.
+- Do not edit anything in dist/.
+- Do not reformat files you were not asked to change.
+
+## Before you say it is done
+`pnpm check` and `pnpm build` pass, `pnpm test` passes, and you have
+loaded the changed page and looked at it.</code></pre>
+
+<p>What is doing the work: the build-fails-without-metadata rule, and the LCP line. Both encode something that already went wrong once.</p>
+
+<h2 id="webapp">Example 2: Next.js application with a database</h2>
+
+<p>A multi-tenant SaaS application. The stakes are higher, so the security and testing sections earn more space and the SEO section shrinks to almost nothing.</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Northgate: multi-tenant scheduling app. Every row is scoped to an
+organisation. Getting that scoping wrong leaks one customer's data to
+another, which is the single worst outcome in this codebase.
+
+## Stack
+Next.js 14 App Router, TypeScript strict. Postgres via Drizzle.
+Auth by session cookie. Tailwind. Deployed to Vercel from main.
+
+## Commands
+- `pnpm dev` / `pnpm build` / `pnpm start`
+- `pnpm typecheck`   tsc --noEmit
+- `pnpm test`        Vitest, unit
+- `pnpm test:e2e`    Playwright; needs a running dev server
+- `pnpm db:migrate`  applies migrations; never edit an applied one
+
+## Architecture
+- Server Components by default. Add "use client" only for interactivity.
+- Data access lives in src/server/. Nothing under src/app/ or
+  src/components/ may import a database client directly.
+- Every query filters by organisation id. There is no exception.
+- Mutations are Server Actions in src/server/actions/, each one
+  re-checking the session and the organisation.
+
+## Security
+- Authorisation is checked server-side on every request, per resource.
+  Hiding a control in the UI is not an authorisation check.
+- Secrets come from the environment. Never in source, never in a client
+  bundle, never logged. .env is git-ignored and stays that way.
+- Validate every input with a zod schema at the boundary.
+- Never build SQL by string concatenation.
+- New routes are denied by default until explicitly opened.
+
+## Testing
+- A change to behaviour needs a test that fails without it.
+- Anything touching organisation scoping needs a test that a user from
+  organisation A cannot read organisation B's row.
+- Do not skip or delete a failing test to make the suite green.
+
+## Migrations
+- Forward-compatible with the currently deployed version: add columns
+  nullable, backfill, then tighten in a later migration.
+- Never a destructive migration without asking.
+
+## Do not
+- Do not commit, push, or open a pull request unless asked.
+- Do not run db:migrate against anything but local.
+- Do not add a dependency to do something the standard library does.
+- Do not claim something is tested or deployed without having run it.
+
+## Before you say it is done
+typecheck, lint, unit tests and the affected e2e tests pass, and you
+have exercised the change against a running app.</code></pre>
+
+<p>Note how specific the scoping rules are. "Be careful with multi-tenancy" is unenforceable. "Every query filters by organisation id, and there is a test that a user from A cannot read B's row" is checkable in a diff.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes the longer-form versions of these files together with the audits that check whether they are being followed. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="shopify">Example 3: Shopify theme</h2>
+
+<p>The most platform-specific of the four, because a hosted platform has rules an assistant cannot infer from the repository. This one is closest to the file behind this site.</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Custom Shopify theme for a one-product store. The paid theme is kept in
+the repository as a reference only; our layer is the sbs-* sections,
+snippets and templates. Do not edit vendor files.
+
+## Commands
+- `scripts/theme_pull.py <themeId> <dir>`   pull a theme to disk
+- `scripts/theme_push.py <themeId> <dir> [files...]`  push files
+- `scripts/validate-articles.py`            content validation
+- `tests/run-all.sh`                        the full suite
+
+## Platform rules that are not obvious
+- `policy` is not a valid template type. Policy pages render through
+  the page template.
+- `templates/agents.md.liquid` runs in a RESTRICTED Liquid context:
+  only `request` and `agents` exist. Referencing `shop`, `settings`,
+  `pages` or `product` renders empty with no error.
+- A section's `max_blocks` must be raised and pushed BEFORE pushing a
+  section group that exceeds it, or the push is rejected.
+- Use `{% render %}`, never `{% include %}`.
+- `image_url` returns a protocol-relative URL. Prepend https, not http.
+
+## Development loop
+- Work on the development theme. Pushing to the live theme requires
+  SBS_ALLOW_LIVE=1 and is a deliberate act.
+- After every push, fetch the affected URL and check the response for
+  "Liquid error". A broken Liquid tag renders as text, not a 500.
+
+## Structured data
+- Only types that describe what is on the page.
+- No Review, Rating or AggregateRating markup. There are no reviews.
+- Do not invent a value to satisfy a validator. Omit it and note why.
+
+## Credentials
+- Read from the files named in scripts/shopify_api.py. Never print a
+  token, never log one, never put one in a Liquid template, a commit,
+  a screenshot, or the customer-facing product.
+
+## Do not
+- Do not edit theme/dev-full/ or theme/one-live/. They are snapshots.
+- Do not push to the live theme unless asked.
+- Do not upload the paid product archive to Shopify Files. A public
+  CDN URL bypasses checkout.
+
+## Before you say it is done
+tests/run-all.sh passes, the content validator passes, and you have
+fetched the changed URL and read the response.</code></pre>
+
+<p>Almost every line in the "platform rules" section is something that cost hours the first time. That is the correct test for whether a rule belongs in the file. The build guide for this stack is <a href="/blogs/guides/build-shopify-store-with-claude-code">how to build a Shopify store with Claude Code</a>.</p>
+
+<h2 id="monorepo">Example 4: shared package in a monorepo</h2>
+
+<p>This one goes in <code>packages/ui/CLAUDE.md</code>, not at the repository root. It is loaded when work happens in that directory and it inherits the root file, so it only says what is different.</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md — packages/ui
+
+Inherits the root CLAUDE.md. This file only covers what is different
+about this package.
+
+## What this is
+The shared component library. Consumed by apps/web and apps/admin.
+A breaking change here breaks both, so treat the public API as public.
+
+## Commands
+Run from this directory, not the repository root:
+- `pnpm build`      tsup, ESM + types
+- `pnpm test`       Vitest + Testing Library
+- `pnpm storybook`  visual review on :6006
+
+## Boundaries
+- This package imports nothing from apps/. Ever. If a component needs
+  application state, it takes it as a prop.
+- No data fetching, no routing, no environment variables in here.
+- Everything exported is listed in src/index.ts. Nothing is imported
+  by deep path from a consuming app.
+
+## Public API
+- A change to an exported prop type is a breaking change. Say so, and
+  add a changeset.
+- Do not remove or rename an export to tidy up. Deprecate first.
+
+## Components
+- One component per file, named the same as the file.
+- Props typed explicitly, no `any`.
+- Every interactive component is keyboard-operable and has a visible
+  focus style. Every new component gets a Storybook story.
+- Styling through the token layer. No hard-coded colours or spacing.
+
+## Testing
+- Test behaviour, not implementation. Query by role, then by label.
+  Do not query by class name or test id unless there is no alternative.
+
+## Do not
+- Do not change the build config to make one import work.
+- Do not add a dependency here that only one consuming app needs.</code></pre>
+
+<p>The whole point of a nested file is that first line. Repeating the root file's rules here would be duplication with two places to drift apart.</p>
+
+<h2 id="diff">Reading the four side by side</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Section</th><th>What drives the difference</th></tr></thead>
+<tbody>
+<tr><td>Architecture</td><td>Different every time. This is the section worth the most thought</td></tr>
+<tr><td>Commands</td><td>Same shape; the Shopify and monorepo ones need explaining because they are not <code>npm run</code></td></tr>
+<tr><td>Security</td><td>Expands with the stakes. Long for the app, short for the static site</td></tr>
+<tr><td>SEO</td><td>Large for the marketing site, one line for the app, absent for the package</td></tr>
+<tr><td>Deployment</td><td>Different every time, and omitted for a package that does not deploy</td></tr>
+<tr><td>Do not</td><td>Mostly identical, plus one or two project-specific hazards</td></tr>
+<tr><td>Definition of done</td><td>Same structure, different commands</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two things carry over unchanged in all four: the "do not commit or push unless asked" rule, and the closing definition of done. Those two are worth putting in your personal <code>~/.claude/CLAUDE.md</code> so you stop retyping them.</p>
+
+<h2 id="notbelong">Rules that belong in none of them</h2>
+
+<p>Every one of these gets written into a <code>CLAUDE.md</code> at some point, and every one is better somewhere else.</p>
+
+<ul>
+  <li><strong>"Run the formatter after editing."</strong> Mechanical and unconditional, so it belongs in a <a href="/blogs/guides/claude-code-hooks">hook</a>, where it runs whether or not anyone read the file.</li>
+  <li><strong>A description of the directory structure.</strong> Claude can read the directory. Only note the parts that are surprising.</li>
+  <li><strong>Your linter's configuration, in prose.</strong> The config is the authority. Restating it creates two sources of truth.</li>
+  <li><strong>A multi-step procedure you run occasionally.</strong> That is a <a href="/blogs/guides/claude-code-skills">skill</a>. It costs nothing until it is invoked, whereas everything in <code>CLAUDE.md</code> costs attention on every turn.</li>
+  <li><strong>Rules you are not willing to enforce.</strong> A rule that is routinely broken with no consequence teaches that the file is optional.</li>
+</ul>
+
+<h2 id="test">Testing yours</h2>
+
+<p>Three checks, in increasing strength.</p>
+
+<p><strong>Ask.</strong> Start a session and ask what the file says about testing, or deployment, or security. A vague answer means a vague section.</p>
+
+<p><strong>Bait.</strong> Ask for something the file forbids — adding a dependency, pushing to the production branch, skipping a failing test. It should refuse and cite the reason.</p>
+
+<p><strong>Observe.</strong> Over a week, note which rules get broken. A rule broken repeatedly is either badly written or does not belong in a prompt file at all.</p>
+
+<p>If you want the blank versions to adapt rather than these filled-in ones, the free <a href="/pages/production-claude-md-starter">production CLAUDE.md starter</a> is a single generic file, and the starter kit offered on this page bundles per-project templates with a review checklist.</p>
+
+<h2>Where to go next</h2>
+
+<p>The full reasoning behind all of this is in <a href="/blogs/guides/production-claude-md-web-development">how to create a production CLAUDE.md</a>. For where the mechanical rules should go instead, read <a href="/blogs/guides/claude-code-hooks">hooks</a> and <a href="/blogs/guides/claude-code-skills">skills</a>. For the build workflow these files support, start with <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a>, and for the platform-specific one, <a href="/blogs/guides/build-shopify-store-with-claude-code">building a Shopify store</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/memory" rel="noopener">Claude Code: memory and CLAUDE.md</a> — file locations and precedence</li>
+  <li><a href="https://code.claude.com/docs/en/settings" rel="noopener">Claude Code: settings</a> — what belongs in settings rather than a prompt file</li>
+  <li><a href="https://code.claude.com/docs/en/hooks" rel="noopener">Claude Code: hooks</a> — for the rules that should be enforced</li>
+</ul>

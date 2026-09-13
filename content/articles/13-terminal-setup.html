@@ -1,0 +1,226 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#install">Install it</a></li>
+    <li><a href="#login">Log in</a></li>
+    <li><a href="#first">Your first session</a></li>
+    <li><a href="#permissions">Permission modes, and Shift+Tab</a></li>
+    <li><a href="#commands">The commands you will actually use</a></li>
+    <li><a href="#shortcuts">Keyboard shortcuts worth learning on day one</a></li>
+    <li><a href="#week">What to do in your first week</a></li>
+    <li><a href="#mistakes">Five beginner mistakes</a></li>
+    <li><a href="#next">When you outgrow the basics</a></li>
+  </ol>
+</nav>
+
+<h2 id="install">Install it</h2>
+
+<p>Claude Code runs in your terminal. Pick one method — the native installer is the recommended one and it auto-updates in the background.</p>
+
+<p><strong>macOS, Linux, WSL:</strong></p>
+<pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+
+<p><strong>Windows PowerShell:</strong></p>
+<pre><code>irm https://claude.ai/install.ps1 | iex</code></pre>
+
+<p><strong>Windows CMD:</strong></p>
+<pre><code>curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd</code></pre>
+
+<p>Two alternatives, both of which <strong>do not auto-update</strong> — you have to upgrade them yourself for features and security fixes:</p>
+
+<pre><code>brew install --cask claude-code        # then: brew upgrade claude-code
+winget install Anthropic.ClaudeCode    # then: winget upgrade Anthropic.ClaudeCode</code></pre>
+
+<p>Debian, Fedora, RHEL and Alpine can also install through apt, dnf, or apk.</p>
+
+<p>Confirm it worked:</p>
+
+<pre><code>claude --version</code></pre>
+
+<p>That prints a version number followed by <code>(Claude Code)</code>.</p>
+
+<p>Two Windows notes that save confusion. If you see <code>The token '&&' is not a valid statement separator</code>, you are in PowerShell and ran the CMD command. If you see <code>'irm' is not recognized</code>, you are in CMD and ran the PowerShell one — your prompt shows <code>PS C:\</code> in PowerShell and plain <code>C:\</code> in CMD. And on native Windows, installing <a href="https://git-scm.com/downloads/win" rel="noopener">Git for Windows</a> is recommended so Claude Code can use the Bash tool; without it, it falls back to PowerShell. WSL setups do not need it.</p>
+
+<h2 id="login">Log in</h2>
+
+<pre><code>claude</code></pre>
+
+<p>First run prompts you to authenticate in the browser. Credentials are stored, so this is a one-time step. To switch accounts later, type <code>/login</code> inside a running session.</p>
+
+<p>You can sign in with a Claude subscription (Pro, Max, Team, Enterprise — the recommended route), a Claude Console account with pre-paid credits, or through Amazon Bedrock, Google Cloud's Agent Platform or Microsoft Foundry if your organisation uses one.</p>
+
+<p>One gotcha: if <code>ANTHROPIC_API_KEY</code> is already set in your environment, Claude Code skips the login prompt and asks you to approve that key instead. If you meant to use your subscription, unset the variable first.</p>
+
+<h2 id="first">Your first session</h2>
+
+<pre><code>cd /path/to/your/project
+claude</code></pre>
+
+<p>Start in a real project, not an empty directory. Claude Code reads files as it needs them — you do not paste anything in, and you do not add files to context manually.</p>
+
+<p>Before asking it to change anything, ask it to explain something. This is the fastest way to calibrate whether you can trust it here:</p>
+
+<pre class="sbs-prompt">what does this project do?</pre>
+<pre class="sbs-prompt">where is the main entry point?</pre>
+<pre class="sbs-prompt">explain the folder structure</pre>
+
+<p>Then a small change:</p>
+
+<pre class="sbs-prompt">add input validation to the user registration form</pre>
+
+<p>In your first session it asks before each change. Approve them one at a time and read what it is doing — that first session is where you learn what it does well and what it guesses at.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Once past the first hour, the difference between good and bad results is almost entirely what you tell it up front. The Claude Code Website Launch System packages that &mdash; production CLAUDE.md templates, a staged build prompt, and 100 reusable prompts. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="permissions">Permission modes, and Shift+Tab</h2>
+
+<p>This is the setting that most changes how the tool feels, and most people find it by accident.</p>
+
+<p>After your first session, <strong>auto mode</strong> is the built-in starting mode for interactive terminal sessions on Pro, Max and Team plans: a classifier reviews actions instead of you, and Claude edits most files and runs most commands without asking. On other plans, Manual mode is the starting point. Your own settings or your organisation can change this.</p>
+
+<p><strong>Press <code>Shift+Tab</code> at any time to cycle the mode.</strong> That is the whole control.</p>
+
+<p>How to use it in practice: stay in a mode that asks while you are learning what the tool does in <em>your</em> codebase. Move to auto once you have a sense of it. Drop back to a stricter mode whenever you are somewhere consequential — auth, payments, migrations, deploy scripts. The mode is per-session and free to change mid-task.</p>
+
+<p>Plan mode deserves its own mention. It lets Claude research and propose without touching anything, which is the right default for any change large enough that you would not want to read the diff cold.</p>
+
+<h2 id="commands">The commands you will actually use</h2>
+
+<p>Shell commands, run from your terminal:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Command</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>claude</code></td><td>Start an interactive session</td></tr>
+<tr><td><code>claude "task"</code></td><td>Start with an initial prompt</td></tr>
+<tr><td><code>claude -p "query"</code></td><td>One-off query, prints the answer and exits</td></tr>
+<tr><td><code>claude -c</code></td><td>Continue the most recent conversation in this directory</td></tr>
+<tr><td><code>claude -r</code></td><td>Resume a previous conversation, chosen from a list</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Session commands, typed inside Claude Code:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Command</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>/help</code></td><td>Available commands and skills</td></tr>
+<tr><td><code>/clear</code></td><td>Clear the conversation history</td></tr>
+<tr><td><code>/login</code></td><td>Switch accounts or re-authenticate</td></tr>
+<tr><td><code>/exit</code> or Ctrl+D twice</td><td>Leave</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>claude -p</code> is more useful than it looks, because it composes with everything else your shell can do:</p>
+
+<pre><code>git log --oneline -20 | claude -p "summarise these commits for a release note"</code></pre>
+
+<p>That is the entry point to scripted use — running Claude Code in a loop, in a git hook, or in CI.</p>
+
+<h2 id="shortcuts">Keyboard shortcuts worth learning on day one</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Key</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>/</code></td><td>Lists every command and skill available to you</td></tr>
+<tr><td><code>Tab</code></td><td>Completes commands</td></tr>
+<tr><td><code>↑</code></td><td>Command history</td></tr>
+<tr><td><code>Shift+Tab</code></td><td>Cycles permission mode</td></tr>
+<tr><td><code>Ctrl+D</code> twice</td><td>Exit</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Typing <code>/</code> and reading the list is the single best five minutes a new user can spend. Most people do not discover what is available for weeks.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-first-week.png?v=1787943933" alt="A five-step first week. Days 1 to 2: ask, do not tell. Day 3: small verifiable changes. Day 4: ask for a plan first. Day 5: write a CLAUDE.md. Rest of the week: let it drive git."
+       width="1000" height="562" loading="lazy" decoding="async">
+  <figcaption>Skipping to day 4 is the commonest reason people conclude the tool is unreliable.</figcaption>
+</figure>
+
+<h2 id="week">What to do in your first week</h2>
+
+<p>An order that builds judgement before it builds dependency.</p>
+
+<p><strong>Days 1–2: ask, do not tell.</strong> Use it as a codebase question-answering tool. "What calls this function?" "Why does this test fail?" "What would break if I changed this?" You learn where it is reliable at zero risk.</p>
+
+<p><strong>Day 3: small, verifiable changes.</strong> A bug with a reproduction. A function with tests. Something where "did it work?" has an unambiguous answer.</p>
+
+<p><strong>Day 4: ask for a plan first.</strong> Before any change touching more than one file, ask for the plan and read it. This habit is what separates people who get good results from people who get large diffs.</p>
+
+<pre class="sbs-prompt">Create an implementation plan for this. Break it into steps that are each
+independently reviewable and independently revertible. Do not implement
+anything yet — I want the plan first.</pre>
+
+<p><strong>Day 5: write a <code>CLAUDE.md</code>.</strong> The moment you notice yourself explaining the same convention twice, it belongs in a file the tool reads every session. <a href="/blogs/guides/production-claude-md-web-development">Creating a production CLAUDE.md</a> covers what belongs in it and — more importantly — what does not.</p>
+
+<p><strong>Rest of the week: git.</strong> Let it handle commits, branches, and history questions. It is genuinely good at this and it is low risk because everything is recoverable.</p>
+
+<pre class="sbs-prompt">what files have I changed?
+commit my changes with a descriptive message
+create a new branch called feature/checkout-validation</pre>
+
+<h2 id="mistakes">Five beginner mistakes</h2>
+
+<h3>Asking for too much at once</h3>
+<p>"Build the whole feature" produces a diff nobody reviews. The output is often fine; the problem is that you cannot check it. Stage the work into steps you can read.</p>
+
+<h3>Describing the solution instead of the problem</h3>
+<p>"Add a cache here" forecloses the possibility that the query needs an index. Describe the symptom and the constraint, and ask for approaches.</p>
+
+<h3>Accepting "done" without evidence</h3>
+<p>"Tests pass" is a claim. Ask for the output. Then get in the habit of asking <em>"what did you not verify?"</em> — the answer is often the most useful line in the response.</p>
+
+<h3>Staying in a mode that asks about everything</h3>
+<p>Approving forty prompts in a row trains you to stop reading them, which is worse than auto mode. Move up once you trust it, and drop back deliberately for risky work.</p>
+
+<h3>Re-explaining the project every session</h3>
+<p>If you are typing the same context repeatedly, that is the signal it belongs in <code>CLAUDE.md</code>. This is the most common reason people conclude the tool is inconsistent — it is being told different things each time.</p>
+
+<h2 id="next">When you outgrow the basics</h2>
+
+<p>The tool has considerably more depth than the quickstart shows, and it is worth knowing what exists so you recognise the moment you need it.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>When you notice</th><th>Reach for</th></tr></thead>
+<tbody>
+<tr><td>Repeating the same conventions</td><td><a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a></td></tr>
+<tr><td>Pasting the same procedure</td><td><a href="/blogs/guides/claude-code-skills">Skills</a> — a <code>/command</code> you type</td></tr>
+<tr><td>Context filling with file reads</td><td><a href="/blogs/guides/claude-code-subagents">Subagents</a> — isolated context, restricted tools</td></tr>
+<tr><td>Wanting to share your setup with a team</td><td><a href="/blogs/guides/claude-code-plugins">Plugins</a></td></tr>
+<tr><td>Rules being forgotten</td><td><a href="/blogs/guides/claude-code-hooks">Hooks</a> — enforced, not requested</td></tr>
+<tr><td>Needing your own tools and data</td><td><a href="/blogs/guides/claude-code-mcp">MCP</a></td></tr>
+<tr><td>Wanting it on every pull request</td><td><a href="/blogs/guides/claude-code-github-actions">GitHub Actions</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>None of that is needed on day one. All of it becomes obvious at the moment the problem it solves shows up.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>If you would rather skip the trial-and-error, the Launch System is the assembled version: the configuration, the prompts, the audits, and the checklists from a real build. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>The natural next step is a real project end to end — <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a> covers the full sequence. For directing it well, the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> has 27 worked examples. If you are still deciding whether an agentic tool is even the right category for you, <a href="/blogs/guides/vibe-coding-tools">vibe coding tools and platforms</a> compares the alternatives.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/quickstart" rel="noopener">Claude Code: quickstart</a> — install, login, first session</li>
+  <li><a href="https://code.claude.com/docs/en/cli-reference" rel="noopener">Claude Code: CLI reference</a></li>
+  <li><a href="https://code.claude.com/docs/en/permission-modes" rel="noopener">Claude Code: permission modes</a></li>
+  <li><a href="https://code.claude.com/docs/en/troubleshoot-install" rel="noopener">Claude Code: troubleshoot installation</a></li>
+</ul>

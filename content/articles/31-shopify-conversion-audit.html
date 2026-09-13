@@ -1,0 +1,121 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#different">What Shopify decides for you</a></li>
+    <li><a href="#events">Start with the events, because apps duplicate them</a></li>
+    <li><a href="#product">The product page</a></li>
+    <li><a href="#cart">The cart</a></li>
+    <li><a href="#checkout">Checkout, and what you cannot change</a></li>
+    <li><a href="#mobile">Mobile, on a real device</a></li>
+    <li><a href="#trust">Trust and the pages nobody reads until they matter</a></li>
+    <li><a href="#theme">Reading the theme rather than the page</a></li>
+    <li><a href="#after">After the order</a></li>
+  </ol>
+</nav>
+
+<h2 id="different">What Shopify decides for you</h2>
+
+<p>A Shopify conversion audit is not a generic one with the word Shopify added. The platform owns several of the things you would otherwise audit, and knowing which is the difference between useful findings and a list of changes you cannot make.</p>
+
+<p>Shopify owns checkout on every plan below Shopify Plus. It owns the URL structure. It owns the cart endpoints. Apps inject front-end code you did not write and frequently cannot see in your theme. And the theme you are auditing may carry demo content and behaviours from a vendor who never saw your catalogue.</p>
+
+<p>So the audit runs in a different order from a generic one: measurement first, because apps break it; then the parts you control; then a clear statement of what is platform behaviour rather than a defect.</p>
+
+<p>The platform-agnostic version is <a href="/blogs/guides/ai-website-conversion-audit">the conversion audit workflow</a>, and <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a> covers the decisions that make a store auditable in the first place.</p>
+
+<h2 id="events">Start with the events, because apps duplicate them</h2>
+
+<p>On Shopify this is not a formality. Shopify fires its own analytics. Apps commonly add their own <code>purchase</code> and <code>add_to_cart</code> events. A theme may fire a third from a custom pixel. Nothing warns you.</p>
+
+<p>The symptom is a conversion rate that is exactly half, or exactly double, what it should be — uniformly, so nothing looks anomalous.</p>
+
+<pre class="sbs-prompt">List every source of analytics events on this store: Shopify's own,
+theme code, custom pixels, and each installed app. For the purchase
+and add-to-cart events specifically, identify every place they can
+fire.
+
+Then complete one real transaction and report how many times each
+event actually fired. Report the observed count, not the intended
+one.</pre>
+
+<p>Until that number is one, everything downstream is measuring something other than what you think.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-shopify-events.png?v=1788908806" alt="Four independent sources — Shopify analytics, theme code, a custom pixel, and each installed app — all feeding one purchase event, each counted separately."
+       width="1000" height="466" loading="lazy" decoding="async">
+  <figcaption>Four things can fire a purchase event on a Shopify store, and nothing warns you when two of them do.</figcaption>
+</figure>
+
+<h2 id="product">The product page</h2>
+
+<p>The highest-value page and the one most often audited last. What matters, roughly in order:</p>
+
+<ul>
+  <li><strong>Is the price visible without scrolling</strong> on a 375px viewport? Measure it rather than assuming — themes that look fine on a desktop preview routinely push the buy button below the fold on a phone.</li>
+  <li><strong>Does the button say what happens?</strong> "Add to cart" is honest. A button that adds to cart while saying "Buy now" is not.</li>
+  <li><strong>Are variants selectable without ambiguity</strong>, and does the price update when they change?</li>
+  <li><strong>Is the first image the one that explains the product</strong>, rather than the one that happened to upload first?</li>
+  <li><strong>Are delivery and refund terms reachable before purchase</strong>, not only from the footer? For a digital product this matters more, not less: there is nothing to return, and saying so plainly beforehand prevents the dispute.</li>
+  <li><strong>Does the page load its own images at the size it displays them?</strong> Shopify's image CDN will serve any size you ask for, including one four times too large.</li>
+</ul>
+
+<h2 id="cart">The cart</h2>
+
+<p>Cart problems are usually structural rather than aesthetic:</p>
+
+<ul>
+  <li>Can quantity be changed, and does the total update without a full reload?</li>
+  <li>Is there a route back to the catalogue that is not the browser's back button?</li>
+  <li>Do discount codes fail with a message that says why?</li>
+  <li>Are shipping costs knowable before checkout, or is the first mention on the payment step?</li>
+</ul>
+
+<p>The last one causes more abandonment than any button colour ever has, and on a digital product the fix is a sentence rather than a redesign: say there is no shipping.</p>
+
+<h2 id="checkout">Checkout, and what you cannot change</h2>
+
+<p>Below Plus, checkout is Shopify's. You can change the branding, the language and which fields are required; you cannot change the flow.</p>
+
+<p>That makes the honest audit finding usually one of these:</p>
+
+<ul>
+  <li><strong>A required field that need not be required.</strong> Address collection on a digital-only order is the common one, and it is a setting.</li>
+  <li><strong>A payment method visitors expect and cannot find.</strong></li>
+  <li><strong>An app inserting itself into the flow</strong> with an upsell or a survey.</li>
+</ul>
+
+<p>Anything else about checkout structure belongs in the report as platform behaviour, explicitly labelled, so nobody spends a sprint trying to change it.</p>
+
+<h2 id="mobile">Mobile, on a real device</h2>
+
+<p>Emulation misses three things that matter commercially: the actual tap target size under a thumb, the keyboard covering the field being typed into, and the real network. Complete a purchase on a phone, on cellular, before writing the mobile section of any report.</p>
+
+<p>Then check the boring measurable things: no horizontal scrolling at 320px, every tap target at least 24&nbsp;&times;&nbsp;24 CSS pixels, and no control that depends on hover.</p>
+
+<h2 id="trust">Trust and the pages nobody reads until they matter</h2>
+
+<p>Refund, privacy, terms, contact. Nobody reads them, and their absence is felt anyway. Check they exist, are reachable, say something specific, and do not contradict the product page — stale merchandising copy claiming something the store no longer does is a credibility problem that compounds quietly.</p>
+
+<h2 id="theme">Reading the theme rather than the page</h2>
+
+<p>Several conversion problems are visible in the theme source and invisible in the rendered page until conditions align:</p>
+
+<ul>
+  <li><code>loading="lazy"</code> on the first image in a product loop, which delays the largest paint on every collection page</li>
+  <li><code>image_url</code> without a width, serving the original at whatever size it was uploaded</li>
+  <li>A section that renders a fallback only when a field is empty — so it looks correct on every product that has the field, and wrong on the one that does not</li>
+  <li>Settings referenced in a template but absent from the section schema, which Shopify silently discards</li>
+</ul>
+
+<p>The <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify build guide</a> covers the theme workflow these come out of, and <a href="/blogs/guides/shopify-admin-api-claude-code">the Admin API guide</a> covers scripting the checks so they run on every push rather than when someone remembers.</p>
+
+<h2 id="after">After the order</h2>
+
+<p>For a digital product the post-purchase step is the product. If the download does not arrive, everything upstream was wasted.</p>
+
+<p>The awkward part: a third-party delivery app stores its files privately, and the Admin API generally cannot see whether a file is attached. A product can be active, priced, published and completely undeliverable, and every API-based check will call it healthy. The only proof is a real paid order that gets fulfilled — so place one, and treat any check that claims otherwise as unproven.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Conversion &amp; Revenue Optimization Toolkit contains the Shopify CRO audit in full &mdash; ten phases that read the theme source, not just the rendered page &mdash; alongside the cart, checkout, merchandising and post-purchase workflows. <a href="/products/claude-code-conversion-revenue-optimization-toolkit">See what is included</a>.</p>
+</aside>

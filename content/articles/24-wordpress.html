@@ -1,0 +1,446 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#different">Why WordPress is the hardest platform to hand an agent</a></li>
+    <li><a href="#recon">Reconnaissance, before you change anything</a></li>
+    <li><a href="#local">A local environment worth breaking</a></li>
+    <li><a href="#architecture">The architecture Claude has to be told about</a></li>
+    <li><a href="#claudemd">A CLAUDE.md for WordPress</a></li>
+    <li><a href="#themes">Child themes, block themes, and which you are in</a></li>
+    <li><a href="#plugins">Plugin development</a></li>
+    <li><a href="#php">PHP standards, escaping, and the four functions that matter</a></li>
+    <li><a href="#blocks">Blocks and the editor</a></li>
+    <li><a href="#database">The database, and why the agent stays out of it</a></li>
+    <li><a href="#env">Environment configuration and secrets</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#a11y">Accessibility</a></li>
+    <li><a href="#seo">SEO</a></li>
+    <li><a href="#deploy">Git, staging, and deployment</a></li>
+    <li><a href="#validate">Validation and rollback</a></li>
+    <li><a href="#mistakes">The mistakes that cost the most</a></li>
+    <li><a href="#workflow">The recommended workflow, end to end</a></li>
+  </ol>
+</nav>
+
+<h2 id="different">Why WordPress is the hardest platform to hand an agent</h2>
+
+<p>Claude Code is very good at working inside a repository. WordPress is not, primarily, a repository. It is a PHP application whose behaviour is decided by three things at once: the files on disk, the rows in a database, and whichever of the forty plugins you installed happens to hook the filter you are looking at. Two of those three are invisible to a tool that reads files.</p>
+
+<p>That is the whole difficulty, and everything below is a consequence of it. On a static site or an Astro project, reading the code tells you what the site does. On WordPress, reading the code tells you what <em>could</em> happen, and the database tells you what actually does.</p>
+
+<p>The practical effect is that the reconnaissance step matters more here than on any other platform, and that a confident-sounding change is more likely to be wrong. An agent asked to "make the header sticky" will find a header template, edit it, and report success. Whether that template is the one your site renders depends on the template hierarchy, on whether a page builder is overriding it, on whether the active theme is a child theme, and on whether some plugin filtered the output on the way out.</p>
+
+<p>None of that makes WordPress a bad target. It makes it a platform where the operational layer — a project context file that states the real facts, and checks capable of failing — earns its keep faster than anywhere else.</p>
+
+<h2 id="recon">Reconnaissance, before you change anything</h2>
+
+<p>The first session on a WordPress project should change nothing. Its job is to establish which of the three sources of truth is in charge of what.</p>
+
+<p>The tool for this is WP-CLI, because it can see the database. Give Claude Code permission to run read-only WP-CLI commands and ask for a report, not a fix:</p>
+
+<pre class="sbs-prompt">Analyse this WordPress installation. Do not modify anything, and do not
+run any command that writes.
+
+Report, with the command output as evidence for each:
+
+1. WordPress version, PHP version, and whether multisite is enabled.
+2. The active theme, whether it is a child theme, and its parent.
+3. Whether the active theme is a block theme or a classic theme.
+4. Every active plugin, with version, and flag any that are known page
+   builders, caching layers, or SEO plugins.
+5. Which plugins register custom post types or taxonomies, and their names.
+6. Whether a persistent object cache is configured.
+7. Where uploads live and whether they are offloaded to external storage.
+8. Constants defined in wp-config.php, with values redacted.
+
+Then state, in one paragraph, which parts of this site's output are
+controlled by theme files and which by database content or plugin
+filters. Where you cannot tell, say so rather than guessing.</pre>
+
+<p>Useful commands to allow, all read-only:</p>
+
+<pre><code>wp core version --extra
+wp theme list --status=active --fields=name,version,parent
+wp plugin list --status=active --fields=name,version,update
+wp post-type list --fields=name,label,public
+wp option get template
+wp option get stylesheet
+wp cli info</code></pre>
+
+<p>Two answers change everything that follows. <strong>Is it a block theme or a classic theme?</strong> A block theme keeps templates as HTML files in <code>templates/</code> and its styling in <code>theme.json</code>; a classic theme uses PHP templates and <code>functions.php</code>. Advice for one is often actively wrong for the other. And <strong>is a page builder installed?</strong> If Elementor, Divi, Beaver Builder or similar is active, a large amount of page output lives in post meta rows, not in any file, and editing templates will appear to do nothing.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System ships a reconnaissance prompt per platform, written so the output is evidence rather than a summary you have to trust — <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="local">A local environment worth breaking</h2>
+
+<p>Do not let an agent work against production. This is not a WordPress-specific rule but the consequences are worse here, because a bad migration or a plugin activation can take a site down in a way a file revert will not fix.</p>
+
+<p>Any of the common local stacks will do — <code>wp-env</code>, LocalWP, DDEV, Lando, or a plain Docker Compose file. What matters is not which one, but that three things are true:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Requirement</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>The database can be reset in one command</td><td>So breaking it deliberately, to test a check, is cheap</td></tr>
+<tr><td>It runs the same PHP major version as production</td><td>PHP 8 deprecations that only appear on the server are a bad way to find out</td></tr>
+<tr><td>Debug output is on and logged to a file</td><td><code>WP_DEBUG</code> with <code>WP_DEBUG_LOG</code> and <code>WP_DEBUG_DISPLAY</code> off, so the agent can read errors without them reaching a page</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>wp-env</code> is the lowest-friction option for theme and plugin work because it is a single JSON file the repository can carry, which means the environment is part of the project rather than part of your laptop:</p>
+
+<pre><code>{
+  "core": "WordPress/WordPress#master",
+  "phpVersion": "8.3",
+  "plugins": [ "." ],
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_LOG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "SCRIPT_DEBUG": true
+  }
+}</code></pre>
+
+<p>Tell Claude Code the reset command explicitly, in <code>CLAUDE.md</code>. An agent that knows it can restore the database in five seconds will test destructive things properly instead of reasoning about them.</p>
+
+<h2 id="architecture">The architecture Claude has to be told about</h2>
+
+<p>Four pieces of WordPress architecture cause most of the confusion, and none of them is discoverable by reading a single file.</p>
+
+<h3>The template hierarchy</h3>
+
+<p>WordPress picks a template by walking a defined list from most specific to least. For a single post in the <code>guides</code> category it will look for <code>single-post.php</code>, then <code>single.php</code>, then <code>singular.php</code>, then <code>index.php</code>, taking the first that exists. An agent editing <code>index.php</code> to change a post page is editing a file that is never reached.</p>
+
+<p>State the resolved template in the prompt rather than asking the model to infer it. WP-CLI cannot tell you directly, but the free <code>wp template-hierarchy</code>-style plugins can, and in a pinch a one-line <code>template_include</code> filter will print it.</p>
+
+<h3>Hooks</h3>
+
+<p>Actions and filters are the extension mechanism, and they are also the reason "just edit the template" fails. If a plugin filters <code>the_content</code>, your template change is applied and then modified. When output is wrong and the template looks right, the answer is almost always a hook.</p>
+
+<pre class="sbs-prompt">The excerpt on category archives is being truncated to 20 words and I
+cannot find where. Do not change anything yet.
+
+Find every callback attached to `excerpt_length` and `get_the_excerpt`
+across the active theme and all active plugins. For each, give me the
+file, the line, the priority, and the plugin or theme it belongs to.
+
+Then tell me which one wins at render time and why.</pre>
+
+<h3>The loop</h3>
+
+<p>Almost every template runs a query and iterates it. Changing what appears on a page is more often a query change (<code>pre_get_posts</code>) than a markup change, and the two have very different blast radii: a badly scoped <code>pre_get_posts</code> filter affects the admin, feeds, and every other query on the site.</p>
+
+<h3>Where "content" lives</h3>
+
+<p>Post content is a row. Widgets are options. Menus are terms. Block theme template edits made in the site editor are stored as <code>wp_template</code> posts that <em>override the file on disk</em>. That last one catches people constantly: you edit <code>templates/single.html</code>, deploy it, and nothing changes, because someone opened the site editor once and the database copy now wins.</p>
+
+<h2 id="claudemd">A CLAUDE.md for WordPress</h2>
+
+<p>This is where the reconnaissance turns into something the agent reads on every session. Keep it short — around 150 lines is the working limit before instructions start competing with each other for attention. Everything below is specific enough to change behaviour; nothing in it is generic advice.</p>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Project
+Client marketing site on WordPress 6.x, classic theme with a child theme.
+Traffic is mostly organic search. Downtime is worse than a delayed release.
+
+## Environment
+- Local: `npm run env:start` (wp-env), PHP 8.3, matches production.
+- Reset the database: `npm run env:reset`. This is cheap. Use it.
+- Never run commands against production. There is no production access
+  configured here and there must not be.
+
+## Theme
+- Active theme: `acme-child`, parent `acme`. NEVER edit the parent —
+  it is updated from the vendor and edits are lost.
+- Classic theme: PHP templates, `functions.php`. Not a block theme.
+- Template resolution matters. Before editing a template, confirm which
+  one WordPress actually loads for that route and say which it is.
+
+## Plugins
+- Yoast SEO owns titles, meta descriptions and the sitemap. Do not write
+  competing meta tags in the theme.
+- WP Rocket is active. Any front-end change must be verified with cache
+  cleared, or the check is meaningless.
+- Advanced Custom Fields defines the field groups in
+  `acme-child/acf-json/`. Field changes go in that directory as JSON so
+  they are version controlled, never through the admin only.
+
+## Standards
+- WordPress Coding Standards. `composer lint` must pass.
+- Escape on output, always: `esc_html`, `esc_attr`, `esc_url`, `wp_kses_post`.
+- Sanitise on input. Verify a nonce and a capability on every write.
+- Text domain is `acme`. All user-facing strings translated.
+- Enqueue assets with `wp_enqueue_script` / `wp_enqueue_style` and a
+  version string. Never hard-code a `<script>` tag in a template.
+
+## Database
+- Do not write to the database. Not through WP-CLI, not through SQL,
+  not through a migration script. Propose the change and stop.
+- Reading is fine and encouraged: `wp option get`, `wp post list`.
+
+## Definition of done
+- `composer lint` and `npm run test` pass.
+- The change was verified in the browser with the cache cleared.
+- No PHP notices or warnings in `wp-content/debug.log`.
+- No new query in a loop; if you added one, say so and justify it.</code></pre>
+
+<p>Two lines in that file do most of the work. "Never edit the parent theme" prevents an entire class of change that silently disappears at the next vendor update. "Do not write to the database" turns the most dangerous available action into a proposal you approve.</p>
+
+<h2 id="themes">Child themes, block themes, and which you are in</h2>
+
+<p>A child theme is a directory with a <code>style.css</code> naming its parent and a <code>functions.php</code> that does not replace the parent's. Everything you write goes there. WordPress resolves each template by looking in the child first, so overriding a parent template means copying it across and editing the copy — and it means the copy is now yours to maintain against upstream changes.</p>
+
+<p>Tell the agent that trade-off explicitly, because the default behaviour is to copy the whole file:</p>
+
+<pre class="sbs-prompt">I need to change the post meta line on single posts to show the updated
+date instead of the published date.
+
+Prefer a hook over copying a template. Check first whether the parent
+theme provides a filter or an action for this region; if it does, use it
+and explain which one.
+
+Only copy `single.php` into the child theme if there is genuinely no hook,
+and if you do, say what maintenance burden that creates.</pre>
+
+<p>Block themes are a different world. There is no <code>functions.php</code>-driven markup; templates are HTML files containing block comments, global styles live in <code>theme.json</code>, and a great deal of what used to be PHP is now JSON. Two rules matter for agent-assisted work:</p>
+
+<ul>
+  <li><strong><code>theme.json</code> is the styling source of truth.</strong> A colour or spacing change written into a stylesheet when <code>theme.json</code> is present will be overridden or will fight the generated CSS custom properties. Point the agent at <code>theme.json</code> first.</li>
+  <li><strong>Database templates override file templates.</strong> If a template was ever edited in the site editor, the file is dead until that customisation is cleared. Check before debugging a change that "did not apply".</li>
+</ul>
+
+<h2 id="plugins">Plugin development</h2>
+
+<p>Site-specific behaviour belongs in a plugin, not in the theme, because a theme is a presentation layer that people change. This is a genuinely good fit for agent-assisted work: a small single-purpose plugin is a self-contained file tree with a clear boundary, which is exactly the shape of task an agent completes well.</p>
+
+<p>The minimum viable structure, and a good prompt to generate it:</p>
+
+<pre class="sbs-prompt">Create a plugin at `wp-content/plugins/acme-events/` that registers an
+`event` custom post type and an `event_type` taxonomy.
+
+Requirements:
+- Prefix everything with `acme_events_`. No global function names.
+- Register on `init`, with `show_in_rest` true so the block editor works.
+- Text domain `acme-events`, all labels translated.
+- Activation hook flushes rewrite rules; deactivation hook flushes them
+  again. Do not flush on every request.
+- No output on the front end yet. This registers the data model only.
+- Include a `readme.txt` header and a plugin header with a version.
+
+Do not write to the database beyond what `register_post_type` does.
+After writing it, run `composer lint` and show me the output.</pre>
+
+<p>Three details in that prompt are load-bearing. The prefix rule prevents collisions in a global namespace shared by every other plugin. <code>show_in_rest</code> is the difference between a post type that works in the block editor and one that mysteriously does not. And flushing rewrite rules on activation rather than on every request is the single most common performance mistake in first-draft plugin code.</p>
+
+<h2 id="php">PHP standards, escaping, and the four functions that matter</h2>
+
+<p>WordPress has a documented coding standard and a linter that enforces it. Install both, and put the command in <code>CLAUDE.md</code> so it runs without being asked:</p>
+
+<pre><code>composer require --dev wp-coding-standards/wpcs dealerdirect/phpcodesniffer-composer-installer
+vendor/bin/phpcs --standard=WordPress wp-content/themes/acme-child</code></pre>
+
+<p>The linter catches formatting. It does not catch the thing that actually matters, which is escaping. The rule is simple and absolute: <strong>escape at the point of output, every time, using the function that matches the context.</strong></p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Context</th><th>Function</th><th>Wrong choice looks like</th></tr></thead>
+<tbody>
+<tr><td>Text inside an element</td><td><code>esc_html()</code></td><td>Echoing a variable raw because "it comes from us"</td></tr>
+<tr><td>An attribute value</td><td><code>esc_attr()</code></td><td>Using <code>esc_html()</code>, which leaves quotes intact</td></tr>
+<tr><td>An <code>href</code> or <code>src</code></td><td><code>esc_url()</code></td><td>Using <code>esc_attr()</code>, which permits <code>javascript:</code></td></tr>
+<tr><td>Editor content with allowed HTML</td><td><code>wp_kses_post()</code></td><td>Echoing raw to "preserve formatting"</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Agent-written PHP is usually correct on the first three and inconsistent on the fourth, because <code>wp_kses_post()</code> visibly strips things during testing and the quick fix is to remove it. Put it in the project context file as a rule with a reason, and add a lint sniff for unescaped output so the check is mechanical rather than remembered.</p>
+
+<p>The same applies to writes. Every form or AJAX handler needs a nonce check <em>and</em> a capability check, and they are not interchangeable — a nonce proves the request came from your form, a capability proves this user is allowed to do it. Code that checks one and not the other is the most common real vulnerability in custom WordPress work.</p>
+
+<h2 id="blocks">Blocks and the editor</h2>
+
+<p>Custom blocks are JavaScript, built with the same toolchain as any modern front end. <code>@wordpress/create-block</code> scaffolds one correctly, and letting it do so is better than asking an agent to write the boilerplate from memory, because the boilerplate changes between WordPress versions.</p>
+
+<pre><code>npx @wordpress/create-block acme-callout --namespace acme</code></pre>
+
+<p>Once scaffolded, the useful division of labour is: the tool generates the structure, the agent writes the block's actual behaviour and its <code>block.json</code> attributes. Two things to specify every time:</p>
+
+<ul>
+  <li><strong>Server-side render or static save?</strong> A block whose output depends on live data must render on the server (<code>render_callback</code>), or the saved markup goes stale and the editor throws block validation errors. A block whose output is fixed should save static HTML and skip the PHP entirely.</li>
+  <li><strong>Do not change <code>save()</code> casually.</strong> Editing the save output of a block that already exists in content invalidates every saved instance. If it has to change, it needs a deprecation entry. An agent will not know this unless told.</li>
+</ul>
+
+<p>For most projects the honest answer is that you need fewer custom blocks than you think. Block patterns and block styles cover a large share of what people build custom blocks for, at a fraction of the maintenance.</p>
+
+<h2 id="database">The database, and why the agent stays out of it</h2>
+
+<p>This is the single most important rule on the page.</p>
+
+<p>File changes are reversible with <code>git checkout</code>. Database changes are not. A search-and-replace across <code>wp_posts</code> that gets the pattern slightly wrong will damage every post on the site, and the only recovery is a backup you hopefully took. An agent has no way to evaluate that asymmetry, and it will run the command if it can.</p>
+
+<p>So: reading is fine, writing is proposed and never executed. In practice that means the agent produces the command and you run it, after taking a backup:</p>
+
+<pre><code>wp db export backup-$(date +%Y%m%d-%H%M).sql
+wp search-replace 'http://old.example' 'https://new.example' --dry-run
+# read the dry run output, then remove --dry-run</code></pre>
+
+<p><code>--dry-run</code> on <code>wp search-replace</code> is not optional and should be in your project context file as a rule. It reports what it would change without changing it, which is the closest thing WordPress has to a check that can fail safely.</p>
+
+<p>Serialised data deserves a specific warning. PHP serialisation embeds string lengths, so a naive SQL find-and-replace on a serialised option corrupts it silently — the row still looks plausible and the data is unreadable. <code>wp search-replace</code> handles serialisation correctly; raw SQL does not. Never let a change of that shape happen in a MySQL client.</p>
+
+<h2 id="env">Environment configuration and secrets</h2>
+
+<p><code>wp-config.php</code> holds database credentials and salts, and it is the file most likely to be pasted into a chat when someone is debugging a connection. Keep it out of the repository, commit a <code>wp-config-sample</code> with the variable names and no values, and load real values from the environment.</p>
+
+<p>Three things belong in project context, because an agent will otherwise guess:</p>
+
+<ul>
+  <li>Which constants exist and what they control, with values redacted.</li>
+  <li>That <code>WP_DEBUG</code> is on locally and must never be on in production with <code>WP_DEBUG_DISPLAY</code> enabled — debug output on a live page is an information disclosure, not just untidy.</li>
+  <li>Whether <code>DISALLOW_FILE_EDIT</code> and <code>DISALLOW_FILE_MODS</code> are set, because if they are, the admin's plugin editor and installer are disabled and instructions that assume otherwise are wrong.</li>
+</ul>
+
+<h2 id="security">Security</h2>
+
+<p>Most WordPress compromises are not clever. They are an out-of-date plugin, a form handler with no capability check, or an upload endpoint that trusts a filename. Agent-assisted development helps with the second and third and does nothing about the first.</p>
+
+<p>A review prompt worth running before any release that touches input handling:</p>
+
+<pre class="sbs-prompt">Defensive security review of the custom code in this repository. This is
+a review of code we own — not penetration testing, and not an attempt to
+find live vulnerabilities in a running site.
+
+For every place that accepts input — form handlers, AJAX endpoints, REST
+routes, shortcodes, block attributes — report:
+
+1. Is input sanitised, and with which function?
+2. Is output escaped, and with the correct function for its context?
+3. Is there a nonce check?
+4. Is there a capability check, and is the capability the right one?
+5. Are database calls using $wpdb->prepare() with placeholders?
+6. Can any file path or filename come from user input unvalidated?
+
+Report findings with file and line. Do not fix anything in this run —
+an audit whose findings disappear into a commit is not an audit.</pre>
+
+<p>That last constraint matters more than it looks. If the same session finds and fixes, you get a diff and no report, and you cannot tell which findings were real.</p>
+
+<h2 id="performance">Performance</h2>
+
+<p>WordPress performance work divides into three layers, and only one of them is code.</p>
+
+<p><strong>Queries.</strong> The classic failure is a query inside the loop — fetching post meta or a related term per item, turning one page into forty database round trips. Ask for the query count before and after any template change; the Query Monitor plugin reports it, and a change that adds queries should be justified rather than accepted.</p>
+
+<p><strong>Assets.</strong> Every plugin enqueues its scripts on every page by default, including the ones it is not used on. Conditionally dequeuing another plugin's assets is legitimate and safe when scoped to specific templates, and it is often the largest single win available.</p>
+
+<p><strong>Caching.</strong> A page cache in front of WordPress makes almost all of the above invisible — and makes your front-end verification meaningless if you forget it is there. This is why the project context file above says any front-end check must be done with the cache cleared. An agent reporting "the change is live" after reading a cached response is reporting nothing.</p>
+
+<p>The measurable targets are the same as anywhere: LCP at or under 2.5 seconds, INP at or under 200 milliseconds, CLS at or under 0.1, each at the 75th percentile of real loads and segmented across mobile and desktop. The full method is in the <a href="/blogs/guides/claude-code-performance-core-web-vitals">Core Web Vitals workflow</a>.</p>
+
+<h2 id="a11y">Accessibility</h2>
+
+<p>WordPress core has an accessibility team and reasonable defaults; themes and plugins routinely undo them. The recurring offenders in WordPress specifically are skip links removed for aesthetics, menus whose submenus only open on hover, form fields labelled with placeholders, and "read more" links repeated forty times on an archive with no distinguishing context.</p>
+
+<p>That last one is worth naming because it is invisible to most automated checks and obvious to anyone using a screen reader's link list. The fix is a screen-reader-only continuation of the link text, which WordPress has a helper class for:</p>
+
+<pre><code>&lt;a href="&lt;?php the_permalink(); ?&gt;"&gt;
+  Read more
+  &lt;span class="screen-reader-text"&gt;
+    &lt;?php echo esc_html( get_the_title() ); ?&gt;
+  &lt;/span&gt;
+&lt;/a&gt;</code></pre>
+
+<p>Split any accessibility audit into what a machine can answer — contrast, labels, heading order, alt presence — and what needs a person, which is whether the alt text is useful and whether the flow can be completed by keyboard. The <a href="/blogs/guides/claude-code-accessibility-audit">WCAG workflow</a> covers the split in detail.</p>
+
+<h2 id="seo">SEO</h2>
+
+<p>The most important WordPress SEO decision is one of ownership: if an SEO plugin is active, it owns titles, meta descriptions, canonical tags, Open Graph and the sitemap. Writing competing tags in the theme produces duplicates, and duplicate canonical tags are worse than none because Google may ignore both.</p>
+
+<p>State that boundary in <code>CLAUDE.md</code>. Then the remaining theme-side work is genuinely theme-side:</p>
+
+<ul>
+  <li>One <code>h1</code> per page, and it should be the page's actual subject rather than the site name.</li>
+  <li>Heading order that does not skip levels, which is an accessibility requirement that happens to help.</li>
+  <li>Images with real <code>alt</code> text and explicit <code>width</code> and <code>height</code> so nothing shifts.</li>
+  <li>Archive pagination that is crawlable, and a decision about whether tag archives should be indexed at all — usually they should not, because they duplicate the content of the main listing without adding text.</li>
+</ul>
+
+<p>Structured data should describe what is visibly on the page and nothing more. If the SEO plugin already emits <code>Article</code> and <code>Organization</code>, do not add a second copy from the theme. The <a href="/blogs/guides/claude-code-technical-seo-audit">technical SEO audit workflow</a> covers how to verify what is actually being emitted rather than what you think is.</p>
+
+<h2 id="deploy">Git, staging, and deployment</h2>
+
+<p>WordPress predates the assumption that a website is a repository, and its deployment story reflects that. The workable pattern is:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Layer</th><th>In git?</th><th>How it moves to production</th></tr></thead>
+<tbody>
+<tr><td>Custom theme / child theme</td><td>Yes</td><td>Deployed with the repository</td></tr>
+<tr><td>Custom plugins</td><td>Yes</td><td>Deployed with the repository</td></tr>
+<tr><td>Third-party plugins</td><td>Ideally via Composer</td><td>Installed at build time from a lockfile</td></tr>
+<tr><td>WordPress core</td><td>No</td><td>Managed by the host or Composer</td></tr>
+<tr><td>Uploads</td><td>No</td><td>Never; they are user data</td></tr>
+<tr><td>Database</td><td>No</td><td>Never automatically, in either direction</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That last row is the one people get wrong. Pushing a database from staging to production destroys everything that happened on production since the copy — orders, comments, form submissions, new posts. Content moves up from production to staging, never the reverse, and code moves the other way.</p>
+
+<p>A deployment workflow that runs the checks before it ships is worth more than a fast one. The <a href="/blogs/guides/claude-code-github-actions-cloudflare">GitHub Actions and Cloudflare CI/CD guide</a> covers the general shape; for WordPress the pipeline usually adds <code>composer install --no-dev</code>, a PHPCS run, and an <code>rsync</code> or SFTP step scoped to <code>wp-content/themes</code> and <code>wp-content/plugins</code> only.</p>
+
+<h2 id="validate">Validation and rollback</h2>
+
+<p>Verify against the live URL, with the cache cleared, after DNS and CDN have settled. Local and production differ in exactly the places that are hardest to notice: canonical URLs, redirect behaviour, robots directives, and anything depending on a response header.</p>
+
+<p>A minimal post-deploy check, which an agent can run and which can genuinely fail:</p>
+
+<pre><code>curl -sI https://example.com/ | head -1
+curl -s https://example.com/ | grep -o '&lt;title&gt;[^&lt;]*&lt;/title&gt;'
+curl -s https://example.com/ | grep -c 'rel="canonical"'
+curl -sI https://example.com/wp-admin/ | head -1
+wp option get home
+wp option get siteurl</code></pre>
+
+<p>Rollback for files is a git revert and a redeploy. Rollback for the database is the export you took before you started, which is why taking it is a step rather than a suggestion. If you cannot roll back a change, it was not ready to ship.</p>
+
+<h2 id="mistakes">The mistakes that cost the most</h2>
+
+<p><strong>Editing the parent theme.</strong> It works, it survives testing, and it vanishes at the next vendor update. One line in <code>CLAUDE.md</code> prevents it.</p>
+
+<p><strong>Trusting a change that a cache is hiding.</strong> The agent edits a template, reloads, sees the old page, edits again, and now two changes are in flight. Clear the cache first, every time.</p>
+
+<p><strong>Letting the agent write to the database.</strong> Covered above, and worth the repetition because it is the only mistake on this list that can be unrecoverable.</p>
+
+<p><strong>Assuming the file is the template.</strong> The template hierarchy, page builders, and site-editor customisations each mean the file you are looking at may not be the one rendering.</p>
+
+<p><strong>Adding a plugin to solve a fifteen-line problem.</strong> Every plugin is code you now run on every request, an update you now track, and a trust boundary you now own.</p>
+
+<p><strong>Skipping the escaping because it is "internal" data.</strong> There is no internal data. The option you are echoing was set through an admin form.</p>
+
+<h2 id="workflow">The recommended workflow, end to end</h2>
+
+<ol>
+  <li><strong>Reconnaissance session.</strong> No changes. Establish theme type, active plugins, template resolution, and which behaviour lives where. Write the findings into <code>CLAUDE.md</code>.</li>
+  <li><strong>Local environment.</strong> Matching PHP version, debug logging on, one-command database reset. Commit the environment definition.</li>
+  <li><strong>Project context.</strong> The rules that are mechanical and unconditional — never edit the parent, never write to the database, always escape on output, always clear the cache before verifying.</li>
+  <li><strong>One change at a time.</strong> A hook if a hook exists, a template override if it does not, and a plugin for anything that is behaviour rather than presentation.</li>
+  <li><strong>Lint and log.</strong> <code>phpcs</code> clean, and <code>debug.log</code> with no new notices. Both are cheap and both catch real problems.</li>
+  <li><strong>Review the diff.</strong> A session that touched forty files is a session you cannot review, which means it is a session you cannot ship.</li>
+  <li><strong>Audit before release.</strong> Security review of any input handling, accessibility pass on any new markup, query count on any template change.</li>
+  <li><strong>Deploy code only.</strong> Files up, content down, database never automatic.</li>
+  <li><strong>Verify live.</strong> Cache cleared, real URLs, response headers checked. Then check again tomorrow, once a crawler has had a turn.</li>
+</ol>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Launch System packages this as runnable material rather than a method to adapt: a WordPress build prompt, a production <code>CLAUDE.md</code>, the security and accessibility audits, and the pre- and post-launch checklists — <a href="/products/claude-code-website-launch-system">browse the contents</a>.</p>
+</aside>
+
+<p>The through-line is the same one that applies to every platform, and it is simply more expensive to ignore here: an agent is good at doing work and unreliable at assessing its own work. On WordPress, where three sources of truth disagree and two of them are invisible to a file reader, arrange the loop so the assessment happens somewhere you can see it.</p>

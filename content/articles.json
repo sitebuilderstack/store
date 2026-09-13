@@ -1,0 +1,528 @@
+{
+  "blogHandle": "guides",
+  "blogTitle": "Claude Code Guides",
+  "author": "James Joyner IV",
+  "cdn": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/",
+  "tagTaxonomy": [
+    "Claude Code",
+    "Web Development",
+    "CLAUDE.md",
+    "Shopify",
+    "SEO",
+    "AI Development",
+    "Developer Tools",
+    "Deployment",
+    "Conversion"
+  ],
+  "articles": [
+    {
+      "file": "01-build-website.html",
+      "handle": "how-to-build-a-website-with-claude-code",
+      "title": "How to Build a Website With Claude Code: Complete Guide",
+      "seoTitle": "How to Build a Website With Claude Code",
+      "seoDescription": "A complete step-by-step workflow for building and shipping a real website with Claude Code: planning, CLAUDE.md, incremental builds, validation, deployment.",
+      "excerpt": "Claude Code can build a production website, but not by being asked to build a production website. This is the workflow that actually works: fifteen steps from definition to deployment, each with a way to verify it before moving on.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "AI Development",
+        "Deployment"
+      ],
+      "image": "guide-how-to-build-a-website-with-claude-code.png?v=1787803729",
+      "imageAlt": "Claude Code Guides: How to Build a Website With Claude Code. A wireframe of a page being assembled from blocks."
+    },
+    {
+      "file": "02-prompts.html",
+      "handle": "best-claude-code-prompts-for-web-development",
+      "title": "Best Claude Code Prompts for Web Development",
+      "seoTitle": "Best Claude Code Prompts for Web Dev",
+      "seoDescription": "27 Claude Code prompts for web development — discovery, planning, frontend, backend, debugging, SEO, accessibility, security, testing — and why each works.",
+      "excerpt": "Structure beats wording. These 27 prompts cover the whole web development cycle, and each one comes with when to use it, why it works, and what to check afterwards.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-best-claude-code-prompts-for-web-development.png?v=1787803719",
+      "imageAlt": "Claude Code Guides: Best Claude Code Prompts for Web Development. A stack of prompt lines, each marked with a caret."
+    },
+    {
+      "file": "03-claude-md.html",
+      "handle": "production-claude-md-web-development",
+      "title": "How to Create a Production CLAUDE.md for Web Development",
+      "seoTitle": "Production CLAUDE.md for Web Development",
+      "seoDescription": "How to write a CLAUDE.md that changes what Claude Code does: what belongs in it, why length is the main failure mode, a full template, and how to test it.",
+      "excerpt": "A CLAUDE.md is where you answer a project's unstated questions once, in a file, instead of in every prompt. Here is what belongs in one, what does not, and how to tell whether yours is working.",
+      "tags": [
+        "Claude Code",
+        "CLAUDE.md",
+        "Web Development",
+        "Developer Tools"
+      ],
+      "image": "guide-production-claude-md-web-development.png?v=1787803732",
+      "imageAlt": "Claude Code Guides: How to Create a Production CLAUDE.md. A document titled CLAUDE.md with a checklist of rules."
+    },
+    {
+      "file": "04-shopify.html",
+      "handle": "build-shopify-store-with-claude-code",
+      "title": "How to Build a Shopify Store With Claude Code",
+      "seoTitle": "Build a Shopify Store With Claude Code",
+      "seoDescription": "Build a production Shopify store with Claude Code: the theme workflow, Theme Check with JSON output, sections and schema, the Admin API and deployment.",
+      "excerpt": "Shopify is a hosted platform, which changes the shape of the work. This covers the theme workflow, the Admin API, digital delivery, and the platform-specific failures that are easy to ship without noticing.",
+      "tags": [
+        "Claude Code",
+        "Shopify",
+        "Web Development",
+        "Deployment"
+      ],
+      "image": "guide-build-shopify-store-with-claude-code.png?v=1787803722",
+      "imageAlt": "Claude Code Guides: How to Build a Shopify Store With Claude Code. A storefront product grid with one item flowing out as a downloadable file."
+    },
+    {
+      "file": "05-seo.html",
+      "handle": "claude-code-seo-website-optimization",
+      "title": "Claude Code SEO: Complete Website Optimization Workflow",
+      "seoTitle": "Claude Code SEO Workflow",
+      "seoDescription": "A complete technical SEO workflow for Claude Code: thirteen audits in dependency order, from crawlability to Core Web Vitals, each demanding real evidence.",
+      "excerpt": "Claude Code is excellent at the verifiable half of SEO and dangerous at the half that needs external data. This is the workflow for the first half, in the order that matters, with the guardrail for the second.",
+      "tags": [
+        "Claude Code",
+        "SEO",
+        "Web Development",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-seo-website-optimization.png?v=1787803726",
+      "imageAlt": "Claude Code Guides: Claude Code SEO Complete Optimization Workflow. A crawl graph feeding into a rising bar chart."
+    },
+    {
+      "file": "06-subagents.html",
+      "handle": "claude-code-subagents",
+      "title": "Claude Code Subagents: How to Use Them for Real Work",
+      "seoTitle": "Claude Code Subagents: How to Use Them",
+      "seoDescription": "How Claude Code subagents work: isolated context, locked-down tools, the built-in agents, the frontmatter that matters, and a roster worth having.",
+      "excerpt": "A subagent runs in its own context with its own tools, and only the summary comes back. That is the whole value — here is how to use it deliberately.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-subagents.png?v=1787892920",
+      "imageAlt": "Claude Code Guides: Claude Code Subagents. A main session delegating work to three isolated context boxes."
+    },
+    {
+      "file": "07-skills.html",
+      "handle": "claude-code-skills",
+      "title": "Claude Code Skills: Turn Repeated Work Into Commands",
+      "seoTitle": "Claude Code Skills: A Practical Guide",
+      "seoDescription": "How to add and use Claude Code skills: where the skills directory lives, why the file must be SKILL.md, which one wins on a clash, and five to install now.",
+      "excerpt": "A skill's body loads only when it is used, which makes it the right home for procedures that would bloat CLAUDE.md. Here is how to write ones that work.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-skills.png?v=1787892923",
+      "imageAlt": "Claude Code Guides: Claude Code Skills. A stack of command cards above a SKILL.md file."
+    },
+    {
+      "file": "08-plugins.html",
+      "handle": "claude-code-plugins",
+      "title": "Claude Code Plugins: Build, Install, and Share Extensions",
+      "seoTitle": "Claude Code Plugins: Build and Share",
+      "seoDescription": "Build and install Claude Code plugins: the manifest, directory structure, hooks, marketplaces, testing, and the layout mistake that fails silently.",
+      "excerpt": "A plugin bundles skills, agents, hooks and MCP servers so a team installs them in one step. Here is how to build one, and the mistake that costs an afternoon.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-plugins.png?v=1787892926",
+      "imageAlt": "Claude Code Guides: Claude Code Plugins. One package containing skills, agents, hooks and MCP blocks."
+    },
+    {
+      "file": "09-certification.html",
+      "handle": "claude-code-certification",
+      "title": "Is There a Claude Code Certification?",
+      "seoTitle": "Is There a Claude Code Certification?",
+      "seoDescription": "There is no Claude Code certification. Here is what Anthropic actually certifies, how the exams work, whether it is worth it, and what proves competence.",
+      "excerpt": "There is no Claude Code certification. Anthropic's programme is real and worth knowing about — and there is a better answer to the question underneath.",
+      "tags": [
+        "Claude Code",
+        "AI Development",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-certification.png?v=1787892929",
+      "imageAlt": "Claude Code Guides: Is There a Claude Code Certification? A credential seal with a checkmark."
+    },
+    {
+      "file": "10-enterprise.html",
+      "handle": "claude-code-enterprise",
+      "title": "Claude Code for Teams and Enterprise",
+      "seoTitle": "Claude Code for Teams and Enterprise",
+      "seoDescription": "Deploying Claude Code across an organisation: provider options, managed policy settings, model pinning, security review answers, cost control, and rollout.",
+      "excerpt": "The question that matters is narrow: where does inference run, and who is billed. Everything else — policy, standards, rollout — is the same either way.",
+      "tags": [
+        "Claude Code",
+        "Deployment",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-enterprise.png?v=1787892932",
+      "imageAlt": "Claude Code Guides: Claude Code for Teams and Enterprise. Policy layers narrowing from organisation to developer."
+    },
+    {
+      "file": "11-vibe-coding.html",
+      "handle": "vibe-coding-tools",
+      "title": "Vibe Coding Tools and Platforms: An Honest Comparison",
+      "seoTitle": "Vibe Coding Tools and Platforms",
+      "seoDescription": "What vibe coding means, the three categories of tool, how to choose between them, where it genuinely works, and the wall most projects hit eventually.",
+      "excerpt": "Vibe coding and disciplined development are not opposites, they are a dial. Here are the three categories of tool and how to tell which end you are on.",
+      "tags": [
+        "Claude Code",
+        "AI Development",
+        "Web Development",
+        "Developer Tools"
+      ],
+      "image": "guide-vibe-coding-tools.png?v=1787892936",
+      "imageAlt": "Claude Code Guides: Vibe Coding Tools and Platforms. A dial between vibes and disciplined."
+    },
+    {
+      "file": "12-github-actions.html",
+      "handle": "claude-code-github-actions",
+      "title": "Claude Code and GitHub: Actions, PR Review, and CI",
+      "seoTitle": "Claude Code GitHub Actions: PR Reviews",
+      "seoDescription": "Use Claude Code with GitHub Actions for pull-request review: the workflow file, permissions and secrets, inline comments, security, and troubleshooting.",
+      "excerpt": "Mention @claude and it implements changes. Give it a prompt and it runs on every pull request without anyone asking. The second is where the value is.",
+      "tags": [
+        "Claude Code",
+        "Deployment",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-github-actions.png?v=1787943918",
+      "imageAlt": "Claude Code Guides: Claude Code and GitHub. A pipeline of push, review and merge stages with an @claude gate."
+    },
+    {
+      "file": "13-terminal-setup.html",
+      "handle": "claude-code-terminal-setup",
+      "title": "Getting Started With Claude Code in the Terminal",
+      "seoTitle": "Getting Started With Claude Code",
+      "seoDescription": "Install Claude Code, log in, and run your first session. Permission modes, the commands you will use, a first week that works, and five beginner mistakes.",
+      "excerpt": "Install, log in, and a first week ordered to build judgement before dependency. Plus the one keyboard shortcut most people find by accident.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-terminal-setup.png?v=1787943921",
+      "imageAlt": "Claude Code Guides: Getting Started With Claude Code in the Terminal. A terminal window showing the claude command."
+    },
+    {
+      "file": "14-mcp.html",
+      "handle": "claude-code-mcp",
+      "title": "Claude Code and MCP: Connecting External Tools",
+      "seoTitle": "Claude Code and MCP",
+      "seoDescription": "Connect Claude Code to external tools with MCP: the four transports, scopes and which file each writes to, authentication, limits, and the real risks.",
+      "excerpt": "MCP earns its place when the information lives somewhere the filesystem cannot reach. Here is how to connect it, and what you take on when you do.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-mcp.png?v=1787943924",
+      "imageAlt": "Claude Code Guides: Claude Code and MCP. A central hub wired to three external systems."
+    },
+    {
+      "file": "15-hooks.html",
+      "handle": "claude-code-hooks",
+      "title": "Claude Code Hooks: Enforce What You Shouldn't Have to Remember",
+      "seoTitle": "Claude Code Hooks",
+      "seoDescription": "Claude Code hooks reference with examples: every event including SessionStart, matchers, exit codes, how to disable one, and why they fail silently.",
+      "excerpt": "Everything else you write for Claude Code is a request. Hooks run. That difference decides which of your rules belongs where.",
+      "tags": [
+        "Claude Code",
+        "Developer Tools",
+        "Deployment"
+      ],
+      "image": "guide-claude-code-hooks.png?v=1787943927",
+      "imageAlt": "Claude Code Guides: Claude Code Hooks. A barrier passing two requests and blocking one."
+    },
+    {
+      "file": "16-website-audit.html",
+      "handle": "claude-code-website-audit",
+      "title": "Claude Code Website Audit: Complete Production Checklist",
+      "seoTitle": "Claude Code Website Audit Workflow",
+      "seoDescription": "Audit a live site with Claude Code: four passes in the order that matters, prompts that return evidence, a severity scale, and five real findings.",
+      "excerpt": "An audit asks what is wrong with what already shipped, and which of it matters. Four passes in a deliberate order, prompts that produce evidence instead of impressions, and the check that quietly lies to you.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Developer Tools",
+        "SEO"
+      ],
+      "image": "guide-claude-code-website-audit.png?v=1788243619",
+      "imageAlt": "Claude Code Guides: Claude Code Website Audit. A page under a magnifying lens with findings ranked beside it."
+    },
+    {
+      "file": "17-technical-seo-audit.html",
+      "handle": "claude-code-technical-seo-audit",
+      "title": "How to Run a Technical SEO Audit With Claude Code",
+      "seoTitle": "Claude Code Technical SEO Audit",
+      "seoDescription": "Run a technical SEO audit with Claude Code: the crawler's partial-run trap, rendered HTML over templates, schema validation, and what submission does.",
+      "excerpt": "Knowing what to check is the easy half. This is the execution: writing checks that are capable of failing, four false passes from this site and what caused each, and what the submission layer actually does.",
+      "tags": [
+        "Claude Code",
+        "SEO",
+        "Developer Tools",
+        "Deployment"
+      ],
+      "image": "guide-claude-code-technical-seo-audit.png?v=1788243622",
+      "imageAlt": "Claude Code Guides: How to Run a Technical SEO Audit With Claude Code. A column of checks where one has failed and one is unresolved."
+    },
+    {
+      "file": "18-claude-md-examples.html",
+      "handle": "claude-md-examples-web-development",
+      "title": "CLAUDE.md Examples for Production Web Development",
+      "seoTitle": "CLAUDE.md Examples for Web Development",
+      "seoDescription": "Four complete CLAUDE.md examples: an Astro marketing site, a Next.js app with a database, a Shopify theme, and a shared package in a monorepo.",
+      "excerpt": "Four filled-in CLAUDE.md files rather than templates with blanks: an Astro marketing site, a Next.js app with a database, a Shopify theme, and a monorepo package — with what changes between them and why.",
+      "tags": [
+        "Claude Code",
+        "CLAUDE.md",
+        "Web Development",
+        "Shopify"
+      ],
+      "image": "guide-claude-md-examples-web-development.png?v=1788243625",
+      "imageAlt": "Claude Code Guides: CLAUDE.md Examples for Production Web Development. Four stacked CLAUDE.md files labelled static site, web app, shopify theme and monorepo."
+    },
+    {
+      "file": "19-shopify-seo.html",
+      "handle": "shopify-seo-with-claude-code",
+      "title": "Shopify SEO With Claude Code: Complete Workflow",
+      "seoTitle": "Shopify SEO With Claude Code",
+      "seoDescription": "Shopify SEO with Claude Code: what the platform already handles, duplicate URLs and canonicals measured on a live store, and what is left to you.",
+      "excerpt": "What Shopify already does well, what is genuinely left to you, and the thin pages the platform creates without being asked. Every claim measured by fetching the URL rather than taken from documentation.",
+      "tags": [
+        "Claude Code",
+        "Shopify",
+        "SEO",
+        "Web Development"
+      ],
+      "image": "guide-shopify-seo-with-claude-code.png?v=1788243628",
+      "imageAlt": "Claude Code Guides: Shopify SEO With Claude Code. Three product URL variants resolving to a single canonical URL."
+    },
+    {
+      "file": "20-security-audit.html",
+      "handle": "claude-code-website-security-audit",
+      "title": "Claude Code Website Security Audit: Complete Workflow",
+      "seoTitle": "Claude Code Website Security Audit",
+      "seoDescription": "Run a defensive security audit with Claude Code: fifteen passes from secrets to logging, a finding format that produces evidence, and where it stops.",
+      "excerpt": "An agent reads code, configuration and dependencies in full, reaches a deployed site only through its own requests, and must not attempt exploitation at all. This is the workflow that stays on the right side of that line.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Developer Tools",
+        "Deployment"
+      ],
+      "image": "guide-claude-code-website-security-audit.png?v=1788414365",
+      "imageAlt": "Claude Code Guides: Claude Code Website Security Audit. A shield with review layers inside it and an open lock beneath, marking what the review does not reach."
+    },
+    {
+      "file": "21-search-console.html",
+      "handle": "google-search-console-claude-code",
+      "title": "Google Search Console With Claude Code: Complete SEO Workflow",
+      "seoTitle": "Google Search Console With Claude Code",
+      "seoDescription": "Turn Search Console data into a short list of work: what the metrics mean, position bands and the action each deserves, and how to read indexing states.",
+      "excerpt": "The common failure in AI-assisted SEO is writing the wrong thing enthusiastically. Search Console tells you what Google already associates with your domain — this is how to turn that into three changes rather than twelve articles.",
+      "tags": [
+        "Claude Code",
+        "SEO",
+        "Developer Tools",
+        "Web Development"
+      ],
+      "image": "guide-google-search-console-claude-code.png?v=1788414368",
+      "imageAlt": "Claude Code Guides: Google Search Console With Claude Code. Query bars sorted into position bands, with the four-to-ten band highlighted."
+    },
+    {
+      "file": "22-performance.html",
+      "handle": "claude-code-performance-core-web-vitals",
+      "title": "Claude Code Performance Optimization: Core Web Vitals Workflow",
+      "seoTitle": "Claude Code Core Web Vitals Workflow",
+      "seoDescription": "Fix real performance problems with Claude Code: LCP, INP and CLS with current thresholds, and a measure-change-measure loop that moves one variable.",
+      "excerpt": "\"Make the website faster\" is not a task an agent can complete. This is the loop that works: measure, find the one bottleneck, change exactly one thing, measure again, and revert it if it did not move.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "SEO",
+        "Shopify"
+      ],
+      "image": "guide-claude-code-performance-core-web-vitals.png?v=1788414372",
+      "imageAlt": "Claude Code Guides: Claude Code Performance Optimization. Two gauges labelled before and after, with an arrow between them."
+    },
+    {
+      "file": "23-accessibility-audit.html",
+      "handle": "claude-code-accessibility-audit",
+      "title": "Claude Code Accessibility Audit: Complete WCAG Workflow",
+      "seoTitle": "Claude Code Accessibility Audit",
+      "seoDescription": "A WCAG 2.2 Level AA workflow with Claude Code: semantics, keyboard, focus, forms, contrast, target size and ARIA — plus the manual passes no tool can do.",
+      "excerpt": "W3C is explicit that tools cannot do it all. This is the division of labour: what a scanner answers, what reading components adds, and the manual passes that decide whether any of it worked.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Developer Tools",
+        "AI Development"
+      ],
+      "image": "guide-claude-code-accessibility-audit.png?v=1788414375",
+      "imageAlt": "Claude Code Guides: Claude Code Accessibility Audit. Two panels dividing checks a tool can answer from the ones only a person can."
+    },
+    {
+      "file": "24-wordpress.html",
+      "handle": "claude-code-wordpress",
+      "title": "How to Build a WordPress Website With Claude Code: Complete Workflow",
+      "seoTitle": "Claude Code WordPress Workflow",
+      "seoDescription": "Using Claude Code on WordPress safely: reconnaissance, child themes, plugins, escaping, the database rule, security, deployment and a production CLAUDE.md.",
+      "excerpt": "WordPress is the hardest platform to hand an agent, because its behaviour is decided by files, a database and forty plugins at once — and two of those three are invisible to a tool that reads files. Here is the workflow that makes it safe.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-wordpress.png?v=1788698931",
+      "imageAlt": "Claude Code Guides: How to Build a WordPress Website With Claude Code. Three labelled cards — files, database and plugins, with database highlighted — connected by converging lines to a single card marked 'rendered page'."
+    },
+    {
+      "file": "25-astro.html",
+      "handle": "claude-code-astro",
+      "title": "How to Build an Astro Website With Claude Code: Production Workflow",
+      "seoTitle": "Claude Code Astro Workflow",
+      "seoDescription": "Building a production Astro site with Claude Code: content collections with loaders, islands, TypeScript as a check, SEO, and deploying to Cloudflare Workers.",
+      "excerpt": "Astro is close to the best-case platform for agent-assisted work, because almost everything the site does is visible in files. This is a production build end to end, against Astro 7's current content collections API.",
+      "tags": [
+        "Claude Code",
+        "Web Development",
+        "Deployment"
+      ],
+      "image": "guide-claude-code-astro.png?v=1788698934",
+      "imageAlt": "Claude Code Guides: How to Build an Astro Website With Claude Code. A page card with a highlighted content block, beside three smaller blocks queueing to join it, the first highlighted."
+    },
+    {
+      "file": "26-claude-code-vs-cursor.html",
+      "handle": "claude-code-vs-cursor-web-development",
+      "title": "Claude Code vs Cursor for Web Development: Which Should You Use in 2026?",
+      "seoTitle": "Claude Code vs Cursor",
+      "seoDescription": "An honest comparison for production website work: where each tool is strong, current pricing, no invented benchmarks, and a framework for choosing.",
+      "excerpt": "Two disclosures first: this site sells material for Claude Code, and there are no benchmark numbers here because I have not run a controlled head-to-head. What follows is a comparison from the specific perspective of building and maintaining production websites.",
+      "tags": [
+        "Claude Code",
+        "AI Development",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-vs-cursor-web-development.png?v=1788698938",
+      "imageAlt": "Claude Code Guides: Claude Code vs Cursor for Web Development. Two side-by-side panes, one headed 'terminal' with command prompts and highlighted, one headed 'editor' with lines of code."
+    },
+    {
+      "file": "27-deploy-github-cloudflare.html",
+      "handle": "claude-code-github-actions-cloudflare",
+      "title": "Deploy a Claude Code Website With GitHub Actions and Cloudflare: Complete CI/CD Workflow",
+      "seoTitle": "Claude Code CI/CD With Cloudflare",
+      "seoDescription": "A complete pipeline: branch protection, validation gates, preview deploys, Cloudflare Workers static assets, smoke tests that can fail, and rollback.",
+      "excerpt": "Continuous deployment is usually sold on speed, which is the least interesting thing about it. The reason to build one is that it is the only place a check runs whether or not anyone remembered.",
+      "tags": [
+        "Claude Code",
+        "Deployment",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-github-actions-cloudflare.png?v=1788698941",
+      "imageAlt": "Claude Code Guides: Deploy With GitHub Actions and Cloudflare. Three stacked job cards on the left connected by lines to a vertical gate; two connections are stopped at the gate by a crossed circle and one passes straight through."
+    },
+    {
+      "file": "28-shopify-admin-api.html",
+      "handle": "shopify-admin-api-claude-code",
+      "title": "Automating Shopify With the Admin API and Claude Code",
+      "seoTitle": "Shopify Admin API With Claude Code",
+      "seoDescription": "Automate a Shopify store with the Admin GraphQL API and Claude Code: tokens outside the repo, userErrors, publications, staged uploads and idempotent scripts.",
+      "excerpt": "Anything you can do in the Shopify admin you can do through the API — and a change made through the API has history, review and a way back. This covers the parts that bite: userErrors returning HTTP 200, publishing being separate from creating, and what the API cannot see.",
+      "tags": [
+        "Claude Code",
+        "Shopify",
+        "Developer Tools"
+      ],
+      "image": "guide-shopify-admin-api-claude-code.png?v=1788834098",
+      "imageAlt": "Claude Code Guides: Automating Shopify With the Admin API. A client node labelled \"you\" connected to three resource cards, one link highlighted."
+    },
+    {
+      "file": "29-cro-workflow.html",
+      "handle": "claude-code-conversion-rate-optimization",
+      "title": "Claude Code Conversion Rate Optimization: The Complete Workflow",
+      "seoTitle": "Claude Code CRO: Complete Workflow",
+      "seoDescription": "A conversion workflow for Claude Code: separate the four modes, verify the measurement, label every finding by what you know, and admit when you cannot test.",
+      "excerpt": "Ask a model to increase conversions and you get a countdown timer and a predicted percentage lift. Neither is knowledge. This is the workflow that produces findings you can act on instead.",
+      "tags": [
+        "Claude Code",
+        "Conversion",
+        "Web Development"
+      ],
+      "image": "guide-claude-code-conversion-rate-optimization.png?v=1788908900",
+      "imageAlt": "Claude Code Guides: Conversion Rate Optimization. A dial between guessing and measuring."
+    },
+    {
+      "file": "30-conversion-audit.html",
+      "handle": "ai-website-conversion-audit",
+      "title": "AI Website Conversion Audit With Claude Code",
+      "seoTitle": "AI Website Conversion Audit",
+      "seoDescription": "Run a conversion audit with Claude Code that produces evidence rather than opinions: scope, four passes, and where AI-assisted audits go wrong.",
+      "excerpt": "An audit produces findings, not a redesign. Four passes, an evidence standard a sceptical colleague could check, and the three ways an AI-assisted audit reliably goes wrong.",
+      "tags": [
+        "Claude Code",
+        "Conversion",
+        "AI Development"
+      ],
+      "image": "guide-ai-website-conversion-audit.png?v=1788908904",
+      "imageAlt": "Claude Code Guides: AI Website Conversion Audit. A magnifier over a page, findings listed beside it."
+    },
+    {
+      "file": "31-shopify-conversion-audit.html",
+      "handle": "shopify-conversion-audit-claude-code",
+      "title": "Shopify Conversion Audit With Claude Code",
+      "seoTitle": "Shopify Conversion Audit With Claude Code",
+      "seoDescription": "A Shopify conversion audit with Claude Code: duplicated app events, the product page, cart, what checkout will not let you change, and reading the theme.",
+      "excerpt": "Shopify owns checkout, the URLs and the cart endpoints, and apps duplicate your analytics events without warning. A Shopify conversion audit runs in a different order because of it.",
+      "tags": [
+        "Claude Code",
+        "Shopify",
+        "Conversion"
+      ],
+      "image": "guide-shopify-conversion-audit-claude-code.png?v=1788908908",
+      "imageAlt": "Claude Code Guides: Shopify Conversion Audit. A storefront product grid under inspection."
+    },
+    {
+      "file": "32-landing-page-audit.html",
+      "handle": "claude-code-landing-page-audit",
+      "title": "Claude Code Landing Page Audit: A CRO Workflow",
+      "seoTitle": "Claude Code Landing Page Audit",
+      "seoDescription": "A landing page CRO audit with Claude Code: message match, the fold measured at 375px, the action, the form checks that find real defects.",
+      "excerpt": "A landing page has one job, and most pages called landing pages have four. Message match, the measured fold, the form checks that find real defects, and the order to fix them in.",
+      "tags": [
+        "Claude Code",
+        "Conversion",
+        "Web Development"
+      ],
+      "image": "guide-claude-code-landing-page-audit.png?v=1788908911",
+      "imageAlt": "Claude Code Guides: Landing Page Audit. A stack of page blocks with one primary action highlighted."
+    },
+    {
+      "file": "33-cro-prompts.html",
+      "handle": "claude-code-cro-prompts",
+      "title": "Best Claude Code CRO Prompts for Website Optimization",
+      "seoTitle": "Claude Code CRO Prompts",
+      "seoDescription": "Conversion prompts for Claude Code organised by stage: discovery, analytics verification, funnel diagnosis, pages, forms, copy, experiments and validation.",
+      "excerpt": "A prompt is only useful if it has a finish line. Nine prompts organised by stage, each stating its mode, demanding observation over inference, and permitting a short answer.",
+      "tags": [
+        "Claude Code",
+        "Conversion",
+        "Developer Tools"
+      ],
+      "image": "guide-claude-code-cro-prompts.png?v=1788908916",
+      "imageAlt": "Claude Code Guides: CRO Prompts. Prompt cards arranged in stages."
+    }
+  ]
+}

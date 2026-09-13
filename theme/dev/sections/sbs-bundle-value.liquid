@@ -1,0 +1,110 @@
+{%- comment -%}
+  Bundle value: what the three products cost separately, what the bundle costs,
+  and the difference.
+
+  EVERY number here is read from the live products. Nothing is typed into a
+  setting, and there is no "was" price — the store has never charged the separate total as a
+  single transaction, so presenting it as a struck-through former price would be
+  a fabricated discount. It is presented as what it is: the sum of three prices
+  the store really does charge, next to a fourth price it really does charge.
+
+  If any component product is unavailable the comparison is suppressed entirely
+  rather than shown with a smaller total. A saving computed from two of three
+  products would overstate the bundle's value, and quietly.
+
+  The bundle product itself supplies its own price, so this section cannot
+  disagree with the buy button beneath it.
+{%- endcomment -%}
+
+{%- assign bundle = all_products[section.settings.bundle] -%}
+
+{%- assign parts_total = 0 -%}
+{%- assign parts_found = 0 -%}
+{%- assign parts_expected = 0 -%}
+{%- for block in section.blocks -%}
+  {%- assign parts_expected = parts_expected | plus: 1 -%}
+  {%- assign p = all_products[block.settings.product] -%}
+  {%- if p != blank and p.available -%}
+    {%- assign parts_found = parts_found | plus: 1 -%}
+    {%- assign parts_total = parts_total | plus: p.price -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- assign complete = false -%}
+{%- if bundle != blank and bundle.available and parts_expected > 0 and parts_found == parts_expected -%}
+  {%- assign complete = true -%}
+{%- endif -%}
+
+{%- if complete -%}
+  {%- assign saving = parts_total | minus: bundle.price -%}
+  <section class="sbs-section sbs-section--tight" id="{{ section.settings.anchor | default: 'value' | escape }}">
+    <div class="sbs-container">
+      <div class="sbs-section-head">
+        <h2>{{ section.settings.heading | default: 'What it costs' | escape }}</h2>
+      </div>
+
+      <div class="sbs-value">
+        <table class="sbs-value__table">
+          <caption class="sbs-value__caption">
+            Bought separately against bought together. Both are prices this store
+            charges today.
+          </caption>
+          <tbody>
+            {%- for block in section.blocks -%}
+              {%- assign p = all_products[block.settings.product] -%}
+              <tr>
+                <th scope="row"><a href="{{ p.url }}">{{ p.title | escape }}</a></th>
+                <td>{{ p.price | money }}</td>
+              </tr>
+            {%- endfor -%}
+            <tr class="sbs-value__sum">
+              <th scope="row">Bought separately</th>
+              <td>{{ parts_total | money }}</td>
+            </tr>
+            <tr class="sbs-value__bundle">
+              <th scope="row">{{ bundle.title | escape }}</th>
+              <td>{{ bundle.price | money }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {%- if saving > 0 -%}
+          <p class="sbs-value__saving">
+            <strong>{{ saving | money }} less</strong> than buying the three
+            separately. The same files, delivered as {{ parts_expected }} downloads
+            on one order.
+          </p>
+        {%- endif -%}
+
+        {%- if section.settings.note != blank -%}
+          <p class="sbs-value__note">{{ section.settings.note | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Bundle value",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "value" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What it costs" },
+    { "type": "text", "id": "bundle", "label": "Bundle product handle",
+      "info": "The whole section is omitted unless this and every component below resolve." },
+    { "type": "textarea", "id": "note", "label": "Note under the table" }
+  ],
+  "blocks": [
+    {
+      "type": "part",
+      "name": "Component product",
+      "settings": [
+        { "type": "text", "id": "product", "label": "Product handle" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Bundle value" }]
+}
+{% endschema %}

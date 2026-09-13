@@ -1,0 +1,164 @@
+{%- assign variant = product.selected_or_first_available_variant -%}
+
+<section class="sbs-section">
+  <div class="sbs-container">
+    <div class="sbs-hero__grid">
+      <div>
+        <span class="sbs-eyebrow">{{ product.vendor | escape }}</span>
+        <h1>{{ product.title | escape }}</h1>
+
+        {%- if section.settings.summary != blank -%}
+          <p class="sbs-lede" style="margin-top: var(--sp-5);">{{ section.settings.summary | escape }}</p>
+        {%- endif -%}
+
+        {%- comment -%}
+          id="buy" so the header's CTA has somewhere to go on a product page,
+          matching the homepage's #buy anchor.
+        {%- endcomment -%}
+        <div class="sbs-buy" id="buy" style="margin-top: var(--sp-6); max-width: none;" data-sbs-buy>
+          <div class="sbs-buy__price">
+            {{ variant.price | money }}
+            <small>{{ cart.currency.iso_code }} · one payment</small>
+          </div>
+
+          {%- if variant.available -%}
+            {%- form 'product', product, id: 'sbs-product-form', data-sbs-buy-form: '' -%}
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" name="add"
+                      class="sbs-btn sbs-btn--primary sbs-btn--block"
+                      data-busy-label="Adding&hellip;"
+                      style="margin-top: var(--sp-5);">
+                {{ section.settings.button_label | default: 'Add to cart' | escape }}
+                &mdash; {{ variant.price | money_without_trailing_zeros }}
+              </button>
+              {{ form | payment_button }}
+            {%- endform -%}
+          {%- else -%}
+            <button type="button" class="sbs-btn sbs-btn--primary sbs-btn--block" disabled
+                    style="margin-top: var(--sp-5);">Currently unavailable</button>
+          {%- endif -%}
+
+          {%- if section.settings.note != blank -%}
+            <p class="sbs-cta-note">{{ section.settings.note | escape }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div>
+        {%- if product.featured_media -%}
+          <img
+            src="{{ product.featured_media | image_url: width: 900 }}"
+            srcset="{{ product.featured_media | image_url: width: 500 }} 500w,
+                    {{ product.featured_media | image_url: width: 900 }} 900w,
+                    {{ product.featured_media | image_url: width: 1400 }} 1400w"
+            sizes="(min-width: 64em) 44vw, 92vw"
+            width="{{ product.featured_media.width }}"
+            height="{{ product.featured_media.height }}"
+            alt="{{ product.featured_media.alt | default: product.title | escape }}"
+            loading="eager"
+            fetchpriority="high"
+            style="border-radius: var(--radius-lg); border: 1px solid var(--border);">
+        {%- else -%}
+          {%- comment -%}
+            No product image: show a contents grid built from the section
+            blocks rather than a placeholder box, so nothing implies a
+            physical item.
+
+            The tiles are a fallback, not a second copy of the image. Each
+            product image already depicts the same module grid, so rendering
+            both would put the identical labels on one page twice.
+          {%- endcomment -%}
+          {%- render 'sbs-product-tiles', blocks: section.blocks -%}
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if product.description != blank -%}
+      <div class="sbs-rte" style="max-width: var(--measure); margin-top: var(--sp-9);">
+        {{ product.description }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .sbs-rte h3 { font-size: var(--step-2); margin-top: var(--sp-7); margin-bottom: var(--sp-3); }
+  .sbs-rte p { color: var(--muted); }
+  .sbs-rte p + p { margin-top: var(--sp-4); }
+  .sbs-rte ul { list-style: disc; padding-left: 1.25rem; margin-top: var(--sp-4); }
+  .sbs-rte li { color: var(--muted); }
+  .sbs-rte li + li { margin-top: var(--sp-3); }
+  .sbs-rte strong { color: var(--text); }
+  .sbs-rte code {
+    font-family: var(--font-mono); font-size: .9em;
+    background: var(--surface-2); padding: .1em .4em; border-radius: 4px;
+    color: var(--mono-accent);
+  }
+  .sbs-rte em { color: var(--dim); }
+
+  /* A code block in a product description. The operations system's page shows
+     a real command and its output; without overflow-x the long line pushed a
+     375px viewport to 649px. Same rules as .sbs-article__body pre. */
+  .sbs-rte pre {
+    background: #05070B; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: var(--sp-5); margin-top: var(--sp-4);
+    overflow-x: auto; font-family: var(--font-mono);
+    font-size: .84rem; line-height: 1.65; color: var(--text);
+  }
+  .sbs-rte pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* Tables in a product description.
+
+     The equivalent rules existed only under .sbs-article__body, so a table in
+     a product description had no wrapper overflow and no min-width. The SEO
+     toolkit's three-column comparison table pushed the page to 454px at a
+     375px viewport — the whole document scrolled sideways, on the page whose
+     job is to sell. Adding a fourth column to the comparison made it worse,
+     which is how it was found.
+
+     min-width keeps the table legible rather than crushing columns to one word
+     per line; overflow-x on the wrapper keeps the scrolling inside the table
+     instead of moving the page. */
+  .sbs-rte .sbs-table {
+    overflow-x: auto; border: 1px solid var(--border);
+    border-radius: var(--radius); margin-top: var(--sp-5);
+  }
+  .sbs-rte table { width: 100%; border-collapse: collapse; min-width: 34rem; }
+  .sbs-rte th, .sbs-rte td {
+    border-bottom: 1px solid var(--border); padding: var(--sp-3);
+    text-align: left; font-size: var(--step--1); vertical-align: top;
+    color: var(--muted);
+  }
+  .sbs-rte thead th { background: var(--surface-2); color: var(--text); }
+  .sbs-rte tbody tr:last-child td { border-bottom: 0; }
+  .sbs-rte td strong, .sbs-rte th strong { color: var(--text); }
+
+</style>
+
+{% schema %}
+{
+  "name": "SBS — Product",
+  "tag": "div",
+  "settings": [
+    { "type": "textarea", "id": "summary", "label": "Summary above the buy panel",
+      "default": "The complete prompt, architecture, SEO, deployment, security, and launch system for turning Claude Code into your AI web-development team." },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "note", "label": "Note under the button",
+      "default": "Instant digital download. Nothing is shipped." }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Contents tile",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "meta", "label": "Meta" },
+        { "type": "checkbox", "id": "highlight", "label": "Highlight", "default": false }
+      ]
+    }
+  ],
+  "max_blocks": 18,
+  "presets": [{ "name": "SBS — Product" }]
+}
+{% endschema %}

@@ -1,0 +1,57 @@
+<section class="sbs-section" id="{{ section.settings.anchor | default: 'how' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ol class="sbs-flow">
+      {%- for block in section.blocks -%}
+        <li class="sbs-flow__item" {{ block.shopify_attributes }}>
+          <span class="sbs-flow__n">{{ forloop.index0 | plus: 1 | prepend: '0' | slice: -2, 2 }}</span>
+          <span class="sbs-flow__label">{{ block.settings.label | escape }}</span>
+          {%- if block.settings.desc != blank -%}
+            <span class="sbs-flow__desc">{{ block.settings.desc | escape }}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+
+    {%- if section.settings.footnote != blank -%}
+      <p class="sbs-dim" style="margin-top: var(--sp-6);">{{ section.settings.footnote | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Workflow",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "how" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "How it works" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "From idea to production" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Every file in the system belongs to one of these stages. When you are not sure what to do next, you look up your stage and take the next file." },
+    { "type": "text", "id": "footnote", "label": "Footnote",
+      "default": "The loop at the end is the point — a launch is the first moment you have real data to feed back in." }
+  ],
+  "blocks": [
+    {
+      "type": "stage",
+      "name": "Stage",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Stage" },
+        { "type": "text", "id": "desc", "label": "One-line description" }
+      ]
+    }
+  ],
+  "max_blocks": 14,
+  "presets": [{ "name": "SBS — Workflow" }]
+}
+{% endschema %}

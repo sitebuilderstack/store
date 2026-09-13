@@ -1,0 +1,392 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 Technical SEO",
+            "meta": "4 files"
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 On-page SEO",
+            "meta": "1 file"
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 Indexation",
+            "meta": "1 file"
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 Structured data",
+            "meta": "1 file"
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 Internal linking",
+            "meta": "1 file"
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 Core Web Vitals",
+            "meta": "1 file"
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 Accessibility & SEO",
+            "meta": "1 file"
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 Content auditing",
+            "meta": "1 file"
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 Search Console",
+            "meta": "2 files"
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 Bing & IndexNow",
+            "meta": "1 file"
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 Platform workflows",
+            "meta": "4 files"
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 Launch validation",
+            "meta": "3 files"
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 Competitor research",
+            "meta": "1 file"
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "14 Reporting",
+            "meta": "1 file"
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "Prompt library",
+            "meta": "20 prompts"
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "Templates",
+            "meta": "4 templates"
+          }
+        },
+        "t17": {
+          "type": "tile",
+          "settings": {
+            "label": "Checklists",
+            "meta": "3 checklists"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17"
+      ],
+      "settings": {
+        "summary": "Audit, optimise and validate a production website for search with Claude Code. Twenty prompts, fourteen modules, platform workflows and report templates — all plain Markdown, delivered as one download.",
+        "button_label": "Get the toolkit",
+        "note": "One payment. Instant download. Licensed to one person for unlimited projects, including client work."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Fourteen numbered modules, twenty prompts, four report templates and three checklists, plus a START-HERE that tells you which file to open. All plain Markdown — nothing to install, no account, no subscription.",
+            "code": "claude-code-seo-website-audit-toolkit/\n  START-HERE.md\n  01-technical-seo/\n  02-on-page-seo/\n  ...\n  14-reporting/\n  prompts/\n  templates/\n  checklists/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "START-HERE routes you in four minutes",
+            "body": "It does not explain SEO. It asks what your situation is and sends you to one file. The table is the whole page.",
+            "code": "| Your situation                  | Open this                                |\n| Pages are not being indexed     | 03-indexation/INDEXATION-TROUBLESHOOTING |\n| About to launch                 | 12-launch-validation/PRE-LAUNCH-SEO      |\n| Traffic dropped after migrating | 12-launch-validation/MIGRATION-SEO       |"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Open the prompt, fill in the brackets",
+            "body": "Every prompt names its role, objective, discovery phase, constraints, evidence requirements, analysis, validation and deliverables. Replacing the bracketed values is the difference between a scoped audit and a generic one.",
+            "code": "You are a technical SEO specialist auditing [SITE], a\n[SITE TYPE] built on [PLATFORM]. I own the codebase."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Discovery runs first and changes nothing",
+            "body": "The agent reports the structure, fetches one URL of every type, and states what it cannot determine without data you have not given it. Then it stops and waits.",
+            "code": "Stop and show me this before continuing."
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "Findings come with evidence, not summaries",
+            "body": "Every finding carries the URL, the response and the exact markup. The prompt forbids fixing anything in the same run — an audit whose findings disappear into a commit leaves you a diff and no report.",
+            "code": "- Do not change anything in this run.\n- Every finding needs evidence: the URL,\n  the response, the exact markup."
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Platform workflows carry what actually differs",
+            "body": "A Shopify sitemap cannot be hand-edited. A WordPress SEO plugin owns canonicals. An Astro site with no `site` in its config emits relative canonicals silently. Audits that do not know these produce confident wrong answers.",
+            "code": "11-platform-workflows/\n  SHOPIFY.md\n  WORDPRESS.md\n  ASTRO.md\n  STATIC-AND-CUSTOM.md"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Every check gets proved capable of failing",
+            "body": "Break the thing, watch the check go red, restore it, watch it go quiet. Both directions. This is the rule the whole toolkit is built on, because a check nobody has seen fail is a line in a log that says PASS.",
+            "code": "# add a noindexed URL to the sitemap copy\n# run the checker -> must report a failure\n# remove it -> must go quiet"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "Hand someone the report",
+            "body": "Four templates: executive summary, technical findings, remediation backlog, and before-and-after. Each has an unmeasured section, because a report that hides its gaps reads as more complete and is less useful.",
+            "code": "14-reporting/\ntemplates/EXECUTIVE-SUMMARY.md\ntemplates/TECHNICAL-FINDINGS.md\ntemplates/REMEDIATION-BACKLOG.md\ntemplates/BEFORE-AFTER.md"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the SEO & Website Audit Toolkit",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to a finished build.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real entry point, and the real thirteen-stage workflow.</p><p>For the system applied to a real build, read <a href=\"/pages/case-study\">how this store was built with it</a>.</p>",
+        "sample_url": "https://sitebuilderstack.com/pages/sample-technical-seo-audit",
+        "sample_label": "Read a full audit workflow from it, free"
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Is this the same as the Website Launch System?",
+            "answer": "<p>No, and they overlap in one place on purpose. This toolkit is about auditing and search on a site that already exists. The Launch System is about planning, building and launching one — it includes SEO but does not go as deep, and it also covers security, accessibility, Git and deployment, which this does not.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Can Claude Code read my Search Console with this?",
+            "answer": "<p>No. It has no credentials for your property and there is no way to give it any that does not go through you. The workflows here tell you exactly what to export and hand over, or how to set up a service account yourself if you will do it repeatedly. Anything claiming otherwise is wrong.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "Will this make my site rank?",
+            "answer": "<p>Nobody can promise that and this does not. It finds and fixes defects that can be observed. Where the honest conclusion is that a site's constraint is authority rather than optimisation, these prompts are written to say so — which is more useful than a list of small changes that would not move anything.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need to be an SEO specialist?",
+            "answer": "<p>No. It assumes you can read a diff, run a command and reach your live site. Most of it is aimed at a competent developer who has inherited responsibility for how a site performs in search.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "Which platforms does it cover?",
+            "answer": "<p>Shopify, WordPress, Astro, static sites and custom applications each have their own workflow, because what goes wrong differs. Everything else applies to any platform.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "What exactly do I get?",
+            "answer": "<p>One ZIP: 55 files, 88 KB, all plain Markdown. Twenty prompts, fourteen modules, four report templates and three checklists. Nothing to install, no account, no subscription, and a published SHA-256 so you can verify the download.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "Is there an upgrade credit toward the Launch System?",
+            "answer": "<p>No. There is no automatic upgrade credit and we are not going to promise one the store cannot honour. If you want both products, buy both.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it on client work?",
+            "answer": "<p>Yes, on unlimited client projects. The licence is per person, so buy a copy for each person who will use it. You may not redistribute or resell the toolkit itself.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8"
+      ],
+      "settings": {
+        "anchor": "questions",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "",
+        "emit_schema": true
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Building a site rather than auditing one?",
+        "body": "The Claude Code Website Launch System covers the whole lifecycle — planning, platform build systems, security, accessibility, Git and CI/CD, deployment and launch checklists.",
+        "cta_label": "See the Launch System",
+        "cta_url": "/products/claude-code-website-launch-system",
+        "note": "A separate product. Buying the toolkit does not include it, and there is no automatic upgrade credit.",
+        "product": "claude-code-website-launch-system"
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Planning, platform build systems, a production CLAUDE.md, security, accessibility, Git, deployment and launch checklists. The whole lifecycle.",
+            "flagship": true
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert & grow",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "Once the traffic arrives: funnels, page audits, forms, analytics, experimentation and conversion copy. No overlap with the search material here.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "The first three",
+            "product": "complete-site-builder-stack",
+            "body": "Build, rank and convert in one purchase — the three earlier systems on this site, delivered as three downloads.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Monitoring, security checks, backups, dependency updates, deployment gates, incident playbooks and monthly reporting. For the stage after launch, which lasts longest.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p3",
+        "p5",
+        "p4"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The other three",
+        "heading": "Search is one part of the problem",
+        "intro": "Getting found, getting acted on, and staying up are different jobs. This toolkit covers the first. Building the site, converting the traffic and operating it are the other three — or take the first three together.",
+        "note": "<p>Separate products at separate prices, or the first three together as the Complete Site Builder Stack. Buying one does not include the others and there is no upgrade credit. Which stage you are in is explained on the <a href=\"/pages/build-rank-convert\">Build, Rank, Convert, Operate page</a>.</p>"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

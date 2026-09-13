@@ -1,0 +1,22 @@
+{%- if section.settings.text != blank -%}
+  <div class="sbs-announce">
+    {{ section.settings.text }}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Announcement",
+  "tag": "aside",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Announcement text",
+      "info": "Keep it short and factual. Do not use countdowns or scarcity claims.",
+      "default": "<p>Launch websites faster with Claude Code.</p>"
+    }
+  ],
+  "presets": [{ "name": "SBS — Announcement" }]
+}
+{% endschema %}

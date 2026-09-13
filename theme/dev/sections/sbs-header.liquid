@@ -1,0 +1,180 @@
+{%- comment -%}
+  The page's own product, captured before the settings assignment below
+  shadows the global.
+{%- endcomment -%}
+{%- assign page_product = product -%}
+{%- assign cta_product = all_products[section.settings.product] -%}
+
+{%- comment -%}
+  Fall back to a ROOT-relative anchor: a bare '#buy' is a dead link on
+  every page except the homepage, since the buy section only exists there.
+{%- endcomment -%}
+{%- assign cta_url = section.settings.cta_url -%}
+{%- if cta_url == blank -%}
+  {%- assign cta_url = routes.root_url | append: '#buy' -%}
+{%- endif -%}
+
+{%- comment -%}
+  On a product page the header CTA follows the product being viewed.
+
+  It was hard-wired to the configured product, so every page carried
+  "Get it — $99" pointing at the homepage — including the $39 and $59 product
+  pages, where it sat above that product's own buy button advertising a
+  different product at a different price. A visitor reading the conversion
+  toolkit's page saw a $99 button before they saw the $59 one.
+{%- endcomment -%}
+{%- if template.name == 'product' and page_product != blank -%}
+  {%- assign cta_product = page_product -%}
+  {%- assign cta_url = '#buy' -%}
+{%- endif -%}
+
+<header class="sbs-header">
+  <div class="sbs-container sbs-header__inner">
+    <a class="sbs-logo" href="{{ routes.root_url }}">
+      <span class="sbs-logo__mark" aria-hidden="true">{{ section.settings.logo_mark | escape }}</span>
+      <span>{{ section.settings.logo_text | default: shop.name | escape }}</span>
+    </a>
+
+    {%- if section.blocks.size > 0 -%}
+      <nav class="sbs-nav" id="sbs-primary-nav" aria-label="Primary">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'menu' and block.settings.label != blank -%}
+            {%- comment -%}
+              A disclosure, not a hover menu: hovering is not an interaction a
+              keyboard or touch user can perform, and a menu that only opens on
+              hover is unreachable for both.
+
+              The button ships hidden and the list ships visible, so with no
+              JavaScript the child links simply appear inline in the nav —
+              still reachable, still crawlable. The script reveals the button,
+              hides the list and adds `is-enhanced`, which is what turns the
+              list into a positioned panel. Nothing is hidden from anyone
+              unless the thing that can reveal it is running.
+
+              Links resolve `all_products[handle]` where a handle is given, so
+              the title and price come from the live product and cannot drift.
+              A hard-coded price here would be caught by the storefront claims
+              auditor, which is the correct outcome and worth avoiding entirely.
+            {%- endcomment -%}
+            <div class="sbs-nav__group" data-sbs-menu>
+              <button type="button" class="sbs-nav__toggle"
+                      id="sbs-menu-btn-{{ block.id }}"
+                      aria-expanded="false"
+                      aria-controls="sbs-menu-{{ block.id }}" hidden>
+                {{ block.settings.label | escape }}
+                <span class="sbs-nav__chev" aria-hidden="true"></span>
+              </button>
+              {%- comment -%}
+                On mobile the list is always expanded inside the panel, so the
+                button is not used and cannot label it. This heading does — a
+                real heading rather than a button that does nothing, which is
+                what reusing the toggle would have produced.
+              {%- endcomment -%}
+              <h2 class="sbs-nav__grouplabel">{{ block.settings.label | escape }}</h2>
+              <ul class="sbs-nav__sub" id="sbs-menu-{{ block.id }}"
+                  aria-labelledby="sbs-menu-btn-{{ block.id }}" {{ block.shopify_attributes }}>
+                {%- for i in (1..5) -%}
+                  {%- assign lk = 'label_' | append: i -%}
+                  {%- assign uk = 'url_' | append: i -%}
+                  {%- assign pk = 'product_' | append: i -%}
+                  {%- assign sub_product = all_products[block.settings[pk]] -%}
+                  {%- if sub_product != blank -%}
+                    <li>
+                      <a href="{{ sub_product.url }}" data-sbs-track="product_nav_clicked">
+                        <span class="sbs-nav__subtitle">{{ sub_product.title | escape }}</span>
+                        <span class="sbs-nav__subprice">{{ sub_product.price | money_without_trailing_zeros }}</span>
+                      </a>
+                    </li>
+                  {%- elsif block.settings[lk] != blank and block.settings[uk] != blank -%}
+                    <li>
+                      <a href="{{ block.settings[uk] }}">
+                        <span class="sbs-nav__subtitle">{{ block.settings[lk] | escape }}</span>
+                      </a>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- elsif block.settings.label != blank -%}
+            <a href="{{ block.settings.url | default: '#' }}" {{ block.shopify_attributes }}>
+              {{ block.settings.label | escape }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    <a class="sbs-btn sbs-btn--primary sbs-header__cta" href="{{ cta_url }}">
+      {{- section.settings.cta_label | default: 'Get it' | escape -}}
+      {%- if cta_product != blank %} — {{ cta_product.price | money_without_trailing_zeros }}{% endif -%}
+    </a>
+
+    {%- comment -%}
+      Mobile menu toggle. Last in the header so it sits on the right, and
+      shipped hidden so that without JavaScript the navigation is simply a
+      stacked list rather than a button that opens nothing.
+
+      Opening moves focus to the first link in the panel, which is why its DOM
+      position after the panel does not strand a keyboard user: Escape brings
+      focus back here.
+    {%- endcomment -%}
+    <button type="button" class="sbs-burger" id="sbs-burger"
+            aria-expanded="false" aria-controls="sbs-primary-nav" hidden>
+      <span class="sbs-burger__bars" aria-hidden="true"></span>
+      <span class="sbs-burger__text">Menu</span>
+    </button>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "SBS — Header",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "logo_text", "label": "Wordmark", "default": "Site Builder Stack" },
+    { "type": "text", "id": "logo_mark", "label": "Logo mark", "default": "S",
+      "info": "One or two characters shown in the square mark." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Get it" },
+    { "type": "url", "id": "cta_url", "label": "Button link",
+      "info": "Leave empty to scroll to the buy section on this page." },
+    { "type": "product", "id": "product", "label": "Product",
+      "info": "Used to show the live price on the button." }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Nav link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "Nav menu",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Menu label" },
+        { "type": "header", "content": "Items" },
+        { "type": "product", "id": "product_1", "label": "Product 1",
+          "info": "Shows the live title and price. Leave empty to use a label and link instead." },
+        { "type": "text", "id": "label_1", "label": "Label 1" },
+        { "type": "url",  "id": "url_1", "label": "Link 1" },
+        { "type": "product", "id": "product_2", "label": "Product 2" },
+        { "type": "text", "id": "label_2", "label": "Label 2" },
+        { "type": "url",  "id": "url_2", "label": "Link 2" },
+        { "type": "product", "id": "product_3", "label": "Product 3" },
+        { "type": "text", "id": "label_3", "label": "Label 3" },
+        { "type": "url",  "id": "url_3", "label": "Link 3" },
+        { "type": "product", "id": "product_4", "label": "Product 4" },
+        { "type": "text", "id": "label_4", "label": "Label 4" },
+        { "type": "url",  "id": "url_4", "label": "Link 4" },
+        { "type": "product", "id": "product_5", "label": "Product 5" },
+        { "type": "text", "id": "label_5", "label": "Label 5" },
+        { "type": "url",  "id": "url_5", "label": "Link 5" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "SBS — Header" }]
+}
+{% endschema %}

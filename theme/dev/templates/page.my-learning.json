@@ -1,0 +1,54 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-learning",
+      "blocks": {
+        "t1": {
+          "type": "track",
+          "settings": {
+            "hub": "claude-code-web-development"
+          }
+        },
+        "t2": {
+          "type": "track",
+          "settings": {
+            "hub": "claude-code-seo"
+          }
+        },
+        "t3": {
+          "type": "track",
+          "settings": {
+            "hub": "claude-code-shopify"
+          }
+        },
+        "t4": {
+          "type": "track",
+          "settings": {
+            "hub": "claude-code-production"
+          }
+        },
+        "t5": {
+          "type": "track",
+          "settings": {
+            "hub": "claude-code-wordpress"
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5"
+      ],
+      "settings": {
+        "tracks_heading": "Learning tracks",
+        "blog": "guides"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

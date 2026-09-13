@@ -1,0 +1,191 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#job">Knowing what to check is the easy half</a></li>
+    <li><a href="#rule">The rule: a check you have not seen fail is not a check</a></li>
+    <li><a href="#crawl">The crawler, and the partial-run trap</a></li>
+    <li><a href="#rendered">Rendered HTML beats template source</a></li>
+    <li><a href="#schema">Validating structured data on the live URL</a></li>
+    <li><a href="#falsepass">Four false passes, and what caused each</a></li>
+    <li><a href="#diff">Turning findings into a diff</a></li>
+    <li><a href="#submit">Submission: Search Console, Bing, IndexNow</a></li>
+    <li><a href="#repeatable">Making it run on every deploy</a></li>
+    <li><a href="#dont">What not to automate</a></li>
+  </ol>
+</nav>
+
+<h2 id="job">Knowing what to check is the easy half</h2>
+
+<p>There is no shortage of technical SEO checklists, including <a href="/pages/claude-code-seo-checklist">one on this site</a>. The list is not the hard part. The hard part is running it in a way that produces evidence rather than reassurance — and the failure mode is specific enough to name: <strong>checks that report success on exactly the condition they exist to catch.</strong></p>
+
+<p>This article is about the execution. If you want the reasoning behind <em>what</em> to audit, in dependency order across thirteen areas, that is <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO workflow guide</a>. This one assumes you already know what to look at and covers how to look, how to prove you looked, and what to do with the result.</p>
+
+<h2 id="rule">The rule: a check you have not seen fail is not a check</h2>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-check-can-fail.png" alt="Four outcomes of a check. A pass where the check ran and the condition held. A pass where the check ran against the wrong thing. A pass where the check never ran at all. And a fail where the check ran and the condition broke. The middle two are indistinguishable from the first, and only the fail proves the check works."
+       width="1000" height="514" loading="lazy" decoding="async">
+  <figcaption>Three of these produce the same output. Only the fourth proves anything about the check itself.</figcaption>
+</figure>
+
+<p>Take any check that just passed and ask what else would produce that same output. Usually: the check ran correctly; the check ran against the wrong page, file, or attribute; the check never executed. All three print the same green line.</p>
+
+<p>The remedy is a minute of work per check. Break the thing on purpose and confirm the check goes red. Delete a canonical tag from a local copy. Point one internal link at a URL that does not exist. Rename the file the script reads. If the output does not change, you have learned something far more valuable than a passing result.</p>
+
+<p>Do this the moment you write the check, while you still remember what it was supposed to catch. Every example in this article is a check that was written, passed, and turned out to be incapable of failing.</p>
+
+<h2 id="crawl">The crawler, and the partial-run trap</h2>
+
+<p>Start here, because almost everything downstream needs the URL inventory.</p>
+
+<pre><code>Write a crawler for this site that starts at the homepage, follows
+only same-host links, and records per URL: status, final URL after
+redirects, title, meta description, canonical, h1 count, word count.
+
+Hard requirements:
+- Pause between requests; honour Retry-After on 429.
+- Retry with exponential backoff, up to a minute.
+- Separate "throttled" failures from real ones in the summary.
+- If any URL could not be fetched, print INCOMPLETE and exit non-zero.
+- Never summarise a partial crawl as a clean one.</code></pre>
+
+<p>Those last two lines exist because of a specific failure. An earlier version of this crawler reported <strong>zero broken links</strong> across a run in which nine of twenty-eight seed URLs had returned 429. It had retried four times over about fourteen seconds, given up, and treated an unreachable page as nothing to report.</p>
+
+<p>After the fix — six attempts backing off to sixty seconds, honouring <code>Retry-After</code>, and a distinct exit code for a partial run — the same crawl reached 28 pages and found <strong>44</strong> URLs where the throttled run had found 25. The link report had not been wrong so much as based on two-thirds of the site.</p>
+
+<p>Sort the resulting table three ways before doing anything else: by title (duplicates), by description (duplicates and blanks), and by status (anything not 200 or an intended redirect). On this site, sorting by title is what surfaced eight blog tag archives all sharing the blog index's exact title tag.</p>
+
+<h2 id="rendered">Rendered HTML beats template source</h2>
+
+<p>An assistant with repository access will happily audit your templates. Templates describe intentions. Search engines read responses.</p>
+
+<pre><code>Fetch the live URL for one page of each template type. From the
+response body only — not from any template file — report:
+title, meta description, canonical href, any robots meta or
+X-Robots-Tag header, count of JSON-LD blocks, and whether each
+JSON-LD block parses as valid JSON.
+
+If a value comes from a file rather than a response, do not report it.</code></pre>
+
+<p>Categories that only exist in the response:</p>
+
+<ul>
+  <li><strong>Platform fallbacks.</strong> A homepage whose <code>&lt;title&gt;</code> silently becomes the raw platform domain when a setting is empty.</li>
+  <li><strong>Injected directives.</strong> A <code>noindex</code> added by a plugin, a header, or a platform preference that appears nowhere in the theme.</li>
+  <li><strong>Double-escaping.</strong> A title captured with an HTML entity in it, then escaped again for <code>og:title</code>, printing <code>&amp;amp;ndash;</code> into the tag. Correct in the template, wrong in the output.</li>
+  <li><strong>Request-time canonicals.</strong> The canonical for <code>?variant=</code> or <code>?utm_source=</code> is decided at request time, so it can only be measured by requesting it.</li>
+</ul>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Launch System supplies these audits as prompts with the evidence format built in, plus the checklists they run against. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="schema">Validating structured data on the live URL</h2>
+
+<p>Two separate questions, and people usually only ask the second.</p>
+
+<p><strong>Does it parse?</strong> Extract every <code>application/ld+json</code> block from the rendered HTML and run it through a JSON parser. A trailing comma from a Liquid or JSX conditional is invisible to the eye and fatal to the markup. This is the check most often skipped, and the cheapest to run.</p>
+
+<p><strong>Does it describe the page honestly?</strong> Harder, and not automatable. Compare each property against what a visitor sees: the price in the markup against the price on the page, the author in the markup against the byline, the breadcrumb list against the visible trail.</p>
+
+<p>Two things worth being firm about:</p>
+
+<ul>
+  <li><strong>Never add review, rating, or aggregate markup without real reviews.</strong> It is a guidelines violation and a manual-action risk, and an assistant asked to "improve the structured data" will suggest it, because the pattern is common in its training data. Say no.</li>
+  <li><strong>Do not invent a value to satisfy a validator.</strong> A missing recommended property is a warning. A fabricated one is a lie in machine-readable form. If a return policy is decided case by case, no schema.org return category describes it, and the correct action is to omit the property and write down why.</li>
+</ul>
+
+<h2 id="falsepass">Four false passes, and what caused each</h2>
+
+<p>All four are from auditing this store. The root cause is the same every time: the failure path was never exercised.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>What it reported</th><th>What was true</th><th>Cause</th></tr></thead>
+<tbody>
+<tr><td>0 broken links</td><td>Nine of 28 pages never fetched</td><td>429s counted as nothing to report</td></tr>
+<tr><td>Checkout healthy</td><td>Store could not take payments</td><td>Notice injected by JavaScript, absent from initial HTML</td></tr>
+<tr><td>Checkout accepts email</td><td>Never actually checked</td><td>Read <code>innerText</code>; the wording is in a <code>placeholder</code></td></tr>
+<tr><td>Page has a Liquid error</td><td>Page was fine</td><td>Regex matched prose <em>about</em> Liquid errors in an article</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The same list, with the fixes and what each one cost, is in <a href="/pages/case-study">the case study for this site</a>.</p>
+
+<p>Three of the four were false negatives — a real problem reported as fine. The fourth was a false positive, which is less dangerous but erodes trust in the whole report until someone stops reading it.</p>
+
+<p>The corrective habit that came out of this: <strong>control-test in both directions.</strong> Feed the check a case that should pass and one that should fail, and confirm it says so. For the Liquid detector that meant one page with a real Liquid error and one containing the phrase in prose, and tightening the pattern until the two were distinguished.</p>
+
+<h2 id="diff">Turning findings into a diff</h2>
+
+<p>Audit and repair are separate phases, and mixing them loses the record of what was wrong. Once the findings are written down, work through them one at a time:</p>
+
+<pre><code>Finding: /blogs/guides/tagged/* returns eight pages that all share
+the blog index's title and meta description.
+
+Before changing anything:
+1. Show me the template code that produces the title on those URLs.
+2. Tell me which condition distinguishes a tag archive from the index.
+3. Propose the smallest change, and say what it does to the index page.
+Then make the change, and show me the rendered title of both a tag
+page and the index afterwards.</code></pre>
+
+<p>Step three prevents the classic regression where fixing the archive breaks the page it was copied from. The final instruction is the important one: it forces the assistant to demonstrate both branches of the condition it just wrote, which is the same control-test discipline applied to a fix rather than a check.</p>
+
+<h2 id="submit">Submission: Search Console, Bing, IndexNow</h2>
+
+<p>The audit ends by telling the search engines what changed. Three systems, and they behave differently enough to be worth stating plainly.</p>
+
+<p><strong>Google Search Console.</strong> Verify the property for the exact production hostname, then submit the sitemap. Submission is a hint, not an instruction — Google decides what to crawl and when, and a submitted sitemap can sit unfetched for days. It also ignores <code>&lt;priority&gt;</code> and <code>&lt;changefreq&gt;</code> entirely, so neither is worth tuning. What is worth watching is the coverage report: "Discovered — currently not indexed" is a quality signal, not a technical fault, and no amount of resubmission changes it.</p>
+
+<p><strong>Bing Webmaster Tools.</strong> Faster and more literal. Submitted feeds get crawled quickly, and URL submission is quota-limited, which gives you a clean way to confirm a call actually did something: check the quota before and after and see it decrement. That is a real verification rather than a 200 response you hope meant something.</p>
+
+<p><strong>IndexNow.</strong> Used by Bing, Yandex, Seznam and Naver. <strong>Google does not use it.</strong> It requires a key file served as plain text from the site root, which is awkward on a hosted platform that does not let you write arbitrary root files — on Shopify the working route is to upload the key to Files and map the root path to it with a URL redirect. Whether IndexNow accepts a key behind a cross-host redirect is the kind of thing worth measuring rather than assuming: it does, and the submission returns 202 (validation pending) before settling to 200 (key accepted).</p>
+
+<p>One discipline for all three: <strong>submit changed and new URLs only.</strong> A job that resubmits every URL on a timer wastes quota, tells search engines nothing, and on IndexNow specifically is exactly the behaviour the protocol asks you not to exhibit.</p>
+
+<p>Submission is where this guide stops. What comes back &mdash; queries, positions, impressions, and the decision about which page to touch next &mdash; is covered in <a href="/blogs/guides/google-search-console-claude-code">Google Search Console with Claude Code</a>.</p>
+
+<h2 id="repeatable">Making it run on every deploy</h2>
+
+<p>An audit run once is a snapshot. The value is in the second run, when it catches a regression somebody introduced without noticing.</p>
+
+<p>The subset worth putting in CI is small and fast:</p>
+
+<ul>
+  <li>Crawl every URL; fail on any 404, 500, redirect chain, or incomplete run</li>
+  <li>Fail on a duplicate title or duplicate meta description</li>
+  <li>Fail on a missing or non-self-referencing canonical</li>
+  <li>Fail on any JSON-LD block that does not parse</li>
+  <li>Fail on an unexpected <code>noindex</code></li>
+</ul>
+
+<p>Everything else — content quality, cannibalisation, Core Web Vitals field data — is judgement or needs traffic, and belongs in a monthly review rather than a build gate. <a href="/blogs/guides/claude-code-github-actions">Running Claude Code in GitHub Actions</a> covers the mechanics; the rule that the check must be able to fail applies to the CI job too, so break something once and watch the build go red.</p>
+
+<h2 id="dont">What not to automate</h2>
+
+<p>Three things stay manual, and pretending otherwise is where automated SEO reports go wrong.</p>
+
+<p><strong>Anything requiring external data.</strong> Search volume, keyword difficulty, competitor backlinks. An assistant with no data source that produces a specific number has invented it. Get these from Search Console, Bing Webmaster Tools, or a keyword API — and if the number did not come from a request, do not use it.</p>
+
+<p><strong>Whether the content is any good.</strong> A script can tell you a page has a unique title and valid markup. It cannot tell you the page is worth ranking. That judgement is yours.</p>
+
+<p><strong>Intent overlap.</strong> Deciding that two pages compete for one query, and which one should win, needs someone who understands why both were written. A tool can flag the similarity; it should not resolve it.</p>
+
+<h2>Where to go next</h2>
+
+<p>For what to check and why, in dependency order, read <a href="/blogs/guides/claude-code-seo-website-optimization">the Claude Code SEO workflow</a>. For auditing a whole site rather than its SEO layer, <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a> covers the four-pass method this borrows from. On a hosted storefront, <a href="/blogs/guides/shopify-seo-with-claude-code">Shopify SEO with Claude Code</a> covers what the platform already handles. The checklists themselves are free: <a href="/pages/claude-code-seo-checklist">SEO</a> and <a href="/pages/claude-code-website-audit-checklist">website audit</a>. Rules about never inventing metrics belong in <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a>.</p>
+
+<p>Running these in dependency order, on a schedule, is what the <a href="/products/claude-code-seo-website-audit-toolkit">SEO &amp; Website Audit Toolkit</a> packages &mdash; the same sequence, with each prompt stating its evidence requirements and forbidden from fixing in the same run.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap" rel="noopener">Google: build and submit a sitemap</a> — including why priority and changefreq are ignored</li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls" rel="noopener">Google: canonicalisation</a> — how the signals are weighed</li>
+  <li><a href="https://www.indexnow.org/documentation" rel="noopener">IndexNow documentation</a> — key file requirements and response codes</li>
+  <li><a href="https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a" rel="noopener">Bing webmaster guidelines</a></li>
+  <li><a href="https://developers.google.com/search/docs/appearance/structured-data/sd-policies" rel="noopener">Google: structured data guidelines</a> — what counts as a violation</li>
+</ul>

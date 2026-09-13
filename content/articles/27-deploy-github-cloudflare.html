@@ -1,0 +1,529 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#why">What a pipeline is actually for</a></li>
+    <li><a href="#lifecycle">The lifecycle, end to end</a></li>
+    <li><a href="#repo">Repository preparation</a></li>
+    <li><a href="#branches">Branch strategy</a></li>
+    <li><a href="#secrets">Secrets, and the rules that are not negotiable</a></li>
+    <li><a href="#checks">The validation workflow</a></li>
+    <li><a href="#extras">Link, accessibility and structural checks in CI</a></li>
+    <li><a href="#previews">Preview deployments</a></li>
+    <li><a href="#cloudflare">Cloudflare: Workers or Pages</a></li>
+    <li><a href="#deploy">The deploy workflow</a></li>
+    <li><a href="#dynamic">When the site is not fully static</a></li>
+    <li><a href="#migrate">Migrating an existing Pages project</a></li>
+    <li><a href="#env">Environment variables and bindings</a></li>
+    <li><a href="#dns">Custom domains and DNS</a></li>
+    <li><a href="#caching">Caching</a></li>
+    <li><a href="#smoke">Smoke testing production</a></li>
+    <li><a href="#rollback">Rollback</a></li>
+    <li><a href="#monitoring">Monitoring</a></li>
+    <li><a href="#claudemd">CLAUDE.md for a deploying repository</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#mistakes">The mistakes that cost the most</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">What a pipeline is actually for</h2>
+
+<p>Continuous deployment is usually sold on speed. That is the least interesting thing about it.</p>
+
+<p>The reason to build one, especially when an agent is writing a meaningful share of the code, is that it is the only place a check runs whether or not anyone remembered. A rule in a project context file is a request. A step in a workflow is a gate. When Claude Code produces forty files in an afternoon, the difference between those two things is the difference between a site you can ship and one you hope is fine.</p>
+
+<p>The second reason is that it makes deploys boring, and boring deploys are what let you ship small changes often, which is what makes rollback cheap. A pipeline that only runs on a monthly release is a pipeline that has taught everyone to fear releases.</p>
+
+<p>This guide builds the whole thing: repository, branches, validation, preview, production, smoke tests, rollback. It uses GitHub Actions and Cloudflare, and the shape transfers to other hosts with different deploy steps.</p>
+
+<h2 id="lifecycle">The lifecycle, end to end</h2>
+
+<p>Every stage below either produces evidence or is a gate. Stages that do neither should not exist.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Stage</th><th>What it proves</th><th>Where it runs</th></tr></thead>
+<tbody>
+<tr><td>Local work with Claude Code</td><td>Nothing yet — this is where mistakes are made cheaply</td><td>Your machine</td></tr>
+<tr><td>Branch and commit</td><td>The change is isolated and revertible</td><td>Your machine</td></tr>
+<tr><td>Pull request</td><td>Someone will read it before it ships</td><td>GitHub</td></tr>
+<tr><td>Validation workflow</td><td>Lint, types, tests, structural checks pass</td><td>Actions</td></tr>
+<tr><td>Build</td><td>The thing compiles from a clean checkout, not just on your laptop</td><td>Actions</td></tr>
+<tr><td>Preview deploy</td><td>The built artefact renders on a real URL</td><td>Cloudflare</td></tr>
+<tr><td>Merge</td><td>A human approved it</td><td>GitHub</td></tr>
+<tr><td>Production deploy</td><td>The same artefact, same pipeline</td><td>Cloudflare</td></tr>
+<tr><td>Smoke test</td><td>The live site is actually serving what you shipped</td><td>Actions, post-deploy</td></tr>
+<tr><td>Monitoring</td><td>You find out about the failure before a customer does</td><td>Ongoing</td></tr>
+<tr><td>Rollback</td><td>The last stage is reversible</td><td>On demand</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="repo">Repository preparation</h2>
+
+<p>Four things before any workflow exists, because a pipeline built on a repository that is not ready produces confusing failures.</p>
+
+<p><strong>A lockfile, committed.</strong> CI must install from it with the frozen path — <code>npm ci</code>, not <code>npm install</code>. Without this, the build that passes in CI is not the build you tested.</p>
+
+<p><strong>Node version pinned in a file the tooling reads.</strong> An <code>.nvmrc</code> or the <code>engines</code> field, and the workflow reads the same source. A version mismatch between local and CI is a whole afternoon.</p>
+
+<p><strong>Scripts that CI can call.</strong> If the only way to run your tests is a command you remember, CI cannot run them. Every gate needs an <code>npm run</code> entry.</p>
+
+<p><strong>A <code>.gitignore</code> that covers <code>.env</code>, build output and editor files.</strong> Then verify it works rather than assuming: <code>git check-ignore -v .env</code> should print the rule that matches.</p>
+
+<pre class="sbs-prompt">Prepare this repository for CI. Do not add a workflow yet.
+
+1. Confirm a lockfile is committed and the install script uses the
+   frozen/locked path. Show me the file and the script.
+2. Confirm the Node version is pinned in a file, and say which.
+3. List every quality command that exists — lint, typecheck, test,
+   build — and for each, run it and show the output. If one does not
+   exist, say so rather than inventing a script name.
+4. Run `git check-ignore -v .env` and show the result.
+5. Search the tracked tree for credential patterns and report anything
+   found, redacted.
+
+Report only. Change nothing.</pre>
+
+<h2 id="branches">Branch strategy</h2>
+
+<p>For a website, trunk-based with short-lived branches is almost always right. Long-lived branches accumulate merge risk, and a marketing site rarely needs a develop branch, a release branch and a hotfix ceremony.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Branch</th><th>Rule</th></tr></thead>
+<tbody>
+<tr><td><code>main</code></td><td>Always deployable. Protected. No direct pushes, including from an agent.</td></tr>
+<tr><td>Feature branches</td><td>Short-lived, one concern, merged by pull request.</td></tr>
+<tr><td>Tags</td><td>Optional, but a tag per production deploy makes rollback a checkout rather than an archaeology exercise.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Protect <code>main</code> in the repository settings: require a pull request, require the validation workflow to pass, and dismiss stale approvals when new commits land. That last one matters with an agent in the loop, because "approved, then three more commits appeared" is a common shape.</p>
+
+<p>Put the rule in your project context file too, so the agent branches without being asked:</p>
+
+<pre><code>## Git
+- Never commit directly to `main`. Branch first, always.
+- One concern per branch. If the change grew, say so and stop.
+- Do not force-push a branch that has an open pull request.</code></pre>
+
+<p>Better still, enforce it with a hook rather than a request, so it holds regardless of whether the instruction was read. The <a href="/blogs/guides/claude-code-hooks">hooks guide</a> covers the mechanics.</p>
+
+<h2 id="secrets">Secrets, and the rules that are not negotiable</h2>
+
+<p>Two secrets are needed for Cloudflare deployment, and CI is non-interactive so there is no browser login to fall back on:</p>
+
+<ul>
+  <li><code>CLOUDFLARE_API_TOKEN</code> — scoped to the minimum needed, which for a static site deploy is Workers Scripts edit on the one account. Not a global API key.</li>
+  <li><code>CLOUDFLARE_ACCOUNT_ID</code> — not secret in any meaningful sense, but conventionally stored alongside.</li>
+</ul>
+
+<p>The rules, all of which have been learned expensively by somebody:</p>
+
+<p><strong>Never in the repository.</strong> Not in a config file, not in a comment, not gitignored. Gitignore protects against one specific accident and nothing else.</p>
+
+<p><strong>Never echoed.</strong> GitHub masks known secret values in logs, but only exact matches — a token that has been transformed, base64-encoded or interpolated into a longer string is not masked. Do not print things that might contain one.</p>
+
+<p><strong>Scoped tokens, and rotate on exposure.</strong> A secret that was ever public is public. Removing it from a file does not unpublish it; only rotation does.</p>
+
+<p><strong>Restrict what runs on pull requests from forks.</strong> Workflows triggered by <code>pull_request</code> from a fork do not receive secrets by default, and that default is correct. Do not defeat it with <code>pull_request_target</code> unless you have thought very carefully about running untrusted code with a token in the environment.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System includes example GitHub Actions workflows, the secrets rules as an enforceable checklist, and a security audit written for code you own rather than penetration testing — <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="checks">The validation workflow</h2>
+
+<p>One workflow, running on every pull request and on pushes to <code>main</code>. It should be fast enough that nobody is tempted to skip it.</p>
+
+<pre><code>name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7</code></pre>
+
+<p>Four details are doing real work here.</p>
+
+<p><code>permissions: contents: read</code> narrows the default token. Workflows get more permission than they need unless you say otherwise, and a validation job needs none of it.</p>
+
+<p><code>concurrency</code> with <code>cancel-in-progress</code> stops five queued runs when someone pushes five times in a minute.</p>
+
+<p><code>node-version-file</code> reads the pin from the repository rather than duplicating it in YAML, so the two cannot drift.</p>
+
+<p>Uploading the build output means the deploy job can use the <em>same artefact</em> that passed validation rather than building again. A pipeline that builds twice is a pipeline that can deploy something it did not test.</p>
+
+<h2 id="extras">Link, accessibility and structural checks in CI</h2>
+
+<p>This is where a website pipeline earns more than a generic one, because the checks that matter most for a site are cheap and structural.</p>
+
+<pre><code>      - name: Every internal link resolves
+        run: npm run check:links
+
+      - name: Head tags present on every page
+        run: |
+          missing=0
+          while IFS= read -r f; do
+            grep -q '&lt;title&gt;' "$f" || { echo "no title: $f"; missing=1; }
+            grep -q 'rel="canonical"' "$f" || { echo "no canonical: $f"; missing=1; }
+            [ "$(grep -c '&lt;h1' "$f")" = "1" ] || { echo "h1 count: $f"; missing=1; }
+          done &lt; &lt;(find dist -name '*.html')
+          exit $missing
+
+      - name: No credentials in the tree
+        run: |
+          ! grep -rIlE "AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|-----BEGIN [A-Z ]*PRIVATE KEY-----" \
+            --exclude-dir=.git . | grep -q .</code></pre>
+
+<p>Those run against <code>dist/</code>, the built output, not the source. That distinction is the whole point: a link checker pointed at source files is checking something that is not what visitors receive, and it will happily report zero broken links forever.</p>
+
+<p>Which raises the rule that matters more than any workflow syntax on this page. <strong>Prove every check can fail before you trust it passing.</strong> Break a link deliberately, push, watch the job go red. Then fix it and watch it go green. A check that has never failed is a line in a log that says PASS for reasons nobody has established — and a check pointed at the wrong directory will say PASS forever.</p>
+
+<h2 id="previews">Preview deployments</h2>
+
+<p>A preview URL per pull request is the single highest-value addition to a website pipeline. Reviewing a diff tells you the code changed; opening the preview tells you the page is right.</p>
+
+<p>With Workers, a preview is a deploy to a differently-named environment or a versioned upload that returns its own URL. The pattern that works with the least ceremony is a per-branch Worker name:</p>
+
+<pre><code>  preview:
+    if: github.event_name == 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: dist, path: dist }
+
+      - name: Deploy preview
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --name acme-site-pr-${{ github.event.number }}</code></pre>
+
+<p>Two operational notes. Preview deployments accumulate, so add a cleanup step on pull request close or you will collect a Worker per pull request forever. And previews should not be indexable — serve <code>X-Robots-Tag: noindex</code> or a <code>robots.txt</code> disallow on preview hostnames, because a preview URL that gets crawled is a duplicate of your site with a different address.</p>
+
+<h2 id="cloudflare">Cloudflare: Workers or Pages</h2>
+
+<p>This is the part of Cloudflare deployment advice most likely to be stale, and getting it wrong sends you down a path that still works but is no longer the recommended one.</p>
+
+<p>Cloudflare's own documentation now states that <strong>Workers supports most Pages use cases, offers a broader feature set, is Cloudflare's primary platform for building applications, and that new projects should start with Workers.</strong> Pages is not being switched off and existing projects continue to work — it is simply no longer where you should begin.</p>
+
+<p>For a statically built site that means Workers Static Assets. The configuration is a <code>wrangler.jsonc</code> at the repository root naming the directory your build produced:</p>
+
+<pre><code>{
+  "name": "acme-site",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}</code></pre>
+
+<p><code>not_found_handling</code> deserves a moment. The default behaviour for a missing path on some static hosts is to serve the index page with a <code>200</code>, which turns every typo and every stale inbound link into an indexable duplicate of your homepage. Setting it to serve a real 404 page with a real 404 status is a one-line fix for a genuine SEO defect. Use <code>single-page-application</code> only if you are genuinely deploying an SPA that routes on the client.</p>
+
+<p>Deploying uploads the Worker and the assets in a single operation, so there is no separate asset-upload step to get out of sync.</p>
+
+<h2 id="deploy">The deploy workflow</h2>
+
+<pre><code>name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Smoke test
+        run: ./scripts/smoke.sh https://example.com</code></pre>
+
+<p><code>cancel-in-progress: false</code> on the deploy concurrency group is deliberate and the opposite of the validation job. Cancelling a deploy halfway is how you get a half-deployed site; queueing them is correct.</p>
+
+<p>The <code>environment</code> block gives you a deployment record in GitHub and, more usefully, a place to attach a required reviewer. If you want a human to approve every production deploy, that is a repository setting rather than a code change.</p>
+
+<p><code>cloudflare/wrangler-action@v3</code> is the supported action and defaults to Wrangler v4. Pin the Wrangler version explicitly with <code>wranglerVersion</code> if you need reproducibility across a major bump.</p>
+
+<h2 id="dynamic">When the site is not fully static</h2>
+
+<p>Everything above assumes a build that produces a directory of files. Plenty of sites need one or two routes that run at request time — a form handler, a search endpoint, a page personalised by a cookie — and it is worth being deliberate about that, because the usual mistake is to convert the whole site to server rendering for the sake of two routes.</p>
+
+<p>Two approaches, and the first is almost always better.</p>
+
+<p><strong>Keep the site static and add an endpoint.</strong> A Worker route alongside your assets handles the dynamic path; everything else stays prerendered and served from cache. The site keeps its performance characteristics and only the route that needs a server has one.</p>
+
+<p><strong>Switch the framework to server or hybrid output.</strong> Necessary when many routes need request-time data. It changes the build target, adds an adapter, and means every page now costs a request-time invocation. Do this when the site genuinely calls for it, not because one contact form does.</p>
+
+<p>Whichever you choose, the pipeline barely changes — the build produces something different, the deploy command is the same. What does change is your smoke test, which should now assert that the dynamic route behaves rather than just that it returns 200:</p>
+
+<pre><code>check "search endpoint returns JSON" \
+  'curl -s "$BASE/api/search?q=test" | head -c1 | grep -q "[[{]"'
+check "form handler rejects a GET" \
+  '[ "$(curl -s -o /dev/null -w "%{http_code}" "$BASE/api/contact")" = "405" ]'</code></pre>
+
+<p>That second check is the kind people skip. An endpoint that accepts any method is a real defect and it never shows up in a browser, because a browser sends the method the form told it to.</p>
+
+<h2 id="migrate">Migrating an existing Pages project</h2>
+
+<p>If you already deploy to Cloudflare Pages, nothing is broken and there is no deadline. Pages continues to work. The reason to move is that Workers is where the feature development is going, and a migration is cheaper on a small site now than on a larger one later.</p>
+
+<p>The shape of the move for a static site:</p>
+
+<ol>
+  <li><strong>Add a <code>wrangler.jsonc</code></strong> with <code>assets.directory</code> pointing at your existing build output. Nothing about the build changes.</li>
+  <li><strong>Deploy to a new Worker name first</strong> and test it on the <code>workers.dev</code> URL. Do not move the custom domain yet.</li>
+  <li><strong>Compare the two deployments</strong> with the same smoke test. Pay particular attention to 404 handling and redirects, which are configured differently between the two products and are the most likely thing to differ.</li>
+  <li><strong>Move any <code>_headers</code> and <code>_redirects</code> rules</strong> to their Workers equivalents, and verify each one with <code>curl -sI</code> rather than assuming the translation was faithful.</li>
+  <li><strong>Move the custom domain</strong> once the Worker is serving correctly, then re-run the smoke test against the real hostname.</li>
+  <li><strong>Leave the Pages project in place for a few days</strong> before deleting it, so rollback is a DNS change rather than a rebuild.</li>
+</ol>
+
+<p>The step people skip is the third, and redirects are where it bites. A redirect rule that silently stopped applying does not produce an error; it produces a 404 on a URL that used to work, discovered weeks later in Search Console.</p>
+
+<h2 id="env">Environment variables and bindings</h2>
+
+<p>Distinguish three things that people routinely conflate:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Kind</th><th>Where it lives</th><th>Visible to</th></tr></thead>
+<tbody>
+<tr><td>Build-time public value</td><td>Workflow env, or committed config</td><td>Anyone — it is compiled into the output</td></tr>
+<tr><td>Build-time secret</td><td>GitHub secret, used only during the build</td><td>CI. Never let it reach the bundle.</td></tr>
+<tr><td>Runtime secret</td><td>A Wrangler secret on the Worker</td><td>The Worker at request time, never the client</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The mistake worth naming: a build tool that inlines environment variables will happily inline a secret if the variable is named in a way the tool considers public. Once built, it is in the JavaScript your visitors download. Check the built output rather than the source:</p>
+
+<pre><code>grep -rE "sk_live|api[_-]?key|secret" dist/ | head</code></pre>
+
+<p>Runtime secrets go to the Worker, not the repository: <code>npx wrangler secret put API_TOKEN</code>. They are then readable in the Worker's environment and nowhere else.</p>
+
+<h2 id="dns">Custom domains and DNS</h2>
+
+<p>Attach the custom domain to the Worker in the Cloudflare dashboard or via configuration; the DNS record is created for you when the zone is on Cloudflare. Three things to decide once and write down:</p>
+
+<ul>
+  <li><strong>Apex or www, and a permanent redirect from the other.</strong> Serving both is a duplicate-content problem that no canonical tag fully fixes.</li>
+  <li><strong>HTTPS everywhere, with HSTS once you are confident.</strong> HSTS is difficult to undo; enable it after you are sure every subdomain is ready.</li>
+  <li><strong>Trailing slash behaviour, decided and consistent.</strong> Whichever you pick, the other must redirect with a <code>301</code>, and your internal links should use the canonical form so no visitor takes the redirect.</li>
+</ul>
+
+<p>Verify all three from the command line rather than in a browser, because a browser hides redirect chains:</p>
+
+<pre><code>curl -sIL https://example.com | grep -E '^HTTP|^location'
+curl -sI http://example.com | head -1
+curl -sI https://www.example.com | head -1</code></pre>
+
+<h2 id="caching">Caching</h2>
+
+<p>Static assets should be immutable and cached hard; HTML should not be. The distinction is the difference between a fast site and one that serves last week's page.</p>
+
+<p>Hashed asset filenames — which every modern build tool produces — make this simple: the filename changes when the content changes, so the file can be cached for a year safely. HTML files keep the same URL forever, so they must revalidate.</p>
+
+<p>Getting this backwards is a common and painful failure: cache the HTML aggressively and your deploy appears not to have happened, for hours, for everyone except you.</p>
+
+<p>After any cache configuration change, verify from outside the network you deployed from, and check the actual headers:</p>
+
+<pre><code>curl -sI https://example.com/ | grep -iE 'cache-control|cf-cache-status|age'
+curl -sI https://example.com/_astro/index.abc123.js | grep -i cache-control</code></pre>
+
+<h2 id="smoke">Smoke testing production</h2>
+
+<p>The deploy step reporting success means the upload succeeded. It does not mean the site is right. A smoke test is a small script that asks the live URL a handful of questions with unambiguous answers, and it belongs in the pipeline immediately after deploy.</p>
+
+<pre><code>#!/usr/bin/env bash
+# scripts/smoke.sh — fail the deploy if production is not serving what we shipped.
+set -euo pipefail
+BASE="${1:?usage: smoke.sh https://example.com}"
+fail=0
+check() { if eval "$2"; then echo "  ok   $1"; else echo "  FAIL $1"; fail=1; fi }
+
+check "homepage returns 200" \
+  '[ "$(curl -s -o /dev/null -w "%{http_code}" "$BASE/")" = "200" ]'
+check "homepage has a title" \
+  'curl -s "$BASE/" | grep -q "&lt;title&gt;[^&lt;]"'
+check "canonical is absolute" \
+  'curl -s "$BASE/" | grep -qE "rel=\"canonical\" href=\"https://"'
+check "unknown path returns 404" \
+  '[ "$(curl -s -o /dev/null -w "%{http_code}" "$BASE/definitely-not-a-page")" = "404" ]'
+check "robots.txt is served" \
+  '[ "$(curl -s -o /dev/null -w "%{http_code}" "$BASE/robots.txt")" = "200" ]'
+check "sitemap is served" \
+  '[ "$(curl -s -o /dev/null -w "%{http_code}" "$BASE/sitemap-index.xml")" = "200" ]'
+check "no accidental noindex" \
+  '! curl -s "$BASE/" | grep -q "name=\"robots\" content=\"noindex"'
+
+exit $fail</code></pre>
+
+<p>Seven checks, a few seconds, and each one has caught a real production problem somewhere. The 404 check is the most valuable: a misconfigured fallback serving <code>200</code> for every unknown path is invisible in a browser and catastrophic for indexing.</p>
+
+<p>As with everything else — break each of these deliberately once and confirm the script goes red. A smoke test that cannot fail is decoration.</p>
+
+<h2 id="rollback">Rollback</h2>
+
+<p>Two mechanisms, and you want both.</p>
+
+<p><strong>Revert and redeploy.</strong> <code>git revert</code> the merge commit, push, and the pipeline ships the previous state through the same gates. Slower, and always correct.</p>
+
+<p><strong>Roll back the deployment.</strong> Wrangler keeps previous versions and can roll back to one, which is faster and does not require a build. Use it to stop the bleeding, then revert in git so the repository and production agree — a rolled-back deployment with an un-reverted <code>main</code> is a trap for the next person who ships.</p>
+
+<p>Whichever you use, decide in advance what triggers it. "The smoke test failed" is a good trigger. "Something looks odd" leads to an hour of investigation while the site is broken.</p>
+
+<h2 id="monitoring">Monitoring</h2>
+
+<p>The minimum that is genuinely worth having on a small site:</p>
+
+<ul>
+  <li><strong>Uptime check</strong> on the homepage and one deep page, alerting somewhere you will actually see it.</li>
+  <li><strong>A weekly crawl</strong> for broken links and missing head tags — the same checks CI runs, pointed at production, because production can break without a deploy when an external link rots or a plugin updates.</li>
+  <li><strong>Search Console</strong> coverage checks, which is where you find out that something is noindexed days before you would have noticed the traffic drop. The <a href="/blogs/guides/google-search-console-claude-code">Search Console workflow</a> covers the API and its traps.</li>
+  <li><strong>Real-user Core Web Vitals</strong>, because INP cannot be measured in a lab — it depends on what people actually click.</li>
+</ul>
+
+<h2 id="claudemd">CLAUDE.md for a deploying repository</h2>
+
+<pre data-sbs-copy="claudemd"><code># CLAUDE.md
+
+## Deployment
+- Production is Cloudflare Workers, deployed from `.github/workflows/deploy.yml`
+  on push to `main`. Nothing deploys any other way.
+- Never run `wrangler deploy` locally against production.
+- `wrangler.jsonc` `assets.directory` must match the build output
+  directory. If you change one, change the other and say so.
+
+## Git
+- Never commit to `main`. Branch, pull request, wait for Validate.
+- One concern per branch.
+
+## Secrets
+- Read from the environment, never from a file in this repository.
+- Never echo a value that might contain one, including in debug output.
+- If a secret is ever printed or committed, say so immediately. It has
+  to be rotated; removing the line does not undo it.
+
+## Checks
+- Every check must be able to fail. Before adding one, break the thing
+  it checks, confirm it goes red, restore, confirm it goes quiet.
+- Checks run against `dist/`, the built output. A check pointed at
+  source is checking something visitors never receive.
+
+## Definition of done
+- Validate workflow green.
+- Preview URL opened and the changed pages actually looked at.
+- `scripts/smoke.sh` passes against the preview.
+- No new dependency without saying what it costs in shipped bytes.</code></pre>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Symptom</th><th>Usual cause</th></tr></thead>
+<tbody>
+<tr><td>Works locally, fails in CI</td><td><code>npm install</code> locally versus <code>npm ci</code> in CI, or a different Node version. Pin both.</td></tr>
+<tr><td>Deploy succeeds, site unchanged</td><td>Cache. Check <code>cf-cache-status</code> and <code>age</code> headers before assuming the deploy failed.</td></tr>
+<tr><td>Authentication error in the deploy step</td><td>Token scope, not token validity. A token that can read cannot deploy.</td></tr>
+<tr><td>404 on every route except the homepage</td><td><code>assets.directory</code> pointing at the wrong folder, or the build output changed location.</td></tr>
+<tr><td>Every unknown path returns the homepage with a 200</td><td><code>not_found_handling</code> set to SPA mode on a content site.</td></tr>
+<tr><td>Secrets missing on a pull request from a fork</td><td>Working as designed. Do not defeat it with <code>pull_request_target</code>.</td></tr>
+<tr><td>Two deploys raced and the older one won</td><td>Missing concurrency group on the deploy job.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="mistakes">The mistakes that cost the most</h2>
+
+<p><strong>Building twice.</strong> If validation builds and deploy builds again, you can ship an artefact that was never tested. Pass the artefact between jobs.</p>
+
+<p><strong>Checks that run against source.</strong> The built output is what visitors get. Everything structural should be checked there.</p>
+
+<p><strong>Caching HTML.</strong> The deploy appears not to have happened, and only for other people.</p>
+
+<p><strong>A workflow with default permissions.</strong> The token is more powerful than the job needs. Set <code>permissions</code> explicitly on every workflow.</p>
+
+<p><strong>Indexable previews.</strong> A per-pull-request URL that gets crawled is a duplicate of your site.</p>
+
+<p><strong>No smoke test.</strong> "Deploy succeeded" and "the site works" are different claims, and only one of them was verified.</p>
+
+<p><strong>A rollback you have never performed.</strong> The first time you roll back should not be during an incident. Do it once, deliberately, on a quiet afternoon.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Launch System ships the workflows, the smoke test, the secrets rules and the pre- and post-launch checklists as files you run rather than a method you transcribe — <a href="/products/claude-code-website-launch-system">browse the contents</a>.</p>
+</aside>
+
+<p>The pipeline is not the interesting part of the work and that is exactly the point. Once every change goes through the same gates, deploying stops being an event, and the question stops being "is this safe to ship" and becomes "did the checks pass". That is a much better question, provided the checks are ones you have watched fail.</p>

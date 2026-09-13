@@ -1,0 +1,96 @@
+<p>There is a gap between "the feature works" and "this is safe to leave running", and agentic coding tools make that gap wider rather than narrower. They are fast at producing working code and indifferent to the operational questions nobody asked them: what happens when this fails, who can see this, what breaks if the third-party service is down, and how would anyone find out.</p>
+
+<p>This hub is about closing that gap deliberately — security, accessibility, performance, CI, code review, and the release discipline that makes deploys boring.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers shipping to production, and small teams where the person writing the code is also the person on call. If you have a platform team enforcing this for you, most of it is already handled. If you do not, it is handled by whoever remembers, which is a bad plan that works right up until it does not.</p>
+
+<h2 id="verification">The one idea everything here depends on</h2>
+
+<p>A check that has never failed is not a check. It is a line in a log file that says "PASS" for reasons nobody has established.</p>
+
+<p>This sounds obvious and is routinely skipped, because a passing test feels like evidence. It is not, until you have seen it go red. Before trusting any automated check — a link crawler, a schema validator, a secret scanner, an accessibility pass — break the thing it is checking and confirm it notices, then restore and confirm it goes quiet again. Both directions matter: a check that fires on everything is as useless as one that fires on nothing, because both get ignored.</p>
+
+<p>Every automated check behind this site was built that way, and doing so caught real defects that a green run would have hidden. An SEO crawler that stripped query strings never followed <code>?page=2</code>, so a duplicate title on paginated pages was invisible to the very audit meant to find it. A diagram generator silently clipped subtitles that overflowed their box; adding a guard that raised on overflow immediately surfaced three diagrams that had been shipping clipped since publication.</p>
+
+<p>Neither of those was found by review. Both were found by making a check capable of failing.</p>
+
+<h2 id="security">Security: the parts that actually bite</h2>
+
+<p>Web application security has a current reference point — the OWASP Top 10:2025 — and it is worth reading rather than half-remembering, because the categories moved. Software Supply Chain Failures is now its own entry, Security Logging and Alerting Failures was renamed, and Mishandling of Exceptional Conditions is new.</p>
+
+<p>For a website built with an agentic tool, four risks dominate in practice.</p>
+
+<p><strong>Secrets reaching places they should not.</strong> Not just committed keys — a credential in a log line, in a generated document, in a screenshot, in a template, or copied into a downloadable artefact. The defence is structural: read credentials from a path outside the repository, run every diagnostic output through a redaction filter, and scan the whole tree for credential patterns as part of the test suite rather than at review time.</p>
+
+<p><strong>Client-side trust.</strong> Anything in front-end JavaScript is public. An API key in a bundle is disclosed, whatever the file is called.</p>
+
+<p><strong>Dependencies.</strong> Every package is code you are choosing to run. Every MCP server is a trust boundary you are choosing to open. The question is not whether they are malicious but whether you would notice if one became so.</p>
+
+<p><strong>Failing loudly enough.</strong> An error swallowed by a catch block is a security event nobody investigated. Logging that nobody reads is the same thing with extra steps.</p>
+
+<p>Worth stating plainly: a defensive security review of code you own is not penetration testing, and conflating the two produces reports that are both alarming and useless.</p>
+
+<h2 id="a11y">Accessibility as a production concern</h2>
+
+<p>WCAG 2.2 is the current W3C Recommendation. AA is the level nearly every legal framework references, and the practical work divides cleanly in two.</p>
+
+<p><strong>What a machine can answer:</strong> missing alt attributes, colour contrast ratios, form controls without labels, heading order, duplicate or missing landmarks, focus visibility, and target size — with the caveat that success criterion 2.5.8 has five exceptions, and a checker that does not implement the inline one will flag every link inside a paragraph and destroy its own credibility.</p>
+
+<p><strong>What needs a person:</strong> whether alt text is <em>useful</em>, whether the reading order makes sense, whether an error message tells you how to fix the problem, and whether the whole flow can be completed with a keyboard. No tool answers these, and a report that implies otherwise is overstating what it found.</p>
+
+<p>Keep the two categories separate in any audit you produce. Merging them is how "47 issues found" comes to mean nothing.</p>
+
+<h2 id="performance">Performance, measured honestly</h2>
+
+<p>Core Web Vitals thresholds: LCP at or under 2.5 seconds, INP at or under 200 milliseconds, CLS at or under 0.1 — at the <strong>75th percentile</strong>, segmented across mobile and desktop. INP replaced FID and has been the stable responsiveness metric since 2024.</p>
+
+<p>Two consequences people skip. Lab tools cannot meaningfully measure INP, because it depends on what real users actually click — you need field data. And a good median can sit on a failing 75th percentile, so an average is not an answer.</p>
+
+<p>The regressions that matter in practice are structural rather than incremental: an embed that arrives late and shifts the layout, an image without dimensions, a font swap that reflows a paragraph, a script that blocks rendering. Reserve space, set dimensions, defer what can be deferred, and treat a new third-party script as the significant decision it is.</p>
+
+<h2 id="ci">CI, code review, and what to automate</h2>
+
+<p>The useful division is between things that must always be true and things that need judgement.</p>
+
+<p><strong>Automate the invariants.</strong> No secrets in the tree. Configuration files parse. Structured data is valid JSON. Internal links resolve. The declared page size matches the constant the layout uses to decide what to noindex — the kind of drift that silently drops a real page out of the index, and exactly the kind a human reviewer will never catch.</p>
+
+<p><strong>Review the judgement.</strong> Whether the abstraction is right, whether the error handling is meaningful, whether the change is scoped to what was asked. An agent reviewing a pull request is genuinely useful here, provided its findings are treated as a hypothesis to verify rather than a verdict.</p>
+
+<p>Two failure modes to design against. Tooling so fragile that ordinary content changes break the build teaches everyone to bypass it. And a check that reads the paid or private half of a repository will fail on a public clone — skip it explicitly rather than letting it fail, so a green run stays meaningful in both places.</p>
+
+<h2 id="environments">Environment configuration</h2>
+
+<p>Most production incidents in small projects are configuration, not code. Three rules cover most of it.</p>
+
+<p><strong>Configuration comes from the environment, secrets come from outside the repository.</strong> Those are different statements. A feature flag in a committed config file is fine. A token is not, even in a file you have gitignored — gitignore protects against one specific accident and nothing else.</p>
+
+<p><strong>Make the dangerous target require an explicit act.</strong> If the same command can deploy to staging or production depending on an argument you might forget, it will eventually deploy to production. Default to the safe target and require an environment variable to override. One line of code, one entire class of accident removed.</p>
+
+<p><strong>Assert the environment rather than assuming it.</strong> A script that needs a credential should fail immediately with a clear message when it is absent, not halfway through a multi-step operation with a stack trace. This matters more with an agent in the loop, because a partial failure is much harder to reason about than a refusal at the start.</p>
+
+<h2 id="testing">What to test on a content-heavy site</h2>
+
+<p>Unit tests are not the interesting part here. The checks that repeatedly earn their keep on a website are the boring structural ones, and most of them are a few lines:</p>
+
+<ul>
+  <li>Every internal link and in-page anchor resolves.</li>
+  <li>Every JSON and configuration file parses.</li>
+  <li>No credential pattern appears anywhere in the tracked tree.</li>
+  <li>Structured data contains the types you expect and none you have forbidden.</li>
+  <li>Constants that must agree actually agree — the page size in a paginator and the page size the layout uses to decide what to noindex being the canonical example.</li>
+  <li>Claims made on the site still match the thing they describe. If a page says "100 prompts", something should count them.</li>
+</ul>
+
+<p>That last one is the category people never automate and always regret. Marketing copy drifts from reality quietly, and the drift is only ever noticed by a customer.</p>
+
+<h2 id="release">Release discipline</h2>
+
+<p>Small, reversible, verified. Deploy something you can undo, then check the live URL rather than the preview — after DNS and caches have settled, because the interesting differences between local and production are exactly the ones that only appear there: canonical URLs, robots directives, redirect behaviour, and anything that depends on a response header.</p>
+
+<p>Then check again the next day. Some failures are only visible once a crawler, a CDN, or a scheduled job has had a turn.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>The path below runs from the general audit through security, accessibility, and CI. The full hub list underneath adds performance and the production CLAUDE.md guide, which is where most of this gets written down so it survives you not being in the room.</p>

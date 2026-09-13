@@ -1,0 +1,12 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-404",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

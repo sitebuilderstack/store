@@ -1,0 +1,256 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#difference">An audit is not a launch checklist</a></li>
+    <li><a href="#order">The order that matters</a></li>
+    <li><a href="#setup">Setting Claude up to audit, not to fix</a></li>
+    <li><a href="#crawl">Pass 1: crawl and record</a></li>
+    <li><a href="#rendered">Pass 2: rendered HTML, not templates</a></li>
+    <li><a href="#visitor">Pass 3: use the site</a></li>
+    <li><a href="#code">Pass 4: read the code</a></li>
+    <li><a href="#prompts">Prompts that produce evidence</a></li>
+    <li><a href="#severity">Severity, and writing it up</a></li>
+    <li><a href="#found">Five findings from this site</a></li>
+    <li><a href="#lying">The audit that lies to you</a></li>
+    <li><a href="#cadence">How often to run it</a></li>
+  </ol>
+</nav>
+
+<h2 id="difference">An audit is not a launch checklist</h2>
+
+<p>A launch checklist asks <em>is this ready to ship?</em> An audit asks <em>what is wrong with what already shipped, and which of it matters?</em> The second question is harder, because the site in front of you looks finished. Somebody signed it off. Everything that is broken is broken quietly.</p>
+
+<p>The distinction changes the method. A launch checklist is worked through in order, because the work is sequenced. An audit is an inspection: you gather evidence first and prioritise afterwards, and the order you inspect in is chosen to stop you from being told what to think.</p>
+
+<p>This guide is the method. The list of things to look at is a separate document — the <a href="/pages/claude-code-website-audit-checklist">website audit checklist</a> — which is free, ungated, and designed to be handed to Claude Code section by section. Read this for how to run an audit; open that for what to check.</p>
+
+<h2 id="order">The order that matters</h2>
+
+<p>Four passes, and the order is the single most useful thing in this article.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-audit-order.png" alt="Four audit passes in order. One, crawl every URL recording status, title, description, canonical and word count. Two, fetch the rendered HTML for one page per template, because what ships matters more than what the template says. Three, use the site on a phone and try to complete its primary action. Four, read the code last, once you know what to look for."
+       width="1000" height="502" loading="lazy" decoding="async">
+  <figcaption>Reading the templates first tells you what the site is supposed to do, which makes it much harder to see what it does.</figcaption>
+</figure>
+
+<p>Most audits are run in exactly the wrong order: open the repository, read the components, form a mental model, then check the site against it. By the time you look at the live site you are no longer able to see it. You see your model of it, and your model is built from source that describes intentions.</p>
+
+<p>Claude Code has the same failure mode, more strongly. Give it the repository first and it will describe an excellent site. Give it the responses first and it will describe the one that exists.</p>
+
+<h2 id="setup">Setting Claude up to audit, not to fix</h2>
+
+<p>The default behaviour of a coding assistant is to fix things. During an audit that is actively harmful: findings disappear into commits before anyone has decided whether they matter, and the record of what was wrong is lost.</p>
+
+<p>Say so explicitly at the start of the session:</p>
+
+<pre><code>We are auditing this site, not fixing it. For this session:
+
+- Do not edit any file.
+- Do not commit, push, or open a pull request.
+- Record findings as: URL, what you observed, how you observed it,
+  why it matters, severity.
+- If you cannot verify something, say so and mark it unverified.
+  Do not infer it from the source.</code></pre>
+
+<p>That last rule does most of the work. Without it you get findings phrased as "the canonical tag appears to be self-referencing", which means the template looked right. With it you get "fetched https://example.com/x, canonical is https://example.com/x" or an explicit gap.</p>
+
+<p>If the audit is something you run regularly, this belongs in a <a href="/blogs/guides/claude-code-skills">skill</a> rather than being retyped, and the "do not edit" half belongs in a <a href="/blogs/guides/claude-code-hooks">hook</a>, where it is enforced rather than requested.</p>
+
+<h2 id="crawl">Pass 1: crawl and record</h2>
+
+<p>Start with a table. One row per URL, columns for status code, final URL after redirects, title, meta description, canonical, H1 count, and word count. Nothing clever — the point is coverage, not analysis.</p>
+
+<pre><code>Write a script that crawls this site starting from the homepage,
+following only internal links, and records for each URL:
+status, final URL, title, meta description, canonical, h1 count.
+
+Requirements:
+- Pause between requests. Honour Retry-After.
+- If any request fails after retries, print an INCOMPLETE banner
+  and exit non-zero. Do not summarise a partial crawl as clean.
+- Write the results to CSV.</code></pre>
+
+<p>The failure requirement is not decoration. A crawler that hits rate limiting, silently drops nine of twenty-eight pages, and then reports "0 broken links" has told you nothing while sounding authoritative. That happened on this site. The fix was longer backoff and a distinct exit code for a partial run; the crawl then found nineteen more URLs than the throttled one had.</p>
+
+<p>What falls straight out of the table:</p>
+
+<ul>
+  <li><strong>Duplicate titles and descriptions</strong> — sort the column and look for repeats. This is where the most common real finding lives.</li>
+  <li><strong>Missing descriptions</strong> — blank cells.</li>
+  <li><strong>Broken links</strong> — anything that is not 200 or an intended redirect.</li>
+  <li><strong>Redirect chains</strong> — where the final URL is two or more hops away.</li>
+  <li><strong>Thin pages</strong> — word counts far below the rest.</li>
+  <li><strong>Orphans</strong> — anything in the sitemap that the crawl never reached.</li>
+</ul>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System packages the audit passes below as runnable prompts, with the evidence format and the severity scale built in. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="rendered">Pass 2: rendered HTML, not templates</h2>
+
+<p>Fetch one live page per template type — home, product, article, index, a policy page, the 404 — and read what actually came back.</p>
+
+<p>Things that are only visible here:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Check</th><th>Why the template will not tell you</th></tr></thead>
+<tbody>
+<tr><td><code>noindex</code> in the response</td><td>Often injected by a plugin, a platform setting, or a header</td></tr>
+<tr><td>Structured data validity</td><td>Liquid or JSX that looks fine can emit malformed JSON</td></tr>
+<tr><td>Entity leakage in meta tags</td><td>Double-escaping only appears in the output</td></tr>
+<tr><td>Canonical target</td><td>Depends on request-time values, not the template</td></tr>
+<tr><td>The real <code>&lt;title&gt;</code></td><td>Platform fallbacks fire when a setting is empty</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That last row is worth an example. This store shipped with its homepage <code>&lt;title&gt;</code> set to the raw <code>.myshopify.com</code> domain, because the theme fell back to it when a setting was never filled in. In a browser tab it looked entirely normal. It was visible only by reading the response.</p>
+
+<p>Validate every JSON-LD block by parsing it, not by looking at it. A block with a trailing comma is invisible to the eye and worthless to a search engine.</p>
+
+<h2 id="visitor">Pass 3: use the site</h2>
+
+<p>Open the site on a phone, on mobile data, and try to do the thing it wants you to do. Buy something. Send the form. Find the pricing.</p>
+
+<p>This is the pass people skip, and it is the one that catches the expensive problems, because the expensive problems are usually not in the HTML at all. Some categories that only appear here:</p>
+
+<ul>
+  <li>A call-to-action that is present, valid, and invisible — text at low contrast against its own background</li>
+  <li>A button that links to a fragment which only exists on another page, so clicking it does nothing at all</li>
+  <li>A payment provider that is configured but not activated, where the failure notice is injected by JavaScript and absent from the initial HTML</li>
+  <li>A form that submits successfully and delivers nothing</li>
+  <li>A sticky bar that covers the primary action at 320 pixels</li>
+</ul>
+
+<p>Claude Code can help here with a headless browser, but do not let it replace the human pass. A script checks the conditions you thought of. A person notices the thing nobody thought of.</p>
+
+<h2 id="code">Pass 4: read the code</h2>
+
+<p>Now, with a table of URLs, a set of rendered responses, and a list of things that felt wrong, the source becomes useful. You are not looking for problems any more; you are looking for the cause of problems you have already observed.</p>
+
+<pre><code>Here is the finding: on /pages/about the primary CTA renders with
+text and background at the same colour.
+
+Find the cause in the stylesheet. Show me the two rules involved and
+which one wins, with the specificity of each. Do not change anything.</code></pre>
+
+<p>Asking for the mechanism rather than the fix is what keeps the audit an audit. It also produces a better fix later, because "a generic link rule outranks the button rule by one point of specificity" tells you something that "changed the colour" does not.</p>
+
+<h2 id="prompts">Prompts that produce evidence</h2>
+
+<p>Four patterns that reliably return facts instead of impressions.</p>
+
+<p><strong>Ask for the observation, not the verdict.</strong> "Is the SEO good?" produces an essay. "Fetch these twelve URLs and print status, title, description and canonical as a table" produces a table.</p>
+
+<p><strong>Ask what would have to be true.</strong> "What would have to be true for this check to pass while the feature is broken?" surfaces the gap between what you measured and what you concluded.</p>
+
+<p><strong>Ask for the counter-case.</strong> "Find a page where this does not hold." An assistant looking for confirmation finds it every time; one looking for a counter-example finds the exception.</p>
+
+<p><strong>Ask it to break its own check.</strong> Covered below, and the single highest-value habit in this entire method.</p>
+
+<p>There is a longer set of these in the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a>, including the discovery and debugging patterns this leans on.</p>
+
+<h2 id="severity">Severity, and writing it up</h2>
+
+<p>Findings sorted by the section they came from are almost useless. Sort by severity.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Severity</th><th>Test</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>Critical</strong></td><td>Money, data, or reachability</td><td>Cannot buy, cannot contact, data exposed, site not indexable</td></tr>
+<tr><td><strong>High</strong></td><td>A real user is blocked or misled</td><td>Dead primary CTA, no delivery, keyboard trap, fabricated reviews</td></tr>
+<tr><td><strong>Medium</strong></td><td>Measurable cost, no blockage</td><td>Duplicate titles, missing structured data, slow LCP, thin pages</td></tr>
+<tr><td><strong>Low</strong></td><td>Noticeable to you, not to them</td><td>Spacing, copy nits, cosmetic validator warnings</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Each finding gets five fields: URL, what was observed, how it was observed, why it matters, severity. The third field is the one that makes an audit reproducible, and the one most reports omit.</p>
+
+<p>State plainly what you could not check and why. An audit that hides its own gaps is worse than a shorter one that admits them, because the reader assumes the gaps were covered.</p>
+
+<p>For a quick read on where you stand before running any of this, the free <a href="/pages/launch-readiness-score">website readiness score</a> asks twenty-four questions across seven categories and returns a prioritised list. It is a self-assessment rather than an audit &mdash; it reports what you tell it &mdash; so the useful way to use it is backwards: answer honestly, then treat every &ldquo;Yes&rdquo; as a claim to verify against the live site.</p>
+
+<h2 id="found">Five findings from this site</h2>
+
+<p>This storefront was built with the method it sells, and audited the same way. Five real findings, all invisible to someone looking at the site:</p>
+
+<ol>
+  <li><strong>A primary call-to-action rendered invisible.</strong> Text at 1:1 contrast against its own background, because a generic link rule outranked the button rule by a single point of CSS specificity. Found by computing contrast in a rendered DOM, not by reading the CSS.</li>
+  <li><strong>The homepage title was the raw <code>.myshopify.com</code> domain.</strong> A theme fallback that fires when a setting is empty. Found by fetching the homepage and reading the title out of the response.</li>
+  <li><strong>Every call-to-action on every non-home page was dead.</strong> They linked to <code>#buy</code>, a fragment that only exists on the homepage. No error, no navigation. Found by resolving fragment links against the page they appear on.</li>
+  <li><strong>Checkout could not accept payments.</strong> The notice is injected by JavaScript and absent from the initial HTML, so every fetch-based check reported a healthy checkout. Found by rendering the page in a browser.</li>
+  <li><strong>A fulfilled order delivered nothing.</strong> The order was placed with a phone number and no email address, and the delivery app sends by email only. Every status the platform reported said success. Found by checking whether the order actually had an email field.</li>
+</ol>
+
+<p>The pattern across all five: nothing was visibly wrong, and every one was found by fetching something and measuring what came back. The longer write-up, with the mechanism behind each and a screenshot of the checkout failure, is in <a href="/pages/case-study">the case study for this site</a>.</p>
+
+<h2 id="lying">The audit that lies to you</h2>
+
+<p>The most dangerous output of an audit is a green check that was never capable of being red.</p>
+
+<p>Every one of these happened while auditing this site, and each was caught only because the check was tested against a failing case afterwards:</p>
+
+<ul>
+  <li>A link crawler reported zero broken links across a run where nine of twenty-eight pages had returned 429.</li>
+  <li>A checkout check looked for wording in <code>document.body.innerText</code> that only ever appears in an input's <code>placeholder</code> attribute. It could not have fired.</li>
+  <li>A Liquid-error detector matched prose <em>about</em> Liquid errors in an article, and reported a clean page as broken.</li>
+  <li>A digital-delivery check passed on an order that delivered nothing, because it never looked at whether the order had an email address.</li>
+</ul>
+
+<p>So: <strong>after a check passes, break the thing it checks and confirm it goes red.</strong> Delete a canonical tag. Point a link at a 404. Rename the file the script reads. If the check stays green, it was never a check.</p>
+
+<p>This costs a minute per check and it is the difference between an audit and a document that looks like one.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Every audit in the Launch System ends with a way to prove it ran, not a claim that it did. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2 id="deeper">Going deeper on one pass</h2>
+
+<p>Three areas of the audit above have enough depth to need their own workflow. Each is the long version of what is one section here:</p>
+
+<ul>
+  <li><a href="/blogs/guides/claude-code-website-security-audit">Security audit</a> &mdash; fifteen passes, a finding format, and where penetration testing begins</li>
+  <li><a href="/blogs/guides/claude-code-performance-core-web-vitals">Performance and Core Web Vitals</a> &mdash; diagnosis rather than a score, one variable at a time</li>
+  <li><a href="/blogs/guides/claude-code-accessibility-audit">Accessibility audit</a> &mdash; WCAG 2.2 Level AA, and the manual passes no tool replaces</li>
+</ul>
+
+<h2 id="cadence">How often to run it</h2>
+
+<p>The full four-pass audit is a project, not a routine. A sensible cadence:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>When</th><th>What to run</th></tr></thead>
+<tbody>
+<tr><td>Every deploy</td><td>The crawl, in CI, failing the build on a new 404 or duplicate title</td></tr>
+<tr><td>Every template change</td><td>Rendered HTML and structured data for the affected template</td></tr>
+<tr><td>Monthly</td><td>Search Console coverage, Core Web Vitals field data, dependency audit</td></tr>
+<tr><td>Quarterly, or on inheriting a site</td><td>All four passes</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Moving the crawl into <a href="/blogs/guides/claude-code-github-actions">GitHub Actions</a> is the highest-value single step, because it turns a thing you remember to do into a thing that happens.</p>
+
+<h2>Where to go next</h2>
+
+<p>The checklist this article describes running is at <a href="/pages/claude-code-website-audit-checklist">the website audit checklist</a>, free and ungated, alongside a <a href="/pages/claude-code-launch-checklist">launch checklist</a> for sites that have not shipped yet. For the underlying build method, start with <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a>. For the SEO half specifically, <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO workflow</a> covers what to check and <a href="/blogs/guides/claude-code-technical-seo-audit">running a technical SEO audit</a> covers how to prove you checked it. The rules that stop an assistant editing during an audit belong in <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a>.</p>
+
+<p>An audit is one stage of three. If you own the whole lifecycle rather than one part of it, <a href="/pages/build-rank-convert">Build, Rank, Convert</a> sets out the order, and explains why the three are separate products rather than one.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://www.w3.org/WAI/WCAG22/quickref/" rel="noopener">WCAG 2.2 quick reference</a> — the success criteria behind the accessibility pass</li>
+  <li><a href="https://developers.google.com/search/docs/appearance/structured-data/search-gallery" rel="noopener">Google: structured data gallery</a> — which types are eligible for what</li>
+  <li><a href="https://web.dev/articles/vitals" rel="noopener">web.dev: Core Web Vitals</a> — the thresholds used in the performance pass</li>
+  <li><a href="https://owasp.org/www-project-top-ten/" rel="noopener">OWASP Top Ten</a> — the reference behind the security pass</li>
+</ul>

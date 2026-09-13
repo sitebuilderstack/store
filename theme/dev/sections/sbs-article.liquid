@@ -1,0 +1,558 @@
+{%- comment -%}
+  Long-form article renderer on the landing layout. The purchased theme's
+  article template renders in its own design with jQuery and a 424 KB
+  stylesheet; these guides get the site's own typography instead.
+
+  Table of contents is authored in the article body rather than generated,
+  so it needs no JavaScript and stays accessible with JS disabled.
+
+  Navigation is read from metafields written by scripts/publish-graph.py:
+    sbs.pillar        the hub this guide belongs to
+    sbs.path/step     position in a learning path, for prev/next
+    sbs.prev/next     adjacent guides in that path
+    sbs.related       2-5 editorially chosen guides
+    sbs.resource      the free resource that fits this guide's intent
+
+  All of these store bare handles. `article.handle` in Liquid is the QUALIFIED
+  handle ("guides/claude-code-seo"), so every lookup composes the qualified
+  form first and falls back to the bare one.
+{%- endcomment -%}
+
+{%- assign pillar_handle = article.metafields.sbs.pillar -%}
+{%- assign pillar_page = pages[pillar_handle] -%}
+{%- assign step = article.metafields.sbs.step -%}
+{%- assign steps_total = article.metafields.sbs.steps_total -%}
+
+<article class="sbs-article">
+  <header class="sbs-section sbs-section--tight">
+    <div class="sbs-container">
+      <nav class="sbs-crumbs" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ blog.url }}">{{ blog.title | escape }}</a>
+        {%- if pillar_page != blank and pillar_page.title != blank -%}
+          <span aria-hidden="true">/</span>
+          <a href="{{ pillar_page.url }}">{{ pillar_page.title | escape }}</a>
+        {%- endif -%}
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ article.title | escape }}</span>
+      </nav>
+
+      {%- comment -%}
+        Reading progress.
+
+        Ships hidden and is revealed by JavaScript, because a progress bar that
+        cannot move is worse than none. Positioned fixed under the header, so it
+        cannot contribute layout shift on a page whose CLS is currently 0.0007.
+
+        aria-hidden throughout: this is a visual orientation cue for a ten-minute
+        page. A screen reader user navigates by heading and would be read the
+        section name again on every scroll tick, which is noise rather than
+        information.
+      {%- endcomment -%}
+      <div class="sbs-reading" data-sbs-reading hidden aria-hidden="true">
+        <div class="sbs-reading__bar"><span data-sbs-reading-fill></span></div>
+        <p class="sbs-reading__where"><span data-sbs-reading-section></span></p>
+      </div>
+
+      <div class="sbs-article__head">
+        {%- comment -%}
+          Topic label doubling as the up-link to the hub. Descriptive anchor
+          text rather than "learn more": the link text names the destination.
+        {%- endcomment -%}
+        {%- if pillar_page != blank and pillar_page.title != blank -%}
+          <p class="sbs-article__pillar">
+            <a href="{{ pillar_page.url }}" data-sbs-track="pillar_up_click">{{ pillar_page.title | escape }}</a>
+            {%- if step != blank and steps_total != blank -%}
+              <span class="sbs-article__step">Step {{ step }} of {{ steps_total }}</span>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+
+        <h1>{{ article.title | escape }}</h1>
+
+        {%- if article.excerpt != blank -%}
+          <p class="sbs-lede">{{ article.excerpt | strip_html }}</p>
+        {%- endif -%}
+
+        <div class="sbs-article__meta">
+          {%- comment -%}
+            Byline links to the author page when the article is by the site's
+            author, so the visible attribution and the Person structured data in
+            sbs-schema point at the same entity.
+          {%- endcomment -%}
+          {%- if article.author == 'James Joyner IV' -%}
+            <span><a class="sbs-article__byline" href="/pages/about" rel="author">{{ article.author | escape }}</a></span>
+          {%- else -%}
+            <span>{{ article.author | escape }}</span>
+          {%- endif -%}
+          <span aria-hidden="true">·</span>
+          <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+            {{ article.published_at | date: '%-d %B %Y' }}
+          </time>
+          {%- assign words = article.content | strip_html | split: ' ' | size -%}
+          {%- assign mins = words | divided_by: 220 | plus: 1 -%}
+          <span aria-hidden="true">·</span>
+          <span>{{ mins }} min read</span>
+          {%- if article.metafields.sbs.level != blank -%}
+            <span aria-hidden="true">·</span>
+            <span>{{ article.metafields.sbs.level }}</span>
+          {%- endif -%}
+          {%- if article.tags.size > 0 -%}
+            <span aria-hidden="true">·</span>
+            <span class="sbs-article__tags">
+              {%- for tag in article.tags -%}
+                <a href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a>
+              {%- endfor -%}
+            </span>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {%- if article.image -%}
+    <div class="sbs-container">
+      <img
+        class="sbs-article__hero"
+        src="{{ article.image | image_url: width: 1400 }}"
+        srcset="{{ article.image | image_url: width: 700 }} 700w,
+                {{ article.image | image_url: width: 1100 }} 1100w,
+                {{ article.image | image_url: width: 1600 }} 1600w"
+        sizes="(min-width: 1180px) 1100px, 92vw"
+        width="{{ article.image.width }}"
+        height="{{ article.image.height }}"
+        alt="{{ article.image.alt | escape }}"
+        loading="eager"
+        fetchpriority="high">
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    In-article progression.
+
+    The body is split on its own <h2> boundaries and reassembled with at most
+    TWO cards inserted, roughly a third and two thirds of the way down. Server
+    rendered, so there is no layout shift and no JavaScript involved.
+
+    Guards, in order of importance:
+      · only for articles with enough sections to have a natural stopping point
+      · at most two cards, never three, and never the same destination twice
+      · the two cards say different things — one lateral, one forward — so a
+        reader is not shown the same call to action repeatedly
+    A short article gets nothing.
+  {%- endcomment -%}
+  {%- assign body_parts = article.content | split: '<h2' -%}
+  {%- assign section_count = body_parts.size | minus: 1 -%}
+  {%- assign related = article.metafields.sbs.related.value -%}
+
+  {%- assign insert_a = 0 -%}
+  {%- assign insert_b = 0 -%}
+  {%- if section_count >= 6 and section.settings.show_inline_ctas -%}
+    {%- assign insert_a = section_count | times: 33 | divided_by: 100 | at_least: 2 -%}
+    {%- assign insert_b = section_count | times: 68 | divided_by: 100 -%}
+    {%- if insert_b <= insert_a -%}{%- assign insert_b = insert_a | plus: 2 -%}{%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%} Card A: a lateral read. Card B: the next step in the path. {%- endcomment -%}
+  {%- assign next_handle = article.metafields.sbs.next -%}
+  {%- assign card_b = blank -%}
+  {%- if next_handle != blank -%}
+    {%- assign nbq = blog.handle | append: '/' | append: next_handle -%}
+    {%- assign card_b = blog.articles | where: 'handle', nbq | first -%}
+    {%- unless card_b -%}{%- assign card_b = blog.articles | where: 'handle', next_handle | first -%}{%- endunless -%}
+  {%- endif -%}
+
+  {%- comment -%}
+    Card A is the lateral read. The first related guide is very often also the
+    next step in the path — pointing both cards at the same guide would show
+    the reader the same destination twice, which is exactly the repetition to
+    avoid. So skip any candidate that equals the next lesson, and if none is
+    left, render no lateral card at all rather than a duplicate.
+  {%- endcomment -%}
+  {%- assign card_a = blank -%}
+  {%- for ra in related -%}
+    {%- if ra != next_handle -%}
+      {%- assign raq = blog.handle | append: '/' | append: ra -%}
+      {%- assign cand = blog.articles | where: 'handle', raq | first -%}
+      {%- unless cand -%}{%- assign cand = blog.articles | where: 'handle', ra | first -%}{%- endunless -%}
+      {%- if cand != blank -%}
+        {%- assign card_a = cand -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  <div class="sbs-section">
+    <div class="sbs-container">
+      <div class="sbs-rte sbs-article__body">
+        {%- for part in body_parts -%}
+          {%- if forloop.first -%}
+            {{ part }}
+          {%- else -%}
+            {%- assign idx = forloop.index0 -%}
+            {%- if idx == insert_a and card_a != blank -%}
+              <aside class="sbs-nextup" aria-label="Related guide">
+                <p class="sbs-nextup__label">Related</p>
+                <p class="sbs-nextup__link">
+                  <a href="{{ card_a.url }}" data-sbs-track="related_guide_clicked">{{ card_a.title | escape }}</a>
+                </p>
+              </aside>
+            {%- elsif idx == insert_b and card_b != blank -%}
+              <aside class="sbs-nextup sbs-nextup--next" aria-label="Next in this path">
+                <p class="sbs-nextup__label">Next in this path</p>
+                <p class="sbs-nextup__link">
+                  <a href="{{ card_b.url }}" data-sbs-track="next_step_clicked">{{ card_b.title | escape }}</a>
+                </p>
+              </aside>
+            {%- endif -%}
+            <h2{{ part }}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="sbs-container">
+    {% render 'sbs-author', author: article.author %}
+  </div>
+
+  {%- comment -%}
+    Previous / next through the learning path this guide belongs to. Rendered
+    as a nav landmark with its own label so a screen-reader user can find it
+    directly, and only when the guide is actually in a path.
+  {%- endcomment -%}
+  {%- assign prev_handle = article.metafields.sbs.prev -%}
+  {%- if prev_handle != blank or next_handle != blank -%}
+    {%- assign prev_a = blank -%}
+    {%- if prev_handle != blank -%}
+      {%- assign pq = blog.handle | append: '/' | append: prev_handle -%}
+      {%- assign prev_a = blog.articles | where: 'handle', pq | first -%}
+      {%- unless prev_a -%}{%- assign prev_a = blog.articles | where: 'handle', prev_handle | first -%}{%- endunless -%}
+    {%- endif -%}
+    <div class="sbs-container">
+      <nav class="sbs-prevnext" aria-label="Learning path navigation">
+        {%- if prev_a != blank -%}
+          <a class="sbs-prevnext__link sbs-prevnext__link--prev" href="{{ prev_a.url }}"
+             data-sbs-track="learning_path_prev">
+            <span class="sbs-prevnext__dir"><span aria-hidden="true">&larr;</span> Previous</span>
+            <span class="sbs-prevnext__title">{{ prev_a.title | escape }}</span>
+          </a>
+        {%- else -%}
+          <span></span>
+        {%- endif -%}
+        {%- if card_b != blank -%}
+          <a class="sbs-prevnext__link sbs-prevnext__link--next" href="{{ card_b.url }}"
+             data-sbs-track="learning_path_next">
+            <span class="sbs-prevnext__dir">Next <span aria-hidden="true">&rarr;</span></span>
+            <span class="sbs-prevnext__title">{{ card_b.title | escape }}</span>
+          </a>
+        {%- endif -%}
+      </nav>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    Related guides, chosen editorially in content/content-graph.json rather
+    than by recency. The previous implementation listed the three newest
+    articles in the blog regardless of subject, which is why it is gone.
+  {%- endcomment -%}
+  {%- if section.settings.show_related and related.size > 0 -%}
+    <div class="sbs-section sbs-section--alt">
+      <div class="sbs-container">
+        <h2 class="sbs-article__related-h">{{ section.settings.related_heading | escape }}</h2>
+        <ul class="sbs-grid sbs-grid--3">
+          {%- for h in related -%}
+            {%- assign hq = blog.handle | append: '/' | append: h -%}
+            {%- assign other = blog.articles | where: 'handle', hq | first -%}
+            {%- unless other -%}{%- assign other = blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+            {%- if other != blank and other.id != article.id -%}
+              <li class="sbs-card">
+                <h3><a href="{{ other.url }}" data-sbs-track="related_guide_clicked">{{ other.title | escape }}</a></h3>
+                {%- if other.excerpt != blank -%}
+                  <p>{{ other.excerpt | strip_html | truncate: 130 }}</p>
+                {%- endif -%}
+                <p class="sbs-meta-row">
+                  {%- if other.metafields.sbs.content_type != blank -%}
+                    <span class="sbs-pill">{{ other.metafields.sbs.content_type }}</span>
+                  {%- endif -%}
+                  {%- if other.metafields.sbs.level != blank -%}
+                    <span class="sbs-pill sbs-pill--quiet">{{ other.metafields.sbs.level }}</span>
+                  {%- endif -%}
+                </p>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+        {%- if pillar_page != blank and pillar_page.title != blank -%}
+          <p class="sbs-guides__all">
+            <a href="{{ pillar_page.url }}" data-sbs-track="pillar_up_click">
+              See how this fits into {{ pillar_page.title | escape }}
+            </a>
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    Lesson controls.
+
+    `article.handle` is the QUALIFIED handle ("guides/claude-code-seo"), while
+    the hub's steps metafield holds unqualified handles. Splitting here means
+    both sides key on the same string; keying on the qualified handle would
+    record progress the hub could never find.
+
+    Both buttons ship visible and disabled-free but do nothing without
+    JavaScript, so they are hidden until the script claims them — a control
+    that silently fails to remember is worse than no control.
+  {%- endcomment -%}
+  {%- assign handle_parts = article.handle | split: '/' -%}
+  {%- assign lesson_id = handle_parts | last -%}
+  <div class="sbs-container">
+    <div class="sbs-lesson" data-sbs-lesson-controls
+         data-lesson="{{ lesson_id | escape }}"
+         data-track="{{ pillar_page.handle | escape }}"
+         data-title="{{ article.title | escape }}"
+         data-url="{{ article.url }}" hidden>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-lesson-done
+              aria-pressed="false">
+        <span data-sbs-lesson-done-label>Mark complete</span>
+      </button>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-lesson-save
+              aria-pressed="false">
+        <span data-sbs-lesson-save-label>Save for later</span>
+      </button>
+      <p class="sbs-lesson__note">
+        Kept in this browser only. Nothing is sent anywhere, and there is no
+        account. <a href="/pages/my-learning">See your progress</a>.
+      </p>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Continue your learning path.
+
+    Next comes from this guide's own path position. "Then" is found by chaining
+    through the NEXT guide's own next metafield, so the sequence is read from
+    the graph rather than duplicated here — reorder a path and this follows.
+    "Advanced" is the first related guide marked Advanced that is not already
+    shown, so the three entries never repeat a destination.
+
+    Rendered only when there is a genuine next step. A guide at the end of a
+    path, or in no path, gets the related grid above and nothing invented.
+  {%- endcomment -%}
+  {%- if card_b != blank and section.settings.show_continue -%}
+    {%- assign then_handle = card_b.metafields.sbs.next -%}
+    {%- assign then_a = blank -%}
+    {%- if then_handle != blank -%}
+      {%- assign tq = blog.handle | append: '/' | append: then_handle -%}
+      {%- assign then_a = blog.articles | where: 'handle', tq | first -%}
+      {%- unless then_a -%}{%- assign then_a = blog.articles | where: 'handle', then_handle | first -%}{%- endunless -%}
+    {%- endif -%}
+
+    {%- assign adv_a = blank -%}
+    {%- for h in related -%}
+      {%- if h != next_handle and h != then_handle -%}
+        {%- assign aq = blog.handle | append: '/' | append: h -%}
+        {%- assign cand = blog.articles | where: 'handle', aq | first -%}
+        {%- unless cand -%}{%- assign cand = blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+        {%- if cand != blank and cand.metafields.sbs.level == 'Advanced' and adv_a == blank -%}
+          {%- assign adv_a = cand -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <div class="sbs-section sbs-section--tight">
+      <div class="sbs-container">
+        <section class="sbs-continue" aria-labelledby="sbs-continue-h">
+          <h2 id="sbs-continue-h">{{ section.settings.continue_heading | escape }}</h2>
+          <ol class="sbs-continue__list">
+            <li>
+              <p class="sbs-continue__kind">Next</p>
+              <p class="sbs-continue__link">
+                <a href="{{ card_b.url }}" data-sbs-track="learning_path_next_clicked">{{ card_b.title | escape }}</a>
+              </p>
+              {%- if card_b.excerpt != blank -%}
+                <p class="sbs-continue__note">{{ card_b.excerpt | strip_html | truncate: 120 }}</p>
+              {%- endif -%}
+            </li>
+            {%- if then_a != blank -%}
+              <li>
+                <p class="sbs-continue__kind">Then</p>
+                <p class="sbs-continue__link">
+                  <a href="{{ then_a.url }}" data-sbs-track="learning_path_next_clicked">{{ then_a.title | escape }}</a>
+                </p>
+                {%- if then_a.excerpt != blank -%}
+                  <p class="sbs-continue__note">{{ then_a.excerpt | strip_html | truncate: 120 }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+            {%- if adv_a != blank -%}
+              <li>
+                <p class="sbs-continue__kind">Going deeper</p>
+                <p class="sbs-continue__link">
+                  <a href="{{ adv_a.url }}" data-sbs-track="related_guide_clicked">{{ adv_a.title | escape }}</a>
+                </p>
+                {%- if adv_a.excerpt != blank -%}
+                  <p class="sbs-continue__note">{{ adv_a.excerpt | strip_html | truncate: 120 }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          </ol>
+          {%- if pillar_page != blank and pillar_page.title != blank -%}
+            <p class="sbs-continue__hub">
+              The whole sequence:
+              <a href="{{ pillar_page.url }}" data-sbs-track="pillar_up_click">{{ pillar_page.title | escape }}</a>
+            </p>
+          {%- endif -%}
+        </section>
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    The free resource matched to this guide's intent — an SEO guide offers the
+    SEO checklist, a security guide the security checklist. Resolved through
+    the global pages object so the label is the live page title.
+  {%- endcomment -%}
+  {%- assign res_handle = article.metafields.sbs.resource -%}
+  {%- assign res_page = pages[res_handle] -%}
+  {%- if res_page != blank and res_page.title != blank and section.settings.show_resource -%}
+    <div class="sbs-container">
+      <aside class="sbs-resource-cta" aria-labelledby="sbs-article-res-h">
+        <p class="sbs-nextup__label">Free, no email required</p>
+        <h2 id="sbs-article-res-h"><a href="{{ res_page.url }}" data-sbs-track="lead_magnet_clicked">{{ res_page.title | escape }}</a></h2>
+        {%- if res_page.metafields.global.description_tag != blank -%}
+          <p>{{ res_page.metafields.global.description_tag | strip_html | truncate: 190 }}</p>
+        {%- endif -%}
+      </aside>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    Contextual product CTA — one product, chosen by the guide's intent.
+
+    The handle comes from the sbs.product metafield, so an SEO or auditing
+    guide offers the audit toolkit and a build guide offers the flagship. Never
+    both on one page: two competing offers is worse than one, and the reader
+    has to do the segmenting we should have done.
+
+    Falls back to the section setting so an article with no metafield still
+    renders a CTA rather than nothing.
+  {%- endcomment -%}
+  {%- comment -%}
+    The matching free tool, above the product CTA.
+
+    Someone who has just read a ten-minute guide has earned a useful next
+    action before an offer. The tool is free, ungated, runs entirely in the
+    browser and produces something they can use — so it is a better next step
+    than a price, and it keeps them on the site rather than sending them away
+    to think about it.
+
+    Resolved through `pages[]` so a tool page that is unpublished or renamed
+    drops the block rather than rendering a dead link.
+  {%- endcomment -%}
+  {%- assign tool_handle = article.metafields.sbs.tool -%}
+  {%- assign tool_page = pages[tool_handle] -%}
+  {%- if tool_page != blank and tool_page.title != blank and section.settings.show_tool -%}
+    <div class="sbs-container">
+      <aside class="sbs-article__tool" aria-labelledby="sbs-article-tool-h">
+        <span class="sbs-eyebrow">Free tool</span>
+        <h2 id="sbs-article-tool-h">{{ article.metafields.sbs.tool_heading | default: tool_page.title | escape }}</h2>
+        {%- if article.metafields.sbs.tool_note != blank -%}
+          <p>{{ article.metafields.sbs.tool_note }}</p>
+        {%- endif -%}
+        <a class="sbs-btn sbs-btn--ghost" href="{{ tool_page.url }}"
+           data-sbs-track="tool_cta_clicked">
+          {{ article.metafields.sbs.tool_label | default: 'Open the tool' | escape }}
+        </a>
+      </aside>
+    </div>
+  {%- endif -%}
+
+  {%- assign cta_handle = article.metafields.sbs.product | default: section.settings.product -%}
+  {%- assign product = all_products[cta_handle] -%}
+  {%- if product != blank and section.settings.show_cta -%}
+    {%- assign cta_h = article.metafields.sbs.product_heading | default: section.settings.cta_heading -%}
+    {%- assign cta_b = article.metafields.sbs.product_note | default: section.settings.cta_body -%}
+    {%- assign cta_l = article.metafields.sbs.product_label | default: section.settings.cta_label -%}
+    <div class="sbs-container">
+      <aside class="sbs-article__cta" aria-labelledby="sbs-article-cta-h">
+        <h2 id="sbs-article-cta-h">{{ cta_h | escape }}</h2>
+        <p>{{ cta_b | escape }}</p>
+        <a class="sbs-btn sbs-btn--primary" href="{{ product.url }}" data-sbs-track="product_cta_clicked">
+          {{ cta_l | escape }} &mdash; {{ product.price | money_without_trailing_zeros }}
+        </a>
+        {%- comment -%}
+          One line, under the primary button, never instead of it. The guide's
+          own product is the better match for the reader who got this far, and
+          demoting it to sell a larger purchase would be the wrong trade.
+
+          Rendered only when the bundle resolves AND is genuinely cheaper than
+          the three separately, so the sentence can never claim a saving that
+          is not there. Both numbers come from live products.
+        {%- endcomment -%}
+        {%- assign stack = all_products[section.settings.bundle] -%}
+        {%- if stack != blank and stack.available and cta_handle != section.settings.bundle -%}
+          {%- assign parts_total = 0 -%}
+          {%- assign parts_ok = 0 -%}
+          {%- assign part_handles = section.settings.bundle_parts | split: ',' -%}
+          {%- for h in part_handles -%}
+            {%- comment -%} Liquid rejects a filter inside a bracket lookup. {%- endcomment -%}
+            {%- assign handle = h | strip -%}
+            {%- assign hp = all_products[handle] -%}
+            {%- if hp != blank and hp.available -%}
+              {%- assign parts_ok = parts_ok | plus: 1 -%}
+              {%- assign parts_total = parts_total | plus: hp.price -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if parts_ok == part_handles.size and parts_total > stack.price -%}
+            <p class="sbs-article__cta-alt">
+              Need more than one of these?
+              <a href="{{ stack.url }}" data-sbs-track="bundle_cta_clicked">{{ stack.title | escape }}</a>
+              has all three for {{ stack.price | money_without_trailing_zeros }},
+              against {{ parts_total | money_without_trailing_zeros }} separately.
+            </p>
+          {%- endif -%}
+        {%- endif -%}
+      </aside>
+    </div>
+  {%- endif -%}
+</article>
+
+{% schema %}
+{
+  "name": "SBS — Article",
+  "tag": "div",
+  "settings": [
+    { "type": "header", "content": "In-article navigation" },
+    { "type": "checkbox", "id": "show_inline_ctas", "label": "Show progression cards inside long articles", "default": true,
+      "info": "At most two, only in articles with six or more sections." },
+    { "type": "header", "content": "Free tool" },
+    { "type": "checkbox", "id": "show_tool", "label": "Show the matched free tool", "default": true,
+      "info": "Rendered above the product CTA. Omitted when the guide has no tool metafield." },
+    { "type": "header", "content": "Bundle upsell" },
+    { "type": "text", "id": "bundle", "label": "Bundle product handle",
+      "info": "The line is omitted unless this and every component below resolve, and the bundle is genuinely cheaper." },
+    { "type": "text", "id": "bundle_parts", "label": "Component handles, comma separated" },
+    { "type": "header", "content": "Free resource" },
+    { "type": "checkbox", "id": "show_resource", "label": "Show the matched free resource", "default": true },
+    { "type": "header", "content": "Product CTA" },
+    { "type": "checkbox", "id": "show_cta", "label": "Show the product CTA", "default": true },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "cta_heading", "label": "Heading",
+      "default": "Want the complete workflow?" },
+    { "type": "textarea", "id": "cta_body", "label": "Body",
+      "default": "The Claude Code Website Launch System packages this methodology into a production CLAUDE.md, a staged master build prompt, an SEO system, platform workflows, security and accessibility audits, 100 reusable prompts, and launch checklists." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Get the Launch System" },
+    { "type": "header", "content": "Related" },
+    { "type": "checkbox", "id": "show_continue", "label": "Show the continue-your-path block", "default": true },
+    { "type": "text", "id": "continue_heading", "label": "Continue heading", "default": "Continue your learning path" },
+    { "type": "checkbox", "id": "show_related", "label": "Show related guides", "default": true },
+    { "type": "text", "id": "related_heading", "label": "Heading", "default": "Read these next" }
+  ],
+  "presets": [{ "name": "SBS — Article" }]
+}
+{% endschema %}

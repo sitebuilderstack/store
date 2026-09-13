@@ -1,0 +1,39 @@
+{%- comment -%}
+  One labelled form control for the free tools.
+
+  Kept as a snippet so every field in every tool has the same markup: a real
+  <label for>, a native control, and an optional hint wired with
+  aria-describedby. No ARIA beyond that — native elements already announce
+  their role and state, and adding more would only give screen readers a second
+  version of the same information.
+
+  Parameters:
+    id, label, type ('text' | 'textarea' | 'select'), name
+    options  — for select: a comma-separated list, first item is the default
+    hint     — optional help text
+    ph       — optional placeholder (never a substitute for the label)
+    rows     — for textarea
+{%- endcomment -%}
+<div class="sbs-field">
+  <label for="{{ id }}">{{ label }}</label>
+  {%- if hint != blank -%}
+    <p class="sbs-field__hint" id="{{ id }}-hint">{{ hint }}</p>
+  {%- endif -%}
+  {%- if type == 'select' -%}
+    <select id="{{ id }}" name="{{ name | default: id }}"
+            {% if hint != blank %}aria-describedby="{{ id }}-hint"{% endif %}>
+      {%- assign opts = options | split: ',' -%}
+      {%- for o in opts -%}
+        <option value="{{ o | strip | escape }}">{{ o | strip }}</option>
+      {%- endfor -%}
+    </select>
+  {%- elsif type == 'textarea' -%}
+    <textarea id="{{ id }}" name="{{ name | default: id }}" rows="{{ rows | default: 3 }}"
+              {% if ph != blank %}placeholder="{{ ph | escape }}"{% endif %}
+              {% if hint != blank %}aria-describedby="{{ id }}-hint"{% endif %}></textarea>
+  {%- else -%}
+    <input type="text" id="{{ id }}" name="{{ name | default: id }}" autocomplete="off"
+           {% if ph != blank %}placeholder="{{ ph | escape }}"{% endif %}
+           {% if hint != blank %}aria-describedby="{{ id }}-hint"{% endif %}>
+  {%- endif -%}
+</div>

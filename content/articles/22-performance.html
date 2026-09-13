@@ -1,0 +1,271 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#meaning">What "faster" has to mean before you start</a></li>
+    <li><a href="#vitals">Core Web Vitals, precisely</a></li>
+    <li><a href="#loop">The loop, and the one-variable rule</a></li>
+    <li><a href="#baseline">Take a baseline you can return to</a></li>
+    <li><a href="#tools">Lighthouse, PageSpeed Insights, DevTools</a></li>
+    <li><a href="#lcp">Diagnosing LCP</a></li>
+    <li><a href="#inp">Diagnosing INP</a></li>
+    <li><a href="#cls">Diagnosing CLS</a></li>
+    <li><a href="#images">Images</a></li>
+    <li><a href="#js">JavaScript</a></li>
+    <li><a href="#css">CSS and fonts</a></li>
+    <li><a href="#shopify">Shopify, where you control less</a></li>
+    <li><a href="#prompt">The performance prompt</a></li>
+    <li><a href="#report">Reporting before and after</a></li>
+    <li><a href="#mistakes">Mistakes that cost the most</a></li>
+  </ol>
+</nav>
+
+<h2 id="meaning">What "faster" has to mean before you start</h2>
+
+<p>"Make the website faster" is not a task an agent can complete, because it is not a task at all. Faster for whom, measured how, and how would anyone know it worked?</p>
+
+<p>Three different things get called performance and they disagree with each other regularly:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Kind</th><th>What it is</th><th>What it is good for</th></tr></thead>
+<tbody>
+<tr><td><strong>Lab / synthetic</strong></td><td>One simulated load, controlled conditions — Lighthouse</td><td>Diagnosis. Reproducible, so a change can be attributed</td></tr>
+<tr><td><strong>Field data</strong></td><td>What real visitors experienced, aggregated</td><td>Truth. This is what Google reports and what users felt</td></tr>
+<tr><td><strong>The score</strong></td><td>A weighted composite of lab metrics</td><td>Very little. It is a summary, not a goal</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>Field data wins every disagreement.</strong> A site can score 100 in the lab and be slow for the people using it, usually because the lab run had a fast connection, no third-party scripts loading, and a warm cache. Optimise against field data where you have it, and use lab tools to work out <em>why</em>.</p>
+
+<h2 id="vitals">Core Web Vitals, precisely</h2>
+
+<p>Three metrics, with the thresholds Google publishes on <a href="https://web.dev/articles/vitals" rel="noopener">web.dev</a>:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Metric</th><th>Measures</th><th>Good</th></tr></thead>
+<tbody>
+<tr><td><strong>LCP</strong> — Largest Contentful Paint</td><td>When the largest element in the viewport finished rendering</td><td>Within <strong>2.5 seconds</strong></td></tr>
+<tr><td><strong>INP</strong> — Interaction to Next Paint</td><td>How long the page takes to visibly respond to interactions</td><td><strong>200 milliseconds</strong> or less</td></tr>
+<tr><td><strong>CLS</strong> — Cumulative Layout Shift</td><td>How much content moves unexpectedly during load</td><td><strong>0.1</strong> or less</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two details that change how you read a report. The targets are assessed at <strong>the 75th percentile of page loads, segmented across mobile and desktop</strong> — so "our median is fine" is not a pass, and a mobile failure is not offset by a desktop success.</p>
+
+<p>And <strong>First Input Delay is gone.</strong> INP was promoted from experimental in 2023 and became a stable Core Web Vital in 2024, retiring FID. Any advice still optimising for FID predates that, which is a useful freshness test for a performance article — including one an assistant wrote you.</p>
+
+<h2 id="loop">The loop, and the one-variable rule</h2>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-perf-loop.png" alt="A six-step performance loop: measure a baseline, locate the single largest contributor, state a hypothesis with an expected change, change exactly one thing, measure again under the same conditions, then keep the change or revert it. The fourth step, changing one thing, is highlighted as the discipline the whole loop depends on."
+       width="1000" height="580" loading="lazy" decoding="async">
+  <figcaption>Change five things at once and you have learned nothing about any of them, however much the score moved.</figcaption>
+</figure>
+
+<p>Step four is the entire discipline. It is also the one an agent will break by default: asked to improve performance, it will happily convert images, defer scripts, inline critical CSS and add preloads in one pass. The score may move. You will not know which change did it, whether two of them cancelled out, or which one to revert when something breaks next month.</p>
+
+<p>Step six is the one people skip. A change that produced no measurable improvement is not neutral — it is code you now maintain. Revert it.</p>
+
+<h2 id="baseline">Take a baseline you can return to</h2>
+
+<p>Before touching anything, record enough to compare against later, on the same URL, the same viewport, and the same network conditions:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Record</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>LCP, INP, CLS</td><td>The metrics you are actually moving</td></tr>
+<tr><td>The LCP <em>element</em></td><td>Which node it was. This changes as you optimise, and knowing it is half the diagnosis</td></tr>
+<tr><td>TTFB</td><td>Separates a server problem from a front-end one</td></tr>
+<tr><td>Transfer size and request count</td><td>Rough, but it catches a regression fast</td></tr>
+<tr><td>JavaScript bytes, and how many are third-party</td><td>Usually the largest lever on INP</td></tr>
+<tr><td>Viewport and throttling used</td><td>Without it the comparison is meaningless</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Measure mobile first. Indexing is mobile-first and mobile is where the constraints bite; a desktop-only baseline hides the problem you are trying to find.</p>
+
+<h2 id="tools">Lighthouse, PageSpeed Insights, DevTools</h2>
+
+<p><strong>Lighthouse</strong> is a lab tool and its output varies run to run — machine load, network, extensions. Run it three times and take the median rather than trusting one run. Its opportunities list is a good starting point and a poor priority list: it is ordered by estimated saving, not by what actually constrains your page.</p>
+
+<p><strong>PageSpeed Insights</strong> runs Lighthouse and, where enough real traffic exists, shows Chrome UX Report field data beside it. When both are present, <strong>read the field data first</strong> and use the lab section to explain it. A new site will have no field data at all, which is not a fault — it means the lab numbers are all you have, and they should be treated as directional.</p>
+
+<p><strong>Chrome DevTools</strong> is where diagnosis actually happens. Network for the waterfall and what blocks what; Performance for long tasks and main-thread time; Coverage for how much CSS and JavaScript is unused on first load. The Performance panel is the only one of the three that tells you <em>why</em> INP is bad rather than that it is.</p>
+
+<h2 id="lcp">Diagnosing LCP</h2>
+
+<p>Identify the element first. Everything else is guessing until you know which node Google is timing.</p>
+
+<pre><code>new PerformanceObserver((list) =&gt; {
+  const e = list.getEntries().at(-1);
+  console.log('LCP', Math.round(e.startTime), e.element);
+}).observe({ type: 'largest-contentful-paint', buffered: true });</code></pre>
+
+<p>Then the cause is almost always one of four, and they need different fixes:</p>
+
+<ul>
+  <li><strong>Slow server response.</strong> High TTFB. No amount of front-end work fixes this — look at caching, the database, or the host.</li>
+  <li><strong>The resource starts late.</strong> The hero image is discovered only after CSS or JavaScript has run. A <code>preload</code>, or simply putting it in the HTML rather than injecting it, fixes this.</li>
+  <li><strong>Render-blocking resources.</strong> Stylesheets and synchronous scripts in the head delaying first paint.</li>
+  <li><strong>The element is lazy-loaded.</strong> Self-inflicted and extremely common — see the mistakes section.</li>
+</ul>
+
+<h2 id="inp">Diagnosing INP</h2>
+
+<p>INP is a main-thread problem. The page is busy, so it cannot respond.</p>
+
+<p>Open the Performance panel, interact with the page, and look for long tasks — anything over 50 ms blocks input. Then attribute them: your own event handlers, framework hydration, or a third-party script. In practice it is usually the third one.</p>
+
+<p>The interventions, in the order worth trying: remove the third-party script if it cannot justify itself; split large bundles so less executes on load; break long tasks up so the main thread can yield; and stop doing layout-triggering work inside high-frequency handlers.</p>
+
+<p>Note that INP cannot be measured without a real interaction. A tool that reports an INP figure for a page nobody touched is reporting an estimate — worth less than an honest absence.</p>
+
+<h2 id="cls">Diagnosing CLS</h2>
+
+<p>The most fixable of the three, and almost always the same handful of causes: images and video without <code>width</code> and <code>height</code>; web fonts swapping to a differently-proportioned face; content injected above existing content — banners, notices, ads; and sections that render after data arrives without reserved space.</p>
+
+<pre><code>new PerformanceObserver((list) =&gt; {
+  for (const e of list.getEntries()) {
+    if (!e.hadRecentInput &amp;&amp; e.value &gt; 0.001) console.log(e.value, e.sources);
+  }
+}).observe({ type: 'layout-shift', buffered: true });</code></pre>
+
+<p>The <code>sources</code> array names the nodes that moved, which turns "CLS is 0.24" into a specific element in seconds.</p>
+
+<h2 id="images">Images</h2>
+
+<p>Usually the largest single win on a content site.</p>
+
+<ul>
+  <li>Serve at the size rendered. A 2400px image in a 600px slot wastes most of its bytes.</li>
+  <li>Modern formats — AVIF, then WebP, with a fallback.</li>
+  <li><code>width</code> and <code>height</code> on every image. This is a CLS fix, not a nicety.</li>
+  <li><code>srcset</code> and <code>sizes</code> so each device gets an appropriate file.</li>
+  <li><code>loading="lazy"</code> below the fold — and <strong>never on the LCP image</strong>.</li>
+  <li>Consider <code>fetchpriority="high"</code> on the LCP image so it is not queued behind less important requests.</li>
+</ul>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>These measurements are one module of the Claude Code Website Launch System, which combines architecture, SEO, security, accessibility and launch validation into one repeatable process. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="js">JavaScript</h2>
+
+<p>Start with the audit nobody wants to do: list every third-party script, name what it does, and say who asked for it. Analytics nobody reads, a chat widget nobody answers, three tag managers — each one costs main-thread time on every visit.</p>
+
+<p>Then Coverage in DevTools, which shows how much of each bundle actually executed on load. High unused percentages point at code splitting or a dependency doing far more than you need.</p>
+
+<p>Beyond that: <code>defer</code> for scripts that need the DOM, <code>async</code> for genuinely independent ones, and a hard look at any dependency pulled in for a single function.</p>
+
+<h2 id="css">CSS and fonts</h2>
+
+<p>CSS in the head blocks rendering by design. The question is how much of it is needed for the first screen. Coverage answers that too. Critical CSS — inlining what the first viewport needs and loading the rest asynchronously — is effective and adds a build step and a way to get out of sync, so it is worth measuring before adopting.</p>
+
+<p>Fonts are a reliable source of both LCP and CLS problems:</p>
+
+<ul>
+  <li>Subset to the characters you use.</li>
+  <li><code>font-display: swap</code> so text is visible immediately, accepting a swap.</li>
+  <li>Preload the one face used above the fold, and only that one — preloading everything makes them compete.</li>
+  <li>Choose a fallback with similar metrics, or tune it with <code>size-adjust</code>, so the swap does not shift layout.</li>
+  <li>Consider whether a system font stack would do. It is free and instant.</li>
+</ul>
+
+<h2 id="shopify">Shopify, where you control less</h2>
+
+<p>Worth its own section, because the usual advice assumes control you do not have.</p>
+
+<p>What you do not control: the platform's own scripts, checkout, and the CDN. Removing platform JavaScript to improve a score breaks analytics, consent handling and several storefront features. <strong>Do not.</strong></p>
+
+<p>What you do control, and where the wins actually are:</p>
+
+<ul>
+  <li><strong>Apps.</strong> The single largest lever on most stores. Each one injects script on every page. Audit them: name each, say what it does, and uninstall what is not earning it. An uninstalled app can leave script behind — check the rendered page afterwards rather than assuming.</li>
+  <li><strong>Image requests.</strong> Use <code>image_url: width: N</code> with a real <code>srcset</code> rather than serving one large file.</li>
+  <li><strong>Liquid in loops.</strong> Repeated lookups inside a `for` loop over a large collection cost server time and show up as TTFB.</li>
+  <li><strong>Theme assets.</strong> A purchased theme frequently ships a stylesheet in the hundreds of kilobytes for a storefront using a fraction of it.</li>
+  <li><strong>Tracking scripts</strong> added by hand to the theme rather than through Customer Events, where they are sandboxed.</li>
+</ul>
+
+<p>A measured example from this store: the homepage renders LCP in 676 ms with CLS at 0.0000, over 145 requests and about 1 MB transferred. The request count looks alarming and almost all of it is platform code. Chasing it down would cost functionality and gain nothing a visitor would feel. The Shopify-specific build workflow is covered in <a href="/blogs/guides/build-shopify-store-with-claude-code">building a Shopify store with Claude Code</a>.</p>
+
+<h2 id="prompt">The performance prompt</h2>
+
+<pre><code>We are optimising the performance of this page: [URL]
+
+Work in this order and stop at each step for me to confirm:
+
+1. BASELINE. Measure and report: LCP with the identified element,
+   INP if a real interaction is possible (say so if not), CLS with
+   the shifting nodes, TTFB, transfer size, request count, and
+   JavaScript bytes split first-party vs third-party. State the
+   viewport and throttling used.
+
+2. LOCATE. Name the single largest contributor to the worst
+   metric, with the evidence. Not a list of twelve opportunities.
+
+3. HYPOTHESISE. State the one change you propose, what you expect
+   it to move, and roughly by how much.
+
+4. CHANGE ONE THING. Only that. Do not tidy anything else.
+
+5. MEASURE AGAIN. Same tool, same viewport, same throttling.
+   Report before and after side by side.
+
+6. DECIDE. If it did not move the metric meaningfully, revert it
+   and say so. Do not keep a change because it seems sensible.
+
+Never lazy-load the LCP element. Never remove functionality to
+improve a score. If you cannot measure something, say so rather
+than estimating it.</code></pre>
+
+<h2 id="report">Reporting before and after</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>LCP (mobile, 4× CPU throttle)</td><td>3.4 s</td><td>2.1 s</td><td>−1.3 s</td></tr>
+<tr><td>LCP element</td><td><code>img.hero</code></td><td><code>img.hero</code></td><td>unchanged</td></tr>
+<tr><td>CLS</td><td>0.18</td><td>0.02</td><td>−0.16</td></tr>
+<tr><td>Transfer</td><td>2.1 MB</td><td>0.9 MB</td><td>−1.2 MB</td></tr>
+<tr><td>Change made</td><td colspan="3">Hero served as AVIF at rendered size, with width and height set</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One row for the change, so the table records what was done as well as what happened. Without it you have numbers nobody can reproduce.</p>
+
+<h2 id="mistakes">Mistakes that cost the most</h2>
+
+<ul>
+  <li><strong>Optimising the score instead of the experience.</strong> The score is a weighted summary. Moving it without moving a metric a user feels is theatre.</li>
+  <li><strong>Changing many things at once.</strong> Attribution is gone, and so is your ability to revert cleanly.</li>
+  <li><strong>Lazy-loading the LCP image.</strong> The most common self-inflicted regression there is: a blanket "lazy-load all images" rule directly delays the metric it was meant to help.</li>
+  <li><strong>Removing functionality for a number.</strong> Deleting analytics or consent handling to gain points is a bad trade you will have to undo.</li>
+  <li><strong>Measuring desktop only.</strong> The thresholds are assessed for mobile and desktop separately.</li>
+  <li><strong>Ignoring field data because lab data is prettier.</strong> Field data is what happened.</li>
+  <li><strong>Treating the opportunities list as a work queue.</strong> It is ordered by estimated saving, not by what constrains your page.</li>
+  <li><strong>Not measuring afterwards.</strong> Then it is not optimisation, it is redecoration.</li>
+</ul>
+
+<h2>Where to go next</h2>
+
+<p>Performance is one pass of a wider inspection — <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a> covers the rest, and <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO workflow</a> covers where Core Web Vitals sit among the other technical signals. For building performance in rather than retrofitting it, start with <a href="/blogs/guides/how-to-build-a-website-with-claude-code">the complete website workflow</a>. The free <a href="/pages/claude-code-launch-checklist">launch checklist</a> and <a href="/pages/claude-code-website-audit-checklist">audit checklist</a> both carry the performance items in short form.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://web.dev/articles/vitals" rel="noopener">web.dev: Core Web Vitals</a> — the metrics, thresholds and the 75th-percentile rule</li>
+  <li><a href="https://web.dev/articles/optimize-lcp" rel="noopener">web.dev: optimize LCP</a></li>
+  <li><a href="https://web.dev/articles/optimize-inp" rel="noopener">web.dev: optimize INP</a></li>
+  <li><a href="https://web.dev/articles/optimize-cls" rel="noopener">web.dev: optimize CLS</a></li>
+  <li><a href="https://developer.chrome.com/docs/devtools/performance" rel="noopener">Chrome DevTools: Performance panel</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver" rel="noopener">MDN: PerformanceObserver</a></li>
+</ul>

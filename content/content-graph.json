@@ -1,0 +1,839 @@
+{
+  "_comment": [
+    "The information architecture: pillars, learning paths, and the editorial",
+    "relationships between guides. Kept separate from content/articles.json so a",
+    "mistake in the graph cannot break article publishing, and so the graph can be",
+    "validated against the manifest rather than trusted.",
+    "",
+    "Every handle here must exist in content/articles.json. scripts/validate-graph.py",
+    "asserts that in both directions and is part of tests/run-all.sh.",
+    "",
+    "An article has exactly one primary pillar (its 'up' link) and at most one",
+    "learning path (its prev/next chain). It may be listed as a cluster member on",
+    "other pillars — that is a reading recommendation, not a second parent."
+  ],
+  "pillars": {
+    "claude-code-web-development": {
+      "title": "Claude Code for Web Development",
+      "short": "Web development",
+      "url": "/pages/claude-code-web-development",
+      "intent": "claude code web development",
+      "cluster": [
+        "claude-code-terminal-setup",
+        "how-to-build-a-website-with-claude-code",
+        "production-claude-md-web-development",
+        "claude-md-examples-web-development",
+        "best-claude-code-prompts-for-web-development",
+        "claude-code-skills",
+        "claude-code-hooks",
+        "claude-code-subagents",
+        "claude-code-mcp",
+        "claude-code-plugins",
+        "vibe-coding-tools",
+        "claude-code-certification",
+        "claude-code-vs-cursor-web-development"
+      ],
+      "resources": [
+        "production-claude-md-starter",
+        "claude-code-launch-checklist",
+        "claude-md-generator"
+      ],
+      "seoTitle": "Claude Code for Web Development",
+      "seoDescription": "The operational layer for building real websites with Claude Code: CLAUDE.md, prompting, skills, hooks, subagents and MCP, in the order they become useful.",
+      "file": "claude-code-web-development.html"
+    },
+    "claude-code-seo": {
+      "title": "Claude Code SEO",
+      "short": "SEO",
+      "url": "/pages/claude-code-seo",
+      "intent": "claude code seo",
+      "cluster": [
+        "claude-code-seo-website-optimization",
+        "claude-code-technical-seo-audit",
+        "google-search-console-claude-code",
+        "claude-code-performance-core-web-vitals",
+        "shopify-seo-with-claude-code",
+        "claude-code-website-audit"
+      ],
+      "resources": [
+        "claude-code-seo-checklist",
+        "claude-code-website-audit-checklist",
+        "claude-code-failure-library",
+        "seo-audit-prompt-generator"
+      ],
+      "seoTitle": "Claude Code SEO",
+      "seoDescription": "Technical SEO with Claude Code, in dependency order: crawling, canonicals, indexing, structured data, Core Web Vitals, Search Console and internal linking.",
+      "file": "claude-code-seo.html"
+    },
+    "claude-code-shopify": {
+      "title": "Claude Code Shopify Development",
+      "short": "Shopify",
+      "url": "/pages/claude-code-shopify",
+      "intent": "claude code shopify",
+      "cluster": [
+        "build-shopify-store-with-claude-code",
+        "shopify-admin-api-claude-code",
+        "shopify-seo-with-claude-code",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-accessibility-audit",
+        "claude-code-website-security-audit",
+        "claude-code-website-audit",
+        "shopify-conversion-audit-claude-code"
+      ],
+      "resources": [
+        "claude-code-launch-checklist",
+        "claude-code-seo-checklist",
+        "launch-readiness-score"
+      ],
+      "seoTitle": "Claude Code Shopify Development",
+      "seoDescription": "Building and running a Shopify store with Claude Code: themes, Liquid, the platform's silent failures, Shopify SEO, performance, accessibility and deployment.",
+      "file": "claude-code-shopify.html"
+    },
+    "claude-code-production": {
+      "title": "Claude Code Production Engineering",
+      "short": "Production",
+      "url": "/pages/claude-code-production",
+      "intent": "claude code production workflow",
+      "cluster": [
+        "claude-code-website-audit",
+        "claude-code-website-security-audit",
+        "claude-code-accessibility-audit",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-github-actions",
+        "claude-code-enterprise",
+        "production-claude-md-web-development",
+        "claude-code-hooks",
+        "claude-code-github-actions-cloudflare",
+        "claude-code-conversion-rate-optimization",
+        "ai-website-conversion-audit",
+        "claude-code-landing-page-audit",
+        "claude-code-cro-prompts"
+      ],
+      "resources": [
+        "claude-code-security-checklist",
+        "claude-code-website-audit-checklist",
+        "claude-code-failure-library",
+        "launch-readiness-score"
+      ],
+      "seoTitle": "Claude Code Production Engineering",
+      "seoDescription": "Shipping safely with Claude Code: checks that can actually fail, security, accessibility, Core Web Vitals, CI, environment config and release discipline.",
+      "file": "claude-code-production.html"
+    },
+    "claude-code-wordpress": {
+      "title": "Claude Code WordPress Development",
+      "short": "WordPress",
+      "url": "/pages/claude-code-wordpress",
+      "intent": "claude code wordpress",
+      "cluster": [
+        "claude-code-wordpress",
+        "claude-code-website-security-audit",
+        "claude-code-accessibility-audit",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-technical-seo-audit",
+        "claude-code-website-audit"
+      ],
+      "resources": [
+        "claude-code-security-checklist",
+        "claude-code-website-audit-checklist",
+        "claude-md-generator"
+      ],
+      "seoTitle": "Claude Code WordPress Development",
+      "seoDescription": "Using Claude Code on WordPress: reconnaissance, child themes, plugins, escaping, the database rule, and the audits that catch what review does not.",
+      "file": "claude-code-wordpress.html"
+    },
+    "claude-code-astro": {
+      "title": "Claude Code Astro Development",
+      "short": "Astro",
+      "url": "/pages/claude-code-astro",
+      "intent": "claude code astro",
+      "cluster": [
+        "claude-code-astro",
+        "claude-code-github-actions-cloudflare",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-technical-seo-audit",
+        "claude-code-accessibility-audit",
+        "claude-code-seo-website-optimization",
+        "claude-code-website-audit"
+      ],
+      "resources": [
+        "claude-code-launch-checklist",
+        "claude-code-seo-checklist",
+        "website-prompt-builder"
+      ],
+      "seoTitle": "Claude Code Astro Development",
+      "seoDescription": "Building production Astro sites with Claude Code: content collections, islands, TypeScript as a check, SEO, and deploying to Cloudflare Workers.",
+      "file": "claude-code-astro.html"
+    }
+  },
+  "paths": {
+    "website-development": {
+      "title": "Learn Claude Code for Website Development",
+      "short": "Website development",
+      "pillar": "claude-code-web-development",
+      "steps": [
+        "vibe-coding-tools",
+        "claude-code-vs-cursor-web-development",
+        "claude-code-terminal-setup",
+        "how-to-build-a-website-with-claude-code",
+        "production-claude-md-web-development",
+        "claude-md-examples-web-development",
+        "best-claude-code-prompts-for-web-development",
+        "claude-code-skills",
+        "claude-code-hooks",
+        "claude-code-subagents",
+        "claude-code-mcp",
+        "claude-code-plugins",
+        "claude-code-certification"
+      ]
+    },
+    "seo": {
+      "title": "Claude Code SEO Learning Path",
+      "short": "SEO",
+      "pillar": "claude-code-seo",
+      "steps": [
+        "claude-code-seo-website-optimization",
+        "claude-code-technical-seo-audit",
+        "google-search-console-claude-code",
+        "claude-code-performance-core-web-vitals"
+      ]
+    },
+    "production": {
+      "title": "Production Claude Code Learning Path",
+      "short": "Production",
+      "pillar": "claude-code-production",
+      "steps": [
+        "claude-code-website-audit",
+        "claude-code-website-security-audit",
+        "claude-code-accessibility-audit",
+        "claude-code-github-actions",
+        "claude-code-github-actions-cloudflare",
+        "claude-code-enterprise"
+      ]
+    },
+    "shopify": {
+      "title": "Claude Code Shopify Learning Path",
+      "short": "Shopify",
+      "pillar": "claude-code-shopify",
+      "steps": [
+        "build-shopify-store-with-claude-code",
+        "shopify-admin-api-claude-code",
+        "shopify-seo-with-claude-code"
+      ]
+    },
+    "platforms": {
+      "title": "Claude Code Platform Builds",
+      "short": "Platforms",
+      "pillar": "claude-code-wordpress",
+      "steps": [
+        "claude-code-wordpress",
+        "claude-code-astro"
+      ]
+    },
+    "conversion": {
+      "title": "Claude Code Conversion Learning Path",
+      "short": "Conversion",
+      "pillar": "claude-code-production",
+      "steps": [
+        "claude-code-conversion-rate-optimization",
+        "ai-website-conversion-audit",
+        "claude-code-landing-page-audit",
+        "shopify-conversion-audit-claude-code",
+        "claude-code-cro-prompts"
+      ]
+    }
+  },
+  "resources": {
+    "production-claude-md-starter": "Production CLAUDE.md starter examples",
+    "claude-code-launch-checklist": "Claude Code website launch checklist",
+    "claude-code-seo-checklist": "Claude Code SEO checklist",
+    "claude-code-security-checklist": "Claude Code security audit checklist",
+    "claude-code-website-audit-checklist": "Claude Code website audit checklist"
+  },
+  "articles": {
+    "claude-code-terminal-setup": {
+      "pillar": "claude-code-web-development",
+      "topic": "Claude Code",
+      "level": "Beginner",
+      "type": "Tutorial",
+      "goal": "Learn",
+      "related": [
+        "how-to-build-a-website-with-claude-code",
+        "production-claude-md-web-development",
+        "best-claude-code-prompts-for-web-development",
+        "claude-code-vs-cursor-web-development"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "how-to-build-a-website-with-claude-code": {
+      "pillar": "claude-code-web-development",
+      "topic": "Web Development",
+      "level": "Beginner",
+      "type": "Guide",
+      "goal": "Build",
+      "related": [
+        "production-claude-md-web-development",
+        "best-claude-code-prompts-for-web-development",
+        "claude-code-website-audit",
+        "build-shopify-store-with-claude-code",
+        "claude-code-astro"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "production-claude-md-web-development": {
+      "pillar": "claude-code-web-development",
+      "topic": "CLAUDE.md",
+      "level": "Intermediate",
+      "type": "Workflow",
+      "goal": "Build",
+      "related": [
+        "claude-md-examples-web-development",
+        "claude-code-hooks",
+        "claude-code-skills",
+        "how-to-build-a-website-with-claude-code",
+        "claude-code-wordpress"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "claude-md-examples-web-development": {
+      "pillar": "claude-code-web-development",
+      "topic": "CLAUDE.md",
+      "level": "Intermediate",
+      "type": "Example",
+      "goal": "Build",
+      "related": [
+        "production-claude-md-web-development",
+        "claude-code-hooks",
+        "how-to-build-a-website-with-claude-code"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "best-claude-code-prompts-for-web-development": {
+      "pillar": "claude-code-web-development",
+      "topic": "Web Development",
+      "level": "Intermediate",
+      "type": "Reference",
+      "goal": "Build",
+      "related": [
+        "how-to-build-a-website-with-claude-code",
+        "production-claude-md-web-development",
+        "claude-code-skills"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-skills": {
+      "pillar": "claude-code-web-development",
+      "topic": "Claude Code",
+      "level": "Intermediate",
+      "type": "Guide",
+      "goal": "Learn",
+      "related": [
+        "claude-code-hooks",
+        "claude-code-subagents",
+        "claude-code-plugins",
+        "production-claude-md-web-development"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "claude-code-hooks": {
+      "pillar": "claude-code-web-development",
+      "topic": "Claude Code",
+      "level": "Advanced",
+      "type": "Guide",
+      "goal": "Secure",
+      "related": [
+        "claude-code-skills",
+        "claude-code-subagents",
+        "production-claude-md-web-development",
+        "claude-code-github-actions"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "claude-code-subagents": {
+      "pillar": "claude-code-web-development",
+      "topic": "Claude Code",
+      "level": "Advanced",
+      "type": "Guide",
+      "goal": "Learn",
+      "related": [
+        "claude-code-skills",
+        "claude-code-hooks",
+        "claude-code-mcp"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "claude-code-mcp": {
+      "pillar": "claude-code-web-development",
+      "topic": "MCP",
+      "level": "Advanced",
+      "type": "Guide",
+      "goal": "Learn",
+      "related": [
+        "claude-code-subagents",
+        "claude-code-skills",
+        "claude-code-plugins",
+        "build-shopify-store-with-claude-code"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "claude-code-plugins": {
+      "pillar": "claude-code-web-development",
+      "topic": "Claude Code",
+      "level": "Advanced",
+      "type": "Guide",
+      "goal": "Learn",
+      "related": [
+        "claude-code-skills",
+        "claude-code-mcp",
+        "claude-code-hooks"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "claude-md-generator"
+    },
+    "vibe-coding-tools": {
+      "pillar": "claude-code-web-development",
+      "topic": "AI Development",
+      "level": "Beginner",
+      "type": "Comparison",
+      "goal": "Learn",
+      "related": [
+        "how-to-build-a-website-with-claude-code",
+        "claude-code-terminal-setup",
+        "claude-code-certification",
+        "claude-code-vs-cursor-web-development"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-certification": {
+      "pillar": "claude-code-web-development",
+      "topic": "AI Development",
+      "level": "Beginner",
+      "type": "Reference",
+      "goal": "Learn",
+      "related": [
+        "claude-code-terminal-setup",
+        "vibe-coding-tools",
+        "claude-code-enterprise",
+        "claude-code-vs-cursor-web-development"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-seo-website-optimization": {
+      "pillar": "claude-code-seo",
+      "topic": "SEO",
+      "level": "Intermediate",
+      "type": "Workflow",
+      "goal": "Optimize",
+      "related": [
+        "claude-code-technical-seo-audit",
+        "google-search-console-claude-code",
+        "shopify-seo-with-claude-code",
+        "claude-code-performance-core-web-vitals"
+      ],
+      "resource": "claude-code-seo-checklist",
+      "product": "seo-toolkit",
+      "tool": "seo-audit-prompt-generator"
+    },
+    "claude-code-technical-seo-audit": {
+      "pillar": "claude-code-seo",
+      "topic": "SEO",
+      "level": "Advanced",
+      "type": "Workflow",
+      "goal": "Audit",
+      "related": [
+        "claude-code-seo-website-optimization",
+        "google-search-console-claude-code",
+        "claude-code-website-audit",
+        "claude-code-astro"
+      ],
+      "resource": "claude-code-seo-checklist",
+      "product": "seo-toolkit",
+      "tool": "seo-audit-prompt-generator"
+    },
+    "google-search-console-claude-code": {
+      "pillar": "claude-code-seo",
+      "topic": "SEO",
+      "level": "Intermediate",
+      "type": "Workflow",
+      "goal": "Optimize",
+      "related": [
+        "claude-code-seo-website-optimization",
+        "claude-code-technical-seo-audit",
+        "claude-code-performance-core-web-vitals"
+      ],
+      "resource": "claude-code-seo-checklist",
+      "product": "seo-toolkit",
+      "tool": "seo-audit-prompt-generator"
+    },
+    "shopify-seo-with-claude-code": {
+      "pillar": "claude-code-shopify",
+      "topic": "Shopify",
+      "level": "Intermediate",
+      "type": "Workflow",
+      "goal": "Optimize",
+      "related": [
+        "build-shopify-store-with-claude-code",
+        "claude-code-seo-website-optimization",
+        "claude-code-technical-seo-audit",
+        "claude-code-performance-core-web-vitals"
+      ],
+      "resource": "claude-code-seo-checklist",
+      "product": "seo-toolkit",
+      "tool": "seo-audit-prompt-generator"
+    },
+    "build-shopify-store-with-claude-code": {
+      "pillar": "claude-code-shopify",
+      "topic": "Shopify",
+      "level": "Beginner",
+      "type": "Guide",
+      "goal": "Build",
+      "related": [
+        "shopify-seo-with-claude-code",
+        "how-to-build-a-website-with-claude-code",
+        "claude-code-mcp",
+        "claude-code-website-audit"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-website-audit": {
+      "pillar": "claude-code-production",
+      "topic": "Deployment",
+      "level": "Intermediate",
+      "type": "Checklist",
+      "goal": "Audit",
+      "related": [
+        "claude-code-technical-seo-audit",
+        "claude-code-website-security-audit",
+        "claude-code-accessibility-audit",
+        "claude-code-performance-core-web-vitals"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "seo-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-website-security-audit": {
+      "pillar": "claude-code-production",
+      "topic": "Security",
+      "level": "Advanced",
+      "type": "Workflow",
+      "goal": "Secure",
+      "related": [
+        "claude-code-website-audit",
+        "claude-code-hooks",
+        "claude-code-github-actions",
+        "claude-code-enterprise",
+        "claude-code-wordpress"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "operations",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-accessibility-audit": {
+      "pillar": "claude-code-production",
+      "topic": "Accessibility",
+      "level": "Intermediate",
+      "type": "Workflow",
+      "goal": "Audit",
+      "related": [
+        "claude-code-website-audit",
+        "claude-code-performance-core-web-vitals",
+        "shopify-seo-with-claude-code"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "launch-system",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-performance-core-web-vitals": {
+      "pillar": "claude-code-production",
+      "topic": "Performance",
+      "level": "Advanced",
+      "type": "Workflow",
+      "goal": "Optimize",
+      "related": [
+        "claude-code-seo-website-optimization",
+        "claude-code-accessibility-audit",
+        "claude-code-website-audit",
+        "shopify-seo-with-claude-code",
+        "claude-code-astro"
+      ],
+      "resource": "claude-code-seo-checklist",
+      "product": "seo-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-github-actions": {
+      "pillar": "claude-code-production",
+      "topic": "GitHub",
+      "level": "Advanced",
+      "type": "Workflow",
+      "goal": "Deploy",
+      "related": [
+        "claude-code-hooks",
+        "claude-code-website-security-audit",
+        "claude-code-enterprise",
+        "claude-code-website-audit",
+        "claude-code-github-actions-cloudflare"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "operations",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-enterprise": {
+      "pillar": "claude-code-production",
+      "topic": "Deployment",
+      "level": "Advanced",
+      "type": "Guide",
+      "goal": "Deploy",
+      "related": [
+        "claude-code-github-actions",
+        "claude-code-website-security-audit",
+        "claude-code-hooks",
+        "claude-code-github-actions-cloudflare"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "operations",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-wordpress": {
+      "pillar": "claude-code-wordpress",
+      "topic": "WordPress",
+      "level": "Intermediate",
+      "type": "Guide",
+      "goal": "Build",
+      "related": [
+        "claude-code-website-security-audit",
+        "production-claude-md-web-development",
+        "claude-code-website-audit",
+        "claude-code-accessibility-audit"
+      ],
+      "resource": "claude-code-security-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-astro": {
+      "pillar": "claude-code-astro",
+      "topic": "Astro",
+      "level": "Intermediate",
+      "type": "Guide",
+      "goal": "Build",
+      "related": [
+        "claude-code-github-actions-cloudflare",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-technical-seo-audit",
+        "how-to-build-a-website-with-claude-code"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-vs-cursor-web-development": {
+      "pillar": "claude-code-web-development",
+      "topic": "AI Development",
+      "level": "Beginner",
+      "type": "Comparison",
+      "goal": "Learn",
+      "related": [
+        "vibe-coding-tools",
+        "claude-code-terminal-setup",
+        "claude-code-skills",
+        "how-to-build-a-website-with-claude-code"
+      ],
+      "resource": "production-claude-md-starter",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-github-actions-cloudflare": {
+      "pillar": "claude-code-production",
+      "topic": "Deployment",
+      "level": "Advanced",
+      "type": "Workflow",
+      "goal": "Deploy",
+      "related": [
+        "claude-code-github-actions",
+        "claude-code-astro",
+        "claude-code-website-security-audit",
+        "claude-code-website-audit"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "operations",
+      "tool": "launch-readiness-score"
+    },
+    "shopify-admin-api-claude-code": {
+      "pillar": "claude-code-shopify",
+      "topic": "Shopify",
+      "level": "Advanced",
+      "type": "Tutorial",
+      "goal": "Build",
+      "related": [
+        "build-shopify-store-with-claude-code",
+        "shopify-seo-with-claude-code",
+        "claude-code-website-audit",
+        "how-to-build-a-website-with-claude-code"
+      ],
+      "resource": "claude-code-launch-checklist",
+      "product": "launch-system",
+      "tool": "website-prompt-builder"
+    },
+    "claude-code-conversion-rate-optimization": {
+      "pillar": "claude-code-production",
+      "topic": "Conversion",
+      "level": "Intermediate",
+      "type": "Tutorial",
+      "goal": "Convert",
+      "related": [
+        "ai-website-conversion-audit",
+        "claude-code-landing-page-audit",
+        "claude-code-cro-prompts",
+        "claude-code-website-audit"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "cro-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "ai-website-conversion-audit": {
+      "pillar": "claude-code-production",
+      "topic": "Conversion",
+      "level": "Intermediate",
+      "type": "Tutorial",
+      "goal": "Convert",
+      "related": [
+        "claude-code-conversion-rate-optimization",
+        "shopify-conversion-audit-claude-code",
+        "claude-code-website-audit",
+        "claude-code-landing-page-audit"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "cro-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "shopify-conversion-audit-claude-code": {
+      "pillar": "claude-code-shopify",
+      "topic": "Conversion",
+      "level": "Intermediate",
+      "type": "Tutorial",
+      "goal": "Convert",
+      "related": [
+        "claude-code-conversion-rate-optimization",
+        "build-shopify-store-with-claude-code",
+        "shopify-seo-with-claude-code",
+        "ai-website-conversion-audit"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "cro-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-landing-page-audit": {
+      "pillar": "claude-code-production",
+      "topic": "Conversion",
+      "level": "Intermediate",
+      "type": "Tutorial",
+      "goal": "Convert",
+      "related": [
+        "claude-code-conversion-rate-optimization",
+        "ai-website-conversion-audit",
+        "claude-code-performance-core-web-vitals",
+        "claude-code-cro-prompts"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "cro-toolkit",
+      "tool": "launch-readiness-score"
+    },
+    "claude-code-cro-prompts": {
+      "pillar": "claude-code-production",
+      "topic": "Conversion",
+      "level": "Intermediate",
+      "type": "Tutorial",
+      "goal": "Convert",
+      "related": [
+        "claude-code-conversion-rate-optimization",
+        "best-claude-code-prompts-for-web-development",
+        "production-claude-md-web-development",
+        "claude-code-landing-page-audit"
+      ],
+      "resource": "claude-code-website-audit-checklist",
+      "product": "cro-toolkit",
+      "tool": "website-prompt-builder"
+    }
+  },
+  "products": {
+    "launch-system": {
+      "handle": "claude-code-website-launch-system",
+      "heading": "Want the complete workflow?",
+      "note": "The Claude Code Website Launch System packages this methodology into a production CLAUDE.md, a staged master build prompt, an SEO system, platform workflows, security and accessibility audits, 100 reusable prompts, and launch checklists.",
+      "label": "Get the Launch System"
+    },
+    "seo-toolkit": {
+      "handle": "claude-code-seo-website-audit-toolkit",
+      "heading": "Want the complete audit workflow?",
+      "note": "The Claude Code SEO & Website Audit Toolkit is twenty audit prompts, fourteen modules, platform workflows and report templates — written so every finding comes with evidence and every check can be proved capable of failing.",
+      "label": "See the SEO Toolkit"
+    },
+    "cro-toolkit": {
+      "handle": "claude-code-conversion-revenue-optimization-toolkit",
+      "heading": "Traffic arriving but not converting?",
+      "note": "The Claude Code Conversion & Revenue Optimization Toolkit is thirteen modules, 70 workflows and 68 commands for finding where a site loses conversions, ranking what to fix, and proving the fix worked — with every finding carrying evidence and an honesty label.",
+      "label": "See the Conversion Toolkit"
+    },
+    "complete-stack": {
+      "handle": "complete-site-builder-stack",
+      "heading": "Need the complete workflow?",
+      "note": "The Complete Site Builder Stack is all three systems on this site — build it, get it found, then turn the traffic into revenue — bought together and delivered as three downloads.",
+      "label": "See the Complete Stack"
+    },
+    "operations": {
+      "handle": "claude-code-website-operations-maintenance-system",
+      "heading": "Now keep it running",
+      "note": "The Claude Code Website Operations & Maintenance System is seventeen modules, 19 slash commands and 11 standard-library scripts for monitoring, securing, updating, backing up, deploying and troubleshooting a live website — with a safety system that never changes production without your authorisation.",
+      "label": "See the Operations System"
+    }
+  },
+  "tools": {
+    "claude-md-generator": {
+      "handle": "claude-md-generator",
+      "heading": "Generate a starting CLAUDE.md",
+      "note": "Answer a few questions about your project and get a CLAUDE.md you can drop in today. It leaves out anything you did not fill in rather than padding it with plausible defaults. Runs in your browser; nothing is transmitted.",
+      "label": "Open the generator"
+    },
+    "seo-audit-prompt-generator": {
+      "handle": "seo-audit-prompt-generator",
+      "heading": "Build the audit prompt for your site",
+      "note": "Produces a technical SEO audit prompt scoped to your platform and access. It demands evidence rather than summaries, forbids fixing in the same run, and works in dependency order. Runs in your browser.",
+      "label": "Open the generator"
+    },
+    "launch-readiness-score": {
+      "handle": "launch-readiness-score",
+      "heading": "Score what you have against this",
+      "note": "Twenty-four questions, seven categories, a score out of 100 and a prioritised list. It reports what you tell it, so the useful way to use it is to treat every \"Yes\" as a claim to verify.",
+      "label": "Take the assessment"
+    },
+    "website-prompt-builder": {
+      "handle": "website-prompt-builder",
+      "heading": "Turn this into a prompt you can run",
+      "note": "Describe the project, pick the task and the stage, and it produces a structured prompt: role, objective, a discovery phase that changes nothing, requirements, validation and deliverables.",
+      "label": "Open the builder"
+    }
+  }
+}

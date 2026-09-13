@@ -1,0 +1,64 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-article",
+      "settings": {
+        "show_cta": true,
+        "product": "claude-code-website-launch-system",
+        "show_related": true,
+        "bundle": "complete-site-builder-stack",
+        "bundle_parts": "claude-code-website-launch-system, claude-code-seo-website-audit-toolkit, claude-code-conversion-revenue-optimization-toolkit"
+      }
+    },
+    "optin": {
+      "type": "sbs-optin",
+      "blocks": {
+        "b1": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a static marketing site"
+          }
+        },
+        "b2": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a web application, with security and migration rules"
+          }
+        },
+        "b3": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a Shopify theme, including the gotchas that cost hours"
+          }
+        },
+        "b4": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a shared package in a monorepo"
+          }
+        },
+        "b5": {
+          "type": "item",
+          "settings": {
+            "item": "A one-page checklist, and how to test the file is actually working"
+          }
+        }
+      },
+      "block_order": [
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+      ],
+      "settings": {
+        "file_url": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/claude-md-starter-kit.zip?v=1788049914"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "optin"
+  ]
+}

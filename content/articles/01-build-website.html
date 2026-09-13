@@ -1,0 +1,530 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#short-answer">The short answer</a></li>
+    <li><a href="#what-claude-code-is">What Claude Code actually is</a></li>
+    <li><a href="#what-it-does-well">What it does well for website work</a></li>
+    <li><a href="#dont-trust-blindly">What not to trust it with blindly</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#define">1. Define the website before you open a terminal</a></li>
+    <li><a href="#inspect">2. Make Claude read the repository first</a></li>
+    <li><a href="#plan">3. Get a plan before you get code</a></li>
+    <li><a href="#claude-md">4. Establish CLAUDE.md</a></li>
+    <li><a href="#ia">5. Design the information architecture</a></li>
+    <li><a href="#architecture">6. Decide the technical architecture</a></li>
+    <li><a href="#build">7. Build in small, verifiable increments</a></li>
+    <li><a href="#sessions">Working across sessions, and in parallel</a></li>
+    <li><a href="#seo">8. Build SEO into the architecture</a></li>
+    <li><a href="#security">9. Security</a></li>
+    <li><a href="#accessibility">10. Accessibility</a></li>
+    <li><a href="#performance">11. Performance</a></li>
+    <li><a href="#validate">12. Validate</a></li>
+    <li><a href="#deploy">13. Deploy</a></li>
+    <li><a href="#index">14. Get indexed</a></li>
+    <li><a href="#monitor">15. Monitor and improve</a></li>
+    <li><a href="#mistakes">Mistakes that cost the most time</a></li>
+    <li><a href="#checklist">The workflow on one page</a></li>
+  </ol>
+</nav>
+
+<h2 id="short-answer">The short answer</h2>
+
+<p>Building a website with Claude Code is not one prompt. It is a sequence of small, verifiable steps, each of which you review before the next one starts:</p>
+
+<p>The free <a href="/pages/website-prompt-builder">website prompt builder</a> turns a description of your project into that sequence: role, objective, a discovery phase that changes nothing, requirements, validation and deliverables. Worth generating one before you read further, so the rest of this has something concrete to argue with.</p>
+
+<pre><code>Define → Inspect → Plan → Configure → Architect → Build
+      → Optimise → Secure → Test → Deploy → Index → Improve</code></pre>
+
+<p>The model is rarely the bottleneck. Claude Code will produce plausible, well-structured code for almost anything you describe. The bottleneck is that <em>plausible</em> and <em>correct</em> are different things, and the gap between them is where projects die: a canonical tag that points at a redirect, a button whose text colour matches its background, a migration that drops a column, a credential that reaches a public bundle.</p>
+
+<p>Everything below is a way of closing that gap without giving up the speed. This guide covers the full lifecycle. Where a stage deserves its own treatment, it links to a deeper guide: <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompts</a>, <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a>, <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify</a>, and <a href="/blogs/guides/claude-code-seo-website-optimization">SEO</a>.</p>
+
+<h2 id="what-claude-code-is">What Claude Code actually is</h2>
+
+<p>Claude Code is a terminal-based agentic coding tool. That phrase does real work, so it is worth separating from two things it is not.</p>
+
+<p><strong>It is not browser chat.</strong> In a chat window you paste code in and copy code out. Claude Code runs in your project directory, reads your actual files, runs your actual commands, and edits your actual repository. It sees the tests fail.</p>
+
+<p><strong>It is not autocomplete.</strong> Editor completion predicts the next few tokens from nearby context. Claude Code takes a goal, decides which files to open, makes a plan, executes multiple steps, and reports what happened.</p>
+
+<p>The practical consequence is that <em>context is your job</em>. An autocomplete tool needs no briefing. An agent working across your repository needs to know what the project is, what conventions it follows, what it must never do, and what "finished" means. Most of the difference between people who get good results and people who get frustrated is how much of that they write down.</p>
+
+<p>Anthropic's documentation is the authority on installation, authentication, and current features; it changes often enough that it is worth checking rather than remembering. As of writing, the recommended install is a single command:</p>
+
+<pre><code># macOS, Linux, WSL
+curl -fsSL https://claude.ai/install.sh | bash
+
+# Windows PowerShell
+irm https://claude.ai/install.ps1 | iex</code></pre>
+
+<p>Then <code>claude --version</code> to confirm, and <code>claude doctor</code> for read-only diagnostics on install health and settings. Claude Code requires a paid Claude account — Pro, Max, Team, Enterprise, or Console — or a third-party provider such as Amazon Bedrock, Google Cloud's Agent Platform, or Microsoft Foundry. The free Claude.ai plan does not include it.</p>
+
+<h2 id="what-it-does-well">What it does well for website work</h2>
+
+<p>Being specific about strengths is more useful than enthusiasm.</p>
+
+<ul>
+  <li><strong>Reading a codebase you did not write.</strong> This is arguably its best trick. Point it at an inherited repository and ask it to map the architecture, and you get in ten minutes what would otherwise take a morning.</li>
+  <li><strong>Mechanical work with a clear specification.</strong> Converting a design system into tokens, wiring up responsive images, writing the twentieth similar API endpoint, adding <code>alt</code> attributes across a template.</li>
+  <li><strong>Audits.</strong> Anything with a checklist — technical SEO, accessibility, security review, dependency hygiene — is a good fit, because the output is findings you verify rather than code you trust.</li>
+  <li><strong>Debugging with real evidence.</strong> Give it the stack trace, the failing command, and permission to run things, and it is genuinely good at tracing a cause.</li>
+  <li><strong>Migrations and refactors</strong> where the target state is well defined and there are tests to prove behaviour did not change.</li>
+  <li><strong>Documentation</strong> that reflects what the code actually does, written at the moment the code is fresh.</li>
+</ul>
+
+<p>What ties these together: they are all tasks where <em>you can check the answer</em>. That is the reliable predictor of whether an agentic workflow will work well.</p>
+
+<h2 id="dont-trust-blindly">What not to trust it with blindly</h2>
+
+<p>These are not theoretical. Every item here is something that has gone wrong in real projects.</p>
+
+<h3>Version-specific facts</h3>
+
+<p>API shapes, configuration keys, CLI flags, platform limits, and framework behaviour all change. A model will produce a confident, correctly-formatted, entirely fictional configuration option, and it will read exactly like a real one. The habit that fixes this is asking for a source: <em>"cite the primary documentation URL for that and quote the relevant line."</em> If it cannot, treat the claim as unverified.</p>
+
+<p>A concrete example from building this site. Shopify's theme documentation lists the template types a theme can define. It does not include <code>policy</code>. When we tried to add one anyway, Shopify's own upload validation rejected it:</p>
+
+<pre><code>Template type 'policy' does not support JSON templates</code></pre>
+
+<p>That is the useful kind of error, because the platform tells you the truth. Plenty of wrong assumptions are not caught that way.</p>
+
+<h3>Destructive and irreversible operations</h3>
+
+<p>Deleting files, dropping or altering database columns, rewriting git history, force-pushing, changing DNS, publishing to production. These deserve an explicit stop-and-ask rule in your project instructions, not a hope that the model will be careful.</p>
+
+<h3>Credentials</h3>
+
+<p>AI-assisted development produces <code>.env</code> files, seeded credentials, and hardcoded test keys with real enthusiasm. Anything in a client-side bundle is public regardless of what it is named. Scan before your first push to a remote — a secret that has been pushed must be rotated, and removing it from history does not un-expose it.</p>
+
+<h3>Anything it claims to have verified</h3>
+
+<p>"Tests pass" and "I ran the build" need to be true. Ask for the output. A related habit worth building: ask <em>"what did you not verify?"</em> at the end of any substantial piece of work. The answer is often the most useful thing in the report.</p>
+
+<h3>Factual content</h3>
+
+<p>Statistics, prices, dates, credentials, comparisons, case studies. Claude drafts; a human publishes. Keep a running list of every claim that needs checking before anything goes live.</p>
+
+<p>How much of this you enforce is a dial rather than a rule. A throwaway prototype does not need any of it; anything with users needs most of it. <a href="/blogs/guides/vibe-coding-tools">Vibe coding tools and platforms</a> covers where that dial should sit for different kinds of work, and what happens to projects that never move it.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>If you have not installed Claude Code yet, <a href="/blogs/guides/claude-code-terminal-setup">getting started in the terminal</a> covers installation, login, and a first week before you attempt anything as large as this.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>What</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><strong>Claude Code</strong>, installed and authenticated</td><td>The tool itself, plus a Pro, Max, Team, Enterprise, or Console account</td></tr>
+<tr><td><strong>Git</strong></td><td>Your undo button. Non-negotiable.</td></tr>
+<tr><td><strong>A terminal you are comfortable in</strong></td><td><code>cd</code>, <code>ls</code>, running a command, reading output</td></tr>
+<tr><td><strong>The runtime for your stack</strong></td><td>Node, Python, PHP, Ruby — whatever the project needs</td></tr>
+<tr><td><strong>Deployment access</strong></td><td>Only when you reach that stage; not needed to start</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One habit matters more than any of the tooling: <strong>launch Claude Code from the project root</strong>. It loads <code>CLAUDE.md</code> files from the working directory and every directory above it. Start it somewhere else and you either starve it of context or hand it someone else's.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-build-workflow.png?v=1787803703" alt="The fifteen steps grouped into six phases: Define, Orient, Design, Build, Ship, and Operate. Define covers step 1; Orient covers reading the repository, planning, and CLAUDE.md; Design covers information and technical architecture; Build covers small increments, SEO, security, accessibility, and performance; Ship covers validation, deployment, and indexing; Operate covers monitoring."
+       width="1000" height="620" loading="lazy" decoding="async">
+  <figcaption>The fifteen steps below, grouped by phase. Each phase produces something the next depends on.</figcaption>
+</figure>
+
+<h2 id="define">1. Define the website before you open a terminal</h2>
+
+<p>The most expensive mistake in AI-assisted development is building a well-engineered answer to the wrong question, quickly.</p>
+
+<p>Before any code, write down five things:</p>
+
+<ol>
+  <li><strong>What this site is, in one sentence a stranger would understand.</strong> If you cannot write that sentence, the problem is not technical.</li>
+  <li><strong>Who it is for</strong> — defined by situation, not demographics. "Owners of two-to-ten-person trades businesses who currently book jobs by text message" is an audience. "Small business owners" is not.</li>
+  <li><strong>The single action that defines success.</strong> One. If you name two, decide which you would keep.</li>
+  <li><strong>What it will deliberately not do.</strong> This is the section people skip and the one that saves the most time.</li>
+  <li><strong>What is being assumed</strong> that has not been validated.</li>
+</ol>
+
+<p>You can do this with Claude Code as a structured interview rather than a blank page — ask it to interview you, one area at a time, and to push back on vague answers. The point is not the document. It is that every architectural decision afterwards has something to be measured against.</p>
+
+<h2 id="inspect">2. Make Claude read the repository first</h2>
+
+<p>On an existing project, the first session should change nothing. Reconnaissance before surgery.</p>
+
+<p>This prompt is genuinely one of the highest-value things you can paste into an unfamiliar repository:</p>
+
+<pre class="sbs-prompt">Analyse this repository. Do not modify anything.
+
+Map:
+1. Structure — what lives where, and the convention behind it
+2. Stack — languages, frameworks, versions. Read the manifest and
+   lockfile; do not infer from directory names.
+3. Entry points — how it starts, builds, tests, and deploys
+4. Data — where it comes from, where it is stored
+5. Configuration — what environment variables are expected
+6. Conventions in force — naming, structure, error handling, styling
+7. Tests — what exists, what it covers, whether it currently passes
+
+Then tell me:
+- The three things I most need to understand before changing anything
+- Anything that looks unusual, and whether it seems deliberate
+- Anything you are uncertain about
+
+Cite file paths for every claim. If you could not determine
+something, say so rather than guessing.</pre>
+
+<p>Three details in there are doing most of the work. <em>"Do not modify anything"</em> keeps it read-only. <em>"Read the manifest and lockfile; do not infer from directory names"</em> prevents a whole class of confident wrong answers. <em>"Cite file paths for every claim"</em> makes the output checkable — and you should spot-check two or three.</p>
+
+<p>Two things to look for immediately in the result: <strong>any committed credential</strong>, and <strong>whether the documented commands actually work</strong>. The gap between the README and reality is usually where the bugs live.</p>
+
+<p>For a large codebase, delegate the exploration to a subagent so the file reads land in its context instead of yours — <em>"use a subagent to investigate how our auth system handles token refresh"</em> returns the findings without the noise.</p>
+
+<h2 id="plan">3. Get a plan before you get code</h2>
+
+<p>Claude Code has a plan mode for exactly this: it reads files and proposes an approach but makes no edits until you approve. Start a session in it with <code>claude --permission-mode plan</code>, or press <kbd>Shift+Tab</kbd> mid-session until the status bar shows <code>⏸ plan mode on</code>.</p>
+
+<p>Plan mode is worth using more than people do, because the economics are lopsided. A wrong architectural decision caught in a plan costs one message. The same decision caught after implementation costs a rewrite. There is no other point in the process with that ratio.</p>
+
+<p>What a plan should contain before you approve it:</p>
+
+<ul>
+  <li>Milestones that are each independently demonstrable and independently revertible</li>
+  <li>The specific files each step will touch</li>
+  <li>The verification for each step — <em>how will we know this worked?</em></li>
+  <li>The rollback</li>
+  <li>What the plan is uncertain about</li>
+</ul>
+
+<p>If a proposed step touches more than roughly ten files or spans more than one architectural layer, ask for it to be split. Long unreviewed stretches of generated code are where architectural drift accumulates, and drift is much harder to fix than bugs.</p>
+
+<h2 id="claude-md">4. Establish CLAUDE.md</h2>
+
+<p><code>CLAUDE.md</code> is a Markdown file Claude Code loads at the start of every session in that project. It is where your architecture, conventions, and "always do X" rules live so you stop retyping them.</p>
+
+<p>Without one, every session starts from zero, and the symptom is architectural drift: three form-handling patterns, two CSS strategies, a utility function written four times. Each session made a locally reasonable choice with no knowledge of the others.</p>
+
+<p>The counter-intuitive part is that <strong>shorter files are followed more reliably</strong>. Anthropic's guidance is to target under 200 lines, because the file is loaded into the context window at the start of every session and a long one consumes context while reducing adherence. A 400-line <code>CLAUDE.md</code> is followed <em>less</em> well than a 150-line one.</p>
+
+<p>So the discipline is subtraction. Delete anything that restates a default, anything Claude can read from the code itself, and — most importantly — anything you are not actually going to enforce. Rules you tolerate breaking teach the model that rules in this file are negotiable.</p>
+
+<p><code>/init</code> generates a starting file from your existing codebase, which is a good first draft: it documents what your code <em>does</em>. You then layer on what you want it to <em>do</em>. Run <code>/context</code> to confirm the file actually loaded; "Claude is ignoring my CLAUDE.md" is usually "Claude never saw it".</p>
+
+<p>The full treatment — what belongs in each section, what must never go in, worked examples for Shopify, Astro, and SaaS projects, and how to split large rule sets into <code>.claude/rules/</code> — is in <a href="/blogs/guides/production-claude-md-web-development">the CLAUDE.md guide</a>. If you would rather copy a finished file than build one, there are four in <a href="/blogs/guides/claude-md-examples-web-development">CLAUDE.md examples for production web development</a>, and a free blank <a href="/pages/production-claude-md-starter">starter</a> to adapt.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Writing a good <code>CLAUDE.md</code> from scratch takes a few iterations. The Claude Code Website Launch System ships production-ready templates for it, along with the staged master build prompt that drives the fifteen steps in this guide &mdash; <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="ia">5. Design the information architecture</h2>
+
+<p>Three decisions here are effectively permanent once the site has traffic. Give them disproportionate attention.</p>
+
+<h3>URL structure</h3>
+
+<p>URLs are a contract. Every change afterwards needs a redirect, loses a little, and breaks external links you do not control. Decide them deliberately: lowercase, hyphenated, descriptive, short but complete before short, shallow, and <strong>no dates unless the content is genuinely time-bound</strong>. A URL like <code>/blog/2024/guide/</code> looks stale in 2026 and cannot be updated without a redirect.</p>
+
+<h3>Canonical host and trailing slashes</h3>
+
+<p>Pick <code>www</code> or the apex. Either is fine. <em>Serving both is not</em> — it splits signals and creates duplicates. Same for trailing slashes: choose one, enforce it with redirects, never serve both with a 200.</p>
+
+<h3>The conversion path</h3>
+
+<p>Map the journey from every realistic entry point to the single action you defined in step 1. Then count the steps. Every unexplained requirement discovered mid-flow — an account, a card, a phone call — is a conversion loss and a trust cost.</p>
+
+<h2 id="architecture">6. Decide the technical architecture</h2>
+
+<p>The decision that drives the most downstream consequence is <strong>rendering strategy</strong>: static, server-rendered, client-rendered, or a deliberate mix. It determines performance, SEO risk, hosting cost, and complexity more than any framework choice.</p>
+
+<p>Default to static unless something genuinely cannot be known at build time. "Content might change" is usually solved by rebuilding, not by a server.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Stack</th><th>Fits</th><th>Main constraint to plan around</th></tr></thead>
+<tbody>
+<tr><td><strong>Shopify</strong></td><td>Selling products, digital or physical</td><td>URL prefixes are fixed; themes carry demo content; apps inject front-end code</td></tr>
+<tr><td><strong>WordPress</strong></td><td>Content sites, familiar editing</td><td>Never edit a parent theme or core; plugin count is the main performance and security variable</td></tr>
+<tr><td><strong>Astro</strong></td><td>Marketing, docs, content</td><td>Zero JS by default — protect that; static builds scale linearly with page count</td></tr>
+<tr><td><strong>SaaS application</strong></td><td>Software behind a login</td><td>Tenancy and authorisation are decided first and cannot be retrofitted cheaply</td></tr>
+<tr><td><strong>Static site</strong></td><td>Brochure, portfolio, landing</td><td>Who edits it, and with what tool?</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Each of those constraints changes how you brief Claude Code more than the framework itself does. Two are worth reading before you commit: <a href="/blogs/guides/claude-code-wordpress">Claude Code with WordPress</a> covers why the parent-theme rule and the plugin surface make it the least forgiving of the five, and <a href="/blogs/guides/claude-code-astro">Claude Code with Astro</a> covers protecting the zero-JavaScript default that is the only reason to pick Astro in the first place — it is easy to lose in a single component.</p>
+
+<p>Whatever you choose, ask one question about content before anything else: <strong>who updates this in six months, and what tool do they open?</strong> If the honest answer is "a non-technical person opens a Markdown file in a git repository," the architecture is wrong and the site will be stale within a quarter.</p>
+
+<p>For each significant choice, insist on the shape: <em>the decision, the alternative rejected, and the cost being accepted</em>. A recommendation without a stated cost is marketing, not engineering. Write these into an architecture decision record; six months later it is the only thing that stops someone "fixing" a deliberate oddity.</p>
+
+<h2 id="build">7. Build in small, verifiable increments</h2>
+
+<p>Foundations before features. Design tokens, layout primitives, and the base template before any page, because everything else inherits from them.</p>
+
+<p>Standing rules worth putting in <code>CLAUDE.md</code> so you stop repeating them:</p>
+
+<ul>
+  <li>Work on a feature branch. Never commit directly to the default branch.</li>
+  <li><strong>Commit before every large change.</strong> A clean <code>git status</code> is your undo button, and it is the single highest-value habit in the whole workflow.</li>
+  <li><strong>Read the diff, not the summary.</strong> The summary is written by the thing being reviewed.</li>
+  <li>Semantic HTML first. <code>&lt;button&gt;</code> for actions, <code>&lt;a href&gt;</code> for navigation, never a <code>&lt;div&gt;</code> with a click handler.</li>
+  <li>Handle the unhappy paths as you go — loading, empty, error, offline. These are most of what separates a demo from a product.</li>
+  <li>No dependency without stating what it does, what it weighs, and why the platform cannot do the job.</li>
+</ul>
+
+<p>Follow the conventions already in the codebase <em>even where you would have chosen differently</em>. Consistency beats individual preference. If a pattern is genuinely wrong, change it everywhere in one deliberate pass rather than introducing a second way of doing the same thing.</p>
+
+<h2 id="sessions">Working across sessions, and in parallel</h2>
+
+<p>A real website build spans days, not one sitting. Three mechanics make that practical, and they are underused.</p>
+
+<h3>Resuming</h3>
+
+<p>Claude Code saves conversations locally. <code>claude --continue</code> resumes the most recent session in the current directory; <code>claude --resume</code> opens a picker; <code>/resume</code> does the same from inside a running session. The point is not convenience — it is that you stop re-explaining the project every morning, which is where inconsistency creeps in.</p>
+
+<p>Worth knowing about compaction: when a conversation grows long enough to be summarised, the project-root <code>CLAUDE.md</code> survives, because Claude re-reads it from disk. Instructions you only ever said out loud in the conversation do not. That is a practical argument for writing anything important into the file rather than repeating it in chat.</p>
+
+<h3>Parallel work with worktrees</h3>
+
+<p>Two agents editing the same checkout will collide. A git worktree is a separate checkout on its own branch, so they cannot:</p>
+
+<pre><code>claude --worktree feature-nav</code></pre>
+
+<p>Run the same command with a different name in another terminal and you have an isolated parallel session. The natural fit for website work is one worktree for a feature and another for an audit — the audit reads and reports while the feature branch changes things, and neither trips over the other. Note that the repository needs at least one commit for this to work.</p>
+
+<h3>Headless mode for CI and batch work</h3>
+
+<p>Print mode runs Claude non-interactively, which makes it a normal Unix tool:</p>
+
+<pre><code>git log --oneline -20 | claude -p "summarize these recent commits"</code></pre>
+
+<p>This is how you get an AI review step into a pipeline, or run the same audit prompt across twenty repositories. Be deliberate about permissions when you do — a non-interactive session cannot ask you whether it should delete something.</p>
+
+<h3>Delegating to subagents</h3>
+
+<p>Exploring a large codebase fills your context with file reads you will never look at again. Asking for a <a href="/blogs/guides/claude-code-subagents">subagent</a> — <em>"use a subagent to investigate how the checkout flow handles discount codes"</em> — pushes those reads into a separate context and returns only the findings. On a large site this is the difference between a session that stays sharp and one that runs out of room halfway through the job.</p>
+
+<h2 id="seo">8. Build SEO into the architecture</h2>
+
+<p>Retrofitting SEO is where projects lose weeks. The structural parts — URLs, canonicals, heading semantics, metadata patterns, indexation rules — are architecture decisions, not a later content task.</p>
+
+<p>Decide, before building:</p>
+
+<ul>
+  <li>Title and description <em>patterns</em> per page type, not individual strings</li>
+  <li>Exactly one <code>&lt;h1&gt;</code> per page; no skipped heading levels; headings describe content rather than styling text</li>
+  <li>Self-referencing canonicals everywhere, and the canonical host decision from step 5</li>
+  <li>Which structured data types genuinely describe each page type — and <strong>never</strong> review, rating, or aggregate-rating markup without real reviews behind it</li>
+  <li>What is deliberately <code>noindex</code>: internal search results, thin utility pages, staging</li>
+  <li>How the sitemap stays current automatically</li>
+</ul>
+
+<p>A worked example of getting this wrong, from this site. After launch the homepage was serving <code>&lt;title&gt;site-builder-stack.myshopify.com&lt;/title&gt;</code> with no meta description at all, because Shopify's <code>page_title</code> falls back to the store domain when the homepage title preference is unset. Nothing in the build flagged it; it only appeared when the live page was fetched and read. Which is the argument for the next section.</p>
+
+<p>The full engineering workflow — audits, internal linking, schema, sitemap validation, Search Console — is in <a href="/blogs/guides/claude-code-seo-website-optimization">the SEO guide</a>.</p>
+
+<h2 id="security">9. Security</h2>
+
+<p>Run a secret scan <strong>before your first push to a remote</strong>. Every other class of bug is recoverable by fixing forward; a leaked credential is not.</p>
+
+<p>Scan four places, not one:</p>
+
+<ol>
+  <li>The working tree</li>
+  <li><strong>The full git history, all branches and tags</strong> — a secret removed in a later commit is still there</li>
+  <li><strong>The build output and client bundles</strong> — anything shipped to a browser is public</li>
+  <li>Deployed surfaces: is <code>/.env</code> reachable? Is <code>/.git/config</code>? Both are real, regularly exploited misconfigurations</li>
+</ol>
+
+<p>Beyond secrets, the review areas that matter most for a website: input validated server-side at every trust boundary; output encoded for its specific context; every database query parameterised; authorisation checked on the server for every request <em>including ownership</em>; security headers present and verified on the live response, not in a config file; and cookies carrying <code>Secure</code>, <code>HttpOnly</code>, and <code>SameSite</code>.</p>
+
+<p>The single most common serious vulnerability in web applications is worth testing explicitly: <strong>can user A reach user B's data by changing an ID in a URL or payload?</strong> It takes two minutes to check and is missed constantly.</p>
+
+<p>One honest boundary: a code and configuration review is not a penetration test. It does not attempt exploitation and it has blind spots. Say so in your own reports.</p>
+
+
+<p>The full workflow &mdash; fifteen passes from secrets and dependency scanning through to logging, with a finding format and the line where penetration testing begins &mdash; is in <a href="/blogs/guides/claude-code-website-security-audit">the Claude Code security audit guide</a>.</p>
+<h2 id="accessibility">10. Accessibility</h2>
+
+<p>Target WCAG 2.2 Level AA. The thing to internalise: <strong>automated tooling finds roughly a third of real accessibility problems.</strong> A page that passes an automated scan with zero violations and cannot be operated by keyboard is inaccessible, and that combination is common.</p>
+
+<p>The manual checks that find the rest, in order of yield:</p>
+
+<ul>
+  <li><strong>Put the mouse aside and use the site.</strong> Every interactive element reachable, operable, and visibly focused. No traps. Logical order.</li>
+  <li><strong>Compute contrast ratios rather than asserting them.</strong> 4.5:1 for body text, 3:1 for large text and meaningful non-text elements.</li>
+  <li>Check the focused element is not hidden behind a sticky header — tab down a long page and watch.</li>
+  <li>Every form control programmatically labelled. A placeholder is not a label.</li>
+  <li>200% zoom and a 320px viewport without loss of content or horizontal scrolling.</li>
+</ul>
+
+<p>A worked example of why measuring beats reviewing. On this site, a CSS selector for links (<code>.sbs a</code>, specificity 0,1,1) was beating the button rule (<code>.sbs-btn--primary</code>, specificity 0,1,0). The result: the primary buy button rendered accent text on an accent background — a computed contrast ratio of <strong>1:1</strong>, completely invisible. It passed every static check. It was found by rendering the page in a browser and reading the computed styles of every text node. The fix was to give base element rules zero specificity with <code>:where()</code> so component rules always win.</p>
+
+
+<p>The full workflow, against WCAG 2.2 Level AA, is in <a href="/blogs/guides/claude-code-accessibility-audit">the Claude Code accessibility audit guide</a> &mdash; including the manual passes no tool can perform.</p>
+<h2 id="performance">11. Performance</h2>
+
+<p>Measure first. Optimising without a baseline is guessing with extra steps, and you will not be able to tell whether you helped.</p>
+
+<p>In rough order of typical impact:</p>
+
+<ul>
+  <li><strong>Third-party scripts.</strong> Usually the single largest cost on an otherwise fast site. For each: what does it weigh, what does it deliver, can it be deferred, is it still needed?</li>
+  <li><strong>Images.</strong> Modern formats, correct dimensions, responsive <code>srcset</code>, explicit <code>width</code> and <code>height</code> to prevent layout shift, lazy loading below the fold — and <strong>never lazy-load the largest above-the-fold image</strong>. Lazy-loading the LCP element is a common and costly own-goal.</li>
+  <li><strong>JavaScript.</strong> Remove what is unused, split what is large, defer what is not needed for first render. Ask of every library whether it does something the platform cannot.</li>
+  <li><strong>Fonts.</strong> Subset, <code>font-display: swap</code>, preload only the face that renders first, and question every additional weight.</li>
+  <li><strong>Layout stability.</strong> Reserve space for anything that loads late: images, embeds, banners, injected widgets.</li>
+</ul>
+
+<p>Report real numbers, before and after. And be careful with the claim: lab measurements from a testing tool are a diagnostic, not the measure. Field data from real users is what actually counts. Never remove conversion-critical functionality to improve a score — a faster page that does not convert is a worse page.</p>
+
+
+<p>For diagnosis rather than a checklist &mdash; identifying the LCP element, attributing INP to a long task, and the one-variable rule that makes a change attributable &mdash; see <a href="/blogs/guides/claude-code-performance-core-web-vitals">the Core Web Vitals workflow</a>.</p>
+<h2 id="validate">12. Validate</h2>
+
+<p>This is the stage most people compress, and it is where the interesting bugs live. On this project, four defects were invisible to every static check and only appeared when the page was rendered in a real browser and measured.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Check</th><th>What it catches</th></tr></thead>
+<tbody>
+<tr><td>Build from a clean checkout</td><td>"Works on my machine"</td></tr>
+<tr><td>Lint and type check</td><td>Contract violations, style drift</td></tr>
+<tr><td>Test suite — and read the actual output</td><td>Regressions. "Tests pass" is a claim, not a result.</td></tr>
+<tr><td>Every page at 320, 375, 390, 430, 768, 1024, 1440</td><td>Horizontal overflow, cramped tap targets</td></tr>
+<tr><td>Browser console on every template</td><td>Runtime errors nobody noticed</td></tr>
+<tr><td>Every internal link resolved</td><td>404s, <code>href="#"</code> placeholders, leftover template links</td></tr>
+<tr><td>Keyboard-only pass on every key flow</td><td>Unusable controls, invisible focus</td></tr>
+<tr><td>Computed contrast on every text node</td><td>Invisible text that looks fine in source</td></tr>
+<tr><td>Metadata across the whole site</td><td>Duplicate or missing titles and descriptions</td></tr>
+<tr><td>Structured data validated <em>and</em> compared to the page</td><td>Markup describing content that is not there</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One specific bug worth describing, because it is a whole class. At a 320px viewport this site's page scrolled to 492px. The cause was not a stray width — it was that grid and flex children default to <code>min-width: auto</code>, so a pre-formatted block could not shrink below its content. No linter reports that. It shows up the moment you measure <code>scrollWidth</code> against <code>clientWidth</code> in a real browser.</p>
+
+<p>A QA report with no findings is a QA report nobody should trust.</p>
+
+<h2 id="deploy">13. Deploy</h2>
+
+<p>A professional pipeline is not elaborate. It is:</p>
+
+<pre><code>feature branch
+  → lint, typecheck, tests, secret scan, build
+    → pull request
+      → preview deployment
+        → review
+          → merge
+            → production deploy
+              → smoke test
+                → monitor</code></pre>
+
+<p>Each stage catches a class of problem as early, and therefore as cheaply, as possible. If you add only one, add the <strong>secret scan</strong> — it is the only failure on that list that fixing forward cannot undo.</p>
+
+<p>Two things that repay the effort immediately: <strong>preview deployments per pull request</strong>, which turn "looks right in the diff" into "I clicked it"; and <strong>smoke tests after deploy</strong> — three to five checks answering "is it actually up and serving the right thing", with automatic rollback if they fail.</p>
+
+<p>Make previews non-indexable, and verify that on an actual preview URL rather than assuming the host handles it. A preview competing with production in search results is a real and avoidable problem.</p>
+
+<p>Write the rollback procedure down <em>before</em> you need it, and read it once. During an incident nobody reads documentation for the first time. Roll back first, diagnose second — fixing forward under pressure is how a five-minute incident becomes an hour.</p>
+
+<h2 id="index">14. Get indexed</h2>
+
+<p>Verify the property in Google Search Console — prefer a domain property, since a URL-prefix property for <code>https://example.com</code> does not include <code>https://www.example.com</code>, and people lose a week to that. Submit the sitemap. Set up Bing Webmaster Tools, which can import from Search Console in about two minutes.</p>
+
+<p>Then set expectations honestly, because this is where most disappointment comes from. Google's own documentation is unambiguous: <em>"submitting a sitemap is merely a hint: it doesn't guarantee that Google will download the sitemap or use the sitemap for crawling URLs on the site."</em> Submission aids discovery. It does not cause indexing, and indexing is not ranking.</p>
+
+<p>Before submitting anything, confirm the site is actually ready: publicly accessible, no sitewide <code>noindex</code>, no <code>Disallow: /</code> left over from staging, HTTPS working on every hostname, canonical host decided, and real content on every indexable page. Submitting a site that is not ready wastes crawl budget on pages you are about to change.</p>
+
+
+<p>Once impressions start arriving, <a href="/blogs/guides/google-search-console-claude-code">Google Search Console with Claude Code</a> covers turning that data into a short list of changes rather than more articles.</p>
+<h2 id="monitor">15. Monitor and improve</h2>
+
+<p>The launch is not the end of the process; it is the first moment you have real data to feed back into it.</p>
+
+<p><strong>First 24 hours:</strong> errors, uptime, the conversion path completed for real, analytics actually receiving events. Review 404s from real traffic — every one is a visitor who did not get where they were going, and they reveal links you did not know existed.</p>
+
+<p><strong>First week:</strong> crawl and indexing status, real user behaviour versus the journey you assumed, where people drop out of the conversion path. Internal search queries, if you have search, are a direct list of what people expected to find and could not.</p>
+
+<p><strong>First month:</strong> the review that turns a launch into a product. The highest-value report is pages with high impressions and low click-through — those are ranking but not being clicked, which usually means the title and description do not match what the searcher wanted. It is the cheapest improvement available, and it needs no code.</p>
+
+<p>Then feed what you learned back into step 1.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Every validation gate in this guide &mdash; the security audit, the accessibility audit, the pre-launch and post-launch checklists &mdash; exists as a ready-to-run prompt in the Launch System, so you are not rewriting them for each project. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2 id="mistakes">Mistakes that cost the most time</h2>
+
+<h3>Accepting a large diff without reading it</h3>
+<p>Twelve files change, the architecture drifts, and by the time anyone notices, unwinding it costs more than starting again. Small steps, each reviewed.</p>
+
+<h3>Letting the model decide what "done" means</h3>
+<p>Without stated completion criteria, done is whatever the model decides when it stops writing. Define it before it starts.</p>
+
+<h3>Trusting the summary over the diff</h3>
+<p>The summary is written by the thing being reviewed. <code>git diff</code> before every commit.</p>
+
+<h3>Skipping CLAUDE.md because the project is small</h3>
+<p>Small projects become medium projects. Twenty minutes of setup saves hours of correcting the same thing.</p>
+
+<h3>Writing a CLAUDE.md nobody enforces</h3>
+<p>The opposite failure. Aspirational rules teach the model that rules here are optional. Write fewer, truer ones.</p>
+
+<h3>Auditing in the same session that wrote the code</h3>
+<p>A session reviewing its own work will defend it. Start a fresh one; the findings improve noticeably.</p>
+
+<h3>Believing a passing automated check means the thing works</h3>
+<p>Automated accessibility tools find about a third of issues. Theme and lint checks find syntax, not intent. The remaining problems are found by using the thing.</p>
+
+<h3>Treating "it deployed" as "it works"</h3>
+<p>A deploy that succeeded and produced a broken page is the failure mode smoke tests exist for.</p>
+
+<h2 id="checklist">The workflow on one page</h2>
+
+<pre><code>DEFINE     One-sentence description · audience · one conversion · non-goals
+INSPECT    Read-only repo audit · secret scan · do the docs match reality?
+PLAN       Plan mode · milestones that are revertible · verification per step
+CONFIGURE  CLAUDE.md under 200 lines · only rules you will enforce
+ARCHITECT  URLs · rendering strategy · content source · decisions + costs
+BUILD      Branch · commit first · small diffs · read every one
+OPTIMISE   Baseline, then images, JS, fonts, third parties · real numbers
+SECURE     Secrets (tree, history, bundle, deployed) · authz · headers
+TEST       Build · lint · tests · keyboard · contrast · 320px · console · links
+DEPLOY     CI · preview · smoke test · rollback written down and read
+INDEX      Search Console domain property · sitemap · honest expectations
+IMPROVE    24h errors · 7-day behaviour · 30-day review · feed it back</code></pre>
+
+<p>None of this is exotic. It is ordinary engineering discipline applied to a tool that is fast enough to outrun your review if you let it. The speed is real; the discipline is what makes the speed worth having.</p>
+
+<h2>Where to go next</h2>
+
+<p>Four guides go deeper on the stages that deserve it:</p>
+
+<ul>
+  <li><a href="/blogs/guides/best-claude-code-prompts-for-web-development"><strong>Claude Code prompts for web development</strong></a> — why structured prompts outperform conversational ones, with worked examples across discovery, architecture, debugging, security, and deployment.</li>
+  <li><a href="/blogs/guides/production-claude-md-web-development"><strong>Creating a production CLAUDE.md</strong></a> — what belongs in it, what must never go in, and complete examples for Shopify, Astro, and SaaS projects.</li>
+  <li><a href="/blogs/guides/build-shopify-store-with-claude-code"><strong>Building a Shopify store with Claude Code</strong></a> — the development-theme workflow, Liquid, the Admin GraphQL API, and the traps specific to the platform.</li>
+  <li><a href="/blogs/guides/claude-code-seo-website-optimization"><strong>Claude Code SEO</strong></a> — technical audits, structured data, sitemap validation, and where AI genuinely helps versus where it creates liability.</li>
+  <li><a href="/blogs/guides/claude-code-website-audit"><strong>Auditing a site that already exists</strong></a> — the four-pass method for finding what is wrong with something already shipped, and a severity scale for deciding what to fix first.</li>
+</ul>
+
+<p>For this workflow applied end to end on a real store, including what it caught, see
+<a href="/pages/case-study">how SiteBuilderStack.com was built with it</a>.</p>
+
+<p>Two free, ungated companions to this workflow: the <a href="/pages/claude-code-launch-checklist">website launch checklist</a> for the run-up to going live, and the <a href="/pages/resources">rest of the free resources</a>.</p>
+
+<p>Building it well is the first of three problems; being found and converting are the other two, and they need different work. <a href="/pages/build-rank-convert">The lifecycle page</a> sets out the order, and which of the three a given site actually needs first.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs" rel="noopener">Claude Code documentation</a> — installation, authentication, plan mode, subagents, memory files</li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap" rel="noopener">Google Search Central: build and submit a sitemap</a></li>
+  <li><a href="https://developers.google.com/search/docs/fundamentals/creating-helpful-content" rel="noopener">Google Search Central: creating helpful, reliable, people-first content</a></li>
+  <li><a href="https://www.w3.org/TR/WCAG22/" rel="noopener">W3C: Web Content Accessibility Guidelines 2.2</a></li>
+  <li><a href="https://owasp.org/www-project-top-ten/" rel="noopener">OWASP Top Ten</a></li>
+  <li><a href="https://shopify.dev/docs/storefronts/themes/architecture/templates" rel="noopener">Shopify: theme template types</a></li>
+</ul>

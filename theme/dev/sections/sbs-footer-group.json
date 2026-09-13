@@ -1,0 +1,126 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "name": "SBS Footer",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "sbs-footer",
+      "blocks": {
+        "c1": {
+          "type": "column",
+          "settings": {
+            "heading": "Products",
+            "label_1": "The Launch System",
+            "url_1": "/products/claude-code-website-launch-system",
+            "label_2": "SEO & Website Audit Toolkit",
+            "url_2": "/products/claude-code-seo-website-audit-toolkit",
+            "label_3": "Conversion & Revenue Toolkit",
+            "url_3": "/products/claude-code-conversion-revenue-optimization-toolkit",
+            "label_4": "Operations & Maintenance System",
+            "url_4": "/products/claude-code-website-operations-maintenance-system",
+            "label_5": "Compare all four",
+            "url_5": "/collections/all",
+            "label_6": "What's included",
+            "url_6": "/#included",
+            "label_7": "How it works",
+            "url_7": "/#how",
+            "label_8": "Case study",
+            "url_8": "/pages/case-study",
+            "label_9": "Complete Site Builder Stack",
+            "url_9": "/products/complete-site-builder-stack",
+            "label_10": "Build → Rank → Convert → Operate",
+            "url_10": "/pages/build-rank-convert"
+          }
+        },
+        "c2": {
+          "type": "column",
+          "settings": {
+            "heading": "Legal",
+            "label_1": "Privacy Policy",
+            "url_1": "/policies/privacy-policy",
+            "label_2": "Terms of Service",
+            "url_2": "/policies/terms-of-service",
+            "label_3": "Refund Policy",
+            "url_3": "/policies/refund-policy",
+            "label_4": "Product Licence",
+            "url_4": "/pages/licence",
+            "label_5": "Disclaimer",
+            "url_5": "/pages/disclaimer"
+          }
+        },
+        "c3": {
+          "type": "column",
+          "settings": {
+            "heading": "Support",
+            "label_1": "Contact",
+            "url_1": "/pages/contact",
+            "label_2": "About",
+            "url_2": "/pages/about",
+            "label_3": "Guides",
+            "url_3": "/blogs/guides",
+            "label_4": "Free resources",
+            "url_4": "/pages/resources",
+            "label_5": "Get the Launch System",
+            "url_5": "/#buy",
+            "label_6": "Free tools",
+            "url_6": "/pages/tools",
+            "label_7": "My learning",
+            "url_7": "/pages/my-learning",
+            "label_8": "2026 benchmark",
+            "url_8": "/pages/claude-code-website-development-benchmark-2026"
+          }
+        },
+        "c4": {
+          "type": "column",
+          "settings": {
+            "heading": "Learn",
+            "label_1": "Claude Code for Web Development",
+            "url_1": "/pages/claude-code-web-development",
+            "label_2": "Claude Code SEO",
+            "url_2": "/pages/claude-code-seo",
+            "label_3": "Claude Code Shopify Development",
+            "url_3": "/pages/claude-code-shopify",
+            "label_4": "Claude Code Production Engineering",
+            "url_4": "/pages/claude-code-production",
+            "label_5": "Claude Code WordPress Development",
+            "url_5": "/pages/claude-code-wordpress",
+            "label_6": "Claude Code Astro Development",
+            "url_6": "/pages/claude-code-astro",
+            "label_7": "All guides",
+            "url_7": "/blogs/guides"
+          }
+        }
+      },
+      "block_order": [
+        "c1",
+        "c4",
+        "c3",
+        "c2"
+      ],
+      "settings": {
+        "logo_text": "Site Builder Stack",
+        "logo_mark": "S",
+        "blurb": "<p>Professional systems for building production-ready websites with Claude Code.</p>",
+        "disclaimer": "<p>Site Builder Stack is an independent product and is not affiliated with, sponsored by, or endorsed by Anthropic. \"Claude\" and \"Claude Code\" are product names and trademarks of Anthropic, PBC, referenced here only to describe compatibility.</p><p>No results are promised or implied. This is a professional system for directing Claude Code through website planning, development, optimisation, deployment, and launch — the work still has to be reviewed by you.</p>"
+      }
+    },
+    "sticky": {
+      "type": "sbs-sticky-buy",
+      "settings": {
+        "product": "claude-code-website-launch-system"
+      }
+    }
+  },
+  "order": [
+    "footer",
+    "sticky"
+  ]
+}

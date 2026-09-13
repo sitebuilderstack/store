@@ -1,0 +1,56 @@
+<p>Astro is close to the best-case platform for working with a coding agent, and the reason is structural rather than aesthetic: almost everything the site does is visible in files. No database, no plugin layer filtering your output, no admin interface quietly overriding what you wrote. Read the repository and you know what the site renders.</p>
+
+<p>That one property changes the working relationship. On most platforms the hard part is establishing which source of truth is in charge. Here the hard part is the ordinary one — being specific about what you want, and having a check that can tell you whether you got it.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers building content-shaped sites: documentation, marketing, publications, portfolios, anything where most pages can be rendered ahead of time. It assumes JavaScript and comfort with a build step. It does not assume you have used Astro before.</p>
+
+<p>If your project needs a full CMS with non-technical editors and a plugin ecosystem, the <a href="/pages/claude-code-wordpress">WordPress hub</a> is the more honest place to look. Astro is excellent at a specific shape of site and unhelpful outside it.</p>
+
+<h2 id="defaults">The defaults are the argument</h2>
+
+<p>Three of Astro's defaults do most of the work when an agent is writing the code, because each turns a judgement call into something observable.</p>
+
+<p><strong>Zero JavaScript by default.</strong> Components render at build time and ship HTML. The failure mode where an agent reaches for a client-side dependency to solve a problem that did not need one becomes loudly visible — a bundle appears where there was none. On a framework where a little more JavaScript is invisible, that same decision costs you nothing to make and everything to discover.</p>
+
+<p><strong>Islands are opt-in and named.</strong> Interactivity requires an explicit <code>client:*</code> directive, and which one you choose is a performance decision written into the markup. Agents reach for <code>client:load</code> because it always works; most components should be <code>client:visible</code>. The directive being visible in a diff is what makes that reviewable.</p>
+
+<p><strong>Content collections have schemas.</strong> This is the underused one. A Zod schema on a collection is a check that runs on every build and cannot be skipped. "Every guide has a meta description between 70 and 158 characters" stops being a review item and becomes a build error.</p>
+
+<h2 id="schema">The rule that follows from schemas</h2>
+
+<p>If the schema is a check, then loosening it to make a build pass is deleting a failing test. It is exactly as tempting and exactly as bad, and an agent will do it by default because the instruction was "make the build pass".</p>
+
+<p>So the rule goes in the project context file, permanently and in those words: <strong>the schema is authoritative; if content will not validate, fix the content.</strong> One line, and it converts the most common shortcut into something that has to be argued for.</p>
+
+<p>The same shape applies to the type checker. <code>astro check</code> in the build catches renamed properties, possibly-undefined values and props that no longer exist — precisely the class of mistake an agent makes most, and one that otherwise surfaces as a blank region on a page nobody looked at.</p>
+
+<h2 id="seo">Why Astro sites are good at SEO, when they are</h2>
+
+<p>The entire SEO surface of a static site lives in a layout you control, which means it can be correct by construction rather than by vigilance. One head component owning title, description, canonical, Open Graph and JSON-LD — with every page routing through it — makes "every page has an absolute canonical URL" a property of the codebase.</p>
+
+<p>Two things quietly break that, and neither raises an error:</p>
+
+<ul>
+  <li><strong>Forgetting <code>site</code> in the config.</strong> Canonical URLs silently become relative and the sitemap integration produces nothing useful.</li>
+  <li><strong>A host that serves the index page with a <code>200</code> for unknown paths.</strong> Every typo and every rotted inbound link becomes an indexable duplicate of your homepage. Check it with <code>curl</code>; a browser will not show you the status code.</li>
+</ul>
+
+<p>The <a href="/pages/claude-code-seo">SEO hub</a> covers the wider method; the platform guide below covers the Astro-specific configuration.</p>
+
+<h2 id="deploy">Deployment</h2>
+
+<p>Astro's build output is a directory, which makes it deployable almost anywhere. On Cloudflare, note that the recommendation has changed: Cloudflare's own documentation now states that Workers supports most Pages use cases and that new projects should start with Workers. Pages still works and existing projects are fine — it is simply no longer where to begin.</p>
+
+<p>For a static build that means Workers Static Assets, configured with a <code>wrangler.jsonc</code> pointing at your build directory, deployed from CI with <code>cloudflare/wrangler-action@v3</code>. The full pipeline, including previews and smoke tests, is in the <a href="/blogs/guides/claude-code-github-actions-cloudflare">CI/CD guide</a>.</p>
+
+<h2 id="verify">Verify the build, not the dev server</h2>
+
+<p>The Astro dev server and the production build differ in ways that matter — image processing, prerendering and integration behaviour among them. A change verified only in <code>dev</code> has not been verified. Run the build, preview the output, and point every structural check at <code>dist/</code> rather than at source.</p>
+
+<p>That last point is the one that turns a check into decoration. A link crawler run against source files is checking something visitors never receive, and it will report zero broken links forever. Break a link deliberately, run the crawler, watch it go red, then restore it — the two minutes that costs is what makes every future green run mean something.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>The platform guide below is the end-to-end build. The rest of this hub is the cross-topic work that applies to any production site and that Astro makes unusually easy to get right: performance, technical SEO, accessibility, and the deployment pipeline.</p>

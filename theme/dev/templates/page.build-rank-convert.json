@@ -1,0 +1,153 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-page-content",
+      "settings": {}
+    },
+    "lifecycle": {
+      "type": "sbs-lifecycle",
+      "blocks": {
+        "stage-1": {
+          "type": "stage",
+          "settings": {
+            "stage": "Build",
+            "product": "claude-code-website-launch-system",
+            "question": "How do I build and launch a production-ready website with Claude Code?",
+            "body": "Planning, platform build systems for Shopify, WordPress, Astro, SaaS and landing pages, a production CLAUDE.md, security and accessibility audits, 100 reusable prompts and the launch checklists. It is the system for getting from nothing to live without shipping the mistakes that are cheap now and expensive later.",
+            "guides": "how-to-build-a-website-with-claude-code, production-claude-md-web-development, claude-code-terminal-setup",
+            "cta_label": "See the Website Launch System",
+            "is_bundle": false
+          }
+        },
+        "stage-2": {
+          "type": "stage",
+          "settings": {
+            "stage": "Rank",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "question": "My website exists. Why is nobody finding it?",
+            "body": "Twenty audit prompts in dependency order: crawlability first, then canonicals, then indexing decisions, then metadata, then speed. Each one demands evidence rather than a summary, and none of them is allowed to fix anything in the same run.",
+            "guides": "claude-code-seo-website-optimization, claude-code-technical-seo-audit, google-search-console-claude-code",
+            "cta_label": "See the SEO & Website Audit Toolkit",
+            "is_bundle": false
+          }
+        },
+        "stage-3": {
+          "type": "stage",
+          "settings": {
+            "stage": "Convert",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "question": "People arrive and nothing happens. Where am I losing them?",
+            "body": "Thirteen modules and 70 workflows for finding where a site loses conversions, ranking what to fix, and proving the fix worked. Every finding carries evidence and an honesty label, and the experimentation system tells you when you do not have the traffic to test at all.",
+            "guides": "claude-code-website-audit, claude-code-performance-core-web-vitals, claude-code-accessibility-audit",
+            "cta_label": "See the Conversion & Revenue Toolkit",
+            "is_bundle": false
+          }
+        },
+        "stage-5": {
+          "type": "stage",
+          "settings": {
+            "stage": "The first three",
+            "product": "complete-site-builder-stack",
+            "question": "I own the whole lifecycle, and I will meet the first three of these.",
+            "body": "The three systems together, delivered as three downloads on one order. Nothing in it is exclusive to the bundle and nothing is abridged — it is the same three products at the same versions, for less than buying them separately. Both figures are shown on its page.",
+            "guides": "shopify-admin-api-claude-code, build-shopify-store-with-claude-code",
+            "cta_label": "See the Complete Site Builder Stack",
+            "is_bundle": true
+          }
+        },
+        "stage-4": {
+          "type": "stage",
+          "settings": {
+            "stage": "Operate",
+            "product": "claude-code-website-operations-maintenance-system",
+            "question": "It is live, found and converting. How do I keep it that way?",
+            "body": "Seventeen modules, 19 slash commands and 11 standard-library scripts for the stage that lasts longest: daily health checks with a score, weekly security and link checks, tested backups, dependency updates in batches with rollback points, a gate on both sides of every deploy, incident playbooks and a monthly report. Every change follows seven phases and none touches production without your yes.",
+            "guides": "claude-code-website-security-audit, claude-code-github-actions, claude-code-performance-core-web-vitals",
+            "cta_label": "See the Operations & Maintenance System",
+            "is_bundle": false
+          }
+        }
+      },
+      "block_order": [
+        "stage-1",
+        "stage-2",
+        "stage-3",
+        "stage-4",
+        "stage-5"
+      ],
+      "settings": {
+        "anchor": "lifecycle",
+        "eyebrow": "The lifecycle",
+        "heading": "Build, then rank, then convert, then operate",
+        "intro": "Each stage has its own product because each needs different evidence, different workflows and a different definition of done. The fourth is the one you will use every week for as long as the site exists.",
+        "blog": "guides",
+        "note": "<p>Buying one product does not include the others and there is no upgrade credit &mdash; someone who owns one product and later wants the bundle would be paying for that product twice. Worth knowing before you choose.</p>"
+      }
+    },
+    "selector": {
+      "type": "sbs-picker",
+      "blocks": {
+        "q-1": {
+          "type": "question",
+          "settings": {
+            "question": "What stage is your website in?",
+            "options": "I haven't built it yet | I'm actively building it | It's live | I manage several sites | It's live and I'm the one keeping it running",
+            "scores": "build:3,rank:0,convert:0,operate:0,all:0 | build:3,rank:0,convert:0,operate:0,all:0 | build:0,rank:1,convert:1,operate:1,all:0 | build:0,rank:0,convert:0,operate:0,all:3 | build:0,rank:0,convert:0,operate:3,all:0"
+          }
+        },
+        "q-2": {
+          "type": "question",
+          "settings": {
+            "question": "What is the biggest problem right now?",
+            "options": "Building it correctly | It doesn't rank | Traffic isn't converting | All of the above | Keeping it healthy, secure and up to date",
+            "scores": "build:4,rank:0,convert:0,operate:0,all:0 | build:0,rank:4,convert:0,operate:0,all:0 | build:0,rank:0,convert:4,operate:0,all:0 | build:0,rank:0,convert:0,operate:0,all:4 | build:0,rank:0,convert:0,operate:4,all:0"
+          }
+        },
+        "q-3": {
+          "type": "question",
+          "settings": {
+            "question": "Which describes your work?",
+            "options": "Developer | Technical founder | Agency or consultancy | Marketer or technical SEO",
+            "scores": "build:1,rank:0,convert:0,operate:0,all:0 | build:0,rank:0,convert:0,operate:0,all:0 | build:0,rank:0,convert:0,operate:1,all:2 | build:0,rank:1,convert:0,operate:0,all:0"
+          }
+        },
+        "q-4": {
+          "type": "question",
+          "settings": {
+            "question": "Are you responsible for the whole site lifecycle?",
+            "options": "Yes, all of it | No, one part of it",
+            "scores": "build:0,rank:0,convert:0,operate:0,all:2 | build:0,rank:0,convert:0,operate:0,all:0"
+          }
+        },
+        "q-5": {
+          "type": "question",
+          "settings": {
+            "question": "Which outcome matters most in the next month?",
+            "options": "Launching | Ranking | Converting | A repeatable system for all three | Fewer surprises: uptime, security, backups",
+            "scores": "build:3,rank:0,convert:0,operate:0,all:0 | build:0,rank:3,convert:0,operate:0,all:0 | build:0,rank:0,convert:3,operate:0,all:0 | build:0,rank:0,convert:0,operate:0,all:4 | build:0,rank:0,convert:0,operate:3,all:0"
+          }
+        }
+      },
+      "block_order": [
+        "q-1",
+        "q-2",
+        "q-3",
+        "q-4",
+        "q-5"
+      ],
+      "settings": {
+        "anchor": "picker",
+        "eyebrow": "Not sure which",
+        "heading": "Which Site Builder Stack product do I need?",
+        "intro": "Five questions, under a minute. The recommendation follows the answers — a strong result in one stage returns one product, not the bundle.",
+        "button_label": "Show me"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "lifecycle",
+    "selector"
+  ]
+}

@@ -1,0 +1,100 @@
+{%- assign product = all_products[section.settings.product] -%}
+
+<section class="sbs-hero">
+  <div class="sbs-container sbs-hero__grid">
+    <div>
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+
+      <h1>{{ section.settings.heading | escape }}</h1>
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="sbs-lede">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+
+      <div class="sbs-hero__actions" data-sbs-hero-cta>
+        <a class="sbs-btn sbs-btn--primary" href="{% if section.settings.cta_url != blank %}{{ section.settings.cta_url }}{% else %}{{ routes.root_url }}#buy{% endif %}">
+          {{- section.settings.cta_label | escape -}}
+          {%- if product != blank %} — {{ product.price | money_without_trailing_zeros }}{% endif -%}
+        </a>
+        {%- if section.settings.secondary_label != blank -%}
+          <a class="sbs-btn sbs-btn--ghost" href="{% if section.settings.secondary_url != blank %}{{ section.settings.secondary_url }}{% else %}{{ routes.root_url }}#included{% endif %}">
+            {{ section.settings.secondary_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.support_line != blank -%}
+        <p class="sbs-cta-note">{{ section.settings.support_line | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      The bundle visual is built from the actual contents of the product, not
+      a stock mockup. It is explicitly a set of digital modules — no box,
+      no implication of physical shipment.
+    {%- endcomment -%}
+    <div>
+      <div class="sbs-bundle" role="img" aria-label="{{ section.settings.bundle_alt | escape }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tile' -%}
+            <div class="sbs-bundle__tile{% if block.settings.highlight %} sbs-bundle__tile--accent{% endif %}"
+                 {{ block.shopify_attributes }}>
+              <b>{{ block.settings.label | escape }}</b>
+              <span>{{ block.settings.meta | escape }}</span>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      {%- if section.settings.bundle_caption != blank -%}
+        <p class="sbs-dim" style="margin-top: var(--sp-4); text-align: center;">
+          {{ section.settings.bundle_caption | escape }}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Hero",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow",
+      "default": "The Claude Code Website Launch System" },
+    { "type": "text", "id": "heading", "label": "Heading",
+      "default": "Build production-ready websites with Claude Code" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading",
+      "default": "The complete prompt, architecture, SEO, deployment, security, and launch system for turning Claude Code into your AI web-development team." },
+    { "type": "text", "id": "cta_label", "label": "Primary button", "default": "Get the Launch System" },
+    { "type": "url", "id": "cta_url", "label": "Primary button link",
+      "info": "Leave empty to scroll to the buy section." },
+    { "type": "text", "id": "secondary_label", "label": "Secondary button", "default": "See what's included" },
+    { "type": "url", "id": "secondary_url", "label": "Secondary button link" },
+    { "type": "text", "id": "support_line", "label": "Supporting line",
+      "default": "Instant digital access. 113 files. No subscription." },
+    { "type": "product", "id": "product", "label": "Product",
+      "info": "Used to show the live price on the button." },
+    { "type": "header", "content": "Bundle visual" },
+    { "type": "text", "id": "bundle_alt", "label": "Accessible description",
+      "info": "Describes the tile grid for screen reader users.",
+      "default": "The bundle contents: master prompt, CLAUDE.md, SEO system, Shopify, WordPress, Astro, SaaS, security, accessibility, deployment, 100 prompts, and checklists." },
+    { "type": "text", "id": "bundle_caption", "label": "Caption",
+      "default": "17 modules · 113 files · digital download" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Bundle tile",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "meta", "label": "Meta line" },
+        { "type": "checkbox", "id": "highlight", "label": "Highlight this tile", "default": false }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "SBS — Hero" }]
+}
+{% endschema %}

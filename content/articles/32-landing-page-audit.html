@@ -1,0 +1,115 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#one">A landing page has exactly one job</a></li>
+    <li><a href="#match">Message match: the check nobody runs</a></li>
+    <li><a href="#fold">The first screen</a></li>
+    <li><a href="#action">The action</a></li>
+    <li><a href="#form">The form</a></li>
+    <li><a href="#objections">Objections, in the order they arrive</a></li>
+    <li><a href="#speed">Speed, which is a conversion problem</a></li>
+    <li><a href="#order">The order to fix things in</a></li>
+  </ol>
+</nav>
+
+<h2 id="one">A landing page has exactly one job</h2>
+
+<p>The defining property of a landing page is that it has a single action. That is what separates it from a homepage, and it is the first thing to check — because most pages called landing pages have four.</p>
+
+<p>Count the things a visitor could click that are not the primary action. Navigation, footer links, related products, a chat widget, a cookie banner with three buttons. Each one is an exit, and on a page whose purpose is one action, most of them are not earning their place.</p>
+
+<p>This is not an argument for stripping navigation from every page. It is an argument for knowing which kind of page you are auditing, and applying the right standard.</p>
+
+<p>This is the page-level version of <a href="/blogs/guides/claude-code-conversion-rate-optimization">the conversion workflow</a>. The copy questions overlap with <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt design</a> more than they look: both are about stating a constraint precisely enough that it survives contact with a long session.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-landing-order.png?v=1788908809" alt="Five numbered steps in order: anything broken, anything unmeasured, message match, the first screen and the action, then everything else only if you can tell whether it worked."
+       width="1000" height="602" loading="lazy" decoding="async">
+  <figcaption>Most landing page audits invert this and start at step five.</figcaption>
+</figure>
+
+<h2 id="match">Message match: the check nobody runs</h2>
+
+<p>Open the page the way a visitor reaches it — from the ad, the search result, or the email — and read the two in sequence.</p>
+
+<p>Does the headline answer the promise that got them there, in the same words? A campaign about "SEO audit tooling" landing on a page headed "Grow your business" has a message-match problem that no button colour will fix, and it is invisible if you only ever open the page directly.</p>
+
+<pre class="sbs-prompt">For each significant traffic source to this page, report: the exact
+promise made at the source, the page's headline, and whether the
+headline uses the same vocabulary.
+
+Where they differ, quote both and say which one is likely to be
+changed. Do not propose new copy in this pass.</pre>
+
+<p>On organic traffic, the equivalent is the query. A page ranking for a query it does not answer will take the click and lose the visit — and it shows up as a good position with a poor click-through or a high exit rate rather than as a ranking problem.</p>
+
+<h2 id="fold">The first screen</h2>
+
+<p>At 375px, not on your monitor. Three questions must be answerable without scrolling:</p>
+
+<ul>
+  <li><strong>What is this?</strong> Stated concretely enough that someone outside the company could repeat it.</li>
+  <li><strong>Who is it for?</strong> A page that is for everyone reads as being for nobody.</li>
+  <li><strong>What do I do next?</strong> Visible, or clearly indicated as being just below.</li>
+</ul>
+
+<p>Measure the fold rather than eyeballing it. Load the page at 375&times;667 and record the pixel position of the primary action. If it is below 667, that is a measurement, not an opinion, and it can be tracked.</p>
+
+<h2 id="action">The action</h2>
+
+<p>Three properties, in order of how often they are wrong:</p>
+
+<p><strong>The label describes the outcome, not the mechanism.</strong> "Submit" is a mechanism. "Get the checklist" is an outcome. This is not a copywriting flourish — a button whose label does not describe what happens is the deceptive-button-label pattern when it is deliberate, and a usability defect when it is not.</p>
+
+<p><strong>There is one primary action, styled unmistakably as primary.</strong> Two buttons with equal weight is a choice the visitor has to make before the one you wanted them to make.</p>
+
+<p><strong>It repeats on a long page</strong>, at the points where a reader who is convinced would want it — not every screen, but after each section that does persuasive work.</p>
+
+<h2 id="form">The form</h2>
+
+<p>Every field has a cost, and the cost is paid in completions. The test for each one: <em>can you say what you will do with this, and what breaks if you do not have it?</em> A field that fails that test is being collected because someone might want it later, which is not a reason.</p>
+
+<p>Then the mechanical checks, which are where the proven problems live:</p>
+
+<ul>
+  <li>Does it submit with JavaScript disabled, or at least fail visibly rather than silently?</li>
+  <li>Are errors associated with their fields programmatically, not just placed nearby in red?</li>
+  <li>Does a failed submission preserve what was typed? Clearing a form on error is the single most reliable way to lose someone.</li>
+  <li>Are the labels real <code>&lt;label&gt;</code> elements rather than placeholders? Placeholder-only forms are unusable the moment someone starts typing.</li>
+  <li>Is there a visible success state, or does the page simply reload and hope?</li>
+</ul>
+
+<p>Those are proven problems when found, and they outrank anything on this page about persuasion.</p>
+
+<h2 id="objections">Objections, in the order they arrive</h2>
+
+<p>List what a sceptical visitor would ask, in sequence, and check the page answers each before the point where they would ask it.</p>
+
+<p>For most pages the order is: what is it, is it for me, what does it cost, what happens after I click, and what if it is wrong. Pricing that appears after the form, or refund terms that appear only in the confirmation email, are answering questions after the moment they were asked.</p>
+
+<p>Resist answering an objection with proof you do not have. If the honest answer to "who else uses this" is "nobody yet", the page should not imply otherwise — and inventing the answer is the fastest way to lose the visitor who checks.</p>
+
+<h2 id="speed">Speed, which is a conversion problem</h2>
+
+<p>A landing page that takes eight seconds on a real phone has a conversion problem that copy cannot fix, because a share of the audience never sees the copy.</p>
+
+<p>Measure at the 75th percentile, on mobile, separately from desktop. Largest Contentful Paint and Cumulative Layout Shift are both measurable in a lab; Interaction to Next Paint is not, and any tool claiming a lab INP figure is reporting something else.</p>
+
+<p>The <a href="/blogs/guides/claude-code-performance-core-web-vitals">Core Web Vitals workflow</a> covers the measurement properly. The thing worth carrying into a conversion audit is narrower: layout shift on a page with a button is not an aesthetic problem, it is a page that moves the target while somebody is reaching for it.</p>
+
+<h2 id="order">The order to fix things in</h2>
+
+<ol>
+  <li><strong>Anything broken.</strong> Forms that drop submissions, controls that cannot be operated, errors that clear the field.</li>
+  <li><strong>Anything unmeasured.</strong> If the conversion event does not fire once, everything after this is guesswork.</li>
+  <li><strong>Message match</strong>, because it is usually the largest effect and among the cheapest changes.</li>
+  <li><strong>The first screen and the action.</strong></li>
+  <li><strong>Everything else</strong>, and only then, and only if you can tell whether it worked.</li>
+</ol>
+
+<p>Most landing page audits invert this and start at step five, which is why most of them produce a redesign nobody can evaluate.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Conversion &amp; Revenue Optimization Toolkit contains the landing page audit in full, plus the CTA, form, copy and objection workflows behind it &mdash; each running in a mode that changes nothing and produces findings with evidence. <a href="/products/claude-code-conversion-revenue-optimization-toolkit">See what is included</a>.</p>
+</aside>

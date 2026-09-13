@@ -1,0 +1,86 @@
+<p>Shopify is a good target for agent-assisted development and a bad one to be naive about. The good part: themes are files, Liquid is readable, and the Admin API covers almost everything you would otherwise click through. The bad part: several of the platform's behaviours fail <em>silently</em>, and silent failure is exactly the class of problem an agent will not report, because from its point of view the operation succeeded.</p>
+
+<p>This hub covers building and running a Shopify store with Claude Code — theme development, Liquid, SEO, performance, accessibility and the deployment discipline that keeps a live storefront from becoming a place you are afraid to touch.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers working on Shopify themes and storefronts who want to use Claude Code on a store that takes real orders. It assumes you can read Liquid and use the CLI or the Admin API. It does not assume you are a Shopify specialist — most of what follows is exactly the material a generalist gets wrong on their first store.</p>
+
+<h2 id="silent">The failures that do not announce themselves</h2>
+
+<p>These are the ones worth knowing before you start, because each of them looks like success.</p>
+
+<h3>Template settings for a section schema the platform has not seen yet</h3>
+
+<p>If you push a JSON template referencing settings or block types that the corresponding section's <code>{% schema %}</code> does not yet define, Shopify accepts the upload and <strong>silently discards the settings it does not recognise</strong>. No error, no warning. Your template is live, your new setting is simply gone, and the page renders with defaults.</p>
+
+<p>The fix is ordering: push the section <code>.liquid</code> first, let the schema register, then push the template that uses it. The same rule applies to raising <code>max_blocks</code> before pushing a section group that exceeds the old limit — the difference there is that you get a <code>FILE_VALIDATION_ERROR</code> rather than silence, which is the friendlier of the two behaviours.</p>
+
+<h3>Files uploaded under a name that already exists</h3>
+
+<p>Upload a file whose filename is already in use and Shopify does not overwrite it. It appends a UUID and gives you a new URL. Every page pointing at the old URL keeps serving the old asset, and the "update" you just shipped is not live anywhere. Replacing a file in place means deleting it and re-uploading.</p>
+
+<h3>Restricted Liquid contexts</h3>
+
+<p>Some templates render with only a subset of the usual Liquid objects available. A reference to an object that does not exist in that context does not raise — it renders empty. If you are generating a machine-readable file such as <code>llms.txt</code> from a template, values that must be correct have to be literals or come from a source you have verified is present, and something has to test that those literals still match reality.</p>
+
+<h3>The purchased theme underneath</h3>
+
+<p>If you have layered your own templates over a bought theme, every route you have not explicitly claimed falls through to the original. That is usually fine and occasionally not: a collection page rendering in the parent theme's design with an <code>h1</code> of "Home page" and no title tag is a real page in your sitemap that you have never looked at. Enumerate your routes rather than assuming the ones you built are all that exist.</p>
+
+<h2 id="seo">Shopify SEO: what the platform decides for you</h2>
+
+<p>Shopify generates <code>sitemap.xml</code> and you cannot hand-edit it. That is a good constraint and a frequent source of bad advice. The correct lever is publication state: unpublishing a resource from the Online Store channel removes it from the storefront and from the sitemap outright, which is cleaner than a <code>noindex</code> on a URL Google still has to fetch in order to discover the directive.</p>
+
+<p>Several other things are worth knowing before you spend an afternoon on them:</p>
+
+<ul>
+  <li><strong>Titles and descriptions</strong> live in the <code>global.title_tag</code> and <code>global.description_tag</code> metafields. Setting them through the API is straightforward; forgetting they exist and writing them into the theme is not.</li>
+  <li><strong>Tag archives</strong> at <code>/blogs/&lt;blog&gt;/tagged/&lt;tag&gt;</code> inherit the blog's own title and description by default, which means every one of them ships an exact duplicate of the index's title tag. They are also thin by construction. A distinct title plus <code>noindex, follow</code> is usually right.</li>
+  <li><strong>Paginated pages</strong> repeat page one's title and description unless you add the page number, and a page number past the end of the list still returns <code>200</code> with an empty result. Both are crawlable duplicates you created by accident.</li>
+  <li><strong>Response headers</strong> are not yours. <code>Permissions-Policy</code> has no meta equivalent and simply cannot be set from a theme. <code>Referrer-Policy</code> can, via <code>&lt;meta name="referrer"&gt;</code>. Knowing which is which saves a pointless afternoon.</li>
+</ul>
+
+<h2 id="performance">Performance on a platform you do not fully control</h2>
+
+<p>A bought theme frequently ships jQuery and a stylesheet in the hundreds of kilobytes, and you will not be removing either without breaking pages you did not write. The productive move is not to fight it globally but to isolate: give the templates that matter their own layout, with their own CSS and no inherited JavaScript, and leave the rest of the store alone.</p>
+
+<p>That is a bigger lever than any amount of image tuning, and it is available specifically because Shopify lets a template declare its own layout.</p>
+
+<p>After that, the ordinary work applies. Reserve dimensions on every image so nothing shifts. Serve responsive sizes rather than one large file — a card rendering at 350 CSS pixels does not need an 800-pixel image, and on a listing page that mistake repeats twenty times. Lazy-load below the fold and, just as importantly, do <em>not</em> lazy-load the element that is going to be your LCP.</p>
+
+<h2 id="a11y">Accessibility, and the checks that lie to you</h2>
+
+<p>Shopify themes tend to fail accessibility in predictable places: unlabelled icon buttons, colour contrast in secondary text, focus states removed for aesthetics, and form fields with placeholder text doing the job of a label.</p>
+
+<p>The trap in automated checking is false positives that are worse than misses, because they train you to ignore the tool. Two examples from building this store. A tap-target check flagged every link inside a paragraph, because it did not implement the <strong>inline exception</strong> in WCAG 2.2 success criterion 2.5.8 — targets in a sentence of text are exempt, and a checker without that rule reports a wall of failures on any article. An accessible-name check flagged decorative thumbnails that were deliberately marked <code>aria-hidden</code> and paired with a real text link.</p>
+
+<p>Both were fixed in the checker, not worked around in the markup. A check you have to mentally filter is not a check.</p>
+
+<h2 id="claudemd">What belongs in a Shopify project's CLAUDE.md</h2>
+
+<p>A generic project context file is not much use on a Shopify theme, because the things that go wrong here are platform-specific and an agent has no way to know them. The sections that earn their place:</p>
+
+<ul>
+  <li><strong>Which theme is live and which is development</strong>, by ID, and the rule that pushes go to development unless explicitly overridden.</li>
+  <li><strong>The push ordering rule</strong> — sections before the templates that use their settings — stated as a rule, because the failure is silent and therefore not self-correcting.</li>
+  <li><strong>The API version you are pinned to.</strong> Mutations change shape between versions; <code>shopPolicyUpdate</code> keying on <code>type</code> rather than <code>id</code>, or <code>productUpdate</code> taking <code>ProductUpdateInput</code> rather than <code>ProductInput</code>, are the kind of detail that costs a round trip every time it is guessed.</li>
+  <li><strong>Where credentials live and that they are never printed.</strong> Read from a path outside the repository, never logged, never in a commit, never in a Liquid template.</li>
+  <li><strong>Which routes you own.</strong> So it is obvious when a change lands on a template that falls through to the purchased theme.</li>
+</ul>
+
+<p>Rules that are mechanical belong in a hook rather than here. "Never push to the live theme without the override" is enforceable; a paragraph asking nicely is not.</p>
+
+<h2 id="deployment">Deploying without holding your breath</h2>
+
+<p>The habits that make Shopify theme work safe are unglamorous:</p>
+
+<p><strong>Develop on an unpublished theme.</strong> Push there by default and make pushing to the live theme require an explicit override. This is one environment variable and it removes an entire category of accident.</p>
+
+<p><strong>Keep the theme in git.</strong> The theme editor is a second author with write access that never explains itself. Pulling before you push and reviewing the diff is how you find out what it changed.</p>
+
+<p><strong>Verify against the live URL after deploying.</strong> Not the preview, not a local render — the real page, after caches settle. This is where you find out that the thing you shipped is not the thing that is serving.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>The path below starts with building the store and moves into Shopify-specific SEO. The full hub list underneath adds performance, accessibility and security, all of which apply to a storefront the same way they apply to anything else in production.</p>

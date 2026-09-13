@@ -1,0 +1,51 @@
+<section class="sbs-section sbs-section--alt" id="{{ section.settings.anchor | default: 'platforms' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="sbs-platforms">
+      {%- for block in section.blocks -%}
+        <li class="sbs-platform" {{ block.shopify_attributes }}>{{ block.settings.name | escape }}</li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.caveat != blank -%}
+      <p class="sbs-dim" style="margin-top: var(--sp-6); max-width: var(--measure);">
+        {{ section.settings.caveat | escape }}
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Platforms",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "platforms" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Platforms" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Dedicated build systems for five platforms" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Each with its own build prompt, audits, and launch checklist." },
+    { "type": "textarea", "id": "caveat", "label": "Honest caveat",
+      "info": "Do not remove this. It prevents an implied claim of universal compatibility.",
+      "default": "This is not a claim of universal compatibility. The master prompt and the audit, security, accessibility, and checklist material apply to any stack; the platform modules apply to the platforms listed above." }
+  ],
+  "blocks": [
+    {
+      "type": "platform",
+      "name": "Platform",
+      "settings": [ { "type": "text", "id": "name", "label": "Name" } ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "SBS — Platforms" }]
+}
+{% endschema %}

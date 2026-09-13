@@ -1,0 +1,256 @@
+{%- comment -%}
+  The guide library.
+
+  Server-renders every guide with its metadata as data- attributes, then
+  filters client-side by hiding. With JavaScript disabled the page is exactly
+  what it was before — a complete, readable, crawlable list of every guide —
+  so the enhancement can never cost a visitor or a crawler access to content.
+
+  Filter options are derived from the guides that actually exist rather than
+  hard-coded, so a value retired from content/content-graph.json disappears
+  from the control instead of becoming a dead option that matches nothing.
+
+  Filtered views are client-side only. No faceted URLs are generated: the
+  querystring is written with replaceState for sharing, and canonical_url
+  still points at the clean /blogs/guides, so nothing new becomes indexable.
+
+  BLOG_PER_PAGE in layout/landing.liquid must match the paginate size below;
+  tests/run-all.sh asserts it. Filtering operates on the rendered page, so the
+  page size is deliberately larger than the library.
+{%- endcomment -%}
+
+{%- comment -%}
+  Liquid has no set type. Values are accumulated into a pipe-delimited string
+  and tested with the delimiters attached, so "SEO" cannot match inside
+  "SEO Advanced" and produce a missing option.
+{%- endcomment -%}
+{%- assign topics = '|' -%}
+{%- assign levels = '|' -%}
+{%- assign types  = '|' -%}
+{%- assign goals  = '|' -%}
+{%- for a in blog.articles -%}
+  {%- assign v = a.metafields.sbs.topic -%}
+  {%- if v != blank -%}{%- capture probe -%}|{{ v }}|{%- endcapture -%}
+    {%- unless topics contains probe -%}{%- assign topics = topics | append: v | append: '|' -%}{%- endunless -%}
+  {%- endif -%}
+  {%- assign v = a.metafields.sbs.level -%}
+  {%- if v != blank -%}{%- capture probe -%}|{{ v }}|{%- endcapture -%}
+    {%- unless levels contains probe -%}{%- assign levels = levels | append: v | append: '|' -%}{%- endunless -%}
+  {%- endif -%}
+  {%- assign v = a.metafields.sbs.content_type -%}
+  {%- if v != blank -%}{%- capture probe -%}|{{ v }}|{%- endcapture -%}
+    {%- unless types contains probe -%}{%- assign types = types | append: v | append: '|' -%}{%- endunless -%}
+  {%- endif -%}
+  {%- assign v = a.metafields.sbs.goal -%}
+  {%- if v != blank -%}{%- capture probe -%}|{{ v }}|{%- endcapture -%}
+    {%- unless goals contains probe -%}{%- assign goals = goals | append: v | append: '|' -%}{%- endunless -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign topic_list = topics | split: '|' | sort -%}
+{%- assign type_list  = types  | split: '|' | sort -%}
+{%- assign goal_list  = goals  | split: '|' | sort -%}
+{%- comment -%} Skill level is an order, not an alphabet. {%- endcomment -%}
+{%- assign level_order = 'Beginner,Intermediate,Advanced' | split: ',' -%}
+
+<section class="sbs-section">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ blog.title | escape }}</span>
+    </nav>
+
+    <div class="sbs-section-head">
+      <h1>{{ blog.title | escape }}</h1>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}
+      Hubs first. A reader who knows their topic should not have to filter for
+      it, and these are the pages the guides all link up to.
+    {%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <nav class="sbs-hublinks" aria-label="Topic hubs">
+        <h2 class="sbs-hublinks__h">{{ section.settings.hubs_heading | escape }}</h2>
+        <ul>
+          {%- for block in section.blocks -%}
+            {%- if block.settings.url != blank and block.settings.label != blank -%}
+              <li {{ block.shopify_attributes }}>
+                <a class="sbs-tap" href="{{ block.settings.url }}" data-sbs-track="pillar_view">{{ block.settings.label | escape }}</a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    {%- paginate blog.articles by 48 -%}
+    {%- if blog.articles.size == 0 -%}
+      <div class="sbs-card"><p>No guides published yet.</p></div>
+    {%- else -%}
+
+      {%- comment -%}
+        The filter bar is hidden until JavaScript enables it. Rendering
+        disabled controls to a no-JS visitor would be an interface that does
+        nothing; hiding it leaves the plain list, which works.
+      {%- endcomment -%}
+      <form class="sbs-lib__controls" data-sbs-library-controls hidden
+            role="search" aria-label="Filter guides">
+        <div class="sbs-lib__field sbs-lib__field--search">
+          <label for="sbs-lib-q">Search guides</label>
+          <input type="search" id="sbs-lib-q" name="q" autocomplete="off"
+                 placeholder="hooks, canonical, Core Web Vitals…">
+        </div>
+
+        <div class="sbs-lib__field">
+          <label for="sbs-lib-topic">Topic</label>
+          <select id="sbs-lib-topic" name="topic">
+            <option value="">All topics</option>
+            {%- for t in topic_list -%}
+              {%- if t != blank -%}<option value="{{ t | escape }}">{{ t | escape }}</option>{%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="sbs-lib__field">
+          <label for="sbs-lib-level">Skill level</label>
+          <select id="sbs-lib-level" name="level">
+            <option value="">All levels</option>
+            {%- for l in level_order -%}
+              {%- capture probe -%}|{{ l }}|{%- endcapture -%}
+              {%- if levels contains probe -%}<option value="{{ l | escape }}">{{ l | escape }}</option>{%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="sbs-lib__field">
+          <label for="sbs-lib-goal">Goal</label>
+          <select id="sbs-lib-goal" name="goal">
+            <option value="">Any goal</option>
+            {%- for g in goal_list -%}
+              {%- if g != blank -%}<option value="{{ g | escape }}">{{ g | escape }}</option>{%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="sbs-lib__field">
+          <label for="sbs-lib-type">Type</label>
+          <select id="sbs-lib-type" name="type">
+            <option value="">All types</option>
+            {%- for t in type_list -%}
+              {%- if t != blank -%}<option value="{{ t | escape }}">{{ t | escape }}</option>{%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+
+        <div class="sbs-lib__field sbs-lib__field--action">
+          <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-library-reset>Reset filters</button>
+        </div>
+      </form>
+
+      {%- comment -%}
+        Result count as a polite live region so a screen-reader user hears the
+        effect of a filter. It carries the full count before JavaScript runs,
+        which is also what a no-JS visitor sees.
+      {%- endcomment -%}
+      <p class="sbs-lib__status" data-sbs-library-status role="status" aria-live="polite">
+        {{ blog.articles.size }} guides
+      </p>
+
+      <ul class="sbs-grid sbs-grid--2" data-sbs-library-list>
+        {%- for a in blog.articles -%}
+          {%- assign w = a.content | strip_html | split: ' ' | size -%}
+          {%- assign rt = w | divided_by: 220 | plus: 1 -%}
+          <li class="sbs-card sbs-guide"
+              data-sbs-item
+              data-topic="{{ a.metafields.sbs.topic | escape }}"
+              data-level="{{ a.metafields.sbs.level | escape }}"
+              data-goal="{{ a.metafields.sbs.goal | escape }}"
+              data-type="{{ a.metafields.sbs.content_type | escape }}"
+              data-text="{{ a.title | append: ' ' | append: a.excerpt | append: ' ' | append: a.metafields.sbs.topic | strip_html | downcase | escape }}">
+            {%- if a.image -%}
+              <a href="{{ a.url }}" tabindex="-1" aria-hidden="true">
+                {%- comment -%}
+                  Cards render around 350px wide at most, so an 800px file was
+                  roughly four times the pixels needed on a phone. A srcset lets
+                  the browser pick, and every image here is below the fold and
+                  lazy — none of them is ever the LCP element.
+                {%- endcomment -%}
+                <img class="sbs-guide__img"
+                     src="{{ a.image | image_url: width: 600 }}"
+                     srcset="{{ a.image | image_url: width: 400 }} 400w,
+                             {{ a.image | image_url: width: 600 }} 600w,
+                             {{ a.image | image_url: width: 900 }} 900w"
+                     sizes="(min-width: 64em) 22rem, (min-width: 40em) 45vw, 92vw"
+                     width="{{ a.image.width }}" height="{{ a.image.height }}"
+                     alt="" loading="lazy" decoding="async">
+              </a>
+            {%- endif -%}
+            <h2><a href="{{ a.url }}">{{ a.title | escape }}</a></h2>
+            {%- if a.excerpt != blank -%}
+              <p>{{ a.excerpt | strip_html | truncate: 190 }}</p>
+            {%- endif -%}
+            <div class="sbs-guide__meta sbs-meta-row">
+              {%- if a.metafields.sbs.topic != blank -%}
+                <span class="sbs-pill">{{ a.metafields.sbs.topic }}</span>
+              {%- endif -%}
+              {%- if a.metafields.sbs.content_type != blank -%}
+                <span class="sbs-pill sbs-pill--quiet">{{ a.metafields.sbs.content_type }}</span>
+              {%- endif -%}
+              {%- if a.metafields.sbs.level != blank -%}
+                <span>{{ a.metafields.sbs.level }}</span>
+              {%- endif -%}
+              <span aria-hidden="true">·</span>
+              <span>{{ rt }} min read</span>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- comment -%} Shown by the filter script only when nothing matches. {%- endcomment -%}
+      <div class="sbs-lib__empty" data-sbs-library-empty hidden>
+        <p><strong>No guides match those filters.</strong></p>
+        <p>Try removing one, or <button type="button" class="sbs-linkbtn" data-sbs-library-reset>reset all filters</button>.</p>
+      </div>
+    {%- endif -%}
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="sbs-pagination" aria-label="Pagination">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}">&larr; Newer</a>
+        {%- endif -%}
+        <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}">Older &rarr;</a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Blog",
+  "tag": "div",
+  "settings": [
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Practical guides for building, launching, optimising, securing, and operating production websites with Claude Code. Filter by topic, skill level or goal — or start from a topic hub." },
+    { "type": "text", "id": "hubs_heading", "label": "Hubs heading", "default": "Start from a topic hub" }
+  ],
+  "blocks": [
+    {
+      "type": "hub",
+      "name": "Topic hub",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "url", "label": "URL" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Blog" }]
+}
+{% endschema %}

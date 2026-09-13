@@ -1,0 +1,417 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 Core method",
+            "meta": "8 workflows",
+            "highlight": true
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 Page audits",
+            "meta": "8 workflows",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 Funnels",
+            "meta": "5 workflows",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 Elements & copy",
+            "meta": "7 workflows",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 Ecommerce",
+            "meta": "6 workflows",
+            "highlight": false
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 SaaS",
+            "meta": "5 workflows",
+            "highlight": false
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 Analytics",
+            "meta": "7 workflows",
+            "highlight": false
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 Experimentation",
+            "meta": "7 workflows",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 User behaviour",
+            "meta": "5 workflows",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 Performance & a11y",
+            "meta": "3 workflows",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 Platforms",
+            "meta": "4 workflows",
+            "highlight": false
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 Reports",
+            "meta": "5 workflows",
+            "highlight": false
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 Templates",
+            "meta": "6 templates",
+            "highlight": false
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "Command library",
+            "meta": "68 commands",
+            "highlight": true
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "CLAUDE.md section",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "Worked examples",
+            "meta": "4 examples",
+            "highlight": false
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16"
+      ],
+      "settings": {
+        "summary": "Find where a website loses conversions, rank what to fix, and prove the fix worked — with Claude Code. 70 workflows, 68 commands, one download.",
+        "button_label": "Get the toolkit",
+        "note": "One payment. Instant download. Licensed to one person for unlimited projects, including client work."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Thirteen numbered modules, 70 workflows, 68 commands, six templates and four worked examples, plus a START-HERE that tells you which file to open. All plain Markdown — nothing to install, no account, no subscription.",
+            "code": "claude-code-conversion-revenue-optimization-toolkit/\n  START-HERE.md\n  01-core/\n  02-page-audits/\n  ...\n  13-templates/\n  commands/\n  claude-md/\n  examples/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "START-HERE routes you in five minutes",
+            "body": "It does not explain conversion optimisation. It asks what your situation is and sends you to one file. The table is the whole page.",
+            "code": "| Your situation                     | Open this                        |\n| I want the full audit              | 01-core/MASTER-CRO-AUDIT.md      |\n| I do not know where people drop off| 03-funnels/FUNNEL-MAPPING.md     |\n| I sell on Shopify                  | 05-ecommerce/SHOPIFY-CRO-AUDIT.md|"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Every workflow declares a mode",
+            "body": "AUDIT analyses and changes nothing. PLAN sequences findings. IMPLEMENT makes one named change. VALIDATE confirms it worked. Never letting one session both find and fix is the single convention that makes the rest of the toolkit work.",
+            "code": "> **Mode: AUDIT** — this workflow changes nothing.\n>            It produces findings."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Discovery runs first, then stops",
+            "body": "The master audit reports the site's structure, the conversion architecture and what it cannot determine without data you have not given it. Then it waits. You read it before anything else happens.",
+            "code": "### Phase 1 — Discovery. Change nothing, then stop."
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "Findings carry evidence and an honesty label",
+            "body": "Thirteen fields, including the one that matters most: is this a proven problem, a strong heuristic, an experiment opportunity, or insufficient data? A heuristic never becomes proof because it was written confidently.",
+            "code": "Evidence: iPhone 13, Safari 17, 390x844. Focusing\n#card-number raises the keyboard; submit sits at\ny=812, under it. Reproduced 3/3.\nType: proven problem"
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Priorities are scored, and some things are marked do-not-do",
+            "body": "Impact × Confidence ÷ Effort, each 1–5, banded into this week, this month, next quarter, and do not do. Two rules override the score: critical severity jumps the queue, and measurement comes first.",
+            "code": "| Purchase event never fires | 5 | 5 | 1 | 25 | This week |\n| Hero headline is vague     | 3 | 2 | 1 |  6 | Experiment |\n| Button colour inconsistent | 1 | 2 | 1 |  2 | Do not do |"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Tracking is verified in both directions",
+            "body": "An event that fires on the real action is half the check. The other half is proving it does not fire on page load, on a refresh of the confirmation page, on back-navigation, or on a client-side route change. Duplicate purchase events make every downstream number wrong in the same direction.",
+            "code": "Positive: complete an order -> exactly 1\nNegative: refresh confirmation -> 0\n          back-navigation      -> 0\n          SPA route change     -> 0"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "The experiment workflow that tells you not to",
+            "body": "Before designing a test, a gate: is it broken, is it a requirement, would you ship it regardless, and do you have the traffic? For most sites the answer is that testing is impractical — and saying so beats three weeks producing a number nobody should act on.",
+            "code": "Under 100 weekly conversions — no useful A/B testing\n100–500  — very large effects only, rarely\nAbove 500 — a programme becomes possible"
+          }
+        },
+        "s9": {
+          "type": "step",
+          "settings": {
+            "title": "It refuses the tactics you did not ask for",
+            "body": "Fake countdowns, untracked stock warnings, invented customer numbers, hidden fees, pre-selected add-ons, confirmshaming, obstructive cancellation. The prohibition is repeated in every workflow, because a rule stated once at the start of a long session does not survive to the end of it.",
+            "code": "Would this still work if the visitor understood\nexactly what was happening?"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the Conversion & Revenue Optimization Toolkit",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to a prioritised roadmap.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real entry point, and the real conventions the toolkit runs on.</p><p>For the method applied to a real site, read <a href=\"/pages/case-study\">how this store was built</a>.</p>",
+        "sample_url": "https://sitebuilderstack.com/pages/sample-landing-page-conversion-audit",
+        "sample_label": "Read a full conversion workflow from it, free"
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Will this increase my conversion rate?",
+            "answer": "<p>Nobody can promise that and this does not. What it does is find the places a site loses people, rank them by evidence rather than by opinion, and give you a way to tell whether each fix worked. Where the honest conclusion is that a site does not have enough traffic to know, the workflows are written to say so &mdash; which is more useful than a number produced to satisfy the question.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "How is this different from the SEO toolkit?",
+            "answer": "<p>The SEO toolkit gets people to arrive. This one works out what happens to them once they do. They share no material: the SEO toolkit has no conversion coverage at all, and this one defers search-performance analysis to it rather than duplicating it.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "How is this different from the Launch System?",
+            "answer": "<p>The Launch System builds and launches a site, and contains one landing-page CRO workflow among its 100 prompts. This is 70 workflows on conversion alone, plus funnels, analytics, experimentation and user research, none of which the Launch System covers. If you are building a site, start there. If you have one that under-converts, start here.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need an analytics platform for this to be useful?",
+            "answer": "<p>It is considerably more useful with one, and the toolkit is explicit about that. Where you have no measurement, the workflows mark the affected findings <em>insufficient data</em> rather than guessing, and the first recommendation becomes instrumentation. That is the correct order, and there is a full module on setting it up.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it work if my site does not have much traffic?",
+            "answer": "<p>Yes, and it is written for that case. Most sites cannot run a useful A/B test, so the toolkit's route is defect-fixing, qualitative research and judgement &mdash; with an explicit workflow whose job is to tell you when testing is not viable and what to do instead.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Which platforms does it cover?",
+            "answer": "<p>Shopify has a module that reads the theme source rather than only the rendered page. WooCommerce, Webflow and Squarespace, and JavaScript frameworks each have their own file. Everything else applies anywhere. Every platform file states what is fixable in the theme, in an app, in settings, or not at all.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "What exactly do I get?",
+            "answer": "<p>One ZIP: 99 files, 213&nbsp;KB, all plain Markdown. Thirteen modules, 70 workflows, 68 commands, six templates, four worked examples and a CLAUDE.md section. Nothing to install, no account, no subscription, and a published SHA-256 so you can verify the download.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "Is there a bundle or an upgrade credit?",
+            "answer": "<p>Not today, and we are not going to advertise a discount the store cannot honour. The three products are sold separately at their own prices. If a bundle is offered later it will be a real price, not a struck-through one.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it on client work?",
+            "answer": "<p>Yes, on unlimited client projects, and the reports you produce with it are yours with no attribution requirement. The licence is per person, so buy a copy for each person who will use it. You may not redistribute or resell the toolkit itself.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9"
+      ],
+      "settings": {
+        "anchor": "questions",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "",
+        "emit_schema": true
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Not getting the traffic in the first place?",
+        "body": "The Claude Code SEO & Website Audit Toolkit covers crawlability, indexation, structured data, Core Web Vitals, Search Console and content auditing — the half of the problem that happens before anyone reaches your site.",
+        "cta_label": "See the SEO toolkit",
+        "cta_url": "/products/claude-code-seo-website-audit-toolkit",
+        "note": "A separate product. Buying this does not include it, and there is no automatic upgrade credit.",
+        "product": "claude-code-seo-website-audit-toolkit"
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Planning, platform build systems, a production CLAUDE.md, security and accessibility audits, 100 prompts and launch checklists.",
+            "flagship": false
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals and Search Console — twenty audits in dependency order.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "The first three",
+            "product": "complete-site-builder-stack",
+            "body": "Build, rank and convert in one purchase — the three earlier systems on this site, delivered as three downloads.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Monitoring, security checks, backups, dependency updates, deployment gates, incident playbooks and monthly reporting. For the stage after launch, which lasts longest.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p5",
+        "p4"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The other three",
+        "heading": "Conversion is the third of four problems",
+        "intro": "This toolkit assumes the site exists and people arrive. Building it, getting it found, and keeping it running are the other three jobs — or take the first three together.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

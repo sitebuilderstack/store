@@ -1,0 +1,60 @@
+<p>WordPress runs a large share of the web and is the platform where agent-assisted development goes wrong most quietly. Not because the code is difficult, but because the code is only one of three things deciding what the site does. The files on disk, the rows in the database, and the plugins hooking your output all have a vote — and a tool that reads files can only see one of them.</p>
+
+<p>This hub collects the guides that apply to WordPress work, starting with the platform guide and continuing into the audits that catch what a code review does not.</p>
+
+<h2 id="who">Who this is for</h2>
+
+<p>Developers maintaining WordPress sites that real people visit: client work, agency retainers, a store, a publication. It assumes you can read PHP and use a terminal. It does not assume you are a WordPress specialist — most of the material here is aimed precisely at the competent generalist who has inherited a WordPress install and would like not to break it.</p>
+
+<p>If you are starting a new content site with no requirement to use WordPress, read the <a href="/pages/claude-code-astro">Astro hub</a> first and make the choice deliberately. WordPress is the right answer often, and it is chosen by default far more often than that.</p>
+
+<h2 id="shape">The shape of the problem</h2>
+
+<p>Every platform has a characteristic failure. On a static site it is stale build output. On Shopify it is a setting the platform silently discarded. On WordPress it is <strong>a change that appears to work and is not the change you made</strong>.</p>
+
+<p>There are four common versions of it, and recognising which one you are in saves most of the debugging time:</p>
+
+<ul>
+  <li><strong>The template you edited is not the template that renders.</strong> WordPress resolves templates by walking a hierarchy from most specific to least. Editing <code>index.php</code> to change a post page edits a file that is never reached.</li>
+  <li><strong>A hook is modifying your output after your code runs.</strong> When the markup is right and the page is wrong, look for a filter before you look at the template again.</li>
+  <li><strong>The content is in the database, not in a file.</strong> Page builders store layouts in post meta. Site editor customisations to a block theme are stored as posts that override the file on disk entirely.</li>
+  <li><strong>A cache is showing you the past.</strong> The change shipped, the page did not update, so a second change goes in on top of the first.</li>
+</ul>
+
+<p>None of those produces an error. All of them produce a confident report that the work is done.</p>
+
+<h2 id="rules">The two rules worth enforcing</h2>
+
+<p>Most of the safety in WordPress work with an agent comes from two rules, and both belong in your project context file where they are read at the start of every session.</p>
+
+<p><strong>Never edit the parent theme.</strong> Changes there work, survive testing, and vanish at the next vendor update. Everything goes in the child theme or a plugin.</p>
+
+<p><strong>The agent does not write to the database.</strong> File changes are reversible with a git checkout. A search-and-replace across <code>wp_posts</code> with a slightly wrong pattern is not, and the only recovery is a backup you hopefully took. Reading is fine and useful; writing is proposed, reviewed, and run by you after an export. PHP serialisation makes this worse than it sounds — a naive SQL replace on a serialised option corrupts it silently, because the stored string lengths no longer match.</p>
+
+<h2 id="verify">Verification, which matters more here</h2>
+
+<p>The general discipline behind everything on this site is that a check which has never failed is not evidence. On WordPress that principle has a specific and unusually cheap application: <strong>clear the cache before you verify anything</strong>. An agent reporting "the change is live" after reading a cached response has verified nothing at all, and the report will be perfectly confident.</p>
+
+<p>Three checks worth running on any WordPress change, in order of how often they catch something:</p>
+
+<ol>
+  <li><strong>Look at the rendered HTML, not the template.</strong> <code>curl</code> the page and grep for what you expect. Templates lie; output does not.</li>
+  <li><strong>Read <code>debug.log</code>.</strong> With <code>WP_DEBUG_LOG</code> on and display off, PHP notices accumulate in a file nobody opens. A change that adds notices is a change that is not finished.</li>
+  <li><strong>Count the queries.</strong> A template edit that introduced a query inside the loop turns one page into forty round trips, and it is invisible until the site is under load.</li>
+</ol>
+
+<h2 id="security">Security is mostly two functions</h2>
+
+<p>Custom WordPress code fails security review in the same two places nearly every time: output that is not escaped, and a write handler that checks a nonce but not a capability. Those are different guarantees — a nonce proves the request came from your form, a capability proves this user is allowed to do the thing — and code that has one without the other is the most common real vulnerability in bespoke WordPress work.</p>
+
+<p>Escaping is contextual and the wrong choice is worse than none, because it looks handled. Text inside an element takes <code>esc_html()</code>; an attribute takes <code>esc_attr()</code>; a URL takes <code>esc_url()</code>, which is the one that stops a <code>javascript:</code> href; editor content that must keep its formatting takes <code>wp_kses_post()</code>. That last one is the one agents drop, because it visibly strips things during testing and removing it makes the problem go away.</p>
+
+<h2 id="deploy">Deployment, and the direction things move</h2>
+
+<p>WordPress predates the assumption that a website is a repository, and its deployment story still shows it. The workable arrangement is that <strong>code moves up and content moves down</strong>: themes and custom plugins deploy from git to production; the database is copied from production to staging and never the reverse. Pushing a staging database to production destroys every order, comment and post created since the copy was taken.</p>
+
+<p>Everything else — validation gates, preview environments, smoke tests, rollback — works the same way it does on any other platform. The <a href="/blogs/guides/claude-code-github-actions-cloudflare">CI/CD guide</a> covers the general pipeline; for WordPress the deploy step is usually an rsync scoped to <code>wp-content/themes</code> and <code>wp-content/plugins</code>, with <code>composer install --no-dev</code> and a PHPCS run in front of it.</p>
+
+<h2 id="next">Where to go next</h2>
+
+<p>Start with the platform guide below. After that, the audits in this hub are not WordPress-specific but they are where WordPress sites most often fail: security, because custom handlers are written by hand; accessibility, because themes routinely undo core's defaults; and performance, because a page cache hides the problem until it does not.</p>

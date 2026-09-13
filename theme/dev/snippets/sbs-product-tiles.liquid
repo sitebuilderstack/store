@@ -1,0 +1,18 @@
+{%- comment -%}
+  The contents grid for a product page, rendered either beside the buy panel
+  (when the product has no image) or in a full-width strip below it (when it
+  does). Extracted to a snippet so the two call sites cannot drift.
+
+  Takes: blocks — section.blocks from sbs-product.
+{%- endcomment -%}
+<div class="sbs-bundle">
+  {%- for block in blocks -%}
+    {%- if block.type == 'tile' -%}
+      <div class="sbs-bundle__tile{% if block.settings.highlight %} sbs-bundle__tile--accent{% endif %}"
+           {{ block.shopify_attributes }}>
+        <b>{{ block.settings.label | escape }}</b>
+        <span>{{ block.settings.meta | escape }}</span>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+</div>

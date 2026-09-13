@@ -1,0 +1,184 @@
+{%- comment -%}
+  The three-product ecosystem row.
+
+  Sits low on the homepage, after the FAQ, so it does not compete with the
+  flagship's buy section directly above it. Its job is narrow: someone who has
+  read the whole page and decided the Launch System is not their problem should
+  be able to see, in one screen, which product is.
+
+  Every card resolves `all_products[handle]`, so the title and price shown are
+  the live ones. A product that is drafted, deleted or renamed drops out of the
+  row instead of rendering a dead link at a stale price — the failure mode that
+  matters most here, because a wrong price on a homepage is worse than a
+  missing card.
+
+  The lifecycle labels (Build / Rank / Convert) are the point of the section.
+  Three products listed without them is a catalogue; with them it is an
+  explanation of which one you need.
+{%- endcomment -%}
+
+{%- assign rendered = 0 -%}
+{%- for block in section.blocks -%}
+  {%- assign p = all_products[block.settings.product] -%}
+  {%- if p != blank and p.available -%}
+    {%- assign rendered = rendered | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if rendered > 0 -%}
+  <section class="sbs-section" id="{{ section.settings.anchor | default: 'products' | escape }}">
+    <div class="sbs-container">
+      <div class="sbs-section-head">
+        {%- if section.settings.eyebrow != blank -%}
+          <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+        {%- endif -%}
+        <h2>{{ section.settings.heading | escape }}</h2>
+        {%- if section.settings.intro != blank -%}
+          <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        Three cards sit in three columns; four sit in two rows of two rather
+        than three and an orphan. Chosen from the block count so a page with
+        three (a product page listing the others) and one with four (the
+        homepage) each get the grid that fits.
+      {%- endcomment -%}
+      {%- assign eco_cols = 'sbs-grid--3' -%}
+      {%- if section.blocks.size == 4 or section.blocks.size == 2 -%}{%- assign eco_cols = 'sbs-grid--2' -%}{%- endif -%}
+      <ul class="sbs-grid {{ eco_cols }} sbs-eco">
+        {%- for block in section.blocks -%}
+          {%- assign p = all_products[block.settings.product] -%}
+          {%- if p != blank and p.available -%}
+            <li class="sbs-card sbs-eco__card{% if block.settings.flagship %} sbs-eco__card--flagship{% endif %}"
+                {{ block.shopify_attributes }}>
+              <span class="sbs-eco__stage">{{ block.settings.stage | escape }}</span>
+              {%- comment -%}
+                A distinct event name. product_nav_clicked already exists for
+                the header menu and product_cta_clicked for the closing CTA;
+                reusing either would merge three different placements into one
+                number and make all three unreadable.
+              {%- endcomment -%}
+              <h3><a href="{{ p.url }}" data-sbs-track="product_ecosystem_clicked">{{ p.title | escape }}</a></h3>
+              {%- if block.settings.body != blank -%}
+                <p>{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+              <p class="sbs-eco__price">
+                {{ p.price | money }}
+                {%- if block.settings.flagship -%}
+                  <span class="sbs-eco__flag">The flagship</span>
+                {%- endif -%}
+              </p>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+
+      {%- if section.settings.note != blank -%}
+        <p class="sbs-eco__note">{{ section.settings.note }}</p>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+<style>
+  .sbs-eco__card { display: flex; flex-direction: column; gap: var(--sp-3); }
+  /* Same treatment the bundle tiles use for their highlighted entry, so the
+     flagship reads as the flagship without a second visual language. */
+  .sbs-eco__card--flagship { border-color: var(--accent); background: var(--accent-soft); }
+  .sbs-eco__stage {
+    font-family: var(--font-mono); font-size: var(--step--2);
+    letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+  }
+  .sbs-eco__card h3 { margin: 0; }
+  .sbs-eco__card p { margin: 0; }
+  /* margin-top:auto pins the price to the card's foot so three cards with
+     different body lengths still line their prices up. */
+  .sbs-eco__price {
+    margin-top: auto !important; padding-top: var(--sp-3);
+    font-family: var(--font-mono); color: var(--text);
+    display: flex; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap;
+  }
+  .sbs-eco__flag {
+    font-size: var(--step--2); letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .sbs-eco__note {
+    margin-top: var(--sp-6); color: var(--muted); font-size: var(--step--1);
+    max-width: var(--measure);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SBS — Ecosystem",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor",
+      "label": "Anchor id",
+      "default": "products"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The three products"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Three products, three different problems"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro"
+    },
+    {
+      "type": "richtext",
+      "id": "note",
+      "label": "Note under the row",
+      "info": "Rendered as rich text so it can link. Keep it to one sentence."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "text",
+          "id": "stage",
+          "label": "Lifecycle stage"
+        },
+        {
+          "type": "text",
+          "id": "product",
+          "label": "Product handle",
+          "info": "Resolved live. The card is omitted if the product is not available."
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "One-line positioning"
+        },
+        {
+          "type": "checkbox",
+          "id": "flagship",
+          "label": "Mark as the flagship",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "SBS — Ecosystem"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,153 @@
+<h2 id="who">Who this is for</h2>
+
+<p>Developers, founders and agencies who own a website that gets traffic and does not turn enough of it into revenue. It assumes you can read a diff, run a command and reach your live site. It does not assume you are a CRO specialist &mdash; most of it is aimed at the competent generalist who has inherited responsibility for a number that is not moving.</p>
+
+<p>If nobody is arriving yet, this is the wrong product. Fix distribution first with the <a href="/products/claude-code-seo-website-audit-toolkit">SEO &amp; Website Audit Toolkit</a>, or build the site with the <a href="/products/claude-code-website-launch-system">Website Launch System</a>. This one is for traffic that already exists.</p>
+
+<h2 id="problem">What it is for</h2>
+
+<p>Ask a capable model to &ldquo;increase conversions&rdquo; and a fair share of what comes back is a countdown timer, a fake stock warning, and a confident prediction that the change will lift revenue by some percentage. None of that is knowledge. Two thirds of it is a compliance risk.</p>
+
+<p>The other failure mode is quieter and more expensive: an audit that finds problems and fixes them in the same session, leaving a diff across thirty files, no report, and no way to tell which finding was real. Or a funnel analysis built on a purchase event that fires twice, so every number in it is wrong in the same direction and nothing about the output looks unusual.</p>
+
+<p>Every workflow here is written against those three failures. Findings carry evidence and an honesty label. Audits change nothing. Tracking is verified in both directions before any number is trusted. And no workflow will tell you a change will produce a percentage lift, because nobody can know that in advance.</p>
+
+<h2 id="included">What is included</h2>
+
+<p>Thirteen modules, 70 workflows, 68 commands, six templates and four worked examples &mdash; 65,000 words of plain Markdown. Nothing to install, no account, no subscription.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Module</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td><code>01-core</code></td><td>The master audit, the four modes, the finding format, prioritisation, evidence standards, the prohibitions</td></tr>
+<tr><td><code>02-page-audits</code></td><td>Homepage, landing, pricing, product, category, checkout, signup, content</td></tr>
+<tr><td><code>03-funnels</code></td><td>Funnel mapping, drop-off diagnosis, micro-conversions, traffic source fit, lead generation</td></tr>
+<tr><td><code>04-elements</code></td><td>CTAs, forms, navigation, pricing presentation, trust, objections, conversion copy</td></tr>
+<tr><td><code>05-ecommerce</code></td><td>The Shopify audit in depth, product detail, cart abandonment, checkout, merchandising, post-purchase</td></tr>
+<tr><td><code>06-saas</code></td><td>The SaaS funnel, onboarding and activation, trial to paid, packaging, demo flows</td></tr>
+<tr><td><code>07-analytics</code></td><td>Analytics audit, measurement plans, GA4, privacy-first tooling, event QA, attribution</td></tr>
+<tr><td><code>08-experimentation</code></td><td>Hypotheses, sample size, design, reading results, the log &mdash; and when not to test</td></tr>
+<tr><td><code>09-user-behaviour</code></td><td>Usability review, session recordings, surveys, voice of customer, choosing a method</td></tr>
+<tr><td><code>10-performance-accessibility</code></td><td>Performance and conversion, accessibility barriers on the conversion path, mobile</td></tr>
+<tr><td><code>11-platforms</code></td><td>WordPress and WooCommerce, no-code builders, JavaScript frameworks, what is fixable where</td></tr>
+<tr><td><code>12-reports</code></td><td>Executive summary, full report, quick wins, experiment report, client delivery</td></tr>
+<tr><td><code>13-templates</code></td><td>30/60/90 roadmap, finding log, experiment backlog, measurement plan, copy brief, hypothesis</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Plus <code>commands/</code> with 68 ready commands in nine categories, <code>claude-md/</code> with the section that makes the conventions automatic, and <code>examples/</code> with four complete runs.</p>
+
+<h2 id="method">The method</h2>
+
+<p><strong>Measure &rarr; Diagnose &rarr; Prioritise &rarr; Change &rarr; Validate &rarr; Learn.</strong> Each step exists because skipping it produces a specific failure, and the toolkit names them: skip measurement and you get opinions about a site nobody has data on; skip prioritisation and you get forty findings and no idea which one to do; skip validation and you get a change nobody confirmed worked.</p>
+
+<p>Underneath that sit four modes, which is the convention that makes the rest work.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Mode</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>AUDIT</strong></td><td>Analyse. Change nothing. Most workflows are this.</td></tr>
+<tr><td><strong>PLAN</strong></td><td>Turn findings into sequenced, estimated work. Still no changes.</td></tr>
+<tr><td><strong>IMPLEMENT</strong></td><td>Make one specific, named, approved change. Nothing else.</td></tr>
+<tr><td><strong>VALIDATE</strong></td><td>Check the change did what was predicted.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Never let one session both find and fix. Every workflow declares its mode in its first line.</p>
+
+<h2 id="findings">What a finding looks like</h2>
+
+<p>Every finding uses the same thirteen-field format, and the field that matters most is the one naming its evidence class.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Label</th><th>Means</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td>Proven problem</td><td>Something is broken and you can reproduce it</td><td>Fix it. No test needed.</td></tr>
+<tr><td>Strong heuristic</td><td>An established mechanism, observed here &mdash; not proof for this site</td><td>Usually ship it, knowing what you know.</td></tr>
+<tr><td>Experiment opportunity</td><td>Plausible, unproven, reasonable people would disagree</td><td>Test it, if you have the traffic.</td></tr>
+<tr><td>Insufficient data</td><td>You cannot tell yet, usually because measurement is missing</td><td>Instrument it first.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Findings are scored Impact &times; Confidence &divide; Effort and banded into this week, this month, next quarter, and <em>do not do</em>. That last band is the one most reports never produce and it saves the most time.</p>
+
+<h2 id="shopify">The Shopify module</h2>
+
+<p>A generic audit sees a slow product page. This one reads the theme: it finds the four apps injecting scripts through <code>content_for_header</code>, the <code>image_url</code> call with no width serving a 2,400px hero to a 390px screen, the <code>loading="lazy"</code> that Dawn-derived themes apply to the first image in a loop, the checkout settings requiring a company name nobody uses, and the app pixel firing a second <code>purchase</code> event alongside the native one.</p>
+
+<p>It also states what each fix requires &mdash; a theme change, an app change, a settings change, or a plan upgrade &mdash; because a recommendation a merchant cannot act on is noise.</p>
+
+<h2 id="honest">What it will not do</h2>
+
+<p><strong>It will not predict a percentage lift.</strong> Not once, anywhere. The honest form is: here is the measurement, here is the mechanism, here is the metric to watch and when we will read it. Every workflow says so, and a build-time check refuses to package the product if a prediction has crept into a file.</p>
+
+<p><strong>It will not recommend manipulative tactics.</strong> Fake testimonials or reviews, invented customer numbers, countdown timers without a real deadline, stock scarcity that is not tracked, hidden fees, drip pricing, pre-selected paid add-ons, cancellation harder than signup, confirmshaming, deceptive button labels, or tracking without the consent your jurisdiction requires. The list is explicit, and it is repeated in every workflow rather than stated once &mdash; because a prohibition at the top of a long session does not survive to the end of it.</p>
+
+<p><strong>It will not tell you to A/B test everything.</strong> There is a whole workflow whose job is to tell you not to. Most sites do not have the traffic for a useful experiment, and running an underpowered test is worse than running none: it produces a number, and the number gets quoted.</p>
+
+<h2 id="workflow">What using it looks like</h2>
+
+<ol>
+  <li>Open <code>START-HERE.md</code>. It routes you to one file based on your situation.</li>
+  <li>Open <code>01-core/MASTER-CRO-AUDIT.md</code>, fill in the bracketed values, hand it to Claude Code.</li>
+  <li>It runs discovery and stops. You read what it found before it continues.</li>
+  <li>It produces findings with evidence &mdash; the URL, the element, the device, the viewport, and how many attempts reproduced it.</li>
+  <li>You score them, band them, and do the top one in a separate session.</li>
+  <li>You validate it, then do the next.</li>
+</ol>
+
+<p>If you only ever use the master audit and the prioritisation framework, the toolkit has done its job.</p>
+
+<h2 id="platforms">Platforms</h2>
+
+<p>Shopify has a dedicated module that reads the theme source. WooCommerce, Webflow and Squarespace, and JavaScript frameworks each have their own file, because what goes wrong differs and so does what is fixable. Everything else applies anywhere.</p>
+
+<h2 id="compare">How the three products differ</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Conversion &amp; Revenue</th><th>SEO &amp; Website Audit</th><th>Website Launch System</th></tr></thead>
+<tbody>
+<tr><td>Price</td><td>$19.99</td><td>$19.99</td><td>$19.99</td></tr>
+<tr><td>Best for</td><td>Traffic that under-converts</td><td>A site that is not ranking</td><td>A site you are building</td></tr>
+<tr><td>Conversion auditing</td><td>Primary</td><td>Not covered</td><td>One landing-page workflow</td></tr>
+<tr><td>Funnel and drop-off analysis</td><td>Complete</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Experimentation</td><td>Complete</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Analytics and measurement</td><td>Complete</td><td>Search data only</td><td>Setup level</td></tr>
+<tr><td>Ecommerce and SaaS specifics</td><td>Complete</td><td>Not covered</td><td>Build level</td></tr>
+<tr><td>Conversion copy</td><td>Complete</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Technical SEO</td><td>Not covered</td><td>Complete</td><td>Included</td></tr>
+<tr><td>Search Console and Bing</td><td>Not covered</td><td>Complete</td><td>Summary level</td></tr>
+<tr><td>Content auditing for search</td><td>Not covered</td><td>Complete</td><td>Not covered</td></tr>
+<tr><td>Accessibility</td><td>Conversion path only</td><td>SEO overlap only</td><td>Complete</td></tr>
+<tr><td>Performance</td><td>Conversion effect only</td><td>Core Web Vitals in full</td><td>Included</td></tr>
+<tr><td>Planning and architecture</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+<tr><td>Security audits</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+<tr><td>Git, CI/CD, deployment</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+</tbody>
+</table>
+</div>
+<p>All three are also sold together as the <a href="/products/complete-site-builder-stack">Complete Site Builder Stack</a>, at less than buying them separately. Both figures are shown on that page. There is also a fourth product for the stage after launch: the <a href="/products/claude-code-website-operations-maintenance-system">Website Operations &amp; Maintenance System</a> covers monitoring, security, backups, updates, deploys and incidents, and is sold on its own. If only one column above describes your problem, buy that one &mdash; there is no advantage to owning a system you are not going to open.</p>
+
+
+<p>They are designed to sit end to end: the Launch System builds it, the SEO toolkit gets it found, this one turns the traffic into revenue. Where they overlap, this toolkit defers rather than duplicates &mdash; full accessibility auditing is in the Launch System, search performance is in the SEO toolkit, and the workflows here say so where they stop.</p>
+
+<p>Buying one does not include the others, and there is no automatic upgrade credit. If you want more than one, buy more than one.</p>
+
+<h2 id="delivery">Delivery and licence</h2>
+
+<p>A single ZIP, delivered by download immediately after purchase. 99 files, 213&nbsp;KB, all plain Markdown &mdash; nothing to install and nothing that expires. A published SHA-256 checksum accompanies the download so you can verify what you received.</p>
+
+<p>Licensed to one person for unlimited projects, including client work. You may not redistribute or resell it. Full terms are in <code>LICENSE.md</code> inside the archive.</p>
+
+<h2 id="notpromised">What is not promised</h2>
+
+<p>No conversion rate, no revenue outcome, no percentage. The toolkit is explicit throughout that predicted lifts cannot be made honestly, and that applies to the product itself as much as to the reports you produce with it.</p>
+
+<p>What you get instead is a defensible order of work, findings that carry their evidence, and a way to find out whether each change did anything.</p>

@@ -1,0 +1,126 @@
+{%- comment -%}
+  Build -> Rank -> Convert: the lifecycle page.
+
+  Three stages, each answering the question a visitor arrives with, then the
+  bundle. Every product is resolved through `all_products[handle]` so the title
+  and price shown are the live ones; a product that is drafted or deleted drops
+  its whole stage rather than rendering a dead link at a stale price.
+
+  The supporting guides under each stage come from blocks rather than from the
+  content graph, because the choice of which two or three guides best serve a
+  stage is editorial and the graph does not model it. Each is resolved against
+  the blog so a renamed article disappears instead of 404ing.
+
+  No urgency, no countdown, no saving stated here: the bundle's own page owns
+  the price comparison and computes it from the live products. Restating a
+  saving here would be a second number that could disagree with it.
+{%- endcomment -%}
+
+{%- comment -%} Liquid rejects a filter inside a bracket lookup. {%- endcomment -%}
+{%- assign blog_handle = section.settings.blog | default: 'guides' -%}
+{%- assign blog = blogs[blog_handle] -%}
+
+<section class="sbs-section" id="{{ section.settings.anchor | default: 'lifecycle' | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ol class="sbs-life">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'stage' -%}
+          {%- assign p = all_products[block.settings.product] -%}
+          {%- if p != blank and p.available -%}
+            <li class="sbs-life__stage{% if block.settings.is_bundle %} sbs-life__stage--all{% endif %}"
+                {{ block.shopify_attributes }}>
+              <div class="sbs-life__head">
+                <span class="sbs-life__label">{{ block.settings.stage | escape }}</span>
+                <h3><a href="{{ p.url }}" data-sbs-track="lifecycle_product_clicked">{{ p.title | escape }}</a></h3>
+                <p class="sbs-life__price">{{ p.price | money_without_trailing_zeros }}</p>
+              </div>
+
+              {%- if block.settings.question != blank -%}
+                <blockquote class="sbs-life__q">{{ block.settings.question | escape }}</blockquote>
+              {%- endif -%}
+              {%- if block.settings.body != blank -%}
+                <p class="sbs-life__body">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+
+              {%- comment -%} Supporting guides, resolved so a rename cannot 404. {%- endcomment -%}
+              {%- assign handles = block.settings.guides | split: ',' -%}
+              {%- assign shown = 0 -%}
+              {%- capture guide_list -%}
+                {%- for h in handles -%}
+                  {%- assign gh = h | strip -%}
+                  {%- assign qualified = blog.handle | append: '/' | append: gh -%}
+                  {%- assign a = blog.articles | where: 'handle', qualified | first -%}
+                  {%- unless a -%}{%- assign a = blog.articles | where: 'handle', gh | first -%}{%- endunless -%}
+                  {%- if a != blank -%}
+                    {%- assign shown = shown | plus: 1 -%}
+                    <li><a href="{{ a.url }}" data-sbs-track="lifecycle_guide_clicked">{{ a.title | escape }}</a></li>
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endcapture -%}
+              {%- if shown > 0 -%}
+                <div class="sbs-life__guides">
+                  <p class="sbs-life__guides-h">Read first, free</p>
+                  <ul>{{ guide_list }}</ul>
+                </div>
+              {%- endif -%}
+
+              <p class="sbs-life__cta">
+                <a class="sbs-btn {% if block.settings.is_bundle %}sbs-btn--primary{% else %}sbs-btn--ghost{% endif %}"
+                   href="{{ p.url }}" data-sbs-track="lifecycle_product_clicked">
+                  {{ block.settings.cta_label | default: 'See the product' | escape }}
+                </a>
+              </p>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+
+    {%- if section.settings.note != blank -%}
+      <p class="sbs-life__note">{{ section.settings.note }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Lifecycle",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "lifecycle" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The lifecycle" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Build, then rank, then convert" },
+    { "type": "textarea", "id": "intro", "label": "Intro" },
+    { "type": "text", "id": "blog", "label": "Blog handle", "default": "guides" },
+    { "type": "richtext", "id": "note", "label": "Note under the stages" }
+  ],
+  "blocks": [
+    {
+      "type": "stage",
+      "name": "Stage",
+      "settings": [
+        { "type": "text", "id": "stage", "label": "Stage label" },
+        { "type": "text", "id": "product", "label": "Product handle",
+          "info": "Resolved live. The stage is omitted if the product is unavailable." },
+        { "type": "text", "id": "question", "label": "The question a visitor arrives with" },
+        { "type": "textarea", "id": "body", "label": "What it does" },
+        { "type": "textarea", "id": "guides", "label": "Supporting guide handles, comma separated" },
+        { "type": "text", "id": "cta_label", "label": "CTA label" },
+        { "type": "checkbox", "id": "is_bundle", "label": "This is the complete stack", "default": false }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Lifecycle" }]
+}
+{% endschema %}

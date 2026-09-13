@@ -1,0 +1,14 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-cart",
+      "settings": {
+        "heading": "Your cart"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

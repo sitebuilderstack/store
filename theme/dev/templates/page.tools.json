@@ -1,0 +1,16 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-resource",
+      "settings": {
+        "crumb_parent": false,
+        "wide": true,
+        "show_cta": false
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
