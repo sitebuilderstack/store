@@ -1,0 +1,2246 @@
+[
+  {
+    "query": "claude code ai",
+    "impressions": 1058424,
+    "broad": 1082473,
+    "seeds": [
+      "ai coding assistant",
+      "ai web development",
+      "anthropic claude code",
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code setup",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow",
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code docs",
+    "impressions": 37643,
+    "broad": 43670,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code setup",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code tutorial",
+      "claude code website",
+      "claude code workflow",
+      "claude md"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "ipps-a landing page",
+    "impressions": 22591,
+    "broad": 22591,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude fable 5",
+    "impressions": 16486,
+    "broad": 31937,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code skills",
+    "impressions": 14150,
+    "broad": 20168,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "anthropic claude code",
+    "impressions": 12439,
+    "broad": 17035,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website builder",
+    "impressions": 10086,
+    "broad": 21289,
+    "seeds": [
+      "ai website development",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code github",
+    "impressions": 9486,
+    "broad": 14306,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify online store",
+    "impressions": 9467,
+    "broad": 11232,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "what is claude",
+    "impressions": 7973,
+    "broad": 45895,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "claude code app",
+    "impressions": 7390,
+    "broad": 9097,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code agent",
+    "impressions": 7327,
+    "broad": 10760,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "deep ai chat",
+    "impressions": 6967,
+    "broad": 7578,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code anthropic",
+    "impressions": 6921,
+    "broad": 9609,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code terminal",
+    "impressions": 6388,
+    "broad": 7941,
+    "seeds": [
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code documentation",
+    "impressions": 6368,
+    "broad": 7895,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow",
+      "claude md"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "claude ai anthropic",
+    "impressions": 5640,
+    "broad": 6246,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claudecode claudecode.us com",
+    "impressions": 5326,
+    "broad": 5326,
+    "seeds": [
+      "anthropic claude code",
+      "claude code agent",
+      "claude code guide"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude certified architect",
+    "impressions": 5004,
+    "broad": 7864,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai deep chat",
+    "impressions": 4959,
+    "broad": 5460,
+    "seeds": [
+      "ai web development",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code doc",
+    "impressions": 4280,
+    "broad": 5120,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code setup",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow",
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "perplexity ai search",
+    "impressions": 4263,
+    "broad": 5404,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "build your store",
+    "impressions": 4196,
+    "broad": 5378,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai claude code",
+    "impressions": 4022,
+    "broad": 5303,
+    "seeds": [
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow",
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "what is shopify",
+    "impressions": 3754,
+    "broad": 4255,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "jh landing page",
+    "impressions": 3675,
+    "broad": 3675,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code plans",
+    "impressions": 3553,
+    "broad": 4819,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "create a website",
+    "impressions": 3251,
+    "broad": 16727,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify website builder",
+    "impressions": 3105,
+    "broad": 3181,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai chat deep",
+    "impressions": 3096,
+    "broad": 3568,
+    "seeds": [
+      "ai web development",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "perplexity ai website",
+    "impressions": 3000,
+    "broad": 3000,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude ai website",
+    "impressions": 2970,
+    "broad": 3226,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "everything claude code",
+    "impressions": 2860,
+    "broad": 4541,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai search engine",
+    "impressions": 2569,
+    "broad": 7614,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "make a website",
+    "impressions": 2494,
+    "broad": 22413,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding meaning",
+    "impressions": 2388,
+    "broad": 2509,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude for teachers",
+    "impressions": 2380,
+    "broad": 2528,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "clause ai website",
+    "impressions": 2247,
+    "broad": 2247,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code overview",
+    "impressions": 1987,
+    "broad": 2387,
+    "seeds": [
+      "anthropic claude code",
+      "claude code",
+      "claude code agent",
+      "claude code best practices",
+      "claude code examples",
+      "claude code guide",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best website builder",
+    "impressions": 1870,
+    "broad": 2760,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "deep chat ai",
+    "impressions": 1863,
+    "broad": 1863,
+    "seeds": [
+      "ai web development",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "build a website",
+    "impressions": 1806,
+    "broad": 7931,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "anthropic claude sub",
+    "impressions": 1642,
+    "broad": 1936,
+    "seeds": [
+      "claude code agent"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "chat ai deep",
+    "impressions": 1636,
+    "broad": 1712,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "codex ai coding",
+    "impressions": 1550,
+    "broad": 1774,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website maker",
+    "impressions": 1517,
+    "broad": 1960,
+    "seeds": [
+      "ai website builder",
+      "ai website development",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code ollama",
+    "impressions": 1394,
+    "broad": 1818,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "chai ai website",
+    "impressions": 1372,
+    "broad": 1372,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude agent sdk",
+    "impressions": 1361,
+    "broad": 1414,
+    "seeds": [
+      "claude code agent"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website builder ai",
+    "impressions": 1329,
+    "broad": 2055,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best coding ai",
+    "impressions": 1094,
+    "broad": 1252,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "gemini ai website",
+    "impressions": 1001,
+    "broad": 1021,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude ai training",
+    "impressions": 997,
+    "broad": 1499,
+    "seeds": [
+      "claude code tutorial"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "grok ai website",
+    "impressions": 908,
+    "broad": 908,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai store builder",
+    "impressions": 829,
+    "broad": 2094,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "build your story",
+    "impressions": 795,
+    "broad": 795,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website maker ai",
+    "impressions": 790,
+    "broad": 999,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "deepai image generator",
+    "impressions": 773,
+    "broad": 776,
+    "seeds": [
+      "ai web development",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai code generator",
+    "impressions": 760,
+    "broad": 1232,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code agents",
+    "impressions": 734,
+    "broad": 893,
+    "seeds": [
+      "claude code agent"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code plugins",
+    "impressions": 653,
+    "broad": 727,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vetclaims ai website",
+    "impressions": 637,
+    "broad": 637,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "jobhire ai website",
+    "impressions": 628,
+    "broad": 628,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website ai builder",
+    "impressions": 577,
+    "broad": 607,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "talkie ai website",
+    "impressions": 557,
+    "broad": 557,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code tutorial",
+    "impressions": 551,
+    "broad": 601,
+    "seeds": [
+      "claude code guide"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "claude code certification",
+    "impressions": 534,
+    "broad": 534,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "creative mode ai",
+    "impressions": 529,
+    "broad": 529,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai for coding",
+    "impressions": 520,
+    "broad": 4498,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "www.lovable.dev vibe coding",
+    "impressions": 483,
+    "broad": 483,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "character ai website",
+    "impressions": 475,
+    "broad": 493,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude coding ai",
+    "impressions": 464,
+    "broad": 464,
+    "seeds": [
+      "anthropic claude code"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding definition",
+    "impressions": 447,
+    "broad": 447,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code setup",
+    "impressions": 445,
+    "broad": 525,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify store builder",
+    "impressions": 442,
+    "broad": 1202,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website creator",
+    "impressions": 440,
+    "broad": 596,
+    "seeds": [
+      "ai website builder",
+      "ai website development",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page examples",
+    "impressions": 435,
+    "broad": 435,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "best website builders",
+    "impressions": 431,
+    "broad": 431,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "extranet landing page",
+    "impressions": 423,
+    "broad": 1817,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify sign up",
+    "impressions": 421,
+    "broad": 450,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "what's vibe coding",
+    "impressions": 421,
+    "broad": 421,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "ippsa landing page",
+    "impressions": 419,
+    "broad": 419,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "manus ai website",
+    "impressions": 404,
+    "broad": 404,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website generator",
+    "impressions": 394,
+    "broad": 601,
+    "seeds": [
+      "ai website builder",
+      "ai website development",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe code meaning",
+    "impressions": 393,
+    "broad": 393,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "copilot ai website",
+    "impressions": 356,
+    "broad": 369,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "kimi claude code",
+    "impressions": 354,
+    "broad": 354,
+    "seeds": [
+      "claude code",
+      "claude code best practices",
+      "claude code examples",
+      "claude code project",
+      "claude code prompts",
+      "claude code seo",
+      "claude code shopify",
+      "claude code templates",
+      "claude code tips",
+      "claude code website",
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify official website",
+    "impressions": 350,
+    "broad": 350,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude dynamic workflows",
+    "impressions": 348,
+    "broad": 348,
+    "seeds": [
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai coding tools",
+    "impressions": 347,
+    "broad": 414,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "andrej karpathy claude.md",
+    "impressions": 341,
+    "broad": 368,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "crisp landing page",
+    "impressions": 329,
+    "broad": 329,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude md file",
+    "impressions": 315,
+    "broad": 372,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website designer",
+    "impressions": 312,
+    "broad": 312,
+    "seeds": [
+      "ai website builder",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website builders",
+    "impressions": 311,
+    "broad": 365,
+    "seeds": [
+      "ai website builder",
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "code generator app",
+    "impressions": 307,
+    "broad": 756,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding tools",
+    "impressions": 305,
+    "broad": 421,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "plaud ai web",
+    "impressions": 303,
+    "broad": 303,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "using claude code",
+    "impressions": 298,
+    "broad": 12312,
+    "seeds": [
+      "claude code agent",
+      "claude code setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "pippit ai website",
+    "impressions": 291,
+    "broad": 291,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code guide",
+    "impressions": 274,
+    "broad": 274,
+    "seeds": [
+      "anthropic claude code",
+      "claude code best practices",
+      "claude code tutorial"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "website creator ai",
+    "impressions": 274,
+    "broad": 277,
+    "seeds": [
+      "ai website builder"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "open ai developer",
+    "impressions": 266,
+    "broad": 415,
+    "seeds": [
+      "ai developer tools"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website builder sites",
+    "impressions": 260,
+    "broad": 260,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "emochi ai website",
+    "impressions": 253,
+    "broad": 253,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude ai tutorial",
+    "impressions": 251,
+    "broad": 587,
+    "seeds": [
+      "claude code tutorial"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "base44 website builder",
+    "impressions": 250,
+    "broad": 250,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify official site",
+    "impressions": 248,
+    "broad": 248,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best ai websites",
+    "impressions": 247,
+    "broad": 247,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "claude code enterprise",
+    "impressions": 246,
+    "broad": 331,
+    "seeds": [
+      "anthropic claude code"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude ai coding",
+    "impressions": 246,
+    "broad": 280,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "chat ai website",
+    "impressions": 232,
+    "broad": 250,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "define vibe coding",
+    "impressions": 231,
+    "broad": 231,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify create account",
+    "impressions": 222,
+    "broad": 222,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "lovable ai website",
+    "impressions": 221,
+    "broad": 1010,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website create code",
+    "impressions": 220,
+    "broad": 220,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page meaning",
+    "impressions": 219,
+    "broad": 219,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "meta ai website",
+    "impressions": 216,
+    "broad": 216,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best ai sites",
+    "impressions": 212,
+    "broad": 212,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "claude ai web",
+    "impressions": 211,
+    "broad": 215,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai building website",
+    "impressions": 210,
+    "broad": 210,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "online store builder",
+    "impressions": 203,
+    "broad": 301,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude for beginners",
+    "impressions": 202,
+    "broad": 202,
+    "seeds": [
+      "claude code tutorial"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai landing zone",
+    "impressions": 199,
+    "broad": 549,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding ai",
+    "impressions": 197,
+    "broad": 394,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude best practices",
+    "impressions": 189,
+    "broad": 189,
+    "seeds": [
+      "anthropic claude code",
+      "claude code best practices",
+      "claude code guide"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "website generator ai",
+    "impressions": 188,
+    "broad": 201,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "karpathy claude md",
+    "impressions": 185,
+    "broad": 266,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "andrew karpathy github",
+    "impressions": 182,
+    "broad": 182,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "web site builder",
+    "impressions": 180,
+    "broad": 180,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify shopping site",
+    "impressions": 174,
+    "broad": 174,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "deepseek ai website",
+    "impressions": 174,
+    "broad": 174,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai code writer",
+    "impressions": 172,
+    "broad": 172,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "what is claude.md",
+    "impressions": 171,
+    "broad": 296,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "ai web builder",
+    "impressions": 162,
+    "broad": 162,
+    "seeds": [
+      "ai web development",
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code workflows",
+    "impressions": 162,
+    "broad": 162,
+    "seeds": [
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "my shopify store",
+    "impressions": 160,
+    "broad": 1717,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website builder software",
+    "impressions": 157,
+    "broad": 157,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "website ai maker",
+    "impressions": 155,
+    "broad": 155,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code ultracode",
+    "impressions": 154,
+    "broad": 154,
+    "seeds": [
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "google ai website",
+    "impressions": 154,
+    "broad": 206,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai coding agent",
+    "impressions": 151,
+    "broad": 321,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding platforms",
+    "impressions": 150,
+    "broad": 204,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "create own website",
+    "impressions": 146,
+    "broad": 197,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "google vibe coding",
+    "impressions": 144,
+    "broad": 155,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "whats vibe coding",
+    "impressions": 140,
+    "broad": 140,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coded meaning",
+    "impressions": 136,
+    "broad": 136,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "zoho landing page",
+    "impressions": 133,
+    "broad": 133,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai vibe coding",
+    "impressions": 131,
+    "broad": 131,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude code memory",
+    "impressions": 129,
+    "broad": 129,
+    "seeds": [
+      "claude md"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "wegic ai website",
+    "impressions": 128,
+    "broad": 128,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "fake website maker",
+    "impressions": 126,
+    "broad": 126,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "higgsfield ai website",
+    "impressions": 121,
+    "broad": 121,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai mod maker",
+    "impressions": 117,
+    "broad": 326,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "dootchi ai website",
+    "impressions": 110,
+    "broad": 110,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ultracode claude code",
+    "impressions": 109,
+    "broad": 109,
+    "seeds": [
+      "claude code workflow"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "base44 official website",
+    "impressions": 108,
+    "broad": 108,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude vibe coding",
+    "impressions": 107,
+    "broad": 107,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page design",
+    "impressions": 105,
+    "broad": 764,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "bolt ai website",
+    "impressions": 101,
+    "broad": 105,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify store examples",
+    "impressions": 100,
+    "broad": 100,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "informational"
+  },
+  {
+    "query": "ai coding benchmarks",
+    "impressions": 96,
+    "broad": 96,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page builder",
+    "impressions": 94,
+    "broad": 137,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best code ai",
+    "impressions": 92,
+    "broad": 92,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "claude code rules",
+    "impressions": 90,
+    "broad": 90,
+    "seeds": [
+      "anthropic claude code",
+      "claude code best practices",
+      "claude code guide"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "using claude ai",
+    "impressions": 89,
+    "broad": 89,
+    "seeds": [
+      "claude code tutorial"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "top website builders",
+    "impressions": 89,
+    "broad": 89,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "website building ai",
+    "impressions": 88,
+    "broad": 88,
+    "seeds": [
+      "ai website builder",
+      "build website with ai"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page templates",
+    "impressions": 80,
+    "broad": 82,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "ai development tools",
+    "impressions": 80,
+    "broad": 80,
+    "seeds": [
+      "ai developer tools"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "code ai generator",
+    "impressions": 79,
+    "broad": 79,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "google code ai",
+    "impressions": 79,
+    "broad": 79,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai coding agents",
+    "impressions": 74,
+    "broad": 74,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website design",
+    "impressions": 74,
+    "broad": 74,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai for code",
+    "impressions": 73,
+    "broad": 243,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai web automation",
+    "impressions": 72,
+    "broad": 72,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "emergent ai website",
+    "impressions": 72,
+    "broad": 77,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page definition",
+    "impressions": 72,
+    "broad": 72,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "uc bearcat landing",
+    "impressions": 71,
+    "broad": 71,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify website build",
+    "impressions": 69,
+    "broad": 69,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe code ai",
+    "impressions": 66,
+    "broad": 66,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "google ai code",
+    "impressions": 65,
+    "broad": 65,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding meme",
+    "impressions": 62,
+    "broad": 62,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "create a site",
+    "impressions": 61,
+    "broad": 196,
+    "seeds": [
+      "website build checklist"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "gemini ai code",
+    "impressions": 57,
+    "broad": 57,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "best ai coding",
+    "impressions": 55,
+    "broad": 117,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "web design ai",
+    "impressions": 53,
+    "broad": 53,
+    "seeds": [
+      "ai website builder"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "zeta ai website",
+    "impressions": 51,
+    "broad": 51,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "make minecraft mods",
+    "impressions": 43,
+    "broad": 749,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "create shopify store",
+    "impressions": 42,
+    "broad": 42,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "uc success factors",
+    "impressions": 42,
+    "broad": 42,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "claude ai use",
+    "impressions": 41,
+    "broad": 41,
+    "seeds": [
+      "claude code tutorial"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "suno ai website",
+    "impressions": 41,
+    "broad": 41,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "seo writing ai",
+    "impressions": 41,
+    "broad": 41,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page ai",
+    "impressions": 35,
+    "broad": 35,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding google",
+    "impressions": 32,
+    "broad": 70,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "vibe coding course",
+    "impressions": 31,
+    "broad": 65,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "pixelchat ai website",
+    "impressions": 28,
+    "broad": 28,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "saas landing page",
+    "impressions": 28,
+    "broad": 31,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "gemini ai web",
+    "impressions": 27,
+    "broad": 27,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page website",
+    "impressions": 26,
+    "broad": 26,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "shopify ecommerce website",
+    "impressions": 25,
+    "broad": 25,
+    "seeds": [
+      "build shopify store",
+      "shopify store setup"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai seo tools",
+    "impressions": 24,
+    "broad": 24,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "llm coding benchmark",
+    "impressions": 21,
+    "broad": 21,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page template",
+    "impressions": 20,
+    "broad": 139,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "claude ai developer",
+    "impressions": 16,
+    "broad": 16,
+    "seeds": [
+      "ai developer tools"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "google ai coding",
+    "impressions": 15,
+    "broad": 15,
+    "seeds": [
+      "ai coding assistant",
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "seo for beginners",
+    "impressions": 15,
+    "broad": 15,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "seo audit tools",
+    "impressions": 15,
+    "broad": 15,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "buyer"
+  },
+  {
+    "query": "seasoul ai web",
+    "impressions": 12,
+    "broad": 12,
+    "seeds": [
+      "ai web development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website cloner",
+    "impressions": 12,
+    "broad": 49,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "lemonade ai website",
+    "impressions": 11,
+    "broad": 11,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "github vibe coding",
+    "impressions": 9,
+    "broad": 9,
+    "seeds": [
+      "vibe coding"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "semrush site audit",
+    "impressions": 9,
+    "broad": 10,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai coding plan",
+    "impressions": 8,
+    "broad": 63,
+    "seeds": [
+      "ai coding assistant"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "ai website detector",
+    "impressions": 6,
+    "broad": 6,
+    "seeds": [
+      "ai website development"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "website seo audit",
+    "impressions": 2,
+    "broad": 2,
+    "seeds": [
+      "ai seo audit"
+    ],
+    "intent": "navigational/other"
+  },
+  {
+    "query": "landing page significado",
+    "impressions": 1,
+    "broad": 1,
+    "seeds": [
+      "ai landing page"
+    ],
+    "intent": "navigational/other"
+  }
+]

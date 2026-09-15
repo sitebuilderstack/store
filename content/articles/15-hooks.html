@@ -1,0 +1,316 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#why">Requested versus enforced</a></li>
+    <li><a href="#shape">The shape of a hook</a></li>
+    <li><a href="#events">The events you will actually use</a></li>
+    <li><a href="#matchers">Matchers</a></li>
+    <li><a href="#input">What a hook receives</a></li>
+    <li><a href="#exit">Exit codes, and the one that blocks</a></li>
+    <li><a href="#json">Richer control through JSON output</a></li>
+    <li><a href="#recipes">Four hooks worth having</a></li>
+    <li><a href="#types">Handlers other than shell commands</a></li>
+    <li><a href="#where">Where hooks live</a></li>
+    <li><a href="#debug">Debugging, and the silent failure</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">Requested versus enforced</h2>
+
+<p>Everything else you write for Claude Code is a request. <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a> rules are followed but not guaranteed. <a href="/blogs/guides/claude-code-skills">Skills</a> run when invoked. <a href="/blogs/guides/claude-code-subagents">Subagents</a> do what their prompt says.</p>
+
+<p>Hooks are different in one respect that changes where they belong: <strong>they run.</strong> A hook is a shell command, HTTP endpoint, LLM prompt, or agent bound to a lifecycle event, and it fires whether or not anyone remembered.</p>
+
+<p>That gives you a clean rule for deciding what goes where:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>The rule is…</th><th>Put it in</th></tr></thead>
+<tbody>
+<tr><td>A convention, with a reason worth reading</td><td><code>CLAUDE.md</code></td></tr>
+<tr><td>A procedure you run sometimes</td><td>A skill</td></tr>
+<tr><td>Mechanical and unconditional</td><td><strong>A hook</strong></td></tr>
+<tr><td>Serious if missed, in an organisation</td><td>Managed settings</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A formatter that runs after every edit does not need anybody to follow a rule. Moving that class of thing out of <code>CLAUDE.md</code> also makes the file shorter, which makes everything left in it work better.</p>
+
+<h2 id="shape">The shape of a hook</h2>
+
+<p>Hooks live in a <code>hooks</code> object in settings:</p>
+
+<pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs npm run lint:fix"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+<p>Read it as three nested levels: the <strong>event</strong> (<code>PostToolUse</code>), a list of <strong>matchers</strong> filtering when to fire, and for each, a list of <strong>handlers</strong> to run.</p>
+
+<p>The detail that trips people up on their first hook: <strong>input arrives as JSON on stdin</strong>, not as arguments. That is why the example pipes through <code>jq</code> to pull out the file path.</p>
+
+<h2 id="events">The events you will actually use</h2>
+
+<p>There are a great many events — session lifecycle, subagent lifecycle, task lifecycle, config changes, compaction, worktrees, MCP elicitation. Five cover almost every practical use:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Event</th><th>Fires</th><th>Can block</th></tr></thead>
+<tbody>
+<tr><td><code>PreToolUse</code></td><td>Before a tool call executes</td><td><strong>Yes</strong></td></tr>
+<tr><td><code>PostToolUse</code></td><td>After a tool call succeeds</td><td>No</td></tr>
+<tr><td><code>PostToolUseFailure</code></td><td>After a tool call fails</td><td>No</td></tr>
+<tr><td><code>UserPromptSubmit</code></td><td>Before Claude processes your prompt</td><td><strong>Yes</strong></td></tr>
+<tr><td><code>SessionStart</code></td><td>Session begins or resumes</td><td>No</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>PreToolUse</code> is the one that provides safety, because it is the one that can stop something happening. <code>PostToolUse</code> is the one that provides automation.</p>
+
+<p>Beyond those, worth knowing they exist: <code>Stop</code> and <code>StopFailure</code> when a turn ends, <code>SubagentStart</code> and <code>SubagentStop</code>, <code>PreCompact</code> and <code>PostCompact</code>, <code>FileChanged</code> for watching files on disk, and <code>Notification</code> for permission and idle prompts.</p>
+
+<h2 id="matchers">Matchers</h2>
+
+<p>What <code>matcher</code> filters on depends on the event. For tool events it is the tool name:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Matcher</th><th>Matches</th></tr></thead>
+<tbody>
+<tr><td><code>"*"</code> or omitted</td><td>Everything</td></tr>
+<tr><td><code>Bash</code></td><td>Only the Bash tool</td></tr>
+<tr><td><code>Edit|Write</code></td><td>Either — <code>,</code> works as well as <code>|</code></td></tr>
+<tr><td><code>mcp__.*__write.*</code></td><td>Regex, for anything with other characters</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Plain strings of letters, digits, underscores, hyphens and spaces are exact matches. Anything else is treated as a regular expression — which means a matcher with a stray <code>.</code> or <code>*</code> behaves differently than you may intend.</p>
+
+<p>Other events match on other things: <code>SessionStart</code> on <code>startup</code>, <code>resume</code>, <code>clear</code>, <code>compact</code> or <code>fork</code>; <code>SubagentStart</code> on the agent type; <code>FileChanged</code> on filenames such as <code>.envrc|.env</code>.</p>
+
+<h2 id="input">What a hook receives</h2>
+
+<p>Every hook gets a common set of fields on stdin:</p>
+
+<pre><code>{
+  "session_id": "abc123",
+  "transcript_path": "/path/to/transcript.jsonl",
+  "cwd": "/current/directory",
+  "permission_mode": "default",
+  "hook_event_name": "PreToolUse",
+  "agent_id": "...",
+  "agent_type": "..."
+}</code></pre>
+
+<p>Tool events add the part you usually want:</p>
+
+<pre><code>{
+  "tool_name": "Bash",
+  "tool_input": { "command": "npm test", "description": "Run tests" },
+  "tool_use_id": "toolu_01ABC123...",
+  "permission_decision": "allow"
+}</code></pre>
+
+<p><code>agent_id</code> and <code>agent_type</code> are worth noting: a hook can tell whether it is running inside a subagent and behave differently, which is how you exempt exploration from a rule you want on the main thread.</p>
+
+<h2 id="exit">Exit codes, and the one that blocks</h2>
+
+<p>This is the part to get right, because the semantics are not what most people assume.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Exit code</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>0</strong></td><td>Success. Stdout starting with <code>{</code> is parsed as JSON output; other stdout goes to the debug log — except on <code>UserPromptSubmit</code>, <code>UserPromptExpansion</code> and <code>SessionStart</code>, where it reaches Claude's context.</td></tr>
+<tr><td><strong>2</strong></td><td><strong>Blocks the action</strong> on events that support it. The message comes from the JSON decision reason, or from stderr.</td></tr>
+<tr><td>Anything else</td><td>Generally ignored. Only JSON output controls the decision. Invalid JSON is a non-blocking error and the action proceeds.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two consequences worth internalising:</p>
+
+<p><strong>Exit 1 does not block anything.</strong> A hook that fails with a normal error code lets the action through. If you want to stop something, you must exit 2.</p>
+
+<p><strong>Exit 2 cannot be overridden.</strong> Even valid JSON saying <code>permissionDecision: "allow"</code> loses to exit 2.</p>
+
+<p>Blocking works on <code>PreToolUse</code>, <code>UserPromptSubmit</code>, <code>UserPromptExpansion</code>, <code>Stop</code>, <code>SubagentStop</code>, <code>TeammateIdle</code>, <code>TaskCreated</code>, <code>TaskCompleted</code>, <code>ConfigChange</code>, <code>PreCompact</code>, <code>Elicitation</code>, <code>ElicitationResult</code> and <code>WorktreeCreate</code>. Note that <code>WorktreeCreate</code> is the exception that blocks on <em>any</em> non-zero exit.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-hook-exit-codes.png?v=1787943940" alt="Four exit codes and their effects. Exit 0 is success and stdout starting with a brace is parsed as JSON. Exit 2 blocks the action and cannot be overridden even by JSON. Exit 1 does nothing and is ignored. Other codes behave like exit 1, with WorktreeCreate as the one exception."
+       width="1000" height="502" loading="lazy" decoding="async">
+  <figcaption>Exit 1 does not block. If you want to stop something, you must exit 2.</figcaption>
+</figure>
+
+<h2 id="json">Richer control through JSON output</h2>
+
+<p>Rather than exiting 2, a hook can print a decision:</p>
+
+<pre><code>{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Writes to prod config need review"
+  }
+}</code></pre>
+
+<p>Three fields make this more useful than a bare block:</p>
+
+<ul>
+  <li><code>permissionDecisionReason</code> — Claude sees why, so it can adapt rather than retry the same thing.</li>
+  <li><code>additionalContext</code> — inject text into Claude's context. On <code>SessionStart</code>, this is how you feed in the current branch, open incidents, or today's deploy freeze.</li>
+  <li><code>updatedInput</code> — <em>rewrite</em> the tool input rather than rejecting it. Available on <code>PreToolUse</code>. This is the advanced move: silently add <code>--dry-run</code>, redirect a path, cap a limit.</li>
+</ul>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Hooks enforce standards; something has to define them first. The Claude Code Website Launch System supplies that layer &mdash; production CLAUDE.md templates, security and accessibility audits, and launch checklists. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="recipes">Four hooks worth having</h2>
+
+<h3>1. Format after every edit</h3>
+
+<pre><code>{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "jq -r '.tool_input.file_path' | xargs -r npx prettier --write"
+      }]
+    }]
+  }
+}</code></pre>
+
+<p>Formatting becomes a property of the system rather than a rule anyone follows. Delete the corresponding line from your <code>CLAUDE.md</code> afterwards.</p>
+
+<h3>2. Block writes to files that should never change</h3>
+
+<pre><code>#!/bin/bash
+input=$(cat)
+path=$(jq -r '.tool_input.file_path // empty' <<<"$input")
+
+case "$path" in
+  */dist/*|*/node_modules/*|*.lock|*/migrations/*)
+    echo "Blocked: $path is generated or immutable. Change the source." >&2
+    exit 2
+    ;;
+esac
+exit 0</code></pre>
+
+<p>Wire it to <code>PreToolUse</code> with matcher <code>Write|Edit</code>. This is the class of rule that gets ignored as documentation and enforced perfectly as a hook.</p>
+
+<h3>3. Refuse dangerous shell commands</h3>
+
+<pre><code>#!/bin/bash
+input=$(cat)
+cmd=$(jq -r '.tool_input.command // empty' <<<"$input")
+
+if [[ "$cmd" == *"rm -rf /"* ]] || [[ "$cmd" == *"DROP DATABASE"* ]] \
+   || [[ "$cmd" == *"git push --force"* ]]; then
+  echo "Blocked: destructive command. Run it yourself if you mean it." >&2
+  exit 2
+fi
+exit 0</code></pre>
+
+<p>Keep the list short and specific. A hook that blocks half of what you legitimately do gets disabled, which is worse than not having it.</p>
+
+<h3>4. Inject session context</h3>
+
+<pre><code>{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{
+        "type": "command",
+        "command": "echo \"Branch: $(git branch --show-current). Uncommitted: $(git status --porcelain | wc -l) files.\""
+      }]
+    }]
+  }
+}</code></pre>
+
+<p>On <code>SessionStart</code>, plain stdout reaches Claude's context. Every session starts knowing where it is — without that costing a line in <code>CLAUDE.md</code> forever.</p>
+
+<h2 id="types">Handlers other than shell commands</h2>
+
+<p>A handler does not have to be a script. Five types exist, and two are genuinely interesting:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Type</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>command</code></td><td>A shell command. The default and usually the right one.</td></tr>
+<tr><td><code>http</code></td><td>POSTs the hook input to a URL. For centralised policy or audit logging.</td></tr>
+<tr><td><code>mcp_tool</code></td><td>Calls an <a href="/blogs/guides/claude-code-mcp">MCP</a> tool, with input templating like <code>${tool_input.file_path}</code>.</td></tr>
+<tr><td><code>prompt</code></td><td>Asks a model to judge. <em>"Evaluate whether this is safe."</em></td></tr>
+<tr><td><code>agent</code></td><td>Runs a full agent to decide.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The <code>prompt</code> and <code>agent</code> types let you write policy that needs judgement rather than pattern matching — "is this migration reversible?" is not a regex. Use them sparingly: they add latency to every matching tool call, and a slow hook makes the whole session feel slow.</p>
+
+<p>Useful options on any handler: <code>timeout</code>, <code>async</code> for fire-and-forget, <code>once</code> to run a hook a single time per session, and <code>statusMessage</code> so the user sees what is happening rather than an unexplained pause.</p>
+
+<h2 id="where">Where hooks live</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Location</th><th>Scope</th><th>Shareable</th></tr></thead>
+<tbody>
+<tr><td><code>~/.claude/settings.json</code></td><td>All your projects</td><td>No</td></tr>
+<tr><td><code>.claude/settings.json</code></td><td>This project</td><td><strong>Yes — commit it</strong></td></tr>
+<tr><td><code>.claude/settings.local.json</code></td><td>This project, you only</td><td>No, gitignored</td></tr>
+<tr><td>Managed policy settings</td><td>Organisation-wide</td><td>Admin-controlled</td></tr>
+<tr><td>Plugin <code>hooks/hooks.json</code></td><td>Where the plugin is enabled</td><td>Yes, bundled</td></tr>
+<tr><td>Skill or subagent frontmatter</td><td>Session scope</td><td>Yes, in the file</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Use <code>${CLAUDE_PROJECT_DIR}</code> to reference scripts relative to the project root, so a committed hook works on everyone's machine regardless of where they cloned it.</p>
+
+<p>For organisations, the important row is managed policy settings: <strong>hooks defined there cannot be disabled from outside managed settings.</strong> <code>disableAllHooks</code> turns off everything else, but not those. That is what makes a hook an actual control rather than a strong suggestion — see <a href="/blogs/guides/claude-code-enterprise">Claude Code for teams and enterprise</a>.</p>
+
+<h2 id="debug">Debugging, and the silent failure</h2>
+
+<p>The characteristic hook failure is that <strong>nothing happens and nothing tells you</strong>. A matcher with a typo never fires, and a hook that never fires is indistinguishable from a hook that ran and found nothing wrong.</p>
+
+<p>So test every hook the same way you should test any check: <strong>trigger it deliberately and confirm it fires.</strong> Ask Claude to edit a file your formatter hook watches. Ask it to write to a path your blocking hook should refuse. If the block does not happen, the hook is not working — do not assume it is.</p>
+
+<p>Claude Code records which hooks matched, their exit codes, and their output in the debug log. That is the first place to look, and usually the only place you need to.</p>
+
+<p>Two failure modes that account for most of the rest: <strong>forgetting stdin</strong> — a script reading <code>$1</code> gets nothing, because input arrives as JSON on standard input — and <strong>exiting 1 expecting a block</strong>, which lets the action straight through.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>A hook is only as useful as the standard behind it. <a href="/products/claude-code-website-launch-system">Browse the contents</a> of the Launch System for audits and checklists worth enforcing.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>For the standards worth enforcing in the first place, the free <a href="/pages/claude-code-security-checklist">security checklist</a> and <a href="/pages/claude-code-launch-checklist">launch checklist</a> are both written as individually checkable items.</p>
+
+<p>Hooks are the enforcement layer. <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a> holds the rules and reasons — see <a href="/blogs/guides/claude-md-examples-web-development">four worked examples</a> — <a href="/blogs/guides/claude-code-skills">skills</a> hold procedures, <a href="/blogs/guides/claude-code-subagents">subagents</a> isolate work, <a href="/blogs/guides/claude-code-plugins">plugins</a> distribute all of it, and <a href="/blogs/guides/claude-code-github-actions">GitHub Actions</a> runs it in CI. If you are new to the tool, start with <a href="/blogs/guides/claude-code-terminal-setup">getting started in the terminal</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/hooks" rel="noopener">Claude Code: hooks reference</a> — every event, matcher, input field, exit code and output field</li>
+  <li><a href="https://code.claude.com/docs/en/settings" rel="noopener">Claude Code: settings</a> — where hooks are configured</li>
+  <li><a href="https://code.claude.com/docs/en/security" rel="noopener">Claude Code: security</a> — managed policy settings</li>
+</ul>

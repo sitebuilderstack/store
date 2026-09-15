@@ -1,0 +1,319 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#reach">What an agent actually reaches</a></li>
+    <li><a href="#scope">Scope before anything else</a></li>
+    <li><a href="#workflow">The workflow</a></li>
+    <li><a href="#secrets">Secrets, including the ones in history</a></li>
+    <li><a href="#deps">Dependencies and supply chain</a></li>
+    <li><a href="#authn">Authentication</a></li>
+    <li><a href="#authz">Authorisation, which is the one that matters</a></li>
+    <li><a href="#input">Input handling</a></li>
+    <li><a href="#sessions">Sessions</a></li>
+    <li><a href="#headers">Headers and transport</a></li>
+    <li><a href="#browser">What ships to the browser</a></li>
+    <li><a href="#api">APIs and webhooks</a></li>
+    <li><a href="#pipeline">CI/CD and logging</a></li>
+    <li><a href="#prompt">The audit prompt</a></li>
+    <li><a href="#format">Recording a finding</a></li>
+    <li><a href="#validate">Fix, then prove the fix</a></li>
+    <li><a href="#limits">What this does not replace</a></li>
+  </ol>
+</nav>
+
+<h2 id="reach">What an agent actually reaches</h2>
+
+<p>A security review is not one activity. It is several, and an agent is genuinely useful for some of them, marginal for others, and must not attempt the rest.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-security-audit-reach.png" alt="Seven layers of a security review and how far an agent reaches into each. It reads source code, configuration and dependencies in full, and reaches the deployed site only through requests it makes. It cannot observe running behaviour such as race conditions, must not attempt adversarial testing or exploitation, and cannot decide what threat modelling considers important."
+       width="1000" height="638" loading="lazy" decoding="async">
+  <figcaption>The top four are where it earns its place. The bottom three are not a gap in the tooling — they are a different job.</figcaption>
+</figure>
+
+<p>The distinction that matters most: <strong>Claude Code reads, and it requests. It does not attack.</strong> An audit that stays on the reading side is thorough, repeatable and safe to run against your own production system. One that drifts into probing is penetration testing, needs written authorisation, and should be done by someone who does it for a living.</p>
+
+<p>Say this in the session, because the default behaviour is to be helpful:</p>
+
+<pre><code>This is a defensive audit of code and configuration we own.
+
+Do not attempt exploitation, credential stuffing, brute force,
+scanning of hosts, or any request designed to trigger a
+vulnerability. Read the code, read the configuration, and make
+ordinary requests to our own site only.
+
+Report findings. Do not fix anything yet.</code></pre>
+
+<h2 id="scope">Scope before anything else</h2>
+
+<p>An audit with no scope produces a list of generic advice. Half an hour establishing what the system actually is makes everything after it specific.</p>
+
+<pre><code>Before auditing anything, inventory this project and report:
+
+- Language, framework and major versions
+- How authentication works, and who issues the session
+- Where data lives, and how it is queried
+- Every route or endpoint, and which require auth
+- Third-party services, and what credentials each holds
+- Where files are uploaded to, and what is done with them
+- Every webhook receiver, and how each verifies its sender
+- Admin surfaces, and how they are protected
+- Where the app is deployed, and what the pipeline does
+- Anything handling payment
+
+For each: file paths. If you cannot determine one, say so.</code></pre>
+
+<p>The last line matters. An inventory with honest gaps is useful; one with confident guesses is worse than none, because everything downstream inherits the guess.</p>
+
+<h2 id="workflow">The workflow</h2>
+
+<p>Fifteen passes, in an order chosen so each one narrows the next:</p>
+
+<pre><code>Scope → Inventory → Secrets → Dependencies → Authentication
+  → Authorisation → Input handling → Sessions → Headers
+  → Browser exposure → Infrastructure → CI/CD → Logging
+  → Deployment → Validation</code></pre>
+
+<p>Secrets come third for a reason: a leaked credential makes every other finding academic. Authorisation follows authentication because you cannot review who may do what until you know who the system thinks they are.</p>
+
+<h2 id="secrets">Secrets, including the ones in history</h2>
+
+<p>The most common real finding on a small codebase, and the easiest to check.</p>
+
+<pre><code>Search this repository for credentials in source, configuration,
+build output, and committed artefacts. Include: API keys, access
+tokens, private keys, database URLs with passwords, and any
+hard-coded password including test ones.
+
+Report file and line for each. Do not print the secret value —
+print enough to locate it and no more.</code></pre>
+
+<p>That last instruction is not decoration. An audit report containing the actual keys is itself a disclosure, and it will end up pasted into an issue tracker.</p>
+
+<p>Then the part people miss. <strong>Deleting a secret in a later commit does not remove it from history.</strong></p>
+
+<pre><code>git grep -I --line-number -e 'BEGIN.*PRIVATE KEY' $(git rev-list --all) -- 2&gt;/dev/null | head
+git log -p -S'API_KEY' --oneline | head -50</code></pre>
+
+<p>A dedicated scanner is better than grep for this — <a href="https://github.com/gitleaks/gitleaks" rel="noopener">gitleaks</a> and <a href="https://github.com/trufflesecurity/trufflehog" rel="noopener">trufflehog</a> both scan history, and <a href="https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning" rel="noopener">GitHub secret scanning</a> runs continuously on repositories that enable it.</p>
+
+<p><strong>The rule that follows from a hit is unconditional: any secret that was ever committed is compromised and must be rotated.</strong> Rewriting history does not un-clone the repository, and it does not help if the commit was ever pushed.</p>
+
+<p>Check the client bundle separately. A key that is safe on a server is public the moment it is bundled:</p>
+
+<pre><code>grep -rIn -E '(sk_live|api[_-]?key|secret)' dist/ build/ .next/static/ 2&gt;/dev/null</code></pre>
+
+<h2 id="deps">Dependencies and supply chain</h2>
+
+<p>Now the top category in the <a href="https://owasp.org/Top10/2025/" rel="noopener">OWASP Top 10:2025</a> to have moved: <strong>A03:2025 — Software Supply Chain Failures</strong>, expanded from what was previously the vulnerable-components category.</p>
+
+<pre><code>npm audit --audit-level=high        # or: pnpm audit / yarn npm audit
+pip-audit                            # Python
+bundle audit                         # Ruby</code></pre>
+
+<p>What a scanner tells you and what it does not:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>It finds</th><th>It misses</th></tr></thead>
+<tbody>
+<tr><td>Known CVEs in your lockfile</td><td>Vulnerabilities nobody has reported yet</td></tr>
+<tr><td>Versions with published advisories</td><td>Whether your code reaches the vulnerable path</td></tr>
+<tr><td>Transitive dependencies</td><td>A malicious package with no advisory</td></tr>
+<tr><td></td><td>Typosquats you installed by accident</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The second column is where an agent adds something a scanner cannot. Ask whether the vulnerable function is actually called, and whether each dependency earns its place:</p>
+
+<pre><code>For each high-severity advisory from npm audit, find where the
+affected package is used in our code and say whether the
+vulnerable code path is reachable. If it is not reachable, say so
+rather than recommending an upgrade we may not need.
+
+Separately: list every direct dependency added in the last year,
+what it does, and whether the standard library covers it.</code></pre>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System packages these passes as runnable prompts with the evidence format built in, alongside the accessibility and SEO audits that run beside them. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="authn">Authentication</h2>
+
+<p>Read the implementation, not the login page. What to establish, in order of how much damage each causes:</p>
+
+<ul>
+  <li><strong>Password storage.</strong> A modern algorithm — argon2, bcrypt, scrypt. Not MD5, not SHA-256, not "encrypted".</li>
+  <li><strong>Reset tokens.</strong> Random, single-use, short-lived, invalidated on use, and not guessable from the user id.</li>
+  <li><strong>Rate limiting</strong> on login, registration and reset, and it applies per account as well as per address.</li>
+  <li><strong>Account enumeration.</strong> Do the responses for "no such user" and "wrong password" differ, in body, status, <em>or timing</em>?</li>
+  <li><strong>Multi-factor</strong> available for privileged accounts, and enabled on yours.</li>
+  <li><strong>Password rules</strong> that do not block passphrases. A 16-character maximum is a bug.</li>
+</ul>
+
+<h2 id="authz">Authorisation, which is the one that matters</h2>
+
+<p>Authentication asks who you are. Authorisation asks what you may do. They get conflated constantly, and the second is where the expensive failures live: <strong>A01:2025 — Broken Access Control</strong> remains the top category in OWASP's list.</p>
+
+<p>The check that finds most of it in a few minutes:</p>
+
+<pre><code>For every route that returns or modifies a record, show me the
+line that verifies the current user may access THAT SPECIFIC
+record — not just that they are logged in, and not just that
+their role is correct.
+
+List any route where you cannot find such a check.</code></pre>
+
+<p>Then verify by hand. Log in as one user, take an id from a URL or an API response, change it to another user's, and confirm you get a 403 rather than their data. That single test finds more real problems than any scanner, and it takes two minutes.</p>
+
+<p>Two rules worth writing into <a href="/blogs/guides/production-claude-md-web-development">your project's <code>CLAUDE.md</code></a> so they survive the audit: authorisation is checked server-side on every request, and hiding a control in the UI is not an authorisation check.</p>
+
+<h2 id="input">Input handling</h2>
+
+<p>Every value that came from outside is untrusted until it has been validated for its purpose and escaped for its destination.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Where it lands</th><th>What to look for</th></tr></thead>
+<tbody>
+<tr><td>SQL</td><td>String concatenation or interpolation anywhere near a query. Parameterise or use the ORM properly</td></tr>
+<tr><td>HTML</td><td><code>innerHTML</code>, <code>dangerouslySetInnerHTML</code>, or a template filter that disables escaping</td></tr>
+<tr><td>A shell</td><td>User input reaching <code>exec</code>, <code>system</code>, or a subprocess with <code>shell=True</code></td></tr>
+<tr><td>A template</td><td>User input rendered <em>as</em> a template rather than into one</td></tr>
+<tr><td>A file path</td><td>Path joins without normalisation, or anything that can climb out of its root</td></tr>
+<tr><td>An outbound request</td><td>A user-supplied URL fetched by the server — now folded into A01 in the 2025 list</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Uploads get their own pass: type and size limited, renamed, stored outside the web root, and never executed. "We check the extension" is not a control.</p>
+
+<h2 id="sessions">Sessions</h2>
+
+<p>Short pass, mechanical, and easy to get right once. Cookies set <code>HttpOnly</code>, <code>Secure</code> and <code>SameSite</code>. The session identifier regenerates on login and on any privilege change. Sessions expire both on idle and absolutely. Logout invalidates server-side rather than only clearing the cookie. No identifiers in URLs. CSRF protection on every state-changing request that relies on cookie auth.</p>
+
+<h2 id="headers">Headers and transport</h2>
+
+<p>Check the live response, not the config file — a header can be added or stripped by a proxy or a platform you do not control:</p>
+
+<pre><code>curl -sI https://example.com | grep -iE 'content-security-policy|strict-transport|x-content-type|referrer-policy|permissions-policy|x-frame'</code></pre>
+
+<p>A useful baseline is <code>Content-Security-Policy</code>, <code>Strict-Transport-Security</code>, <code>X-Content-Type-Options: nosniff</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, and frame protection through CSP <code>frame-ancestors</code>. <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy" rel="noopener">MDN's CSP reference</a> is the place to work out what yours should contain.</p>
+
+<p>Two cautions. A CSP full of <code>unsafe-inline</code> and <code>unsafe-eval</code> is decoration; if you need them, write down why. And <strong>the right values depend on the application</strong> — an agent asked for "recommended headers" will produce a plausible generic set that breaks a third-party embed you actually need.</p>
+
+<h2 id="browser">What ships to the browser</h2>
+
+<p>Everything in the bundle is public. The audit is: what is in there that should not be?</p>
+
+<ul>
+  <li>Secrets, as above. Publishable keys are fine; secret keys are not.</li>
+  <li>Source maps served in production — deliberate or accidental, but know which.</li>
+  <li>Unsafe DOM writes from data that came from a URL, a query string, or an API.</li>
+  <li>Every third-party script, named and justified. Each one can read the page.</li>
+  <li>Tokens in <code>localStorage</code>, which any successful XSS can read.</li>
+</ul>
+
+<h2 id="api">APIs and webhooks</h2>
+
+<p>Rate limiting on public endpoints. CORS restricted to known origins, never <code>*</code> on anything authenticated. Responses returning only the fields needed, rather than whole records the UI happens not to display. Errors generic to the caller and detailed only in server logs.</p>
+
+<p>Webhooks deserve their own attention because the failure is silent:</p>
+
+<pre><code>For each webhook receiver: show the signature or shared-secret
+verification, and show that the comparison is constant-time.
+Then show what happens on a replayed request with an old
+timestamp, and on a duplicate delivery.</code></pre>
+
+<p>A receiver that trusts its caller is an unauthenticated endpoint that mutates your data.</p>
+
+<h2 id="pipeline">CI/CD and logging</h2>
+
+<p>The pipeline holds credentials with more power than most user accounts. Secrets in the platform's secret store rather than the config file; masked in logs; not exposed to builds from forked pull requests; deploy credentials scoped to what they deploy; branch protection on the production branch. <a href="https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions" rel="noopener">GitHub's hardening guide</a> is the reference if you are on Actions, and <a href="/blogs/guides/claude-code-github-actions">running Claude Code in CI</a> covers the workflow side.</p>
+
+<p>For logging, the question is what accidentally ends up in them: tokens, passwords, card numbers, personal data, full request bodies, stack traces returned to users. Note that OWASP renamed this category for 2025 to <strong>A09:2025 — Security Logging &amp; Alerting Failures</strong>, emphasising the alerting half. Logs nobody reads and alerts nobody receives are not a control.</p>
+
+<h2 id="prompt">The audit prompt</h2>
+
+<p>One prompt, reusable, that produces evidence instead of advice:</p>
+
+<pre><code>Audit this project for security problems. Defensive review only —
+read code and configuration, and make ordinary requests to our own
+site. Do not attempt exploitation of any kind.
+
+Rules:
+1. Inspect before proposing anything. Change nothing yet.
+2. Every finding needs evidence: file and line, or the actual
+   response. A finding you cannot evidence is marked UNVERIFIED.
+3. Rank by real impact on this system, not by generic severity.
+4. Do not report a missing nice-to-have as critical.
+5. Do not print secret values.
+6. Say explicitly what you could not check, and why.
+
+For each finding use exactly this shape:
+
+  Finding:
+  Severity:      critical | high | medium | low
+  Location:      file:line, or the URL
+  Evidence:      what you observed
+  Risk:          what an attacker gains
+  Recommendation: the smallest change that fixes it
+  Validation:    how I confirm the fix worked</code></pre>
+
+<p>Rule 6 is the one that turns a report into something you can act on. An audit that hides its own gaps reads as complete, and the reader assumes the silence means safety.</p>
+
+<h2 id="format">Recording a finding</h2>
+
+<p>The <strong>Validation</strong> line is what most reports omit and the only one that closes the loop. "Add CSRF protection" is a recommendation. "Submit the form without the token and confirm a 403" is a validation, and someone can run it.</p>
+
+<p>Severity, kept simple enough that it gets applied consistently:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Severity</th><th>Test</th></tr></thead>
+<tbody>
+<tr><td><strong>Critical</strong></td><td>Data exposed now, or authentication bypassable now</td></tr>
+<tr><td><strong>High</strong></td><td>Exploitable with modest effort, or one condition away from critical</td></tr>
+<tr><td><strong>Medium</strong></td><td>Real weakness, needs another factor to be dangerous</td></tr>
+<tr><td><strong>Low</strong></td><td>Hardening. Worth doing, not worth an incident</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="validate">Fix, then prove the fix</h2>
+
+<pre><code>Find → Understand → Fix → Test → Rescan → Validate</code></pre>
+
+<p><strong>Understand</strong> is the step that gets skipped, and skipping it is how a fix moves the bug rather than removing it. Ask for the mechanism before the patch: which line permits this, and why does the existing check not catch it?</p>
+
+<p>Then fix one finding at a time, in its own commit, with a test that fails without the fix. And apply the discipline this site has learned the hard way: <strong>after the fix passes, reintroduce the problem and confirm the test goes red.</strong> A security test that has never failed is not evidence that the vulnerability is gone — it is evidence that the test runs. Four separate checks on this project reported success on exactly the condition they existed to catch, which is documented in <a href="/pages/case-study">the case study for this site</a>.</p>
+
+<h2 id="limits">What this does not replace</h2>
+
+<p>Stated plainly, because the gap between "we ran an audit" and "we are secure" is where people get hurt:</p>
+
+<ul>
+  <li><strong>Penetration testing.</strong> Actively attempting to break in, by someone qualified, with written authorisation. Nothing above does this.</li>
+  <li><strong>Threat modelling.</strong> Deciding what matters, to whom, and how much. That is a judgement about your business.</li>
+  <li><strong>Compliance auditing.</strong> PCI, SOC 2, HIPAA and the rest have specific evidentiary requirements a code review does not satisfy.</li>
+  <li><strong>Runtime and behavioural analysis.</strong> Race conditions, session handling under load, resource exhaustion.</li>
+  <li><strong>A specialist's judgement</strong> on anything holding payment data, health data, or personal data at scale.</li>
+</ul>
+
+<p>What the workflow above genuinely does is remove the large, boring, avoidable class of problems — the committed <code>.env</code>, the missing object-level check, the endpoint that trusts its caller — so that a specialist's time is spent on the things only a specialist can find.</p>
+
+<h2>Where to go next</h2>
+
+<p>The condensed version of all of this is the free <a href="/pages/claude-code-security-checklist">Claude Code security checklist</a>, written so each item can be handed to a session directly. For the wider inspection this sits inside, see <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a>, and for building security in rather than retrofitting it, <a href="/blogs/guides/how-to-build-a-website-with-claude-code">the complete website workflow</a>. Organisation-level controls are covered in <a href="/blogs/guides/claude-code-enterprise">Claude Code for teams and enterprise</a>, and the rules worth enforcing mechanically belong in <a href="/blogs/guides/claude-code-hooks">hooks</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://owasp.org/Top10/2025/" rel="noopener">OWASP Top 10:2025</a> — the current edition, with Software Supply Chain Failures new at A03</li>
+  <li><a href="https://cheatsheetseries.owasp.org/" rel="noopener">OWASP Cheat Sheet Series</a> — practical per-topic detail</li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers" rel="noopener">MDN: HTTP headers</a></li>
+  <li><a href="https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning" rel="noopener">GitHub: secret scanning</a></li>
+  <li><a href="https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions" rel="noopener">GitHub: hardening Actions</a></li>
+</ul>

@@ -1,0 +1,16 @@
+site,contact,source,category,target_resource,reason_relevant,contact_method,status,date_contacted,response,link_earned,notes
+,,,curated-github-list,github.com/sitebuilderstack/sitebuilderstack_store,Collections of Claude Code resources accept repositories via PR,pull-request,ready,,,no,Repo is live at github.com/sitebuilderstack/sitebuilderstack_store. Read each list's CONTRIBUTING.md and follow it exactly. Disclose that you maintain it.
+,,,claude-code-skills-list,github.com/sitebuilderstack/sitebuilderstack_store,"The kit ships five installable skills; 'claude code skills' is the highest-demand term this project touches (1,970 Bing impressions/month)",pull-request,ready,,,no,Highest-value category now the repo exists. Lists collecting Claude Code skills specifically.
+,,,curated-github-list,/pages/claude-code-seo-checklist,General SEO resource lists take standalone checklists,pull-request,not-started,,,no,Only lists that accept non-tool entries.
+,,,ai-coding-newsletter,/pages/production-claude-md-starter,CLAUDE.md starter is the most linkable single asset for this audience,email,not-started,,,no,One paragraph. Editors decide in seconds.
+,,,webdev-newsletter,/pages/claude-code-launch-checklist,Launch checklists are evergreen newsletter filler of the good kind,email,not-started,,,no,
+,,,devops-newsletter,/pages/claude-code-security-checklist,Includes the AI-assistant section most security lists omit,email,not-started,,,no,Author's background is platform/infra — genuine standing here.
+,,,shopify-developer,/blogs/guides/build-shopify-store-with-claude-code,"Platform-specific guide, not the homepage",forum-post,not-started,,,no,Shopify Community developer forums. Check self-promotion rules.
+,,,astro-community,/blogs/guides/claude-md-examples-web-development,Contains a worked Astro/static-site CLAUDE.md,discord,not-started,,,no,Answer questions first. Link only if the rules allow.
+,,,wordpress-developer,/blogs/guides/how-to-build-a-website-with-claude-code,AI-assisted workflow content is welcome in dev-focused groups,forum-post,not-started,,,no,
+,,,technical-blogger,/pages/case-study,The JS-injected checkout failure is a story that stands alone,email,not-started,,,no,Highest-value category. Personalise heavily or do not send.
+,,,podcast,/pages/case-study,"Five real failures is a segment, not a plug",email,not-started,,,no,
+,,,reddit,/blogs/guides/claude-code-website-audit,"r/webdev, r/ClaudeAI — answer the question in the reply",community-post,not-started,,,no,Most subreddits ban self-promotion. Read rules per sub.
+,,,hacker-news,/pages/case-study,Only the case study stands alone well enough for HN,community-post,not-started,,,no,Never post the product page.
+,,,dev-community,/blogs/guides/claude-code-technical-seo-audit,Cross-post with a canonical tag pointing home,cross-post,not-started,,,no,rel=canonical back to sitebuilderstack.com.
+,,,ai-tool-directory,/pages/resources,Directories that list free developer resources,form-submission,not-started,,,no,Skip any directory that charges for inclusion.

@@ -1,0 +1,269 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#split">What a scanner reaches, and what it cannot</a></li>
+    <li><a href="#standard">Which standard you are auditing against</a></li>
+    <li><a href="#workflow">The workflow</a></li>
+    <li><a href="#tools">Automated tools, used properly</a></li>
+    <li><a href="#semantics">Semantic HTML, first and mostly last</a></li>
+    <li><a href="#headings">Headings</a></li>
+    <li><a href="#keyboard">Keyboard navigation</a></li>
+    <li><a href="#focus">Focus management</a></li>
+    <li><a href="#forms">Forms</a></li>
+    <li><a href="#names">Links, buttons and accessible names</a></li>
+    <li><a href="#images">Images and alternative text</a></li>
+    <li><a href="#contrast">Colour and contrast</a></li>
+    <li><a href="#targets">Target size</a></li>
+    <li><a href="#aria">ARIA, and why it is last</a></li>
+    <li><a href="#dynamic">Dynamic interfaces</a></li>
+    <li><a href="#prompt">The accessibility prompt</a></li>
+    <li><a href="#manual">The manual pass</a></li>
+    <li><a href="#claims">What you must not claim</a></li>
+  </ol>
+</nav>
+
+<h2 id="split">What a scanner reaches, and what it cannot</h2>
+
+<p>Accessibility is the area where automation is most oversold, so it is worth being precise about the division of labour before anything else.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-a11y-automated-vs-human.png" alt="Two columns dividing accessibility checks. A tool can answer mechanical questions such as a missing alt attribute, an empty button, a contrast ratio, a missing form label, a skipped heading level, a duplicate id, a missing lang attribute and an invalid ARIA value. Only a person can answer whether the alt text is meaningful, whether the tab order is logical, whether focus is visible where it lands, whether an announcement makes sense, whether an error is recoverable and whether a shortcut is discoverable."
+       width="1000" height="524" loading="lazy" decoding="async">
+  <figcaption>Zero errors on the left says nothing about the right. W3C is explicit that tools cannot do it all.</figcaption>
+</figure>
+
+<p>The <a href="https://www.w3.org/WAI/test-evaluate/tools/" rel="noopener">W3C Web Accessibility Initiative</a> states it plainly: "tools can't do it all. Some accessibility checks just cannot be automated and require manual intervention", and warns that "in some cases tools can provide inaccurate results".</p>
+
+<p>What Claude Code adds sits between the two columns. It reads components rather than rendered pages, so it catches structural problems a scanner misses — a click handler on a <code>div</code> across forty components, an ARIA pattern applied inconsistently, a focus trap that only exists in one branch of a conditional. What it cannot do is tell you whether the experience makes sense, because that requires being a person using it.</p>
+
+<h2 id="standard">Which standard you are auditing against</h2>
+
+<p>Name it before you start, because "accessible" on its own is not checkable.</p>
+
+<p>The current W3C Recommendation is <strong>WCAG 2.2</strong>, published 5 October 2023 with an update on 12 December 2024. WCAG 2.0, 2.1 and 2.2 are all still existing standards, and they are backwards compatible — content conforming to 2.2 also meets the earlier versions. WCAG 3 remains an early draft and is not something to audit against.</p>
+
+<p>Most organisations target <strong>Level AA</strong>. That is what regulations generally reference and what the criteria in this guide assume.</p>
+
+<h2 id="workflow">The workflow</h2>
+
+<pre><code>Inventory → Automated scan → Claude Code review → Fix
+  → Automated retest → Keyboard test → Screen reader test
+  → Manual validation</code></pre>
+
+<p>The order matters in one specific way: <strong>the automated scan comes before the code review, and the manual passes come last.</strong> Running the scan first clears the mechanical noise so the review is spent on structural questions. Doing the manual passes last means you are testing what you shipped rather than what you started with.</p>
+
+<p>Inventory first, though, or you will audit the homepage and call it done:</p>
+
+<pre><code>List every distinct page template and every interactive component
+in this project. For each component, note whether it involves
+focus management, keyboard interaction, or dynamic content
+updates. I want the audit scope, not an assessment yet.</code></pre>
+
+<h2 id="tools">Automated tools, used properly</h2>
+
+<p><strong>axe</strong> is the most widely used engine, available as a browser extension and as <code>axe-core</code> for CI. It is deliberately conservative: it reports issues it can determine with confidence, which is why a clean axe run is a floor and not a result.</p>
+
+<p><strong>Lighthouse</strong> includes an accessibility category built on axe. The number it produces is a proportion of the automated checks that passed. It is not a WCAG conformance score and does not claim to be.</p>
+
+<p><strong>Browser accessibility inspectors</strong> — the Accessibility panel in Chrome or Firefox DevTools — show the accessibility tree, which is what assistive technology actually receives. When a component behaves oddly with a screen reader, this is where you find out why.</p>
+
+<p>Run one of these in CI and fail the build on new violations. It is cheap and it stops regressions. It does not tell you the site is accessible.</p>
+
+<h2 id="semantics">Semantic HTML, first and mostly last</h2>
+
+<p>Most accessibility problems are not missing ARIA. They are HTML that describes the wrong thing.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Pattern</th><th>Problem</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;div onclick&gt;</code></td><td>Not focusable, not announced as a control, no Enter or Space</td><td><code>&lt;button&gt;</code></td></tr>
+<tr><td><code>&lt;a&gt;</code> with no <code>href</code></td><td>Not in the tab order</td><td><code>&lt;button&gt;</code>, or give it a real destination</td></tr>
+<tr><td>A button that navigates</td><td>No middle-click, no open-in-new-tab, wrong announcement</td><td><code>&lt;a href&gt;</code></td></tr>
+<tr><td>Layout tables</td><td>Announced as data with meaningless relationships</td><td>CSS grid or flexbox</td></tr>
+<tr><td>Bold text as a heading</td><td>Invisible to heading navigation</td><td>A real <code>&lt;h2&gt;</code>–<code>&lt;h6&gt;</code></td></tr>
+<tr><td>No landmarks</td><td>No way to skip to the main content</td><td><code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The rule to write into <a href="/blogs/guides/production-claude-md-web-development">your <code>CLAUDE.md</code></a>: <em>semantic HTML first; a <code>div</code> with a click handler is not a button.</em> It prevents more accessibility work than any audit removes.</p>
+
+<h2 id="headings">Headings</h2>
+
+<p>Headings are the document outline, and for a screen-reader user they are the primary means of navigating a page. One <code>h1</code> describing the page. Levels descend without skipping — an <code>h2</code> followed by an <code>h4</code> implies a level that does not exist. And headings are chosen for structure, not for the size they happen to render at; if a heading looks too large, that is a CSS problem.</p>
+
+<h2 id="keyboard">Keyboard navigation</h2>
+
+<p>The single highest-value manual test, and it takes minutes. Put the mouse down and Tab through the primary journey.</p>
+
+<p>What you are checking: everything interactive is reachable; the order follows the visual order; focus is always visible; nothing traps you; Escape closes what it opened; and Enter and Space do what they should on each control type.</p>
+
+<p><strong>Focus visibility is the one most often broken deliberately.</strong> A stylesheet containing <code>outline: none</code> with no replacement is a failure — the ring was removed because it looked untidy, and now nobody can tell where they are. Replace it, do not delete it. <code>:focus-visible</code> exists so that keyboard users get an indicator without mouse users seeing one.</p>
+
+<p>Tab order follows DOM order, so a CSS reorder — <code>order</code> in flexbox, or grid placement — can make focus jump around the screen unpredictably while looking fine.</p>
+
+<h2 id="focus">Focus management</h2>
+
+<p>Anything that changes what is on screen has to decide where focus goes. This is where component libraries most often fall short.</p>
+
+<p>For a modal: focus moves into the dialog when it opens, is trapped inside while it is open, Escape closes it, and focus returns to the element that opened it. The same pattern applies to drawers and off-canvas navigation.</p>
+
+<p>For content that appears in place — an expanded accordion, a revealed panel — focus usually should not move, but the control needs <code>aria-expanded</code> so its state is announced.</p>
+
+<p>In a single-page application, a route change that updates the DOM without moving focus leaves a screen-reader user on the previous page's content with no indication anything happened.</p>
+
+<h2 id="forms">Forms</h2>
+
+<p>Every input has a programmatically associated label — a <code>&lt;label for&gt;</code> pointing at the input's id. A placeholder is not a label: it disappears on focus, frequently fails contrast, and is not reliably announced.</p>
+
+<p>Beyond labels: mark required fields in text as well as with an asterisk or colour; put instructions before the input rather than after it; associate error messages with their field via <code>aria-describedby</code>; describe errors in words rather than only in red; move focus to the first error on failed submission; and set <code>autocomplete</code> on name, email, address and payment fields, which is both a usability and a WCAG matter.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The accessibility audit is one module of the Claude Code Website Launch System, alongside the security, SEO and launch validation workflows it runs beside. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="names">Links, buttons and accessible names</h2>
+
+<p>Every control needs a name that makes sense read out of context, because that is exactly how assistive technology presents them — a list of links, one after another.</p>
+
+<p>So: no bare "click here" or "read more" repeated down a page; icon-only buttons get an <code>aria-label</code> or visually hidden text; a link wrapping an image needs alt text on the image or a label on the link; and a link that opens a new tab says so in its name rather than only through an icon.</p>
+
+<p>One pattern worth knowing because it looks like a bug and is not: a card whose image and heading both link to the same place is often built with the image link marked <code>aria-hidden="true"</code> and <code>tabindex="-1"</code>. That is correct — it removes a duplicate, unlabelled stop from the tab order. An audit script that flags "link with no accessible name" without checking for that will report a correct implementation as a fault, which is worth knowing before you act on a scanner's output.</p>
+
+<h2 id="images">Images and alternative text</h2>
+
+<p>The decision is what the image is <em>for</em>, not what it depicts:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Kind</th><th>Alt</th></tr></thead>
+<tbody>
+<tr><td>Informative</td><td>What it conveys, in context. Not a description of every pixel</td></tr>
+<tr><td>Decorative</td><td><code>alt=""</code>. Empty, not missing — missing makes screen readers read the filename</td></tr>
+<tr><td>Functional (a link or button)</td><td>What it <em>does</em>, not what it looks like</td></tr>
+<tr><td>Complex (chart, diagram)</td><td>A short alt plus a longer description in the page</td></tr>
+<tr><td>Text in an image</td><td>The text, verbatim</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>This is the clearest case of something an agent can flag and cannot resolve. It can tell you an image has no alt. It cannot tell you whether "chart showing quarterly results" conveys what the chart conveys — only someone who knows what the chart is for can.</p>
+
+<p>And do not keyword-stuff alt text. It is worse for the person relying on it and it is not an SEO technique.</p>
+
+<h2 id="contrast">Colour and contrast</h2>
+
+<p>At Level AA: normal text needs a contrast ratio of at least <strong>4.5:1</strong>, large text at least <strong>3:1</strong>, and non-text user interface components and graphical objects at least <strong>3:1</strong>.</p>
+
+<p>Three things a checker will not catch:</p>
+
+<p><strong>Composited colour.</strong> Text at 60% opacity over a gradient has an effective ratio the stylesheet does not state. Compute it against the actual rendered backdrop.</p>
+
+<p><strong>Focus indicators.</strong> A focus ring that fails 3:1 against its surroundings is not an indicator. This is easy to miss because it is only visible in one state.</p>
+
+<p><strong>Colour as the only signal.</strong> A required field marked only in red, a chart distinguished only by hue, a link identified only by colour within body text. Add a shape, a label, an icon, or an underline.</p>
+
+<p>A real example from this site: a primary call-to-action rendered at 1:1 — text and background the same colour — because a generic link rule outranked the button rule by one point of CSS specificity. Nothing in the source looked wrong, and it was only found by computing contrast against the actual composited backdrop in a rendered DOM. The full account is in <a href="/pages/case-study">the case study for this site</a>.</p>
+
+<h2 id="targets">Target size</h2>
+
+<p>WCAG 2.2 added Success Criterion <strong>2.5.8 Target Size (Minimum)</strong> at Level AA: "The size of the target for pointer inputs is at least 24 by 24 CSS pixels", with five exceptions.</p>
+
+<p>The exception that matters most in practice is <strong>Inline</strong>: "The target is in a sentence or its size is otherwise constrained by the line-height of non-target text." A link inside a paragraph is exempt. A standalone link in a list item, a navigation item, or an icon button is not.</p>
+
+<p>The others are <strong>Spacing</strong> (undersized targets far enough apart that 24px circles centred on them do not intersect), <strong>Equivalent</strong> (the same function is available through a conforming control on the same page), <strong>User Agent Control</strong> (the size is the browser's and unmodified by the author), and <strong>Essential</strong> (a particular presentation is required).</p>
+
+<p>Worth knowing because a naive check produces a wall of false positives: an inline <code>&lt;a&gt;</code> boxes to the font's content height regardless of the line-height around it, so every in-sentence link in an article will measure around 20px tall and every one of them is exempt.</p>
+
+<h2 id="aria">ARIA, and why it is last</h2>
+
+<p>The first rule of ARIA is not to use it: if a native element does the job, use the native element. ARIA changes what is announced without changing behaviour, so a <code>div</code> with <code>role="button"</code> is announced as a button and still does nothing when you press Enter unless you wrote that yourself.</p>
+
+<p>Common misuse worth auditing for: roles on elements that already have them (<code>&lt;button role="button"&gt;</code>); <code>aria-label</code> overriding perfectly good visible text, which breaks voice control because the spoken name no longer matches the visible one; <code>aria-hidden="true"</code> on something focusable, which is a genuine fault — hidden from screen readers but still reachable by keyboard; and live regions on everything, so nothing stands out.</p>
+
+<p>Where ARIA is genuinely needed: <code>aria-expanded</code> on disclosure controls, <code>aria-current</code> for the current page in navigation, <code>aria-live</code> for status messages that appear without a page change, and the dialog pattern, where getting it right by hand is hard enough to justify a well-tested library.</p>
+
+<h2 id="dynamic">Dynamic interfaces</h2>
+
+<p>The components where accessibility is usually lost. For each: <strong>modals</strong> need focus moved in, trapped, Escape to close, and focus returned; <strong>toasts</strong> need an appropriate live region and enough time to be read; <strong>accordions and tabs</strong> need state announced and the documented keyboard interactions; <strong>menus</strong> need arrow-key navigation and Escape; <strong>carousels</strong> need pause control and must not move focus on their own; and <strong>async updates</strong> need a way to announce that something changed.</p>
+
+<p>The <a href="https://www.w3.org/WAI/ARIA/apg/patterns/" rel="noopener">ARIA Authoring Practices Guide</a> documents the expected keyboard behaviour for each of these. Follow the pattern rather than inventing one.</p>
+
+<h2 id="prompt">The accessibility prompt</h2>
+
+<pre><code>Review this project for accessibility problems against WCAG 2.2
+Level AA.
+
+Do this in order:
+1. Inspect the components and templates. Change nothing yet.
+2. For each issue: the component, the file and line, what a user
+   experiences, and the success criterion if you are confident
+   which applies. If you are not confident, describe the problem
+   and say the criterion is uncertain rather than guessing one.
+3. Rank by user impact: blocks a task, makes it harder, or is a
+   polish issue.
+4. Propose the smallest fix. Prefer changing the element to
+   adding ARIA. Do not add ARIA where a native element would do.
+5. Separately, list what you could NOT determine from the code and
+   that needs a person: anything about tab order in the rendered
+   page, whether alt text is meaningful, whether an announcement
+   makes sense, and anything requiring a screen reader.
+
+Do not claim any of this proves conformance.</code></pre>
+
+<p>Step 5 is what makes the output usable. Without it you get a list that reads as complete and silently omits everything automation cannot reach.</p>
+
+<p>A finding shape that keeps the manual half visible:</p>
+
+<pre><code>Issue:
+Component:
+Impact:                blocks | hinders | polish
+Evidence:              file:line, or what was observed
+Recommended fix:
+Automated validation:  what a tool can confirm
+Manual validation:     what a person still has to check</code></pre>
+
+<h2 id="manual">The manual pass</h2>
+
+<p>None of this is optional, and none of it can be delegated to a tool.</p>
+
+<ul>
+  <li><strong>Keyboard only.</strong> Complete the primary journey without touching the mouse.</li>
+  <li><strong>Focus visibility.</strong> At every stop, can you see where you are?</li>
+  <li><strong>Zoom to 200%.</strong> Nothing lost, nothing overlapping, no horizontal scrolling of the page.</li>
+  <li><strong>Reflow at 320px.</strong> The mobile width where things break.</li>
+  <li><strong>A screen reader.</strong> VoiceOver on macOS or iOS, NVDA on Windows, TalkBack on Android. Half an hour of genuine use teaches more than any checklist.</li>
+  <li><strong>Forms.</strong> Submit an empty one. Can you tell what went wrong and fix it without sight of the colour?</li>
+  <li><strong>Dialogs.</strong> Open, Tab around, Escape, and confirm focus came back.</li>
+  <li><strong>Reduced motion.</strong> Is anything still moving, and is anything lost?</li>
+</ul>
+
+<h2 id="claims">What you must not claim</h2>
+
+<p>This matters legally as well as ethically, so state it precisely.</p>
+
+<ul>
+  <li><strong>A Lighthouse accessibility score of 100 does not mean WCAG conformance.</strong> It means the automated subset passed.</li>
+  <li><strong>Zero axe violations does not mean accessible.</strong> It means no violations the engine can detect with confidence.</li>
+  <li><strong>Claude Code cannot certify conformance.</strong> It can find problems and propose fixes. It cannot make a conformance claim.</li>
+  <li><strong>None of this replaces testing with disabled users.</strong> A pattern can satisfy every criterion and still be unusable. Only people who rely on the technology can tell you.</li>
+</ul>
+
+<p>The honest formulation for a report is what was tested, by what method, what was found, and what remains untested. An audit that claims more than it checked is worse than a short one that admits its edges.</p>
+
+<h2>Where to go next</h2>
+
+<p>Accessibility is one pass of a wider inspection — <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a> covers the others, and <a href="/blogs/guides/claude-code-performance-core-web-vitals">the performance workflow</a> and <a href="/blogs/guides/claude-code-website-security-audit">the security audit</a> are its siblings. For building this in from the start rather than retrofitting it, <a href="/blogs/guides/how-to-build-a-website-with-claude-code">the complete website workflow</a> is the place to begin. The free <a href="/pages/claude-code-website-audit-checklist">website audit checklist</a> and <a href="/pages/claude-code-launch-checklist">launch checklist</a> both carry the accessibility items in short form.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://www.w3.org/WAI/standards-guidelines/wcag/" rel="noopener">W3C: WCAG overview</a> — versions, status, and what is current</li>
+  <li><a href="https://www.w3.org/WAI/WCAG22/quickref/" rel="noopener">How to Meet WCAG 2.2</a> — every success criterion with techniques</li>
+  <li><a href="https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html" rel="noopener">Understanding SC 2.5.8 Target Size (Minimum)</a> — the criterion and its five exceptions</li>
+  <li><a href="https://www.w3.org/WAI/test-evaluate/tools/" rel="noopener">W3C WAI: selecting evaluation tools</a> — on what automation can and cannot do</li>
+  <li><a href="https://www.w3.org/WAI/ARIA/apg/patterns/" rel="noopener">ARIA Authoring Practices Guide</a> — expected keyboard behaviour per pattern</li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA" rel="noopener">MDN: ARIA</a></li>
+</ul>

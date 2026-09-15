@@ -1,0 +1,48 @@
+# ── Secrets — first, and non-negotiable ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+shopify-client-id.txt
+shopify-secret.txt
+*-token.json
+.shopify/
+
+# ── Build output ────────────────────────────────────────────────────────────
+dist/
+*.zip
+*.zip.sha256
+*.bak
+
+# ── Working copies of remote state ──────────────────────────────────────────
+# theme/dev/ IS the source of truth and is committed.
+# These are pulled snapshots and must not be edited or committed.
+theme/dev-full/
+theme/one-live/
+theme/backup-*/
+
+# ── Dependencies and tooling ────────────────────────────────────────────────
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.cache/
+
+# ── Editor and OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# ── Local scratch ───────────────────────────────────────────────────────────
+tmp/
+scratch/
+*.local

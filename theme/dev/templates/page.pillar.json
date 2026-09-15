@@ -1,0 +1,26 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-pillar",
+      "settings": {
+        "blog_handle": "guides",
+        "eyebrow": "Topic hub",
+        "path_heading": "Follow it in order",
+        "path_intro": "Each guide assumes the one before it. You can read them in any order, but this is the sequence that does not double back.",
+        "cluster_heading": "Every guide in this hub",
+        "cluster_intro": "Including the reference pieces that do not belong in a sequence.",
+        "resource_heading": "Free resources for this topic",
+        "hubs_heading": "Related learning",
+        "show_cta": true,
+        "product": "claude-code-website-launch-system",
+        "cta_heading": "Want this assembled rather than adapted by hand?",
+        "cta_body": "Every guide in this hub is free and stays free. The Claude Code Website Launch System is the same methodology packaged as a production CLAUDE.md, a staged master build prompt, platform workflows, security and accessibility audits, a prompt library, and launch checklists.",
+        "cta_label": "See the Launch System"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

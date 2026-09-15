@@ -1,0 +1,36 @@
+{%- assign product = all_products[section.settings.product] -%}
+
+<section class="sbs-section sbs-center">
+  <div class="sbs-container">
+    <h2>{{ section.settings.heading | escape }}</h2>
+    {%- if section.settings.body != blank -%}
+      <p class="sbs-lede" style="margin-top: var(--sp-4);">{{ section.settings.body | escape }}</p>
+    {%- endif -%}
+    <div style="margin-top: var(--sp-6);">
+      <a class="sbs-btn sbs-btn--primary" href="{% if section.settings.cta_url != blank %}{{ section.settings.cta_url }}{% else %}{{ routes.root_url }}#buy{% endif %}">
+        {{- section.settings.cta_label | escape -}}
+        {%- if product != blank %} — {{ product.price | money_without_trailing_zeros }}{% endif -%}
+      </a>
+    </div>
+    {%- if section.settings.note != blank -%}
+      <p class="sbs-cta-note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Final CTA",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Start with START-HERE.md" },
+    { "type": "textarea", "id": "body", "label": "Body",
+      "default": "Ten minutes of reading, then Claude Code is building to a process instead of improvising." },
+    { "type": "text", "id": "cta_label", "label": "Button", "default": "Get the Launch System" },
+    { "type": "url", "id": "cta_url", "label": "Button link" },
+    { "type": "text", "id": "note", "label": "Note", "default": "Instant digital access." },
+    { "type": "product", "id": "product", "label": "Product" }
+  ],
+  "presets": [{ "name": "SBS — Final CTA" }]
+}
+{% endschema %}

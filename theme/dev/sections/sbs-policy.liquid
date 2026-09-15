@@ -1,0 +1,115 @@
+{%- comment -%}
+  Renders a store policy (privacy, terms, refund, shipping, contact) through the
+  landing layout, so the legal pages match the rest of the site instead of
+  falling back to the purchased theme.
+
+  Shopify emits policy bodies as HTML; the .sbs-rte rules below style that
+  content without the policy author needing to know about our classes.
+{%- endcomment -%}
+
+<section class="sbs-section">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ policy.title | escape }}</span>
+    </nav>
+
+    <article style="max-width: var(--measure);">
+      <h1>{{ policy.title | escape }}</h1>
+
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede" style="margin-top: var(--sp-4);">
+          {{ section.settings.intro | escape }}
+        </p>
+      {%- endif -%}
+
+      <div class="sbs-stack sbs-rte" style="margin-top: var(--sp-7);">
+        {{ policy.body }}
+      </div>
+    </article>
+
+    {%- if section.settings.show_other_policies -%}
+      <nav class="sbs-policy-nav" aria-label="Other policies">
+        <h2>Other policies</h2>
+        <ul>
+          {%- for p in shop.policies -%}
+            {%- if p != blank and p.id != policy.id -%}
+              <li><a href="{{ p.url }}">{{ p.title | escape }}</a></li>
+            {%- endif -%}
+          {%- endfor -%}
+          <li><a href="{{ routes.root_url }}pages/licence">Product Licence</a></li>
+          <li><a href="{{ routes.root_url }}pages/disclaimer">Disclaimer</a></li>
+        </ul>
+      </nav>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .sbs-crumbs {
+    display: flex; flex-wrap: wrap; gap: .5rem;
+    font-family: var(--font-mono); font-size: var(--step--1);
+    color: var(--dim); margin-bottom: var(--sp-5);
+  }
+  .sbs-crumbs a { color: var(--muted); text-decoration: none; }
+  .sbs-crumbs a:hover { color: var(--accent); text-decoration: underline; }
+
+  .sbs-rte h2 { font-size: var(--step-2); margin-top: var(--sp-7); }
+  .sbs-rte h3 { font-size: var(--step-1); margin-top: var(--sp-6); }
+  .sbs-rte h4 { font-size: var(--step-0); margin-top: var(--sp-5); }
+  .sbs-rte p, .sbs-rte li { color: var(--muted); }
+  .sbs-rte p + p { margin-top: var(--sp-4); }
+  .sbs-rte ul, .sbs-rte ol { padding-left: 1.3rem; margin-top: var(--sp-3); }
+  .sbs-rte ul { list-style: disc; }
+  .sbs-rte ol { list-style: decimal; }
+  .sbs-rte li + li { margin-top: var(--sp-2); }
+  .sbs-rte a { color: var(--accent); }
+  .sbs-rte strong { color: var(--text); }
+  .sbs-rte em { color: var(--dim); }
+  .sbs-rte code {
+    font-family: var(--font-mono); font-size: .9em;
+    background: var(--surface-2); padding: .1em .4em;
+    border-radius: 4px; color: var(--mono-accent);
+  }
+  .sbs-rte table { width: 100%; border-collapse: collapse; margin-top: var(--sp-4); }
+  .sbs-rte th, .sbs-rte td {
+    border: 1px solid var(--border); padding: var(--sp-3);
+    text-align: left; font-size: var(--step--1);
+  }
+  .sbs-rte th { background: var(--surface-2); color: var(--text); }
+  .sbs-rte hr { border: 0; border-top: 1px solid var(--border); margin: var(--sp-6) 0; }
+
+  .sbs-policy-nav {
+    margin-top: var(--sp-9); padding-top: var(--sp-5);
+    border-top: 1px solid var(--border);
+  }
+  .sbs-policy-nav h2 {
+    font-family: var(--font-mono); font-size: var(--step--1);
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: var(--sp-4);
+  }
+  .sbs-policy-nav ul {
+    display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-5);
+    list-style: none; padding: 0;
+  }
+  .sbs-policy-nav a {
+    color: var(--muted); text-decoration: none; font-size: var(--step--1);
+    display: inline-flex; align-items: center; min-height: 1.75rem;
+  }
+  .sbs-policy-nav a:hover { color: var(--accent); text-decoration: underline; }
+</style>
+
+{% schema %}
+{
+  "name": "SBS — Policy",
+  "tag": "div",
+  "settings": [
+    { "type": "textarea", "id": "intro", "label": "Intro above the policy",
+      "info": "Optional. Shown on every policy page." },
+    { "type": "checkbox", "id": "show_other_policies", "label": "Link the other policies",
+      "default": true }
+  ],
+  "presets": [{ "name": "SBS — Policy" }]
+}
+{% endschema %}

@@ -1,0 +1,2251 @@
+/* ==========================================================================
+   Site Builder Stack — landing design system
+   Scoped to the .sbs root so it cannot leak into the rest of the ONE theme.
+   Contrast ratios were computed, not assumed; see docs/THEME-WORKFLOW.md.
+   ========================================================================== */
+
+.sbs {
+  /* ---- colour -------------------------------------------------------- */
+  --bg:            #0B0D12;
+  --surface:       #12151D;
+  --surface-2:     #171B26;
+  --border:        #232A38;   /* decorative dividers */
+  --border-strong: #7D8798;   /* interactive boundaries — 5.36:1 on --bg */
+  --text:          #E9ECF3;   /* 16.43:1 on --bg */
+  --muted:         #A7B0C0;   /*  8.90:1 on --bg */
+  --dim:           #7D8798;   /*  5.36:1 on --bg */
+  --accent:        #8AA6FF;   /*  8.31:1 on --bg */
+  --accent-ink:    #0B0D12;   /*  8.31:1 on --accent */
+  --accent-soft:   rgba(138,166,255,.12);
+  --mono-accent:   #5EEAD4;   /* 13.14:1 on --bg */
+
+  /* ---- type ---------------------------------------------------------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  --step--1: clamp(.82rem, .80rem + .10vw, .88rem);
+  --step-0:  clamp(1rem, .97rem + .16vw, 1.09rem);
+  --step-1:  clamp(1.18rem, 1.10rem + .38vw, 1.42rem);
+  --step-2:  clamp(1.42rem, 1.26rem + .78vw, 1.90rem);
+  --step-3:  clamp(1.70rem, 1.42rem + 1.38vw, 2.55rem);
+  --step-4:  clamp(2.04rem, 1.56rem + 2.36vw, 3.40rem);
+  --step-5:  clamp(2.05rem, 1.42rem + 3.15vw, 4.55rem);
+
+  /* ---- space --------------------------------------------------------- */
+  --sp-1: .25rem;  --sp-2: .5rem;   --sp-3: .75rem;  --sp-4: 1rem;
+  --sp-5: 1.5rem;  --sp-6: 2rem;    --sp-7: 3rem;    --sp-8: 4rem;
+  --sp-9: 6rem;    --sp-10: 8rem;
+
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
+
+  --dur: 180ms;
+  --ease: cubic-bezier(.2,.7,.3,1);
+
+  --container: 1140px;
+  --measure: 68ch;
+
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- reset ----------------------------------------------------------- */
+.sbs *, .sbs *::before, .sbs *::after { box-sizing: border-box; }
+.sbs h1, .sbs h2, .sbs h3, .sbs h4, .sbs p, .sbs ul, .sbs ol, .sbs figure,
+.sbs blockquote, .sbs dl, .sbs dd { margin: 0; }
+.sbs ul, .sbs ol { padding: 0; list-style: none; }
+.sbs img, .sbs svg, .sbs video { display: block; max-width: 100%; height: auto; }
+/* Zero-specificity so component rules always win — see the note on links. */
+:where(.sbs) :where(button, input, select, textarea) { font: inherit; color: inherit; }
+
+/* ---- focus ----------------------------------------------------------- */
+.sbs :focus { outline: none; }
+.sbs :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---- skip link ------------------------------------------------------- */
+.sbs-skip {
+  position: absolute; left: var(--sp-4); top: var(--sp-4);
+  transform: translateY(-200%);
+  z-index: 200;
+  background: var(--accent); color: var(--accent-ink);
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--radius); font-weight: 650; text-decoration: none;
+  transition: transform var(--dur) var(--ease);
+}
+.sbs-skip:focus-visible { transform: translateY(0); }
+
+/* ---- layout ---------------------------------------------------------- */
+.sbs-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--sp-5);
+}
+@media (min-width: 48em) { .sbs-container { padding-inline: var(--sp-6); } }
+
+.sbs-section { padding-block: var(--sp-8); }
+@media (min-width: 48em) { .sbs-section { padding-block: var(--sp-9); } }
+.sbs-section--tight { padding-block: var(--sp-7); }
+.sbs-section--alt { background: var(--surface); }
+
+.sbs-stack > * + * { margin-top: var(--sp-4); }
+.sbs-stack-lg > * + * { margin-top: var(--sp-6); }
+
+/* ---- type ------------------------------------------------------------ */
+.sbs h1, .sbs h2, .sbs h3, .sbs h4 {
+  line-height: 1.14;
+  letter-spacing: -.021em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+.sbs h1 { font-size: var(--step-5); }
+.sbs h2 { font-size: var(--step-4); }
+.sbs h3 { font-size: var(--step-2); }
+.sbs h4 { font-size: var(--step-1); }
+.sbs p  { max-width: var(--measure); }
+
+/* Base link colour. Wrapped in :where() so it has ZERO specificity — any
+   component rule (.sbs-btn, .sbs-logo, .sbs-skip, .sbs-nav a) wins regardless
+   of source order. Without this, `.sbs a` (0,1,1) beat `.sbs-btn--primary`
+   (0,1,0) and the primary button rendered accent-on-accent: invisible. */
+:where(.sbs) :where(a) { color: var(--accent); text-underline-offset: .18em; }
+
+.sbs-lede { font-size: var(--step-1); color: var(--muted); line-height: 1.55; }
+.sbs-muted { color: var(--muted); }
+.sbs-dim { color: var(--dim); font-size: var(--step--1); }
+.sbs-mono { font-family: var(--font-mono); font-size: .92em; }
+
+.sbs-eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mono-accent);
+  margin-bottom: var(--sp-3);
+}
+
+.sbs-section-head { max-width: 46rem; margin-bottom: var(--sp-7); }
+.sbs-section-head p { margin-top: var(--sp-4); }
+
+/* ---- buttons --------------------------------------------------------- */
+.sbs-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--sp-2);
+  min-height: 3rem;
+  padding: var(--sp-3) var(--sp-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-weight: 650;
+  font-size: var(--step-0);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease), background-color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
+}
+.sbs-btn--primary { background: var(--accent); color: var(--accent-ink); }
+.sbs-btn--primary:hover { background: #A2B8FF; }
+.sbs-btn--primary:active { transform: translateY(1px); }
+.sbs-btn--ghost {
+  background: transparent; color: var(--text);
+  border-color: var(--border-strong);
+}
+.sbs-btn--ghost:hover { border-color: var(--accent); color: var(--accent); }
+.sbs-btn--block { width: 100%; }
+.sbs-btn[disabled] { opacity: .55; cursor: not-allowed; }
+
+.sbs-cta-note { margin-top: var(--sp-3); color: var(--muted); font-size: var(--step--1); }
+
+/* ---- cards ----------------------------------------------------------- */
+.sbs-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+.sbs-card--flush { padding: 0; overflow: hidden; }
+.sbs-card h3 { font-size: var(--step-1); }
+.sbs-card p { color: var(--muted); font-size: var(--step--1); line-height: 1.6; }
+
+.sbs-grid { display: grid; gap: var(--sp-4); }
+/* Grid and flex children default to min-width:auto, which stops anything with
+   intrinsically wide content (a <pre>, a long token) from shrinking — that
+   pushes the page wider than the viewport. Verified at 320px. */
+.sbs-grid > *,
+.sbs-compare > *,
+.sbs-hero__grid > *,
+.sbs-footer__grid > *,
+.sbs-bundle > *,
+.sbs-flow > * { min-width: 0; }
+@media (min-width: 40em) { .sbs-grid--2 { grid-template-columns: repeat(2,1fr); } }
+@media (min-width: 40em) { .sbs-grid--3 { grid-template-columns: repeat(2,1fr); } }
+@media (min-width: 64em) { .sbs-grid--3 { grid-template-columns: repeat(3,1fr); } }
+@media (min-width: 40em) { .sbs-grid--4 { grid-template-columns: repeat(2,1fr); } }
+@media (min-width: 64em) { .sbs-grid--4 { grid-template-columns: repeat(4,1fr); } }
+
+/* ---- module cards ---------------------------------------------------- */
+.sbs-module { position: relative; }
+.sbs-module__num {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--accent);
+  letter-spacing: .08em;
+  display: block;
+  margin-bottom: var(--sp-2);
+}
+.sbs-module h3 { margin-bottom: var(--sp-2); }
+.sbs-module__meta {
+  margin-top: var(--sp-4); padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--dim);
+}
+
+/* ---- terminal / code -------------------------------------------------- */
+.sbs-terminal {
+  min-width: 0;
+  max-width: 100%;
+  background: #05070B;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.sbs-terminal__bar {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.sbs-terminal__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); }
+.sbs-terminal__title {
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted);
+  margin-left: var(--sp-2);
+}
+.sbs-terminal__body {
+  max-width: 100%;
+  padding: var(--sp-5);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  line-height: 1.75;
+  color: var(--text);
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+.sbs-terminal__body .c { color: var(--dim); }
+.sbs-terminal__body .k { color: var(--mono-accent); }
+.sbs-terminal__body .a { color: var(--accent); }
+
+/* ---- comparison ------------------------------------------------------ */
+.sbs-compare { display: grid; gap: var(--sp-5); align-items: stretch; }
+@media (min-width: 56em) { .sbs-compare { grid-template-columns: 1fr auto 1fr; } }
+.sbs-compare__arrow {
+  display: none; align-self: center; color: var(--accent);
+  font-size: var(--step-3);
+}
+@media (min-width: 56em) { .sbs-compare__arrow { display: block; } }
+.sbs-compare__panel { display: flex; flex-direction: column; height: 100%; min-width: 0; }
+.sbs-compare__label {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: var(--sp-3);
+}
+.sbs-compare__panel--good .sbs-compare__label { color: var(--mono-accent); }
+
+/* ---- workflow -------------------------------------------------------- */
+.sbs-flow {
+  display: grid; gap: var(--sp-3);
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  counter-reset: flow;
+}
+@media (min-width: 40em) { .sbs-flow { grid-template-columns: repeat(auto-fit, minmax(9.5rem,1fr)); } }
+.sbs-flow__item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--sp-4);
+}
+.sbs-flow__n {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  color: var(--accent); display: block; margin-bottom: var(--sp-1);
+}
+.sbs-flow__label { font-weight: 650; font-size: var(--step-0); }
+.sbs-flow__desc { color: var(--muted); font-size: var(--step--1); margin-top: var(--sp-1); }
+
+/* ---- included list --------------------------------------------------- */
+.sbs-included { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.sbs-included__row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.sbs-included__row:last-child { border-bottom: 0; }
+.sbs-included__name { font-weight: 600; }
+.sbs-included__count {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  color: var(--muted); white-space: nowrap;
+}
+
+/* ---- buy panel ------------------------------------------------------- */
+.sbs-buy {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-6);
+  max-width: 34rem;
+  box-shadow: var(--shadow);
+}
+.sbs-buy__price {
+  font-size: var(--step-4); font-weight: 700; letter-spacing: -.03em;
+  line-height: 1;
+}
+.sbs-buy__price small { font-size: var(--step-0); font-weight: 500; color: var(--muted); }
+.sbs-buy__list { margin: var(--sp-5) 0; }
+.sbs-buy__list li {
+  display: flex; gap: var(--sp-3); align-items: flex-start;
+  padding-block: var(--sp-2); color: var(--muted); font-size: var(--step--1);
+}
+.sbs-buy__tick { color: var(--mono-accent); flex: 0 0 auto; margin-top: .25em; }
+.sbs-buy form { margin: 0; }
+.sbs-buy .shopify-payment-button { margin-top: var(--sp-3); }
+
+/* ---- FAQ ------------------------------------------------------------- */
+.sbs-faq { max-width: 52rem; }
+.sbs-faq__item { border-bottom: 1px solid var(--border); }
+.sbs-faq__q {
+  width: 100%; display: flex; gap: var(--sp-4);
+  align-items: center; justify-content: space-between;
+  padding: var(--sp-5) 0;
+  background: none; border: 0; text-align: left;
+  font-size: var(--step-1); font-weight: 620; cursor: pointer;
+  min-height: 3rem;
+}
+.sbs-faq__q:hover { color: var(--accent); }
+.sbs-faq__icon { flex: 0 0 auto; color: var(--accent); transition: transform var(--dur) var(--ease); }
+.sbs-faq__q[aria-expanded="true"] .sbs-faq__icon { transform: rotate(45deg); }
+.sbs-faq__a { padding-bottom: var(--sp-5); color: var(--muted); }
+.sbs-faq__a[hidden] { display: none; }
+.sbs-faq__a > * + * { margin-top: var(--sp-3); }
+
+/* ---- header ---------------------------------------------------------- */
+/* The header has been declared sticky since launch and has never actually
+   stuck. Shopify wraps every section in its own generated element, and a
+   sticky element can only travel within its parent — the wrapper is exactly
+   as tall as the header, so there is nowhere to travel and it scrolls away
+   like static content. Measured on the live site: at scrollY 1500 the header's
+   top was -1444.
+
+   The fix is to make the WRAPPER sticky. Its id is generated and unstable, so
+   it is selected by the group class plus :has() on the header it contains,
+   which avoids also pinning the announcement bar that shares that class.
+
+   :has() is unsupported in older browsers, where this simply does nothing and
+   the header behaves exactly as it does today. */
+/* Only once the script has collapsed the nav. Without JavaScript the nav ships
+   fully expanded -- that is the progressive-enhancement fallback, and it is
+   531px tall. Sticking that pins half the viewport over the page and swallows
+   clicks meant for the content beneath: the checklist test caught it by
+   clicking a label and landing on a nav link instead.
+
+   `is-enhanced` is added to .sbs-header by sbs.js only after it has taken over
+   the nav, so this rule cannot apply while the tall fallback is showing. */
+.shopify-section-group-sbs-header-group:has(> .sbs-header.is-enhanced) {
+  position: sticky; top: 0; z-index: 60;
+}
+
+.sbs-header {
+  position: sticky; top: 0; z-index: 60;
+  background: rgba(11,13,18,.86);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+@supports not (backdrop-filter: blur(10px)) { .sbs-header { background: var(--bg); } }
+.sbs-header__inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4);
+  min-height: 4rem;
+}
+.sbs-logo {
+  display: inline-flex; align-items: center; gap: var(--sp-3);
+  font-weight: 700; letter-spacing: -.02em; text-decoration: none; color: var(--text);
+  font-size: var(--step-0);
+}
+.sbs-logo__mark {
+  width: 1.75rem; height: 1.75rem; flex: 0 0 auto;
+  border-radius: 7px; background: var(--accent); color: var(--accent-ink);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-weight: 700; font-size: .82rem;
+}
+/* ---- navigation --------------------------------------------------------
+   The nav used to be `display: none` below 56em with no alternative, so a
+   phone had no navigation at all. It is now a stacked list by default and
+   becomes a slide-down panel only once the script has enhanced the header.
+   That ordering is the point: if the script never runs, the links are a plain
+   list rather than being hidden behind a toggle that does nothing. */
+.sbs-nav {
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: var(--sp-1);
+  padding-bottom: var(--sp-4);
+}
+@media (min-width: 56em) {
+  /* A 2rem gap still wraps at 896px even with six items — measured, not
+     assumed — so narrow desktops get 1rem and the wide gap returns at 72em.
+     Without this the nav takes a second line and the sticky header grows from
+     64px to 68px. */
+  .sbs-nav {
+    display: flex; flex-direction: row; align-items: center;
+    gap: var(--sp-4); padding-bottom: 0;
+  }
+}
+@media (min-width: 72em) { .sbs-nav { gap: var(--sp-6); } }
+/* Verified after "Platforms" was dropped from the nav: one line and a 64px
+   header at 896, 910, 940, 1000, 1152, 1280 and 1440px, with no horizontal
+   overflow at any of them. Adding a seventh item brings the wrap back in the
+   896-940px band; there is no room there at any readable gap. */
+
+/* ---- mobile panel ------------------------------------------------------ */
+.sbs-burger {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  min-height: 2.75rem; min-width: 2.75rem;
+  padding: var(--sp-2) var(--sp-3);
+  background: none; border: 1px solid var(--border-strong); border-radius: var(--radius);
+  color: var(--text); font: inherit; font-size: var(--step--1); font-weight: 550;
+  cursor: pointer;
+}
+.sbs-burger:hover { border-color: var(--accent); color: var(--accent); }
+.sbs-burger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (min-width: 56em) { .sbs-burger { display: none; } }
+
+/* Three bars that become a cross when open. Transform only, so it animates
+   without moving anything around it. */
+.sbs-burger__bars,
+.sbs-burger__bars::before,
+.sbs-burger__bars::after {
+  display: block; width: 1rem; height: 2px; background: currentColor; border-radius: 2px;
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.sbs-burger__bars { position: relative; }
+.sbs-burger__bars::before,
+.sbs-burger__bars::after { content: ""; position: absolute; left: 0; }
+.sbs-burger__bars::before { top: -5px; }
+.sbs-burger__bars::after  { top: 5px; }
+.sbs-burger[aria-expanded="true"] .sbs-burger__bars { background: transparent; }
+.sbs-burger[aria-expanded="true"] .sbs-burger__bars::before { transform: translateY(5px) rotate(45deg); }
+.sbs-burger[aria-expanded="true"] .sbs-burger__bars::after  { transform: translateY(-5px) rotate(-45deg); }
+
+/* The Products heading replaces the disclosure button on mobile, where the
+   list is always expanded. Exactly one of the two is shown at any width. */
+.sbs-nav__grouplabel {
+  font-family: var(--font-mono); font-size: .74rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); margin: var(--sp-4) 0 var(--sp-1);
+}
+@media (min-width: 56em) { .sbs-nav__grouplabel { display: none; } }
+@media (max-width: 55.99em) { .sbs-nav__toggle { display: none; } }
+
+@media (max-width: 55.99em) {
+  /* Unenhanced, the nav is an in-flow flex item beside the wordmark, and its
+     stacked content pushed the page past the viewport at 390px. Letting the
+     header wrap gives it its own full-width row. Once the script runs the nav
+     is absolutely positioned and out of flow, so this affects only the no-JS
+     case it exists for. */
+  .sbs-header__inner { flex-wrap: wrap; }
+  .sbs-nav { flex: 1 0 100%; min-width: 0; }
+  .sbs-header.is-enhanced .sbs-header__inner { flex-wrap: nowrap; }
+
+  .sbs-nav > a,
+  .sbs-nav__sub a {
+    min-height: 2.75rem;
+    padding: var(--sp-2) 0;
+    font-size: var(--step-0);
+    color: var(--text);
+  }
+  .sbs-nav__group { display: block; }
+  .sbs-nav__sub { display: flex; flex-direction: column; align-items: stretch; gap: var(--sp-1); }
+  .sbs-nav__sub a { justify-content: space-between; }
+
+  /* Panel styling applies only once the script has taken over. Before that the
+     nav is an ordinary stacked list in the header. */
+  .sbs-header.is-enhanced .sbs-nav {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 65;
+    padding: var(--sp-4) var(--sp-5) var(--sp-6);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    max-height: calc(100vh - 4rem);
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* While the panel is open the page behind it must not scroll. Scoped to the
+   class the script adds, so it can never strand a no-JS visitor. */
+.sbs-menu-open { overflow: hidden; }
+.sbs-nav a {
+  color: var(--muted); text-decoration: none; font-size: var(--step--1);
+  font-weight: 550;
+  /* WCAG 2.2 SC 2.5.8 — minimum 24x24 target */
+  display: inline-flex; align-items: center; min-height: 2rem;
+}
+.sbs-nav a:hover { color: var(--text); }
+
+/* ---- nav disclosure menu ---------------------------------------------
+   Without JavaScript the group is a plain inline list of links: the toggle
+   ships hidden and the list ships visible. The script adds `is-enhanced`,
+   and only then does the list become a positioned panel. That ordering
+   matters — styling the panel unconditionally would hide the links from
+   anyone whose JavaScript did not run. */
+.sbs-nav__group { display: flex; align-items: center; gap: var(--sp-4); }
+.sbs-nav__sub {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; align-items: center; gap: var(--sp-4);
+}
+.sbs-nav__sub a {
+  color: var(--muted); text-decoration: none; font-size: var(--step--1);
+  font-weight: 550; display: inline-flex; align-items: center; min-height: 2rem;
+}
+.sbs-nav__sub a:hover { color: var(--text); }
+
+.sbs-nav__toggle {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  min-height: 2rem; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  color: var(--muted); font: inherit; font-size: var(--step--1); font-weight: 550;
+}
+.sbs-nav__toggle:hover,
+.sbs-nav__toggle[aria-expanded="true"] { color: var(--text); }
+.sbs-nav__toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+.sbs-nav__chev {
+  width: .5rem; height: .5rem; flex: none;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform var(--dur) var(--ease);
+}
+.sbs-nav__toggle[aria-expanded="true"] .sbs-nav__chev {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+/* Enhanced: the list becomes a panel anchored under the toggle. */
+.sbs-nav__group.is-enhanced { position: relative; gap: 0; }
+.sbs-nav__group.is-enhanced .sbs-nav__sub {
+  position: absolute; top: calc(100% + var(--sp-3)); left: 0; z-index: 70;
+  display: grid; gap: 0;
+  min-width: 16rem;
+  padding: var(--sp-2);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.sbs-nav__group.is-enhanced .sbs-nav__sub a {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4);
+  padding: var(--sp-3);
+  border-radius: 6px;
+  color: var(--text);
+  min-height: 2.5rem;
+}
+.sbs-nav__group.is-enhanced .sbs-nav__sub a:hover,
+.sbs-nav__group.is-enhanced .sbs-nav__sub a:focus-visible { background: var(--surface-2); }
+.sbs-nav__subtitle { font-weight: 550; }
+.sbs-nav__subprice {
+  flex: none;
+  font-family: var(--font-mono); font-size: .78rem; color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.sbs-header__cta { display: none; }
+@media (min-width: 40em) { .sbs-header__cta { display: inline-flex; } }
+.sbs-header .sbs-btn { min-height: 2.5rem; padding: var(--sp-2) var(--sp-4); font-size: var(--step--1); }
+
+/* ---- announcement ---------------------------------------------------- */
+.sbs-announce {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  padding: var(--sp-3) var(--sp-5);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+.sbs-announce strong { color: var(--text); font-weight: 600; }
+
+/* ---- hero ------------------------------------------------------------ */
+.sbs-hero { padding-block: var(--sp-8) var(--sp-8); position: relative; overflow: hidden; }
+@media (min-width: 48em) { .sbs-hero { padding-block: var(--sp-9) var(--sp-9); } }
+.sbs-hero::before {
+  content: ""; position: absolute; inset: -30% 40% 40% -10%;
+  background: radial-gradient(closest-side, rgba(138,166,255,.14), transparent 70%);
+  pointer-events: none;
+}
+.sbs-hero__grid { display: grid; gap: var(--sp-7); position: relative; }
+@media (min-width: 64em) {
+  .sbs-hero__grid { grid-template-columns: 1.05fr .95fr; align-items: center; gap: var(--sp-8); }
+}
+.sbs-hero h1 { margin-bottom: var(--sp-5); }
+.sbs-hero__actions {
+  display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-6);
+}
+
+/* ---- bundle visual --------------------------------------------------- */
+/* Two columns on the narrowest phones. Three 1fr tracks plus the container's
+   padding exceeded 320px once a tile's content set the track's minimum — the
+   homepage never showed it because .sbs-hero clips its overflow, so this was
+   latent until the product page rendered the same tiles unclipped. */
+.sbs-bundle {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.sbs-bundle__tile {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  line-height: 1.35;
+  color: var(--muted);
+  min-height: 4.25rem;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+@media (min-width: 24em) { .sbs-bundle { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 30em) { .sbs-bundle__tile { font-size: .74rem; } }
+.sbs-bundle__tile b { color: var(--text); font-weight: 650; display: block; }
+.sbs-bundle__tile span { color: var(--accent); }
+.sbs-bundle__tile--accent { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ---- platforms ------------------------------------------------------- */
+.sbs-platforms { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.sbs-platform {
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: var(--sp-2) var(--sp-5);
+  font-family: var(--font-mono); font-size: var(--step--1);
+  color: var(--muted); background: var(--surface);
+}
+
+/* ---- footer ---------------------------------------------------------- */
+.sbs-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-block: var(--sp-8) var(--sp-6);
+}
+.sbs-footer__grid { display: grid; gap: var(--sp-6); }
+@media (min-width: 48em) { .sbs-footer__grid { grid-template-columns: 1.4fr 1fr 1fr; } }
+.sbs-footer h2 { font-size: var(--step-0); letter-spacing: 0; margin-bottom: var(--sp-3); }
+.sbs-footer ul li + li { margin-top: var(--sp-1); }
+.sbs-footer a {
+  color: var(--muted); text-decoration: none; font-size: var(--step--1);
+  display: inline-flex; align-items: center; min-height: 1.75rem;
+}
+.sbs-footer a:hover { color: var(--text); text-decoration: underline; }
+.sbs-footer__legal {
+  margin-top: var(--sp-7); padding-top: var(--sp-5);
+  border-top: 1px solid var(--border);
+  color: var(--dim); font-size: var(--step--1);
+}
+.sbs-footer__legal p + p { margin-top: var(--sp-3); }
+
+/* ---- sticky mobile buy ------------------------------------------------ */
+.sbs-sticky {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+  background: rgba(18,21,29,.97);
+  border-top: 1px solid var(--border-strong);
+  padding: var(--sp-3) var(--sp-4);
+  padding-bottom: calc(var(--sp-3) + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: var(--sp-4);
+  transform: translateY(110%);
+  transition: transform 220ms var(--ease);
+}
+.sbs-sticky[data-visible="true"] { transform: translateY(0); }
+.sbs-sticky__text { flex: 1 1 auto; min-width: 0; }
+.sbs-sticky__title {
+  font-size: var(--step--1); font-weight: 620;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sbs-sticky__price { font-size: var(--step--1); color: var(--muted); }
+.sbs-sticky .sbs-btn { flex: 0 0 auto; min-height: 2.75rem; padding-inline: var(--sp-5); }
+@media (min-width: 56em) { .sbs-sticky { display: none; } }
+
+/* ---- utility --------------------------------------------------------- */
+/* The hidden attribute must win.
+   The UA stylesheet's `[hidden] { display: none }` is an author-vs-UA loss for
+   ANY author rule that sets display on the same element, whatever its
+   specificity. Several components here are laid out with `display: grid` and
+   also toggled with `el.hidden`, and without this rule they stayed visible:
+   all three experience-level steps rendered in the workflow selector at once,
+   with the "hidden" ones still taking keyboard focus, and the library filter
+   form appeared for visitors with JavaScript disabled where it does nothing.
+   Toggling `hidden` is the accessible way to hide (it removes the element from
+   the accessibility tree and the tab order); this makes it actually work. */
+.sbs [hidden] { display: none !important; }
+
+/* Also the announcement region for copy confirmations and filter results, so
+   it must stay clip-based rather than display:none — display:none removes an
+   element from the accessibility tree and it stops announcing. */
+.sbs-visually-hidden {
+  position: absolute !important; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.sbs-center { text-align: center; }
+.sbs-center p { margin-inline: auto; }
+
+/* ---- motion ---------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sbs *, .sbs *::before, .sbs *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .sbs-sticky { transition: none; }
+}
+
+/* ── policy pages ───────────────────────────────────────────────────────
+   Shopify renders policy content as HTML we do not control, so style it
+   generically. Applied via layout/theme.liquid's policy branch. */
+.sbs-crumbs {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2);
+  font-family: var(--font-mono); font-size: var(--step--1);
+  color: var(--dim); margin-bottom: var(--sp-5);
+}
+/* WCAG 2.2 SC 2.5.8 target size. Breadcrumb links are standalone navigation
+   targets, so the inline-text exception does not cover them: an inline <a>
+   boxes to the font's content height (~22px here), not the line-height.
+   inline-block plus vertical padding takes the target past 24px without
+   changing the visual rhythm. */
+.sbs-crumbs a { color: var(--muted); text-decoration: none;
+  display: inline-block; padding-block: 2px; }
+.sbs-crumbs a:hover { color: var(--accent); text-decoration: underline; }
+
+.sbs-policy-body { max-width: var(--measure); }
+.sbs-policy-body h1 { font-size: var(--step-4); margin-bottom: var(--sp-6); }
+.sbs-rte h2 { font-size: var(--step-2); margin-top: var(--sp-7); margin-bottom: var(--sp-3); }
+.sbs-rte h3 { font-size: var(--step-1); margin-top: var(--sp-6); margin-bottom: var(--sp-2); }
+.sbs-rte h4 { font-size: var(--step-0); margin-top: var(--sp-5); }
+.sbs-rte p, .sbs-rte li { color: var(--muted); }
+.sbs-rte p + p { margin-top: var(--sp-4); }
+.sbs-rte ul, .sbs-rte ol { padding-left: 1.3rem; margin-top: var(--sp-3); }
+.sbs-rte ul { list-style: disc; }
+.sbs-rte ol { list-style: decimal; }
+.sbs-rte li + li { margin-top: var(--sp-2); }
+.sbs-rte a { color: var(--accent); }
+.sbs-rte strong { color: var(--text); }
+.sbs-rte em { color: var(--dim); }
+.sbs-rte code {
+  font-family: var(--font-mono); font-size: .9em;
+  background: var(--surface-2); padding: .1em .4em;
+  border-radius: 4px; color: var(--mono-accent);
+}
+/* A bare URL is one unbreakable token. The benchmark page's citation block
+   carries a 79-character one, which pushed the page to 421px wide at a 320px
+   viewport — the whole page scrolled sideways, not just the quote. Applied to
+   the long-token elements rather than globally, because `anywhere` on ordinary
+   prose produces ragged mid-word breaks nobody asked for. */
+.sbs-rte blockquote, .sbs-rte li, .sbs-rte p { overflow-wrap: anywhere; }
+
+.sbs-rte table { width: 100%; border-collapse: collapse; margin-top: var(--sp-4); }
+.sbs-rte th, .sbs-rte td {
+  border: 1px solid var(--border); padding: var(--sp-3);
+  text-align: left; font-size: var(--step--1);
+}
+.sbs-rte th { background: var(--surface-2); color: var(--text); }
+.sbs-rte hr { border: 0; border-top: 1px solid var(--border); margin: var(--sp-6) 0; }
+
+.sbs-policy-nav {
+  margin-top: var(--sp-9); padding-top: var(--sp-5);
+  border-top: 1px solid var(--border);
+}
+.sbs-policy-nav h2 {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: var(--sp-4);
+}
+.sbs-policy-nav ul {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5);
+  list-style: none; padding: 0;
+}
+.sbs-policy-nav a {
+  color: var(--muted); text-decoration: none; font-size: var(--step--1);
+  display: inline-flex; align-items: center; min-height: 1.75rem;
+}
+.sbs-policy-nav a:hover { color: var(--accent); text-decoration: underline; }
+
+/* ── Shopify's dynamic checkout button ──────────────────────────────────
+   Shopify injects and styles this button itself; its default rendering
+   measured 3.59:1 against our surface, below the 4.5 minimum. These rules
+   bring it onto our tokens. */
+.sbs .shopify-payment-button__button {
+  min-height: 3rem;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-weight: 650;
+  font-size: var(--step-0);
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+.sbs .shopify-payment-button__button:hover:not([disabled]) {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.sbs .shopify-payment-button__button--unbranded {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.sbs .shopify-payment-button__more-options {
+  color: var(--muted);
+  font-size: var(--step--1);
+  text-decoration: underline;
+  min-height: 2rem;
+}
+.sbs .shopify-payment-button__more-options:hover { color: var(--accent); }
+
+/* ── Shopify's injected policy stylesheet ───────────────────────────────
+   Shopify serves storefront/policy-*.css on policy pages, which centres the
+   title and imposes its own narrow container. Ours loads after it, so these
+   overrides win. Verified against the computed styles on the live page. */
+.sbs .shopify-policy__container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.sbs .shopify-policy__title {
+  text-align: left;
+  margin: 0 0 var(--sp-6);
+}
+.sbs .shopify-policy__title h1 {
+  text-align: left;
+  font-size: var(--step-4);
+}
+.sbs .shopify-policy__body { text-align: left; }
+
+/* ── long-form articles ─────────────────────────────────────────────────
+   The guides are read, not scanned, so the body column is narrower than the
+   marketing sections and the vertical rhythm is looser. */
+.sbs-article__head { max-width: 46rem; }
+.sbs-article__head h1 { font-size: var(--step-4); margin-bottom: var(--sp-4); }
+.sbs-article__meta {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3);
+  align-items: center;
+  margin-top: var(--sp-5);
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--dim);
+}
+.sbs-article__tags { display: inline-flex; flex-wrap: wrap; gap: var(--sp-2); }
+.sbs-article__tags a {
+  color: var(--muted); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: .1em .6em;
+  display: inline-flex; align-items: center; min-height: 1.6rem;
+}
+.sbs-article__tags a:hover { color: var(--accent); border-color: var(--accent); }
+
+.sbs-article__hero {
+  width: 100%; height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  margin-top: var(--sp-6);
+}
+
+.sbs-article__body { max-width: 44rem; font-size: 1.06rem; line-height: 1.72; }
+.sbs-article__body > * + * { margin-top: var(--sp-5); }
+.sbs-article__body h2 {
+  font-size: var(--step-2); margin-top: var(--sp-9); scroll-margin-top: 5rem;
+  padding-bottom: var(--sp-3); border-bottom: 1px solid var(--border);
+}
+.sbs-article__body h3 { font-size: var(--step-1); margin-top: var(--sp-7); scroll-margin-top: 5rem; }
+.sbs-article__body h4 { font-size: var(--step-0); margin-top: var(--sp-6); }
+.sbs-article__body ul, .sbs-article__body ol { padding-left: 1.35rem; }
+.sbs-article__body li + li { margin-top: var(--sp-2); }
+.sbs-article__body blockquote {
+  border-left: 3px solid var(--accent);
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-5);
+  margin-left: 0;
+  color: var(--text);
+}
+.sbs-article__body blockquote p { color: var(--text); }
+
+/* in-article table of contents, authored in the body */
+.sbs-toc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: var(--sp-5) var(--sp-6);
+}
+.sbs-toc h2 {
+  font-family: var(--font-mono); font-size: var(--step--1) !important;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 var(--sp-4) !important; border: 0 !important; padding: 0 !important;
+}
+.sbs-toc ol { counter-reset: toc; list-style: none; padding: 0; margin: 0;
+  display: grid; gap: var(--sp-2); }
+.sbs-toc li { counter-increment: toc; display: grid;
+  grid-template-columns: 1.9rem 1fr; gap: var(--sp-2); }
+.sbs-toc li::before {
+  content: counter(toc, decimal-leading-zero);
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent);
+}
+.sbs-toc a { color: var(--muted); text-decoration: none;
+  display: inline-flex; align-items: center; min-height: 1.7rem; }
+.sbs-toc a:hover { color: var(--accent); text-decoration: underline; }
+
+/* code and prompt blocks */
+.sbs-article__body pre {
+  background: #05070B; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--sp-5);
+  overflow-x: auto; font-family: var(--font-mono);
+  font-size: .84rem; line-height: 1.65; color: var(--text);
+  position: relative;
+}
+.sbs-article__body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+.sbs-prompt {
+  background: var(--surface-2) !important;
+  border-left: 3px solid var(--mono-accent) !important;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.sbs-copy {
+  position: absolute; top: .5rem; right: .5rem;
+  font-family: var(--font-mono); font-size: .68rem;
+  padding: .3em .6em; border-radius: 4px;
+  background: var(--surface-2); color: var(--muted);
+  border: 1px solid var(--border-strong); cursor: pointer;
+  min-height: 1.9rem;
+}
+.sbs-copy:hover { color: var(--accent); border-color: var(--accent); }
+
+/* responsive tables inside articles */
+.sbs-article__body .sbs-table { overflow-x: auto; border: 1px solid var(--border);
+  border-radius: var(--radius); }
+.sbs-article__body table { width: 100%; border-collapse: collapse; min-width: 32rem; }
+.sbs-article__body th, .sbs-article__body td {
+  border-bottom: 1px solid var(--border); padding: var(--sp-3);
+  text-align: left; font-size: var(--step--1); vertical-align: top;
+}
+.sbs-article__body thead th { background: var(--surface-2); color: var(--text); }
+.sbs-article__body tbody tr:last-child td { border-bottom: 0; }
+
+/* The free tool offered above the product CTA. Visually lighter than the
+   product block on purpose: it is the useful next step, not the offer, and a
+   second box competing at the same weight would make the page read as two
+   adverts stacked. */
+.sbs-article__tool {
+  max-width: 44rem; margin-top: var(--sp-8);
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: var(--sp-5) var(--sp-6);
+}
+.sbs-article__tool h2 { font-size: var(--step-1); margin: var(--sp-2) 0 var(--sp-3); }
+.sbs-article__tool p {
+  color: var(--muted); font-size: var(--step--1);
+  line-height: 1.6; margin-bottom: var(--sp-4);
+}
+@media (max-width: 30rem) { .sbs-article__tool { padding: var(--sp-4); } }
+
+/* article CTA */
+.sbs-article__cta {
+  max-width: 44rem; margin-top: var(--sp-8);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg); padding: var(--sp-6);
+}
+.sbs-article__cta h2 { font-size: var(--step-2); margin-bottom: var(--sp-3); }
+.sbs-article__cta p { color: var(--muted); margin-bottom: var(--sp-5); }
+/* A link that is the entire content of a list item is a standalone target,
+   not a link inside a sentence, so SC 2.5.8's inline exception does not apply.
+   :only-child keeps this off links that sit within descriptive list text,
+   where inline-block would interfere with wrapping. */
+.sbs-article__body li > a:only-child,
+.sbs-toc li > a:only-child {
+  display: inline-block;
+  padding-block: 3px;
+}
+
+/* Email capture. Deliberately quiet: it sits after the product CTA and should
+   read as an offer, not a second sales block. */
+.sbs-optin__inner { max-width: 46rem; }
+.sbs-optin h2 { margin-bottom: var(--sp-3); }
+.sbs-optin .sbs-lede { margin-bottom: var(--sp-5); }
+.sbs-optin__list {
+  list-style: none; padding: 0; margin: 0 0 var(--sp-6);
+  display: grid; gap: var(--sp-2);
+}
+.sbs-optin__list li {
+  position: relative; padding-left: 1.6rem; color: var(--muted);
+}
+.sbs-optin__list li::before {
+  content: "\2713"; position: absolute; left: 0; top: 0;
+  color: var(--accent); font-weight: 700;
+}
+.sbs-optin__form { margin: 0; }
+.sbs-optin__label {
+  display: block; font-size: 0.86rem; font-weight: 650;
+  margin-bottom: var(--sp-2); color: var(--text);
+}
+.sbs-optin__controls { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.sbs-optin__input {
+  flex: 1 1 16rem; min-width: 0;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-2, var(--border));
+  border-radius: var(--radius); padding: 0.85rem 1rem;
+  font: inherit; font-size: 1rem;
+}
+.sbs-optin__input::placeholder { color: var(--dim, var(--muted)); }
+.sbs-optin__input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent);
+}
+.sbs-optin__controls .sbs-btn { flex: 0 0 auto; }
+.sbs-optin__note {
+  margin-top: var(--sp-4); font-size: 0.88rem; color: var(--muted);
+  max-width: var(--measure);
+}
+.sbs-optin__note p { margin: 0; }
+.sbs-optin__error {
+  border: 1px solid var(--danger, #FF9E96); border-left: 4px solid var(--danger, #FF9E96);
+  background: var(--surface-2); border-radius: var(--radius);
+  padding: var(--sp-4); margin-bottom: var(--sp-5); color: var(--text);
+}
+.sbs-optin__done {
+  border: 1px solid var(--accent); border-left: 4px solid var(--accent);
+  background: var(--surface); border-radius: var(--radius);
+  padding: var(--sp-5);
+}
+.sbs-optin__done > * + * { margin-top: var(--sp-3); }
+.sbs-optin__done-h { font-weight: 650; color: var(--text); font-size: 1.06rem; }
+.sbs-optin__done p { color: var(--muted); margin: 0; }
+.sbs-optin__done:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Homepage guides teaser. */
+.sbs-guides__all { margin-top: var(--sp-6); }
+/* Standalone link, not one inside a sentence, so SC 2.5.8's inline exception
+   does not apply and it has to clear 24px on its own. */
+.sbs-guides__all a { font-weight: 650; display: inline-block; padding-block: 0.35rem; }
+
+/* Diagrams inside the article body. */
+.sbs-article__body figure { margin: var(--sp-7) 0; }
+.sbs-article__body figure img {
+  display: block; width: 100%; height: auto;
+  border-radius: var(--radius); background: var(--surface);
+}
+.sbs-article__body figcaption {
+  margin-top: var(--sp-3);
+  font-size: 0.92rem; color: var(--muted); line-height: 1.55;
+}
+
+/* Inline product CTA inside the article body. Deliberately quieter than the
+   end-of-article block so it reads as an aside, not an interruption. */
+.sbs-article__body .sbs-inline-cta {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: var(--sp-5);
+}
+.sbs-article__body .sbs-inline-cta > * + * { margin-top: var(--sp-3); }
+.sbs-inline-cta__label {
+  display: block;
+  font-size: 0.75rem; font-weight: 650;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.sbs-article__body .sbs-inline-cta p { margin: 0; color: var(--text); }
+.sbs-article__body .sbs-inline-cta a { font-weight: 650; }
+
+.sbs-article__related-h { font-size: var(--step-2); margin-bottom: var(--sp-6); }
+
+/* blog index */
+.sbs-guide { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sbs-guide__img { border-radius: var(--radius); border: 1px solid var(--border); width: 100%; height: auto; }
+.sbs-guide h2 { font-size: var(--step-1); }
+.sbs-guide h2 a, .sbs-card h3 a { color: var(--text); text-decoration: none; }
+.sbs-guide h2 a:hover, .sbs-card h3 a:hover { color: var(--accent); }
+.sbs-guide__meta {
+  margin-top: auto; padding-top: var(--sp-3);
+  font-family: var(--font-mono); font-size: var(--step--1); color: var(--dim);
+  display: flex; gap: var(--sp-2);
+}
+.sbs-pagination {
+  display: flex; gap: var(--sp-5); align-items: center; justify-content: center;
+  margin-top: var(--sp-7); font-size: var(--step--1); color: var(--muted);
+}
+.sbs-pagination a { color: var(--accent); text-decoration: none;
+  display: inline-flex; align-items: center; min-height: 2rem; }
+
+/* ---------------------------------------------------------------------------
+   Free resource pages (/pages/resources and the checklists beneath it)
+
+   These markers used to be CSS pseudo-elements rather than real checkboxes.
+   The stated reasons were that real ones would be "unlabelled controls in the
+   tab order for no benefit", and that their state would be lost on reload.
+   Both are now answered rather than ignored: md2html emits a real <label for>
+   on every item, so nothing is unlabelled, and the state is persisted per page
+   in localStorage. A checklist you can actually work through, close, and come
+   back to is worth the controls.
+
+   Ticking and resetting both work with JavaScript disabled — the inputs are
+   real and the reset is a native <button type="reset"> inside a form. The
+   script only adds progress, persistence and printing.
+
+   A plain <ul> is unaffected; only lists md2html marked as task lists become
+   .sbs-checklist.
+   --------------------------------------------------------------------------- */
+.sbs-checklist { list-style: none; padding-left: 0; }
+.sbs-article__body .sbs-checklist { padding-left: 0; }
+.sbs-checklist > li { position: relative; }
+
+.sbs-check {
+  display: grid;
+  grid-template-columns: 1.15rem 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+}
+.sbs-check > * { min-width: 0; }
+.sbs-check input[type="checkbox"] {
+  width: 1.15rem; height: 1.15rem;
+  margin: 0.32em 0 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex: none;
+}
+.sbs-check input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* The label is the click target, so it carries the 24px minimum height that
+   WCAG 2.2 SC 2.5.8 asks for rather than the 18px box. */
+.sbs-check label {
+  display: block;
+  min-height: 24px;
+  padding-block: 1px;
+  cursor: pointer;
+  overflow-wrap: break-word;
+}
+.sbs-check input:checked + label { color: var(--dim); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+
+/* ---- checklist toolbar ---- */
+.sbs-cl__tools {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-cl__progress { flex: 1 1 12rem; min-width: 0; }
+.sbs-cl__count { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.sbs-cl__bar {
+  display: block; width: 100%; height: 6px; margin-top: var(--sp-2);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; overflow: hidden;
+}
+.sbs-cl__fill { display: block; height: 100%; width: 0; background: var(--accent); transition: width var(--dur) var(--ease); }
+.sbs-cl__tools .sbs-btn { min-height: 2.5rem; padding-inline: var(--sp-5); font-size: var(--step--1); }
+.sbs-cl__note { flex-basis: 100%; margin: 0; color: var(--dim); font-size: .78rem; }
+
+@media print {
+  /* A printed checklist should be the list, not the site. */
+  .sbs-header, .sbs-footer, .sbs-cl__tools, .sbs-article__cta,
+  .sbs-resource-cta, .sbs-sticky, .sbs-announcement { display: none !important; }
+  .sbs-check input[type="checkbox"] { -webkit-appearance: checkbox; appearance: checkbox; }
+  .sbs { background: #fff; color: #000; }
+  .sbs a { color: #000; }
+}
+
+.sbs-resource-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-4);
+  margin: var(--sp-5) 0;
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.sbs-resource-download p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--step--1);
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.sbs-resource-download .sbs-btn { flex: 0 1 auto; max-width: 100%; }
+
+/* At 320px the button's generous inline padding pushed it past the viewport.
+   Below 30em it takes the full width of its box instead of overflowing it. */
+@media (max-width: 30em) {
+  .sbs-resource-download { padding: var(--sp-3); }
+  .sbs-resource-download .sbs-btn {
+    flex: 1 1 100%;
+    width: 100%;
+    padding-inline: var(--sp-4);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Author byline and author box
+   --------------------------------------------------------------------------- */
+.sbs-article__byline {
+  /* inline-block plus vertical padding so the byline clears the 24px minimum
+     of WCAG 2.2 SC 2.5.8; an inline <a> boxes to the font's content height
+     regardless of the line-height around it. */
+  display: inline-block;
+  padding-block: 0.3rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--border);
+}
+.sbs-article__byline:hover,
+.sbs-article__byline:focus-visible {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.sbs-author {
+  max-width: 44rem;
+  margin: var(--sp-7) 0 0;
+  padding: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.sbs-author__eyebrow {
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sbs-author__name { font-size: var(--step-1); margin: var(--sp-2) 0 0; }
+.sbs-author__name a { color: var(--text); text-decoration: none; }
+.sbs-author__name a:hover, .sbs-author__name a:focus-visible { color: var(--accent); }
+.sbs-author__role {
+  margin: var(--sp-1) 0 0;
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+.sbs-author__bio {
+  margin: var(--sp-3) 0 0;
+  color: var(--muted);
+  font-size: var(--step--1);
+  line-height: 1.65;
+}
+.sbs-author__more { margin: var(--sp-3) 0 0; font-size: var(--step--1); }
+.sbs-author__more a { color: var(--accent); }
+
+/* Standalone links on the resources hub: card headings and the "Read it" /
+   related-reading links are targets in their own right, not links inside a
+   sentence, so SC 2.5.8's inline exception does not cover them. */
+.sbs-tap { display: inline-block; padding-block: 0.3rem; }
+.sbs-card h3 > a { display: inline-block; padding-block: 0.15rem; }
+
+/* ---------------------------------------------------------------------------
+   Outcome paths — "What are you trying to build?"
+   --------------------------------------------------------------------------- */
+.sbs-outcomes__head { max-width: var(--measure); }
+.sbs-outcomes { margin-top: var(--sp-6); list-style: none; padding: 0; }
+.sbs-outcome { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sbs-outcome__eyebrow {
+  margin: 0;
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.sbs-outcome h3 { margin: 0; }
+
+/* The stage chain. Chevrons are decorative and generated, so they are not
+   read out; the list is announced as an ordered list, which is what it is. */
+.sbs-outcome__path {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) 0;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+.sbs-outcome__path li { display: inline-flex; align-items: center; }
+.sbs-outcome__path li + li::before {
+  content: "→";
+  margin: 0 0.45rem;
+  color: var(--border-strong);
+  speak: never;
+}
+.sbs-outcome__file {
+  margin: auto 0 0;
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--step--2);
+}
+.sbs-outcome__file-label {
+  display: block;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+.sbs-outcome__file code {
+  font-size: var(--step--2);
+  overflow-wrap: anywhere;
+}
+.sbs-outcome__more { margin: 0; font-size: var(--step--1); }
+.sbs-outcome__more a { color: var(--accent); }
+.sbs-outcomes__cta { margin-top: var(--sp-7); }
+.sbs-outcomes__cta .sbs-cta-note { display: block; margin-top: var(--sp-3); }
+
+/* ---------------------------------------------------------------------------
+   Product demonstration
+   --------------------------------------------------------------------------- */
+.sbs-demo__head { max-width: var(--measure); }
+.sbs-demo__player { margin-top: var(--sp-6); }
+.sbs-demo__player video {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface);
+}
+.sbs-demo__note { margin-top: var(--sp-3); color: var(--muted); font-size: var(--step--1); }
+.sbs-demo__note a { color: var(--accent); }
+
+.sbs-demo__walkthrough { margin-top: var(--sp-6); }
+.sbs-demo__steps {
+  list-style: none; padding: 0; margin: 0;
+  counter-reset: demo;
+  display: grid; gap: var(--sp-4);
+}
+@media (min-width: 48em) { .sbs-demo__steps { grid-template-columns: repeat(2, 1fr); } }
+.sbs-demo__step {
+  counter-increment: demo;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-5);
+  min-width: 0;
+}
+.sbs-demo__step h3 {
+  font-size: var(--step-0);
+  margin: 0 0 var(--sp-2);
+  display: flex; gap: var(--sp-3); align-items: baseline;
+}
+.sbs-demo__step h3::before {
+  content: counter(demo);
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: var(--step--2);
+  color: var(--accent);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  flex: 0 0 auto;
+}
+.sbs-demo__step p { color: var(--muted); font-size: var(--step--1); margin: 0; }
+.sbs-demo__step pre {
+  margin-top: var(--sp-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--sp-3);
+  overflow-x: auto;
+  font-size: var(--step--2);
+  line-height: 1.55;
+}
+.sbs-demo__pending {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: var(--step--1);
+  max-width: var(--measure);
+}
+.sbs-demo__pending p + p { margin-top: var(--sp-3); }
+
+/* ---------------------------------------------------------------------------
+   Long unbreakable tokens in headings
+
+   A title containing a domain, a file path or a long identifier —
+   "SiteBuilderStack.com", "MASTER-WEBSITE-BUILDER-PROMPT.md" — has no break
+   opportunity, so at 320px it pushed the page into horizontal scroll. Breaking
+   anywhere is only allowed as a last resort: normal words still wrap normally.
+   --------------------------------------------------------------------------- */
+.sbs-article__head h1,
+.sbs-article__body h2,
+.sbs-article__body h3,
+.sbs-article__body h4,
+.sbs-outcome h3,
+.sbs-demo__step h3 {
+  overflow-wrap: break-word;
+}
+
+/* Link from a shortened FAQ to the full set, so the subset is not a dead end. */
+.sbs-faq__more { margin-top: var(--sp-5); font-size: var(--step--1); }
+.sbs-faq__more a { color: var(--accent); }
+
+/* Direct links to the individual free resources on the homepage, so each one
+   sits a single hop from the most frequently recrawled page on the site. */
+.sbs-guides__resources { margin-top: var(--sp-7); max-width: var(--measure); }
+.sbs-guides__resources h3 { font-size: var(--step-0); margin: 0 0 var(--sp-3); }
+.sbs-guides__resources ul {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: var(--sp-2);
+}
+.sbs-guides__resources li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--sp-3);
+  font-size: var(--step--1);
+  padding-block: 0.1rem;
+}
+.sbs-guides__resources li a { color: var(--accent); font-weight: 600; }
+.sbs-guides__resources li span { color: var(--muted); }
+
+/* Inline code in prose frequently holds a path or identifier with no break
+   opportunity — `~/.claude/projects/<project>/memory/` pushed the CLAUDE.md
+   guide into horizontal scroll at 320px. Only inline code breaks; a <pre>
+   block keeps its own overflow-x scroller, where breaking a line would change
+   what the code means. */
+.sbs-article__body :not(pre) > code,
+.sbs-rte :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   Learning architecture — topic hubs, paths, metadata pills
+   Added for the pillar/cluster rework. Contrast ratios computed against the
+   surface each element actually sits on, not against --bg by default:
+     --accent  on --accent-soft over --surface   7.0:1
+     --muted   on --surface                      8.3:1
+   ========================================================================== */
+
+.sbs-pillar__count {
+  margin-top: var(--sp-4);
+  color: var(--dim);
+  font-size: var(--step--1);
+}
+
+/* ---- metadata pills -------------------------------------------------- */
+.sbs-meta-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  color: var(--dim);
+  font-size: var(--step--1);
+}
+.sbs-pill {
+  display: inline-block;
+  padding: .15rem var(--sp-3);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.sbs-pill--quiet {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* ---- learning path --------------------------------------------------- */
+.sbs-path { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-4); }
+.sbs-path__item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--sp-4);
+  align-items: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+/* Intrinsically wide content inside a path item must be allowed to shrink,
+   or a long inline token pushes the page past the viewport. Verified at 320px. */
+.sbs-path__item > * { min-width: 0; }
+.sbs-path__num {
+  display: flex; align-items: center; justify-content: center;
+  width: 2.5rem; height: 2.5rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-weight: 650;
+}
+.sbs-path__body h3 { font-size: var(--step-1); }
+.sbs-path__body p { color: var(--muted); font-size: var(--step--1); line-height: 1.6; margin-top: var(--sp-2); }
+.sbs-path__body .sbs-meta-row { margin-top: var(--sp-3); }
+.sbs-path__start { margin-top: var(--sp-6); }
+
+@media (max-width: 24em) {
+  /* Below ~384px the number column costs more than it explains. The ordered
+     list still conveys the sequence to assistive technology. */
+  .sbs-path__item { grid-template-columns: 1fr; gap: var(--sp-3); }
+}
+
+/* ---- article: hub label, in-article progression, prev/next ------------ */
+.sbs-article__pillar {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.sbs-article__pillar a { color: var(--mono-accent); }
+.sbs-article__step { color: var(--dim); letter-spacing: .04em; }
+
+/* Reader navigation inserted between two <h2> sections of the body.
+   Deliberately NOT .sbs-inline-cta: that class is already the authored
+   "From the toolkit" product aside, present twice in every guide. Reusing it
+   would both collide in the cascade and make a navigation link look like a
+   third advert. This one is quieter and reads as a signpost. */
+.sbs-article__body .sbs-nextup {
+  margin: var(--sp-7) 0;
+  padding: var(--sp-4) 0 var(--sp-4) var(--sp-5);
+  border-left: 3px solid var(--border-strong);
+  background: none;
+}
+.sbs-article__body .sbs-nextup--next { border-left-color: var(--mono-accent); }
+.sbs-nextup__label {
+  display: block;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.sbs-article__body .sbs-nextup--next .sbs-nextup__label { color: var(--mono-accent); }
+.sbs-article__body .sbs-nextup__link {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--step-1);
+  line-height: 1.4;
+}
+.sbs-article__body .sbs-nextup__link a { font-weight: 650; }
+
+.sbs-prevnext {
+  display: grid; gap: var(--sp-4);
+  margin: var(--sp-8) 0 0;
+}
+@media (min-width: 40em) { .sbs-prevnext { grid-template-columns: 1fr 1fr; } }
+.sbs-prevnext > * { min-width: 0; }
+.sbs-prevnext__link {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--text);
+}
+.sbs-prevnext__link:hover { border-color: var(--accent); }
+.sbs-prevnext__link--next { text-align: right; }
+.sbs-prevnext__dir {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mono-accent);
+}
+.sbs-prevnext__title { font-weight: 650; line-height: 1.4; overflow-wrap: break-word; }
+
+.sbs-resource-cta {
+  margin: var(--sp-8) 0 0;
+  padding: var(--sp-6);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-resource-cta h2 { font-size: var(--step-2); margin-top: var(--sp-2); }
+.sbs-resource-cta p { color: var(--muted); }
+.sbs-resource-cta p + p { margin-top: var(--sp-3); }
+
+/* ---- guide library --------------------------------------------------- */
+.sbs-hublinks { margin-bottom: var(--sp-7); }
+.sbs-hublinks__h {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mono-accent);
+  margin-bottom: var(--sp-3);
+}
+.sbs-hublinks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.sbs-hublinks a {
+  display: inline-block;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: var(--step--1);
+}
+.sbs-hublinks a:hover { border-color: var(--accent); color: var(--accent); }
+
+.sbs-lib__controls {
+  display: grid;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-lib__controls > * { min-width: 0; }
+@media (min-width: 48em) {
+  .sbs-lib__controls { grid-template-columns: repeat(3, 1fr); }
+  .sbs-lib__field--search { grid-column: 1 / -1; }
+}
+@media (min-width: 72em) {
+  .sbs-lib__controls { grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; align-items: end; }
+  .sbs-lib__field--search { grid-column: auto; }
+}
+.sbs-lib__field { display: flex; flex-direction: column; gap: var(--sp-2); }
+.sbs-lib__field label {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sbs-lib__field input,
+.sbs-lib__field select {
+  min-height: 2.75rem;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: var(--step--1);
+  width: 100%;
+}
+.sbs-lib__field input:focus-visible,
+.sbs-lib__field select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sbs-lib__field--action .sbs-btn { min-height: 2.75rem; padding-inline: var(--sp-5); white-space: nowrap; }
+
+.sbs-lib__status { color: var(--dim); font-size: var(--step--1); margin-bottom: var(--sp-4); }
+.sbs-lib__empty {
+  padding: var(--sp-7) var(--sp-5);
+  text-align: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+.sbs-lib__empty p + p { margin-top: var(--sp-3); color: var(--muted); }
+/* A button that reads as a link. Kept a real <button> because it performs an
+   action rather than navigating. */
+.sbs-linkbtn {
+  background: none; border: 0; padding: 0;
+  color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer;
+}
+.sbs-linkbtn:hover { color: #A2B8FF; }
+
+/* ---- workflow selector ------------------------------------------------ */
+.sbs-sel__fallback p { color: var(--muted); margin-bottom: var(--sp-4); }
+.sbs-hublinks__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.sbs-hublinks__list a {
+  display: inline-block;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: var(--step--1);
+}
+.sbs-hublinks__list a:hover { border-color: var(--accent); color: var(--accent); }
+
+.sbs-sel__form { display: grid; gap: var(--sp-6); }
+@media (min-width: 56em) { .sbs-sel__form { grid-template-columns: 3fr 2fr; } }
+.sbs-sel__form > * { min-width: 0; }
+.sbs-sel__q { border: 0; margin: 0; padding: 0; }
+.sbs-sel__q legend {
+  padding: 0;
+  margin-bottom: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mono-accent);
+}
+.sbs-sel__opts { display: grid; gap: var(--sp-3); }
+@media (min-width: 40em) { .sbs-sel__opts { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 56em) { .sbs-sel__q + .sbs-sel__q .sbs-sel__opts { grid-template-columns: 1fr; } }
+.sbs-sel__opt { position: relative; min-width: 0; }
+/* The input stays in the layout and focusable — it is only visually replaced
+   by the label, so keyboard and screen-reader behaviour is the native one. */
+.sbs-sel__opt input {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  margin: 0; opacity: 0; cursor: pointer;
+}
+.sbs-sel__opt label {
+  display: block;
+  padding: var(--sp-4);
+  min-height: 3rem;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+.sbs-sel__opt input:checked + label {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.sbs-sel__opt input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sbs-sel__opt input:hover + label { border-color: var(--accent); }
+.sbs-sel__hint { display: block; color: var(--muted); font-size: .78rem; margin-top: var(--sp-1); }
+
+.sbs-sel__result { margin-top: var(--sp-6); }
+.sbs-sel__prompt { color: var(--dim); font-size: var(--step--1); }
+.sbs-sel__panel {
+  padding: var(--sp-6);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-sel__panel h3 { font-size: var(--step-2); margin-bottom: var(--sp-5); }
+.sbs-sel__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); }
+.sbs-sel__step { display: grid; grid-template-columns: 2rem 1fr; gap: var(--sp-4); align-items: start; }
+.sbs-sel__step > * { min-width: 0; }
+.sbs-sel__stepnum {
+  display: flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 650;
+}
+.sbs-sel__steplabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.sbs-sel__steplink { margin: var(--sp-1) 0 0; font-size: var(--step-0); line-height: 1.45; }
+.sbs-sel__steplink a { font-weight: 650; overflow-wrap: break-word; }
+.sbs-sel__stepnote { margin: var(--sp-2) 0 0; color: var(--muted); font-size: var(--step--1); }
+.sbs-sel__hublink { margin-top: var(--sp-6); color: var(--muted); font-size: var(--step--1); }
+
+@media (max-width: 24em) {
+  .sbs-sel__step { grid-template-columns: 1fr; gap: var(--sp-2); }
+  .sbs-sel__panel { padding: var(--sp-5); }
+}
+
+/* Always-visible route to the hubs on the homepage, independent of whether the
+   selector has been answered. Sits above the questions so it is reachable
+   without interacting with anything. */
+.sbs-sel__browse { margin-bottom: var(--sp-6); }
+.sbs-sel__browse-h {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: var(--sp-3);
+}
+
+/* ---- learning-path roadmap -------------------------------------------- */
+.sbs-sel__opts--wide { grid-template-columns: 1fr; }
+@media (min-width: 40em) { .sbs-sel__opts--wide { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 64em) { .sbs-sel__opts--wide { grid-template-columns: repeat(3, 1fr); } }
+.sbs-sel__pair { display: grid; gap: var(--sp-6); margin-top: var(--sp-6); }
+@media (min-width: 56em) { .sbs-sel__pair { grid-template-columns: 1fr 1fr; } }
+.sbs-sel__pair > * { min-width: 0; }
+/* The three questions stack; the wide first question spans on its own row. */
+@media (min-width: 56em) { .sbs-sel__form { grid-template-columns: 1fr; } }
+
+.sbs-route__bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-route__progress { flex: 1 1 14rem; min-width: 0; }
+.sbs-route__count { margin: 0; font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.sbs-route__bar .sbs-btn { min-height: 2.5rem; padding-inline: var(--sp-4); font-size: var(--step--1); }
+
+.sbs-route {
+  padding: var(--sp-6);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-route__h { font-size: var(--step-2); margin-bottom: var(--sp-5); }
+.sbs-route__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); }
+.sbs-route__step {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  gap: var(--sp-4);
+  align-items: start;
+}
+.sbs-route__step > * { min-width: 0; }
+.sbs-route__num {
+  display: flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  font-family: var(--font-mono); font-size: var(--step--1); font-weight: 650;
+}
+/* Where this visitor joins the roadmap, and what sits behind them. Steps
+   before the entry point are dimmed rather than ticked — ticking them would
+   claim progress nobody reported. */
+.sbs-route__step.is-entry .sbs-route__num { background: var(--accent); color: var(--accent-ink); }
+.sbs-route__step.is-before-entry .sbs-route__body { opacity: .62; }
+.sbs-route__step.is-done .sbs-route__link a { text-decoration-color: var(--border-strong); }
+.sbs-route__kind {
+  margin: 0; font-family: var(--font-mono); font-size: .78rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+}
+.sbs-route__step.is-entry .sbs-route__kind { color: var(--mono-accent); }
+.sbs-route__link { margin: var(--sp-1) 0 0; font-size: var(--step-0); line-height: 1.45; }
+.sbs-route__link a { font-weight: 650; overflow-wrap: break-word; }
+.sbs-route__note { margin: var(--sp-2) 0 0; color: var(--muted); font-size: var(--step--1); }
+
+.sbs-route__done {
+  display: flex; align-items: center; gap: var(--sp-2);
+  min-height: 24px; padding: 2px var(--sp-2);
+  font-family: var(--font-mono); font-size: .72rem;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  cursor: pointer; white-space: nowrap;
+}
+.sbs-route__done input { width: 1.1rem; height: 1.1rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.sbs-route__done input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sbs-route__complete {
+  margin-top: var(--sp-5); padding: var(--sp-4) var(--sp-5);
+  background: var(--accent-soft); border-radius: var(--radius);
+  color: var(--text); font-size: var(--step--1);
+}
+.sbs-route__cta {
+  margin-top: var(--sp-6); padding-top: var(--sp-5);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 30em) {
+  /* The Done control drops beneath the step rather than squeezing the link. */
+  .sbs-route__step { grid-template-columns: 2rem 1fr; }
+  .sbs-route__done { grid-column: 2; justify-self: start; }
+}
+
+/* ---- free tools ------------------------------------------------------- */
+.sbs-tool { margin-top: var(--sp-7); }
+.sbs-tool__form { display: grid; gap: var(--sp-6); }
+.sbs-tool__form fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--sp-5);
+  margin: 0;
+  min-width: 0;
+}
+.sbs-tool__form legend {
+  padding: 0 var(--sp-3);
+  margin-left: calc(var(--sp-3) * -1);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mono-accent);
+}
+.sbs-tool__lead { color: var(--muted); margin-bottom: var(--sp-5); }
+.sbs-tool__grid { display: grid; gap: var(--sp-5); }
+.sbs-tool__grid > * { min-width: 0; }
+@media (min-width: 48em) { .sbs-tool__grid { grid-template-columns: 1fr 1fr; } }
+.sbs-tool__grid--1 { grid-template-columns: 1fr !important; margin-top: var(--sp-5); }
+
+.sbs-field { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.sbs-field label {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sbs-field__hint { margin: 0; color: var(--dim); font-size: var(--step--1); line-height: 1.5; }
+.sbs-field input,
+.sbs-field select,
+.sbs-field textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--sp-3);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: var(--step--1);
+}
+.sbs-field textarea { min-height: 5rem; resize: vertical; font-family: var(--font-mono); }
+.sbs-field input:focus-visible,
+.sbs-field select:focus-visible,
+.sbs-field textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sbs-field ::placeholder { color: var(--dim); opacity: 1; }
+
+/* readiness questionnaire */
+.sbs-tool__cat + .sbs-tool__cat { margin-top: 0; }
+.sbs-tool__q { padding: var(--sp-4) 0; border-top: 1px solid var(--border); }
+.sbs-tool__q:first-of-type { border-top: 0; padding-top: 0; }
+.sbs-tool__qtext { margin: 0 0 var(--sp-3); color: var(--text); font-size: var(--step--1); line-height: 1.5; }
+.sbs-tool__answers { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.sbs-tool__answer { position: relative; }
+.sbs-tool__answer input {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  margin: 0; opacity: 0; cursor: pointer;
+}
+.sbs-tool__answer label {
+  display: block;
+  min-height: 2.25rem;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: var(--step--1);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sbs-tool__answer input:checked + label { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.sbs-tool__answer input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sbs-tool__actions { display: flex; flex-wrap: wrap; gap: var(--sp-4); }
+.sbs-tool__result {
+  margin-top: var(--sp-7);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+.sbs-tool__resulthead {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); margin-bottom: var(--sp-4);
+}
+.sbs-tool__resulthead h2 { font-size: var(--step-1); }
+.sbs-tool__result pre {
+  max-height: 32rem; overflow: auto;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--sp-4);
+  font-size: .82rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.sbs-tool__caveat { margin-top: var(--sp-4); color: var(--dim); font-size: var(--step--1); }
+
+.sbs-score { display: flex; align-items: baseline; gap: var(--sp-2); margin: 0 0 var(--sp-5); }
+.sbs-score strong { font-size: var(--step-4); line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.sbs-score span { color: var(--muted); font-family: var(--font-mono); }
+.sbs-score__cats { list-style: none; margin: 0 0 var(--sp-5); padding: 0; display: grid; gap: var(--sp-3); }
+.sbs-score__cats li {
+  display: grid; grid-template-columns: 12rem 1fr 2.5rem; gap: var(--sp-3);
+  align-items: center; font-size: var(--step--1);
+}
+.sbs-score__cats li > * { min-width: 0; }
+.sbs-score__cats b { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+@media (max-width: 40em) {
+  .sbs-score__cats li { grid-template-columns: 1fr 2.5rem; }
+  .sbs-score__cats li .sbs-cl__bar { grid-column: 1 / -1; }
+}
+
+/* ---- continue your learning path -------------------------------------- */
+.sbs-continue {
+  padding: var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.sbs-continue h2 { font-size: var(--step-2); margin-bottom: var(--sp-5); }
+.sbs-continue__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-5); }
+@media (min-width: 56em) { .sbs-continue__list { grid-template-columns: repeat(3, 1fr); } }
+.sbs-continue__list > li { min-width: 0; padding-left: var(--sp-4); border-left: 2px solid var(--border-strong); }
+.sbs-continue__list > li:first-child { border-left-color: var(--accent); }
+.sbs-continue__kind {
+  margin: 0; font-family: var(--font-mono); font-size: .74rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+}
+.sbs-continue__list > li:first-child .sbs-continue__kind { color: var(--mono-accent); }
+.sbs-continue__link { margin: var(--sp-2) 0 0; font-size: var(--step-0); line-height: 1.4; }
+.sbs-continue__link a { font-weight: 650; overflow-wrap: break-word; }
+.sbs-continue__note { margin: var(--sp-2) 0 0; color: var(--muted); font-size: var(--step--1); line-height: 1.55; }
+.sbs-continue__hub { margin-top: var(--sp-6); color: var(--muted); font-size: var(--step--1); }
+
+/* ── Bundle value table ─────────────────────────────────────────────────────
+   Every figure in here is rendered from a live product price, so the styling
+   deliberately does not include a struck-through or "was" treatment: there is
+   no former price to strike through, and having the class available invites
+   someone to use it later. */
+.sbs-value {
+  max-width: 34rem; margin-inline: auto;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); padding: var(--sp-5);
+}
+.sbs-value__table { width: 100%; border-collapse: collapse; }
+.sbs-value__caption {
+  caption-side: top; text-align: left; color: var(--muted);
+  font-size: var(--step--1); line-height: 1.6; padding-bottom: var(--sp-4);
+}
+.sbs-value__table th, .sbs-value__table td {
+  padding: var(--sp-3) 0; text-align: left; font-size: var(--step--1);
+  border-bottom: 1px solid var(--border); font-weight: 400;
+}
+.sbs-value__table td { text-align: right; font-family: var(--font-mono); white-space: nowrap; }
+.sbs-value__sum th, .sbs-value__sum td { color: var(--muted); }
+.sbs-value__bundle th, .sbs-value__bundle td {
+  color: var(--text); font-weight: 600; border-bottom: 0;
+  font-size: var(--step-0);
+}
+.sbs-value__saving {
+  margin-top: var(--sp-4); padding: var(--sp-4);
+  background: var(--accent-soft); border-radius: var(--radius);
+  font-size: var(--step--1); line-height: 1.6;
+}
+.sbs-value__note {
+  margin-top: var(--sp-4); color: var(--muted);
+  font-size: var(--step--1); line-height: 1.6;
+}
+@media (max-width: 30rem) {
+  .sbs-value { padding: var(--sp-4); }
+  .sbs-value__table th, .sbs-value__table td { font-size: var(--step--2); }
+}
+
+/* Bundle line under an article's product CTA. Deliberately quiet: it is a
+   secondary offer under a primary button and must not compete with it. */
+.sbs-article__cta-alt {
+  margin-top: var(--sp-4); font-size: var(--step--1);
+  line-height: 1.6; color: var(--muted);
+}
+
+/* Readiness recommendation. Sits under the score, visually secondary to it:
+   the score is what the visitor came for. */
+.sbs-tool__rec {
+  margin-top: var(--sp-5); padding: var(--sp-5);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+.sbs-tool__rec-h {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 var(--sp-3);
+}
+.sbs-tool__rec-why {
+  margin: 0 0 var(--sp-4); font-size: var(--step--1); line-height: 1.6;
+}
+.sbs-tool__rec-note {
+  margin: var(--sp-4) 0 0; color: var(--muted);
+  font-size: var(--step--2); line-height: 1.6;
+}
+
+/* ── Learning progress ──────────────────────────────────────────────────────
+   Completion is shown with a tick AND a colour change, never colour alone —
+   a progress state communicated only by hue is unreadable to a good share of
+   the people it is meant to inform. */
+.sbs-path__progress {
+  display: flex; align-items: center; gap: var(--sp-4);
+  margin-bottom: var(--sp-5); font-size: var(--step--1); color: var(--muted);
+}
+.sbs-path__progress .sbs-cl__bar { flex: 1; min-width: 6rem; }
+.sbs-path__item.is-done .sbs-path__num {
+  background: var(--accent); color: var(--bg); border-color: var(--accent);
+}
+.sbs-path__item.is-done .sbs-path__body > h3 a { text-decoration: line-through; }
+
+.sbs-lesson {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3);
+  margin-top: var(--sp-7); padding-top: var(--sp-5);
+  border-top: 1px solid var(--border);
+}
+.sbs-lesson .sbs-btn.is-on {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--text);
+}
+.sbs-lesson .sbs-btn.is-on::before { content: "\2713\00a0"; }
+.sbs-lesson__note {
+  flex-basis: 100%; margin: 0; color: var(--muted);
+  font-size: var(--step--2); line-height: 1.6;
+}
+
+.sbs-learn__summary { margin-bottom: var(--sp-7); }
+.sbs-learn__big { margin: 0; font-size: var(--step-3); line-height: 1.1; }
+.sbs-learn__big span { font-size: var(--step-0); color: var(--muted); margin-left: .4em; }
+.sbs-learn__sub { margin: var(--sp-2) 0 0; color: var(--muted); font-size: var(--step--1); }
+.sbs-learn__block { margin-bottom: var(--sp-8); }
+.sbs-learn__tracks, .sbs-learn__saved { list-style: none; margin: 0; padding: 0; }
+.sbs-learn__track {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface);
+}
+.sbs-learn__track.is-complete { border-color: var(--accent); }
+.sbs-learn__track-head {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4);
+  align-items: baseline; justify-content: space-between;
+}
+.sbs-learn__track-head h3 { margin: 0; font-size: var(--step-0); }
+.sbs-learn__track-count { margin: 0; color: var(--muted); font-size: var(--step--1); }
+.sbs-learn__bar { display: block; margin: var(--sp-3) 0 var(--sp-4); }
+.sbs-learn__lessons { margin: 0; padding-left: var(--sp-5); }
+.sbs-learn__lesson { margin-bottom: var(--sp-2); font-size: var(--step--1); }
+.sbs-learn__lesson.is-done > a { color: var(--muted); text-decoration: line-through; }
+.sbs-learn__tick { color: var(--accent); margin-left: .4em; font-weight: 700; }
+.sbs-learn__next { margin: var(--sp-4) 0 0; font-size: var(--step--1); }
+.sbs-learn__saved li {
+  display: flex; gap: var(--sp-4); align-items: baseline;
+  justify-content: space-between; padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--border); font-size: var(--step--1);
+}
+.sbs-learn__remove {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--muted); font-size: var(--step--2); text-decoration: underline;
+}
+.sbs-learn__remove:hover { color: var(--text); }
+.sbs-learn__reset { margin-bottom: var(--sp-6); }
+.sbs-learn__note, .sbs-learn__privacy {
+  color: var(--muted); font-size: var(--step--2); line-height: 1.6;
+  margin: var(--sp-3) 0 0;
+}
+@media (max-width: 30rem) {
+  .sbs-learn__track { padding: var(--sp-4); }
+  .sbs-lesson { gap: var(--sp-2); }
+}
+
+/* Opt-in intent segmentation. Stacked at every width: three options of prose
+   this long side by side are unreadable below about 60rem, and the row that
+   would result is the kind of thing that only looks fine in a wide viewport. */
+.sbs-optin__segment { border: 0; margin: 0 0 var(--sp-4); padding: 0; }
+.sbs-optin__segments { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
+.sbs-optin__segment-opt { display: flex; align-items: flex-start; gap: var(--sp-3); }
+.sbs-optin__segment-opt input { margin-top: .25em; flex: none; }
+.sbs-optin__segment-opt label {
+  font-size: var(--step--1); line-height: 1.5; cursor: pointer;
+  /* 24x24 minimum target, met by padding rather than by a fixed height so the
+     label still grows with its own text. */
+  padding-block: .2rem;
+}
+
+.sbs-demo__sample { margin-top: var(--sp-5); }
+
+/* ── Reading progress ───────────────────────────────────────────────────────
+   Fixed under the sticky header, so it never participates in layout and cannot
+   shift the page. Ships hidden; sbs.js reveals it only once it can drive it. */
+.sbs-reading {
+  position: fixed; left: 0; right: 0; top: var(--sbs-header-h, 3.5rem);
+  z-index: 55; pointer-events: none;
+}
+.sbs-reading__bar {
+  height: 2px; background: var(--border);
+}
+.sbs-reading__bar > span {
+  display: block; height: 100%; width: 0;
+  background: var(--accent);
+}
+/* The width is written every scroll tick, so it is animated only where the
+   viewer has not asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .sbs-reading__bar > span { transition: width .1s linear; }
+}
+.sbs-reading__where {
+  margin: 0; padding: .35rem var(--sp-4);
+  font-family: var(--font-mono); font-size: var(--step--2);
+  color: var(--muted); background: rgba(11,13,18,.86);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+@supports not (backdrop-filter: blur(10px)) { .sbs-reading__where { background: var(--bg); } }
+@media (prefers-reduced-motion: no-preference) {
+  .sbs-reading__where { backdrop-filter: blur(10px); }
+}
+/* The section label is orientation, not navigation. Below 40rem the bar alone
+   carries it — a truncated heading in 10px type helps nobody. */
+@media (max-width: 40rem) { .sbs-reading__where { display: none; } }
+
+/* ── Build → Rank → Convert lifecycle ───────────────────────────────────────
+   An ordered list because the stages genuinely are sequential: you cannot
+   convert traffic you do not have. The numbering comes from the list, so it
+   stays correct if a stage drops out because its product is unavailable. */
+.sbs-life { list-style: none; margin: 0; padding: 0; counter-reset: life; display: grid; gap: var(--sp-5); }
+.sbs-life__stage {
+  counter-increment: life;
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--surface); padding: var(--sp-6);
+  position: relative;
+}
+.sbs-life__stage--all { border-color: var(--accent); background: var(--accent-soft); }
+.sbs-life__head { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.sbs-life__label {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+}
+.sbs-life__label::before { content: counter(life, decimal-leading-zero) " · "; color: var(--muted); }
+.sbs-life__stage h3 { margin: 0; font-size: var(--step-2); }
+.sbs-life__price { margin: 0; font-family: var(--font-mono); color: var(--muted); font-size: var(--step--1); }
+.sbs-life__q {
+  margin: 0 0 var(--sp-4); padding-left: var(--sp-4);
+  border-left: 2px solid var(--border);
+  font-size: var(--step-0); line-height: 1.55; color: var(--text);
+}
+.sbs-life__body { color: var(--muted); line-height: 1.65; margin-bottom: var(--sp-5); }
+.sbs-life__guides { margin-bottom: var(--sp-5); }
+.sbs-life__guides-h {
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 var(--sp-2);
+}
+.sbs-life__guides ul { margin: 0; padding-left: var(--sp-5); display: grid; gap: var(--sp-2); }
+.sbs-life__guides li { font-size: var(--step--1); line-height: 1.5; }
+.sbs-life__cta { margin: 0; }
+.sbs-life__note { margin-top: var(--sp-6); color: var(--muted); font-size: var(--step--1); line-height: 1.65; }
+@media (min-width: 60em) {
+  .sbs-life { grid-template-columns: repeat(3, 1fr); align-items: start; }
+  /* The bundle spans the row beneath the three stages it contains, which is
+     the relationship it has to them. */
+  .sbs-life__stage--all { grid-column: 1 / -1; }
+}
+@media (max-width: 30rem) { .sbs-life__stage { padding: var(--sp-5); } }
+
+/* ── Product picker ─────────────────────────────────────────────────────── */
+.sbs-picker { max-width: 44rem; }
+.sbs-picker__q { border: 0; margin: 0 0 var(--sp-6); padding: 0; }
+.sbs-picker__q legend {
+  font-size: var(--step-0); font-weight: 600; padding: 0;
+  margin-bottom: var(--sp-3); line-height: 1.4;
+}
+.sbs-picker__opts { display: grid; gap: var(--sp-2); }
+.sbs-picker__opt { display: flex; align-items: flex-start; gap: var(--sp-3); }
+.sbs-picker__opt input { margin-top: .3em; flex: none; }
+.sbs-picker__opt label {
+  font-size: var(--step--1); line-height: 1.5; cursor: pointer; padding-block: .2rem;
+}
+.sbs-picker__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-5); }
+.sbs-picker__result {
+  margin-top: var(--sp-7); padding: var(--sp-6);
+  border: 1px solid var(--accent); border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+}
+.sbs-picker__result:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.sbs-picker__result-h {
+  font-family: var(--font-mono); font-size: var(--step--1);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  margin: 0 0 var(--sp-4);
+}
+.sbs-picker__why { font-size: var(--step--1); line-height: 1.65; margin: 0 0 var(--sp-4); }
+.sbs-picker__card h4 { margin: 0 0 var(--sp-2); font-size: var(--step-1); }
+.sbs-picker__price { margin: 0 0 var(--sp-4); font-family: var(--font-mono); color: var(--muted); }
+.sbs-picker__alt, .sbs-picker__note {
+  margin: var(--sp-4) 0 0; color: var(--muted);
+  font-size: var(--step--2); line-height: 1.6;
+}
+@media (max-width: 30rem) { .sbs-picker__result { padding: var(--sp-5); } }

@@ -1,0 +1,304 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What a skill is</a></li>
+    <li><a href="#when">When something should become a skill</a></li>
+    <li><a href="#first">Writing your first one</a></li>
+    <li><a href="#where">Where skills live, and which one wins</a></li>
+    <li><a href="#install">Adding a skill someone else wrote</a></li>
+    <li><a href="#listing">Finding and running the skills you have</a></li>
+    <li><a href="#commands">Skills and slash commands are now the same thing</a></li>
+    <li><a href="#frontmatter">Frontmatter that changes behaviour</a></li>
+    <li><a href="#arguments">Passing arguments</a></li>
+    <li><a href="#supporting">Supporting files, and why the body is lazy</a></li>
+    <li><a href="#fork">Running a skill in a subagent</a></li>
+    <li><a href="#versus">Skill, CLAUDE.md, or subagent?</a></li>
+    <li><a href="#ready">Five you can install right now</a></li>
+    <li><a href="#examples">Four skills worth writing</a></li>
+    <li><a href="#antipatterns">Where skills go wrong</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What a skill is</h2>
+
+<p>A skill is a folder with a <code>SKILL.md</code> file in it. The file holds instructions. Claude Code loads it when it is relevant, or you invoke it directly by typing <code>/skill-name</code>.</p>
+
+<p>That is genuinely the whole mechanism. What makes it worth understanding is a property that is easy to miss: <strong>a skill's body loads only when the skill is used.</strong></p>
+
+<p>Compare that to <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a>, which is loaded into every session, every request, forever. A 200-line deployment procedure in <code>CLAUDE.md</code> is paid for on every single message you send, including the ones about CSS. The same procedure as a skill costs almost nothing until the day you deploy.</p>
+
+<p>One more thing worth knowing up front: <strong>custom commands and skills are now the same system.</strong> A file at <code>.claude/commands/deploy.md</code> and a skill at <code>.claude/skills/deploy/SKILL.md</code> both create <code>/deploy</code>. Existing <code>commands/</code> files keep working. Skills add a folder for supporting files, frontmatter for controlling invocation, and the ability for Claude to load them automatically.</p>
+
+<h2 id="when">When something should become a skill</h2>
+
+<p>Two signals, and they are reliable:</p>
+
+<p><strong>You keep pasting the same thing.</strong> The same checklist, the same multi-step procedure, the same set of constraints. If you have typed it three times, it is a skill.</p>
+
+<p><strong>A section of <code>CLAUDE.md</code> has grown into a procedure.</strong> <code>CLAUDE.md</code> should hold facts and rules — what this project is, what must never happen, what to run before finishing. The moment a section becomes <em>steps to follow when doing X</em>, it has outgrown the file. Move it to a skill and your <code>CLAUDE.md</code> gets shorter, which makes everything left in it work better.</p>
+
+<p>That second one is the more valuable observation. Length is the main failure mode of a <code>CLAUDE.md</code>, and skills are the pressure valve.</p>
+
+<h2 id="first">Writing your first one</h2>
+
+<p>Two steps.</p>
+
+<pre><code>mkdir -p ~/.claude/skills/summarize-changes</code></pre>
+
+<p>Then <code>~/.claude/skills/summarize-changes/SKILL.md</code>:</p>
+
+<pre><code>---
+description: Summarise uncommitted changes for a commit message or PR
+  description. Use when work is finished and needs writing up.
+---
+
+Run `git diff` and `git status` to see what actually changed.
+
+Write a summary with:
+- One line saying what this change does, in the imperative
+- What changed and why, grouped by concern rather than by file
+- Anything a reviewer should look at closely
+- Anything you could not verify
+
+Describe the change, not the process of making it. Nobody needs to know
+which file you opened first.</code></pre>
+
+<p>That is a working skill. Type <code>/summarize-changes</code> and it runs.</p>
+
+<p>The directory name becomes the command. The <code>description</code> is what Claude reads when deciding whether to load it on its own — which is why it should say <em>when to use this</em>, not just what it does.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Website Launch System's 100 prompts are written to drop straight into a skills directory, so the whole library becomes slash commands rather than something you paste &mdash; <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="where">Where skills live, and which one wins</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Scope</th><th>Path</th><th>Applies to</th></tr></thead>
+<tbody>
+<tr><td>Personal</td><td><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>All your projects</td></tr>
+<tr><td>Project</td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>This project — commit it</td></tr>
+<tr><td>Plugin</td><td><code>&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code></td><td>Wherever that plugin is enabled</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Precedence has one result that surprises people: with a <code>deploy</code> skill in both <code>~/.claude/skills/</code> and the project's <code>.claude/skills/</code>, <strong>the personal one runs</strong>. Your own skill shadows the team's. If a teammate reports that the project's <code>/deploy</code> is doing something odd, check whether they have a personal skill of the same name.</p>
+
+<p>Plugin skills sidestep this entirely by being namespaced — <code>my-plugin/skills/deploy/SKILL.md</code> becomes <code>/my-plugin:deploy</code> and coexists with a project <code>deploy</code> rather than fighting it.</p>
+
+<p>Two further behaviours worth knowing:</p>
+
+<p><strong>Project skills load from the start directory and every parent up to the repo root</strong>, so starting Claude in a subdirectory still picks up skills defined at the top.</p>
+
+<p><strong>Nested skills load lazily.</strong> Skills in a <code>.claude/skills/</code> below your working directory are not available at startup. They become available the first time Claude reads or edits a file in that subdirectory. In a monorepo this is the feature that lets a package carry its own skills — but until Claude touches that package, those skills do not appear in autocomplete and cannot be invoked by name.</p>
+
+<p>Claude Code also watches skill directories and picks up edits within the session, without a restart. If you create a top-level skills directory that did not exist when the session started, restart so it can be watched.</p>
+
+<h2 id="install">Adding a skill someone else wrote</h2>
+
+<p>Most people's second question about skills is not how to write one — it is how to use one they found. There is no package manager and no install command. A skill is a directory, and adding it means putting that directory somewhere Claude Code already looks.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Where it came from</th><th>How to add it</th><th>How you invoke it</th></tr></thead>
+<tbody>
+<tr><td>A repo, a gist, a colleague</td><td>Copy the folder to <code>~/.claude/skills/&lt;name&gt;/</code> (just you) or <code>.claude/skills/&lt;name&gt;/</code> (the project)</td><td><code>/&lt;name&gt;</code></td></tr>
+<tr><td>A plugin</td><td>Install the plugin from the <code>/plugin</code> menu</td><td><code>/&lt;plugin&gt;:&lt;name&gt;</code></td></tr>
+<tr><td>Your own repo, for a team</td><td>Commit <code>.claude/skills/</code></td><td><code>/&lt;name&gt;</code> for everyone who clones</td></tr>
+<tr><td>Your claude.ai account</td><td>Enable it there; it syncs into <code>~/.claude/skills/synced/</code></td><td><code>/&lt;name&gt;</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The manual case is genuinely this simple:</p>
+
+<pre><code>mkdir -p ~/.claude/skills/summarize-changes
+cp -r ./downloaded-skill/* ~/.claude/skills/summarize-changes/
+# the directory must contain SKILL.md</code></pre>
+
+<p><strong>The file has to be called <code>SKILL.md</code>, and it has to sit inside a directory named after the skill.</strong> A loose <code>summarize-changes.md</code> in the skills folder does nothing. That is the single most common reason a copied skill never shows up.</p>
+
+<p>You do not need to restart. Claude Code watches those directories and picks up an added or edited skill within the session. The one exception is creating a <em>top-level</em> skills directory that did not exist when the session started — that one needs a restart before it is watched.</p>
+
+<p>Removing a skill is the mirror image: delete the directory for a personal or project skill, or uninstall the plugin with <code>/plugin uninstall &lt;plugin&gt;@&lt;marketplace&gt;</code> for a plugin one.</p>
+
+<p>Before you trust a skill from someone else, read its <code>SKILL.md</code>. It is a prompt that runs in your repository, it can carry an <code>allowed-tools</code> list that pre-approves tool calls, and it can bundle scripts. The <a href="/pages/claude-code-security-checklist">security checklist</a> covers what to look for.</p>
+
+<h2 id="listing">Finding and running the skills you have</h2>
+
+<p>Two ways in, and the difference matters more than it looks.</p>
+
+<p><strong>You invoke it.</strong> Type <code>/</code> and the skill name. Autocomplete lists what is currently loaded, and <code>/skills</code> shows the set available in this session — which is the fastest way to find out whether the one you just copied is actually being seen.</p>
+
+<p><strong>Claude invokes it.</strong> When the <code>description</code> in the frontmatter matches what you are asking about, Claude loads the skill on its own. This is the behaviour worth optimising for, and it is entirely driven by that one line — a skill described as "helper utilities" will never fire, because nothing a person types resembles it.</p>
+
+<p>If a skill is not appearing at all, work through it in this order: the file is named <code>SKILL.md</code>; it is inside a directory named for the skill; that directory is under one of the paths in the table above; and, for a nested monorepo skill, Claude has actually touched a file in that subdirectory — until it does, the skill is not loaded and will not autocomplete.</p>
+
+<h2 id="commands">Skills and slash commands are now the same thing</h2>
+
+<p>If you have <code>.claude/commands/deploy.md</code> from an earlier version, it still works and still gives you <code>/deploy</code>. <strong>Custom commands have been merged into skills.</strong> A command file and a skill both produce a slash command and behave the same way.</p>
+
+<p>What a skill adds over a plain command file: a directory for supporting files, frontmatter that controls whether you or Claude may invoke it, and automatic loading when the description matches. If both exist under the same name, <strong>the skill wins</strong>.</p>
+
+<p>There is no urgency to migrate. Convert a command file to a skill when you want one of those three things, not on principle.</p>
+
+<h2 id="frontmatter">Frontmatter that changes behaviour</h2>
+
+<p>Every field is optional; only <code>description</code> is really recommended. These are the ones that do something you will notice:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Field</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>description</code></td><td>How Claude decides to load it. Put the key use case first — this text is truncated at 1,536 characters in the listing.</td></tr>
+<tr><td><code>when_to_use</code></td><td>Trigger phrases and example requests. Counts toward the same 1,536-character cap.</td></tr>
+<tr><td><code>disable-model-invocation</code></td><td><code>true</code> means only you can run it, by typing <code>/name</code>. Use for anything with consequences.</td></tr>
+<tr><td><code>user-invocable</code></td><td><code>false</code> means only Claude runs it. For background knowledge you should not invoke directly.</td></tr>
+<tr><td><code>allowed-tools</code></td><td>Tools pre-approved for the turn that invokes this skill. The grant clears on your next message.</td></tr>
+<tr><td><code>disallowed-tools</code></td><td>Tools removed while the skill is active.</td></tr>
+<tr><td><code>model</code> / <code>effort</code></td><td>Override for the turn. Useful for an expensive audit or a cheap mechanical pass.</td></tr>
+<tr><td><code>paths</code></td><td>Globs limiting when the skill auto-loads. A CSS skill that only wakes for stylesheets.</td></tr>
+<tr><td><code>context: fork</code></td><td>Run the skill in a forked subagent instead of the main thread.</td></tr>
+<tr><td><code>argument-hint</code></td><td>Autocomplete hint, e.g. <code>[issue-number]</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The pair worth adopting as a habit is <code>disable-model-invocation</code> and <code>allowed-tools</code>. The first stops a consequential skill from firing because a description looked relevant. The second stops a routine skill from generating a permission prompt on every step, which is what trains people to approve without reading.</p>
+
+<h2 id="arguments">Passing arguments</h2>
+
+<p><code>$ARGUMENTS</code> captures everything typed after the skill name:</p>
+
+<pre><code>---
+description: Explain what a file does and what depends on it
+argument-hint: [path]
+---
+
+Explain `$ARGUMENTS`: what it does, what calls it, what it calls, and
+what would break if it changed. Cite line numbers.</code></pre>
+
+<p>Then <code>/explain src/auth/session.ts</code>.</p>
+
+<p>For several arguments, name them with the <code>arguments</code> field and reference them as <code>$name</code>. That is clearer than positional splitting once you have more than one.</p>
+
+<h2 id="supporting">Supporting files, and why the body is lazy</h2>
+
+<p>A skill is a folder, so it can hold more than <code>SKILL.md</code>. Reference material, templates, scripts, examples — all of it sits alongside, and none of it enters context until the skill actually runs and Claude reads it.</p>
+
+<p>This is what makes skills the right home for genuinely long material. A 40-page style guide as an import in <code>CLAUDE.md</code> is 40 pages on every request. The same guide in a skill folder is free until the day someone asks about style.</p>
+
+<p>The general principle: <strong>rules that must always apply belong in <code>CLAUDE.md</code>; procedures and reference material belong in skills.</strong> Getting that split right is most of what keeps a project's context lean.</p>
+
+<h2 id="fork">Running a skill in a subagent</h2>
+
+<p>Set <code>context: fork</code> and the skill runs in a forked subagent rather than your main thread:</p>
+
+<pre><code>---
+description: Full technical SEO audit of this project
+context: fork
+agent: general-purpose
+model: opus
+---
+
+Audit indexability, canonicalisation, status codes, sitemap contents,
+metadata uniqueness, heading hierarchy, structured data, and internal
+linking.
+
+Evidence for every finding — a file and line, or the actual response.
+Rank by real impact. Say what you could not check.
+
+Do not invent search volumes, difficulty scores, or traffic estimates.
+"Not measured" is a correct answer.</code></pre>
+
+<p>The audit reads a great deal and returns a report. Forking keeps all that reading out of your session. By default a forked skill runs in the background; set <code>background: false</code> to wait for the result in the same turn.</p>
+
+<p>This is where skills and <a href="/blogs/guides/claude-code-subagents">subagents</a> meet: the skill is the procedure, the subagent is the isolation.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-skill-vs-claudemd.png?v=1787892942" alt="Three rows comparing where knowledge belongs. CLAUDE.md holds facts and rules that must always hold and costs every request forever. A skill holds a procedure you run sometimes and costs only when used. A subagent holds work needing its own context and tool limits, costing only when delegated."
+       width="1000" height="462" loading="lazy" decoding="async">
+  <figcaption>CLAUDE.md is the row you pay for on every message, including the unrelated ones.</figcaption>
+</figure>
+
+<h2 id="versus">Skill, CLAUDE.md, or subagent?</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Use</th><th>For</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td><code>CLAUDE.md</code></td><td>Facts and rules that must always hold</td><td>Every request, forever</td></tr>
+<tr><td>Skill</td><td>A procedure you run sometimes</td><td>Only when used</td></tr>
+<tr><td>Subagent</td><td>Work that should happen in its own context, with its own tool limits</td><td>Only when delegated</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The test: <em>would it be wrong for Claude to not know this right now?</em> If yes, it is a <code>CLAUDE.md</code> rule. If it is only relevant while doing a particular job, it is a skill. If the job would flood your context or needs tools locked down, put the skill in a subagent.</p>
+
+<p>There is a fourth answer for anything mechanical that should happen every time regardless of whether it was invoked: a <a href="/blogs/guides/claude-code-hooks">hook</a>.</p>
+
+<h2 id="ready">Five you can install right now</h2>
+
+<p>If you would rather start from working skills than a blank <code>SKILL.md</code>, five are published free and MIT-licensed in the <a href="https://github.com/sitebuilderstack/sitebuilderstack_store" rel="noopener">Claude Code website starter kit</a>: <code>/seo-audit</code>, <code>/a11y-audit</code>, <code>/security-review</code>, <code>/launch-check</code> and <code>/claude-md-review</code>.</p>
+
+<p>They are worth reading even if you do not install them, because they show the shape that works: each one refuses to fix anything in the run that finds it, four are marked <code>disable-model-invocation</code> so they run when asked rather than on their own, and each ends by saying what it could not check.</p>
+
+<pre><code># just you, every project
+cp -r skills/seo-audit ~/.claude/skills/
+
+# or this project, committed for the team
+mkdir -p .claude/skills &amp;&amp; cp -r skills/* .claude/skills/</code></pre>
+
+<p>Then <code>/skills</code> to confirm Claude Code can see them.</p>
+
+<h2 id="examples">Four skills worth writing</h2>
+
+<h3><code>/check</code> — the finishing procedure</h3>
+<p>Run the type checker, the linter, the tests, and the build; show the real output; state what was not verified. The single most useful skill in most projects, because it turns "done" from a claim into a procedure.</p>
+
+<h3><code>/review</code> — with <code>context: fork</code></h3>
+<p>A review that runs in a fresh context will not defend the code it is reviewing.</p>
+
+<h3><code>/ship</code> — with <code>disable-model-invocation: true</code></h3>
+<p>The deploy sequence, in order, with the rollback written down. Model invocation off, because a deploy should never fire because a description looked relevant.</p>
+
+<h3><code>/audit-a11y</code> — with <code>paths</code></h3>
+<p>Scoped to your template and component globs so it only wakes for UI work.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>These four are the skeleton. The Launch System ships the full set &mdash; security, accessibility, performance, SEO, and launch checklists &mdash; already written as invocable procedures. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2 id="antipatterns">Where skills go wrong</h2>
+
+<h3>A description that says what, not when</h3>
+<p>"Deployment skill" tells Claude nothing about when to reach for it. "Use when deploying to production or when asked to ship" does.</p>
+
+<h3>Dumping <code>CLAUDE.md</code> into a skill and calling it done</h3>
+<p>Rules that must always apply do not work as a skill, because the skill might not load. Move procedures; keep rules.</p>
+
+<h3>Consequential skills left model-invocable</h3>
+<p>Anything that deploys, deletes, migrates, or spends money should require you to type it.</p>
+
+<h3>One giant skill</h3>
+<p>A skill covering deployment, testing, and review will be loaded for all three and is right for none. Split by job.</p>
+
+<h3>Forgetting personal skills shadow project ones</h3>
+<p>The commonest confusing bug in this system, and invisible until you check both directories.</p>
+
+<h2>Where to go next</h2>
+
+<p>Skills package a procedure. <a href="/blogs/guides/claude-code-subagents">Subagents</a> package who runs it and with what tools, and <a href="/blogs/guides/claude-code-plugins">plugins</a> package both so a team can install them in one step. The always-on layer beneath all three is <a href="/blogs/guides/production-claude-md-web-development">a production CLAUDE.md</a> &mdash; there is a free <a href="/pages/production-claude-md-starter">starter file</a> if you do not have one yet. For the procedures themselves, the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> is a ready supply of skill bodies, and the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> shows where each one fires.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/skills" rel="noopener">Claude Code: skills</a> — <code>SKILL.md</code> format, locations, precedence, and the full frontmatter reference</li>
+  <li><a href="https://agentskills.io" rel="noopener">Agent Skills</a> — the open standard skills follow</li>
+  <li><a href="https://code.claude.com/docs/en/memory" rel="noopener">Claude Code: memory</a> — what belongs in <code>CLAUDE.md</code> instead</li>
+</ul>

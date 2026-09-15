@@ -1,0 +1,1 @@
+schema_version,trial_id,run,platform,task_id,task_title,model,tool_version,started_at,ended_at,success,attempts,human_interventions,build_ok,build_errors,tests_ok,lighthouse_performance,lighthouse_accessibility,lighthouse_seo,lighthouse_best_practices,axe_violations,security_findings,code_quality_issues,deployment_ready,notes

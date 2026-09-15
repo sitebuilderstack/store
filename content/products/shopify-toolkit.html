@@ -1,0 +1,141 @@
+<h2 id="headline">Automate Shopify with Claude Code.</h2>
+
+<p class="sbs-lede">A complete toolkit for products, collections, SEO, metafields, inventory, redirects, bulk operations, catalogue auditing and Shopify Admin API automation &mdash; built on the Admin GraphQL API, with a preview before every write, a backup, and a read-back after. Not a prompt pack: 32 working scripts, 34 Claude Code commands, 18 validated GraphQL documents, templates for every input, and 19 modules that say what each workflow does and refuses to do.</p>
+
+<h2 id="problem">The problem</h2>
+
+<p>Updating one Shopify product manually is easy. Updating 500 is a workflow problem. Stores accumulate hundreds of products and thousands of variants, and with them: missing SEO titles, descriptions that are the first sentence of the body, images without alt text, vendors spelled four ways, collections that are empty or unpublished, metafields the theme expects and half the products lack, duplicate SKUs the warehouse will find before you do, inventory that says sold out on the storefront, and redirect lists from a migration nobody finished. Each one is a few clicks in the admin. Multiplied by the catalogue, none of them get done.</p>
+
+<p>Ask a capable model to &ldquo;fix the catalogue&rdquo; through the API and you get the other problem: a script that rewrites every SEO description unreviewed, a bulk mutation with no export to roll back to, a token pasted into a file that gets committed. Speed without oversight is how a store gets a thousand wrong titles by lunchtime.</p>
+
+<h2 id="solution">The solution</h2>
+
+<p>A structured automation system that runs inside Claude Code:</p>
+
+<pre><code>CONNECT  →  AUDIT  →  EXPORT  →  AUTOMATE  →  VALIDATE  →  REPORT</code></pre>
+
+<ul>
+  <li><strong>Working scripts</strong> for every area &mdash; a GraphQL client with retries, throttling and cost awareness; export, audit and write scripts for products, variants, collections, metafields, metaobjects, media, SEO, inventory, pricing and redirects; bulk query and bulk mutation with JSONL utilities; a flagship store audit with a catalogue health score. Python standard library only; nothing to install.</li>
+  <li><strong>Claude Code commands</strong> that run the scripts, read the results, and explain them &mdash; each marked <strong>READ ONLY</strong> or <strong>WRITES TO SHOPIFY &mdash; REQUIRES EXPLICIT CONFIRMATION</strong>.</li>
+  <li><strong>A safety architecture</strong> every write follows: discover, export and back up, validate the input, generate a preview, review, confirm, execute, read back, validate, report. Dry run is the default; <code>--limit</code> caps every run; empty cells never blank a field; stale rows are skipped rather than overwritten.</li>
+  <li><strong>Shopify Admin GraphQL API 2026-07</strong>, validated live &mdash; including that version&rsquo;s changes to collections, media and bulk-operation status, which older scripts and older advice get wrong. The version lives in one place, and the upgrade procedure is written down.</li>
+</ul>
+
+<h2 id="included">What is included</h2>
+
+<p>167 files, 19 modules, 34 commands, 32 scripts, 18 GraphQL documents &mdash; about 65,000 words plus working code. Every number here was counted from the bundle at build time.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Module</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td><code>01-shopify-api-setup</code></td><td>Custom apps and tokens, least-privilege scopes, <code>.env</code>, development stores, the agency layout for many client stores</td></tr>
+<tr><td><code>02-graphql-fundamentals</code></td><td>Queries, mutations, variables, global ids, connections, <code>userErrors</code>, cost and throttling, bulk operations, versioning &mdash; Shopify-specific throughout</td></tr>
+<tr><td><code>03-store-discovery</code></td><td>The store described in one API call</td></tr>
+<tr><td><code>04-products</code></td><td>Export, audit, safe creation, reviewed bulk update with diff, backup and read-back</td></tr>
+<tr><td><code>05-variants</code></td><td>Duplicate and missing SKUs, barcodes, options, oversell policy</td></tr>
+<tr><td><code>06-collections</code></td><td>Audit; create and update; the 2026-07 sources model; products added, never removed</td></tr>
+<tr><td><code>07-metafields</code></td><td>Definitions versus values, type validation, CSV update</td></tr>
+<tr><td><code>08-metaobjects</code></td><td>Definitions, entries, required fields, references</td></tr>
+<tr><td><code>09-media</code></td><td>Image and alt-text audit; the worksheet; alt text applied only for images someone has seen</td></tr>
+<tr><td><code>10-seo</code></td><td>The SEO audit; export &rarr; propose &rarr; review &rarr; apply &rarr; verify with a stale-row check</td></tr>
+<tr><td><code>11-inventory</code></td><td>Levels per location, sold-out and negative counts; the guarded pattern for the one write it does not script</td></tr>
+<tr><td><code>12-pricing</code></td><td>Price data errors, never a proposed price</td></tr>
+<tr><td><code>13-redirects</code></td><td>Loops, chains, duplicates, live targets; validated CSV import; migration lists</td></tr>
+<tr><td><code>14-bulk-operations</code></td><td>Bulk queries for any catalogue size; bulk mutations with a line-count guard; JSONL</td></tr>
+<tr><td><code>15-import-export</code></td><td>The one data workflow; formats; when Shopify&rsquo;s own CSV import is the better tool</td></tr>
+<tr><td><code>16-store-auditing</code></td><td>The flagship audit, the health score, and what an audit cannot see</td></tr>
+<tr><td><code>17-automation</code></td><td>Scheduled read-only audits: cron and GitHub Actions, secrets kept out of the files</td></tr>
+<tr><td><code>18-validation-safety</code></td><td>The write workflow, dry run, limits, backups, rollback</td></tr>
+<tr><td><code>19-reporting</code></td><td>Six report templates; the health score explained</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Plus <code>.claude/commands/</code> with 34 slash commands, <code>scripts/</code> with 32 scripts, <code>graphql/</code> with 18 documents, <code>templates/</code> for products, collections, SEO, metafields, redirects, alt text, <code>CLAUDE.md</code>, <code>.env.example</code> and <code>.gitignore</code>, seven checklists, ten worked examples, and a real, unedited audit of our own store.</p>
+
+<h2 id="commands">The commands</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Command</th><th>Mode</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>/shopify-connection-check</code></td><td>Read</td><td>Configuration, authentication, API version served, scopes</td></tr>
+<tr><td><code>/shopify-store-discovery</code></td><td>Read</td><td>The store described in one call</td></tr>
+<tr><td><code>/shopify-store-audit</code></td><td>Read</td><td><strong>Flagship.</strong> Every area scored; the report and <code>shopify-audit.json</code></td></tr>
+<tr><td><code>/shopify-product-audit</code> &middot; <code>/shopify-product-export</code></td><td>Read</td><td>Incomplete products as a work list; JSON, CSV or bulk export</td></tr>
+<tr><td><code>/shopify-product-create</code> &middot; <code>/shopify-product-update</code> &middot; <code>/shopify-product-bulk-update</code></td><td>Write</td><td>One product as a draft; one product&rsquo;s fields; many from a reviewed CSV</td></tr>
+<tr><td><code>/shopify-variant-audit</code> &middot; <code>/shopify-sku-audit</code></td><td>Read</td><td>SKUs, barcodes, options, policies</td></tr>
+<tr><td><code>/shopify-collection-audit</code> &middot; <code>/shopify-collection-create</code> &middot; <code>/shopify-collection-update</code></td><td>Read / Write</td><td>Empty, unpublished, orphans; create and update, never remove</td></tr>
+<tr><td><code>/shopify-metafield-audit</code> &middot; <code>/shopify-metafield-export</code> &middot; <code>/shopify-metafield-update</code></td><td>Read / Write</td><td>Definitions versus values; type-validated CSV update</td></tr>
+<tr><td><code>/shopify-metaobject-audit</code></td><td>Read</td><td>Entries, required fields, references</td></tr>
+<tr><td><code>/shopify-media-audit</code> &middot; <code>/shopify-alt-text-audit</code></td><td>Read / Write</td><td>Images and alt text; the worksheet; apply reviewed text</td></tr>
+<tr><td><code>/shopify-seo-audit</code> &middot; <code>/shopify-product-seo-audit</code> &middot; <code>/shopify-collection-seo-audit</code></td><td>Read</td><td>Catalogue SEO in priority order</td></tr>
+<tr><td><code>/shopify-seo-export</code> &middot; <code>/shopify-seo-import</code> &middot; <code>/shopify-seo-update</code></td><td>Read / Write</td><td>Worksheet; apply reviewed titles and descriptions</td></tr>
+<tr><td><code>/shopify-inventory-audit</code></td><td>Read</td><td>Levels per location; never proposes a quantity</td></tr>
+<tr><td><code>/shopify-pricing-audit</code></td><td>Read</td><td>Price data errors; never proposes a price</td></tr>
+<tr><td><code>/shopify-redirect-audit</code> &middot; <code>/shopify-redirect-create</code> &middot; <code>/shopify-redirect-import</code></td><td>Read / Write</td><td>Loops, chains, duplicates; validated creation from CSV</td></tr>
+<tr><td><code>/shopify-bulk-export</code> &middot; <code>/shopify-bulk-status</code> &middot; <code>/shopify-bulk-cancel</code> &middot; <code>/shopify-bulk-import</code></td><td>Read / Write</td><td>Bulk queries, status, cancel with confirmation, bulk mutations</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="usecases">Use cases</h2>
+
+<ul>
+  <li>Audit 1,000 products for missing SEO, then write and apply the metadata in reviewed batches.</li>
+  <li>Find every product missing image alt text, with the image beside each row so it can be described properly.</li>
+  <li>Export the catalogue through GraphQL &mdash; paged for a small store, one bulk operation for a large one.</li>
+  <li>Update approved product metadata in bulk, with every diff shown against the live value first.</li>
+  <li>Find duplicate or missing SKUs before a 3PL, POS or shopping feed does.</li>
+  <li>Audit collections: empty, unpublished, and the products that are in none.</li>
+  <li>Export metafields, fix the ones with the wrong type, fill the missing ones from a CSV.</li>
+  <li>Analyse inventory across locations: what is sold out on the storefront, what is negative, what is stocked nowhere.</li>
+  <li>Run a Shopify GraphQL bulk mutation across thousands of products with the line count confirmed first and the result file kept.</li>
+  <li>Generate a full catalogue health report every month, with a score that can be compared to last month&rsquo;s.</li>
+</ul>
+
+<h2 id="who">Who it is for</h2>
+
+<p>Shopify store owners managing catalogue data; developers maintaining stores and integrations; agencies and freelancers operating client stores (the toolkit has a layout that keeps every client&rsquo;s credentials, exports and reports apart); ecommerce operators doing bulk product, collection, SEO and inventory work; technical founders and AI-first builders who would rather have Claude Code run the admin than click through it. It assumes you can run a command and read a CSV. It does not assume you have used the Admin API before &mdash; the setup and GraphQL modules are written for a first time.</p>
+
+<h2 id="safety">Safety</h2>
+
+<p>Every command declares its mode. Read-only commands never run a mutation. Write commands run a dry run first, show every planned change against the live value, ask a question that names the count, and apply only on an explicit yes with <code>--limit</code> equal to that count. A backup of the current values is written before the first mutation; every changed resource is read back and reported OK, WARN or FAIL with Shopify&rsquo;s own <code>userErrors</code> verbatim. Tokens are read from <code>.env</code> and never printed, logged, committed or copied; the client redacts anything token-shaped from every error message.</p>
+
+<p>Some things it will not automate at all, and says why: deleting products, deciding a price, guessing an inventory quantity, publishing or unpublishing without an explicit instruction and the guard flag, writing alt text for an image nobody has looked at, reading orders or customers.</p>
+
+<h2 id="api">The API</h2>
+
+<p>Shopify Admin <strong>GraphQL</strong> API, version <strong>2026-07</strong>, centralised in one setting. No new workflow uses the legacy REST Admin API. Every GraphQL document and every query embedded in a script was validated against a live 2026-07 schema, and the validator ships so you can do the same after each quarterly release &mdash; it reports deprecated fields and arguments before the version that removes them. The changes 2026-07 made to collections (sources instead of rules), product media (<code>fileUpdate</code>), bulk-operation status and several lookups are already handled, and listed in the upgrade guide.</p>
+
+<h2 id="compare">How it fits with the other four</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Shopify Automation</th><th>Website Launch System</th><th>SEO &amp; Website Audit</th><th>Conversion &amp; Revenue</th><th>Operations &amp; Maintenance</th></tr></thead>
+<tbody>
+<tr><td>Price</td><td>$39.99</td><td>$19.99</td><td>$19.99</td><td>$19.99</td><td>$39.99</td></tr>
+<tr><td>Stage</td><td>Automate Shopify</td><td>Build</td><td>Rank</td><td>Convert</td><td>Operate</td></tr>
+<tr><td>Best for</td><td>A Shopify catalogue to manage at scale</td><td>A site you are building</td><td>A site that is not ranking</td><td>Traffic that under-converts</td><td>A live site to keep healthy</td></tr>
+<tr><td>Shopify Admin API automation</td><td>Complete</td><td>A Shopify build module</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Catalogue auditing (products, variants, collections, metafields)</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>SEO</td><td>Catalogue metadata, at scale</td><td>Included at build</td><td>Complete, site-wide</td><td>Not covered</td><td>Maintenance only</td></tr>
+<tr><td>Bulk operations and JSONL</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Working scripts</td><td>32, standard library</td><td>Not included</td><td>Not included</td><td>Not included</td><td>11, standard library</td></tr>
+<tr><td>Uptime, security, backups, deploys</td><td>Not covered</td><td>Setup at launch</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The first three are also sold together as the <a href="/products/complete-site-builder-stack">Complete Site Builder Stack</a>. This one is separate and specific: it is for a Shopify store, and it is the only product here that automates the admin. It pairs naturally with the <a href="/products/claude-code-website-operations-maintenance-system">Operations &amp; Maintenance System</a>, which watches the storefront from the outside while this one manages the catalogue from the inside. Buying it does not include the others, and there is no automatic upgrade credit.</p>
+
+<h2 id="delivery">Delivery and licence</h2>
+
+<p>A single ZIP, delivered by download immediately after purchase. 167 files, about 250&nbsp;KB &mdash; Markdown, Python, GraphQL, CSV and YAML; nothing to install beyond Python 3, which your machine almost certainly has. A published SHA-256 checksum accompanies the download so you can verify what you received.</p>
+
+<p>Licensed to one person for unlimited stores, including client work. You may not redistribute or resell it. Full terms are in <code>LICENSE.md</code> inside the archive. Shopify is a trademark of Shopify Inc.; this product is independent and not affiliated with or endorsed by Shopify.</p>
+
+<h2 id="notpromised">What is not promised</h2>
+
+<p>No ranking, no sales figure, no guarantee that a write to your store is right. The toolkit shows you the change before it happens and the resource after; the judgement in between is yours, and the toolkit is built so that it stays yours.</p>

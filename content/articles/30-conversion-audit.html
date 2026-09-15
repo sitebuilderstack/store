@@ -1,0 +1,135 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What a conversion audit is, and is not</a></li>
+    <li><a href="#scope">Scope it before you open anything</a></li>
+    <li><a href="#evidence">The evidence standard</a></li>
+    <li><a href="#pass1">Pass one: is the measurement trustworthy?</a></li>
+    <li><a href="#pass2">Pass two: does the thing work at all?</a></li>
+    <li><a href="#pass3">Pass three: is it understandable?</a></li>
+    <li><a href="#pass4">Pass four: is it credible?</a></li>
+    <li><a href="#report">Writing it up</a></li>
+    <li><a href="#ai">Where an AI audit goes wrong</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What a conversion audit is, and is not</h2>
+
+<p>An audit produces findings. It does not produce a redesign, a list of opinions about the hero image, or a diff.</p>
+
+<p>That sounds pedantic until you have received the alternative: a document that mixes one reproduced bug with fourteen aesthetic preferences, all written in the same confident register, with no way to tell them apart. The reader either acts on all of it or none of it, and both are wrong.</p>
+
+<p>So the deliverable is a list of findings, each carrying evidence somebody else could check, and each labelled by how much you actually know.</p>
+
+<p>The method it belongs to is in <a href="/blogs/guides/claude-code-conversion-rate-optimization">the conversion workflow</a>; this is the audit step in detail. It assumes the site exists and gets traffic — if it does not, <a href="/blogs/guides/how-to-build-a-website-with-claude-code">building it</a> and <a href="/blogs/guides/claude-code-seo-website-optimization">getting it found</a> are the earlier problems.</p>
+
+<h2 id="scope">Scope it before you open anything</h2>
+
+<p>Decide three things in writing first, because deciding them afterwards is how audits become unfalsifiable:</p>
+
+<ul>
+  <li><strong>The conversion.</strong> One primary action. Not "engagement", not three actions of equal weight. If there genuinely are two, run two audits.</li>
+  <li><strong>The path.</strong> The specific sequence of pages and steps between arrival and that action.</li>
+  <li><strong>The segment.</strong> Device and traffic source, at minimum. Mobile organic behaves so differently from desktop direct that averaging them produces a portrait of nobody.</li>
+</ul>
+
+<p>Then state what you will <em>not</em> look at. An audit with no stated boundary expands until it is a redesign proposal.</p>
+
+<h2 id="evidence">The evidence standard</h2>
+
+<p>Every finding must carry something a sceptical colleague could reproduce: a URL, the step that fails, what you observed, and the conditions. "The checkout is confusing" is not a finding. "On iOS Safari at 375px, the postcode field rejects a valid UK postcode containing a space, and the error message is rendered below the fold" is.</p>
+
+<p>Insist on it in the prompt, because the default is summary:</p>
+
+<pre class="sbs-prompt">Every finding must include: the URL, the exact step, what you
+observed, the viewport and device conditions, and how to reproduce
+it. If you cannot reproduce something, label it as unverified and
+say what access you would need.
+
+Do not summarise. Do not infer behaviour from source code you have
+not executed — say that you read the code and did not run it.</pre>
+
+<p>That last sentence prevents the most common false finding in an AI-assisted audit: a confident statement about runtime behaviour derived entirely from reading a template.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-cro-labels.png?v=1788908802" alt="Four finding labels: proven problem, which you reproduced and should fix without a test; strong heuristic, well evidenced and observed here; experiment opportunity, plausible and genuinely unknown; and insufficient data, where saying you do not know is itself the finding."
+       width="1000" height="502" loading="lazy" decoding="async">
+  <figcaption>The fourth label is the one most reports have no way to express.</figcaption>
+</figure>
+
+<h2 id="pass1">Pass one: is the measurement trustworthy?</h2>
+
+<p>Nothing downstream is worth doing if this fails.</p>
+
+<ul>
+  <li>Does the primary conversion event fire, and fire exactly once?</li>
+  <li>Does it fire on the actual completion, or on a button click that may not have succeeded?</li>
+  <li>Are there two analytics systems disagreeing about the same number?</li>
+  <li>Is any step in the funnel unmeasured? An unmeasured step is a blind spot, and blind spots are where problems live.</li>
+</ul>
+
+<p>A duplicated purchase event is the classic. It halves every conversion rate downstream of it, uniformly, so nothing looks anomalous — the whole funnel just looks mediocre.</p>
+
+<h2 id="pass2">Pass two: does the thing work at all?</h2>
+
+<p>Before anything subjective, establish that the path is completable. Actually complete it, on a real device, as a new visitor with no cookies.</p>
+
+<ul>
+  <li>Every form submits, and rejects bad input with a message the user can see</li>
+  <li>Every control is reachable and operable by keyboard, with visible focus</li>
+  <li>The path works at 320px without horizontal scrolling</li>
+  <li>Errors do not clear correctly-entered fields</li>
+  <li>Nothing depends on a hover state that a touch device cannot produce</li>
+</ul>
+
+<p>These are <strong>proven problems</strong> when found. They need no experiment, no debate and no hypothesis. Fix them, and be slightly suspicious of any audit that skipped straight past this pass to talk about copy.</p>
+
+<h2 id="pass3">Pass three: is it understandable?</h2>
+
+<p>Now the judgement begins, and the labels start to matter.</p>
+
+<ul>
+  <li><strong>Does the page say what it is</strong> within the first screen, in the visitor's words rather than the company's?</li>
+  <li><strong>Does the primary action say what happens next?</strong> "Submit" and "Learn more" describe the mechanism, not the outcome.</li>
+  <li><strong>Is there one primary action</strong>, or four competing for the same attention?</li>
+  <li><strong>Can every form field be justified?</strong> Each one has a cost. A phone number on a newsletter signup is a decision somebody should be able to defend.</li>
+  <li><strong>Is the price findable</strong> on a page whose job is to sell something?</li>
+</ul>
+
+<p>These are <strong>strong heuristics</strong>, not proven problems, and the distinction should survive into the report.</p>
+
+<h2 id="pass4">Pass four: is it credible?</h2>
+
+<p>Credibility problems are the hardest to see on your own site, because you already trust it.</p>
+
+<ul>
+  <li>Are claims specific enough to be falsifiable, or are they adjectives?</li>
+  <li>Is there anything a sceptical reader could verify independently?</li>
+  <li>Are the terms — refunds, licence, delivery — findable <em>before</em> purchase rather than in the confirmation email?</li>
+  <li>Does anything on the page contradict anything else on the site? Stale merchandising copy is a trust problem, not a tidiness one.</li>
+</ul>
+
+<p>Resist the urge to fix a credibility gap by adding proof you do not have. The correct response to "there is no evidence here" is to get evidence, not to write some.</p>
+
+<h2 id="report">Writing it up</h2>
+
+<p>Order the findings by impact and confidence over effort, not by the pass they came from. Put the proven problems at the top regardless of size — they are the only part of the report that is certain.</p>
+
+<p>Then say what you could not check and why. An audit that hides its own gaps is worse than a shorter one that admits them, because the reader assumes the gaps were covered and passed.</p>
+
+<h2 id="ai">Where an AI audit goes wrong</h2>
+
+<p>Three failure modes, in rough order of how often they appear:</p>
+
+<p><strong>It infers instead of observing.</strong> A model reading a Liquid template will tell you what the page does. It is frequently right and occasionally confidently wrong, and there is no way to tell which from the output. Require execution, and require the observation to be stated separately from the inference.</p>
+
+<p><strong>It fills silence with plausibility.</strong> Asked for findings on a page with few problems, it will produce findings anyway, because producing nothing feels like failing. An explicit permission to return a short list fixes most of this: "if there are only three findings, return three."</p>
+
+<p><strong>It reaches for the dark pattern.</strong> Unconstrained, "increase conversions" resolves to urgency, scarcity and social proof — and the fastest way to manufacture all three is to invent them. Prohibit them by name in the prompt rather than hoping.</p>
+
+<p>The <a href="/blogs/guides/claude-code-website-audit">general website audit workflow</a> covers the technical half of the same job, and the two overlap deliberately on performance: a page that takes eight seconds on a real phone has a conversion problem that no amount of copy work will fix.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Conversion &amp; Revenue Optimization Toolkit contains this audit in full, plus seven more page-specific audits, the funnel workflows, the analytics verification and the report templates. <a href="/products/claude-code-conversion-revenue-optimization-toolkit">See what is included</a>.</p>
+</aside>

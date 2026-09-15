@@ -1,0 +1,170 @@
+<h2 id="headline">Your website is live. Now keep it healthy.</h2>
+
+<p class="sbs-lede">A complete operating system for running a production website with Claude Code &mdash; monitoring, security checks, dependency updates, backup verification, performance regression, SEO maintenance, deployment gates, incident diagnosis and monthly reporting. Not a prompt pack: 17 modules, 19 slash commands, 11 working scripts, 9 checklists, 8 report templates and 4 platform guides, with a safety system that never touches production without your say-so.</p>
+
+<h2 id="problem">The problem</h2>
+
+<p>Launching is the short part. What follows is years of small things going wrong quietly: a certificate that stops auto-renewing, a contact form that has delivered nothing since the mail provider tightened its rules, a plugin two majors behind with a published exploit, a deploy that took the checkout button off mobile, a backup nobody has ever restored, a <code>noindex</code> left on after a migration. None of them announce themselves. Each shows up weeks later as a lost order, a lost ranking, or a Friday-evening outage.</p>
+
+<p>Ask a capable model to &ldquo;fix the site&rdquo; and you get a confident change on production with no rollback point and no record. Ask it to &ldquo;check the site&rdquo; and you get a paragraph of reassurance based on a page that loaded. Neither is operations.</p>
+
+<h2 id="solution">The solution</h2>
+
+<p>Operations is a set of checks with a rhythm, a way of scoring what they find, and a discipline for changing things. This system gives you all three, built to run inside Claude Code:</p>
+
+<ul>
+  <li><strong>Working scripts</strong> that measure the site from outside &mdash; HTTP, TLS, DNS, headers, exposure, links, redirects, sitemap, endpoints, baseline &mdash; and merge into one report with a health score. Standard-library Python; nothing to install.</li>
+  <li><strong>Slash commands</strong> that run the scripts, read the results, add the parts a script cannot see (backups, forms, flows, logs, dependencies), and write the report in a fixed format.</li>
+  <li><strong>A safety system.</strong> Every change follows <strong>Discover &rarr; Analyze &rarr; Backup &rarr; Change &rarr; Test &rarr; Validate &rarr; Document</strong>. Audit commands change nothing. The two that do propose one change with its rollback point and wait for a yes. Secrets are never printed, logged, committed or reported.</li>
+  <li><strong>A rhythm</strong>: daily, weekly, every deploy, monthly, quarterly &mdash; as one-page checklists and as automation samples that run the daily part for you.</li>
+</ul>
+
+<h2 id="included">What is included</h2>
+
+<p>106 files, 17 modules, 19 commands, 11 scripts &mdash; about 63,000 words &mdash; in one download. Every number here was counted at build time from the bundle, not typed.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Module</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td><code>01-getting-started</code></td><td>Setup in ten minutes, the safety system, every configuration value explained</td></tr>
+<tr><td><code>02-website-health</code></td><td>The daily health check and how to read its score</td></tr>
+<tr><td><code>03-uptime</code></td><td>The four layers of &ldquo;down&rdquo;; what to monitor and from where</td></tr>
+<tr><td><code>04-security</code></td><td>Transport, headers, exposure probes, platform checks; dependency vulnerabilities by reachability</td></tr>
+<tr><td><code>05-dependencies</code></td><td>The inventory; the update plan in batches with rollback points</td></tr>
+<tr><td><code>06-backups</code></td><td>Completeness by platform, the three numbers, the monthly restore test</td></tr>
+<tr><td><code>07-performance</code></td><td>Measurement, regression bracketing, the baseline file format</td></tr>
+<tr><td><code>08-seo-maintenance</code></td><td>Sitemap, robots, canonicals, noindex, structured data, Search Console coverage &mdash; keeping what ranks from breaking</td></tr>
+<tr><td><code>09-links-redirects</code></td><td>Budgeted crawling; redirect chains, loops, codes and gone rules</td></tr>
+<tr><td><code>10-forms-flows</code></td><td>Forms end to end including delivery; critical flows with a Playwright shape</td></tr>
+<tr><td><code>11-deployment</code></td><td>The nine-question pre-deploy gate; the ten-minute post-deploy check; rollback by provider</td></tr>
+<tr><td><code>12-diagnostics</code></td><td>Log analysis in a fixed seven-section format, with redaction rules</td></tr>
+<tr><td><code>13-incidents</code></td><td>SEV-1 to SEV-4, the first ten minutes, ten playbooks</td></tr>
+<tr><td><code>14-monthly</code></td><td>The two-hour monthly session; the flagship audit with per-area scoring</td></tr>
+<tr><td><code>15-reporting</code></td><td>Eight report templates, from the daily health report to the executive summary</td></tr>
+<tr><td><code>16-automation</code></td><td>A check runner, a crontab, two GitHub Actions workflows</td></tr>
+<tr><td><code>17-platforms</code></td><td>Shopify, WordPress, Astro and static hosts, Node.js</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Plus <code>commands/</code> with 19 slash commands for <code>.claude/commands/</code>, <code>scripts/</code> with 11 scripts, <code>templates/</code> with the <code>CLAUDE.md</code> site block and operating rules, the config file, the critical-URL list and the baseline format, <code>checklists/</code> with all nine, and <code>examples/</code> with a real operations report from this store and three worked examples.</p>
+
+<h2 id="commands">The commands</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Command</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>/website-health-check</code></td><td>Up, TLS, DNS, headers, sitemap, redirects, link sample, baseline &mdash; scored, in five minutes</td></tr>
+<tr><td><code>/website-operations-audit</code></td><td><strong>Flagship.</strong> Every area checked and scored; the master report and <code>operations-report.json</code></td></tr>
+<tr><td><code>/security-check</code></td><td>TLS, forced HTTPS, security headers, exposure probes, platform checks</td></tr>
+<tr><td><code>/dependency-audit</code> &rarr; <code>/update-plan</code></td><td>Inventory and advisories ranked by reachability; updates in batches, staging first, rollback named</td></tr>
+<tr><td><code>/check-backups</code></td><td>Existence, completeness, age, off-site; the monthly restore test</td></tr>
+<tr><td><code>/performance-check</code> / <code>/performance-regression</code></td><td>Server and browser measurements against the baseline; bracket a slowdown to the change that caused it</td></tr>
+<tr><td><code>/seo-maintenance-check</code></td><td>Sitemap, robots, canonicals, noindex, titles, structured data, Search Console</td></tr>
+<tr><td><code>/link-check</code> / <code>/redirect-audit</code></td><td>Every broken or bent link with the fix; every redirect one hop, permanent, correct</td></tr>
+<tr><td><code>/check-forms</code> / <code>/check-critical-flows</code></td><td>Each form through to delivery; each flow on desktop and mobile, in test mode</td></tr>
+<tr><td><code>/pre-deploy-check</code> &rarr; <code>/post-deploy-check</code></td><td>GO or NO-GO before; KEEP or ROLL BACK after</td></tr>
+<tr><td><code>/log-analysis</code></td><td>A log window into Executive Summary, Likely Cause, Immediate Checks, Diagnostic Commands, Remediation, Validation, Rollback</td></tr>
+<tr><td><code>/incident-diagnose</code></td><td>Confirm, classify, restore, stabilise, diagnose, report</td></tr>
+<tr><td><code>/monthly-maintenance</code> &rarr; <code>/generate-maintenance-report</code></td><td>The monthly session; the report with <em>Overall Health Score: NN/100</em> and the executive summary</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="scripts">The scripts</h2>
+
+<p><code>check_http</code>, <code>check_ssl</code>, <code>check_dns</code>, <code>check_headers</code>, <code>crawl_links</code>, <code>audit_redirects</code>, <code>validate_sitemap</code>, <code>test_endpoints</code>, <code>compare_baseline</code>, <code>generate_report</code>, <code>read_config</code>. Python 3.8 or newer, standard library only. Each has <code>--help</code> and <code>--json</code>, and all use the same exit codes (0 pass, 1 warning, 2 fail, 3 could not run) so a scheduler can read them. One command runs the core set and writes the scored report:</p>
+
+<pre><code>python3 ops/scripts/generate_report.py --run https://your-site.example
+Overall Health Score: 94/100 — Healthy</code></pre>
+
+<p>That line is from the sample report in <code>examples/</code>, which is a real, unedited run against this store. The warnings in it are real too.</p>
+
+<h2 id="who">Who it is for</h2>
+
+<p>Anyone responsible for a website that is already live: developers who built it and now keep it, freelancers and agencies maintaining client sites, founders running their own store, and the person who inherited &ldquo;the website&rdquo; with a login and no documentation. It assumes you can run a command and reach the site. It does not assume you have done operations before &mdash; the checklists and the safety system are there so that you do it the careful way from the first day.</p>
+
+<p>If the site is not built yet, this is the wrong product; start with the <a href="/products/claude-code-website-launch-system">Website Launch System</a>. If it is built and nobody is arriving, the <a href="/products/claude-code-seo-website-audit-toolkit">SEO &amp; Website Audit Toolkit</a>. If people arrive and do not buy, the <a href="/products/claude-code-conversion-revenue-optimization-toolkit">Conversion &amp; Revenue Optimization Toolkit</a>. This one is for keeping a live site live.</p>
+
+<h2 id="platforms">Platforms</h2>
+
+<p>Four guides, one per platform, each saying what the platform handles for you, what it does not, where each lever is, and what every check adds on that platform: <strong>Shopify</strong> (apps and permissions, theme rollback, what to export because Shopify does not back it up for you), <strong>WordPress</strong> (host-managed versus self-hosted, item by item; plugins, PHP end-of-life, mail delivery, debug logs), <strong>Astro and static sites</strong> (build-time risk, header and redirect files, form services, secrets in the bundle) and <strong>Node.js applications</strong> (the health endpoint, logs, database backups, process restarts, migrations that cannot be rolled back). The scripts and the commands are the same on all four.</p>
+
+<h2 id="beforeafter">Before and after</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Before</th><th>After</th></tr></thead>
+<tbody>
+<tr><td>You find out the site is down from a customer</td><td>The four-layer check &mdash; DNS, TLS, host, application &mdash; runs every five minutes and tells you which layer</td></tr>
+<tr><td>&ldquo;The contact form works, it loads&rdquo;</td><td>One tagged test submission a week, confirmed in the real inbox, with SPF and DKIM checked when it is not</td></tr>
+<tr><td>Deploy, refresh the homepage, go home</td><td>A nine-question gate before; a ten-minute check after that says KEEP or ROLL BACK</td></tr>
+<tr><td>Backups exist, probably</td><td>Age, restore time, and the date of the last verified restore &mdash; measured monthly</td></tr>
+<tr><td>Twenty-three outdated packages and no plan</td><td>Three batches, each with a rollback point, applied on staging first</td></tr>
+<tr><td>A fix on production in the same breath as the discovery</td><td>Discover &rarr; Analyze &rarr; Backup &rarr; Change &rarr; Test &rarr; Validate &rarr; Document, with a yes before Change</td></tr>
+<tr><td>&ldquo;How is the site doing?&rdquo; &mdash; &ldquo;Fine, I think&rdquo;</td><td>A monthly report with a score, a trend, and the three things being done next month</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="workflow">The recurring workflow</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>When</th><th>What</th><th>Time</th></tr></thead>
+<tbody>
+<tr><td>Daily</td><td><code>/website-health-check</code>, or the automated run and a glance at the monitor</td><td>3 minutes</td></tr>
+<tr><td>Weekly</td><td>Security, links, forms, flows, SEO short form, backup existence</td><td>30&ndash;45 minutes</td></tr>
+<tr><td>Every deploy</td><td><code>/pre-deploy-check</code> &rarr; deploy &rarr; <code>/post-deploy-check</code></td><td>15 minutes</td></tr>
+<tr><td>Monthly</td><td>The full audit, the restore test, the dependency plan, the report</td><td>2 hours</td></tr>
+<tr><td>Quarterly</td><td>Access, expiry dates, configuration drift, third parties</td><td>1&ndash;2 hours</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Each is a one-page checklist in <code>checklists/</code>. The daily and weekly checks can run themselves from cron or GitHub Actions with the samples in <code>16-automation/</code>; the changes never do.</p>
+
+<h2 id="honest">What it will not do</h2>
+
+<p><strong>It will not run penetration tests.</strong> The security check reads headers and TLS and probes a fixed list of paths that must never be public. It attempts no logins, injection, fuzzing or load, and it says so. Application security testing is a separate engagement with a written scope.</p>
+
+<p><strong>It will not automate a change.</strong> Checks are scheduled; changes are authorised one at a time with a rollback point named first. That is the design, not a limitation.</p>
+
+<p><strong>It will not hide a finding to improve the score.</strong> The score is computed from the findings by a script. Accepted findings are listed as accepted, not deleted, and anything that could not be checked is reported as not verified rather than as a pass.</p>
+
+<h2 id="compare">How it fits with the other three</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Operations &amp; Maintenance</th><th>Website Launch System</th><th>SEO &amp; Website Audit</th><th>Conversion &amp; Revenue</th></tr></thead>
+<tbody>
+<tr><td>Price</td><td>$39.99</td><td>$19.99</td><td>$19.99</td><td>$19.99</td></tr>
+<tr><td>Stage</td><td>Operate</td><td>Build</td><td>Rank</td><td>Convert</td></tr>
+<tr><td>Best for</td><td>A live site you must keep healthy</td><td>A site you are building</td><td>A site that is not ranking</td><td>Traffic that under-converts</td></tr>
+<tr><td>Uptime, incidents, playbooks</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Security hygiene and dependency updates</td><td>Complete, recurring</td><td>One-time audit at launch</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Backups and restore testing</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Deployment gates</td><td>Complete</td><td>Setup of CI/CD</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Log analysis and diagnostics</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Performance</td><td>Regression against a baseline</td><td>Included at build</td><td>Core Web Vitals in full</td><td>Conversion effect only</td></tr>
+<tr><td>SEO</td><td>Maintenance only</td><td>Included at build</td><td>Complete</td><td>Not covered</td></tr>
+<tr><td>Conversion</td><td>Forms and flows must work</td><td>One landing-page workflow</td><td>Not covered</td><td>Complete</td></tr>
+<tr><td>Working scripts</td><td>11, standard library</td><td>Not included</td><td>Not included</td><td>Not included</td></tr>
+<tr><td>Monthly reporting</td><td>Complete</td><td>Not covered</td><td>Not covered</td><td>Not covered</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The three earlier products are also sold together as the <a href="/products/complete-site-builder-stack">Complete Site Builder Stack</a>. This one is separate: it starts where they finish, and it is the only one of the four that you will use every week for as long as the site exists. Buying it does not include the others, and there is no automatic upgrade credit.</p>
+
+<h2 id="delivery">Delivery and licence</h2>
+
+<p>A single ZIP, delivered by download immediately after purchase. 106 files, about 220&nbsp;KB &mdash; Markdown, Python, YAML and a shell script; nothing to install beyond Python 3, which your machine almost certainly has. A published SHA-256 checksum accompanies the download so you can verify what you received.</p>
+
+<p>Licensed to one person for unlimited websites, including client work. You may not redistribute or resell it. Full terms are in <code>LICENSE.md</code> inside the archive.</p>
+
+<h2 id="notpromised">What is not promised</h2>
+
+<p>No uptime figure, no security guarantee, no ranking. A passing check covers what the check measured and nothing more, and the reports say what they did not check. What you get is a way to know, every day, whether the site is as healthy as it was yesterday &mdash; and a careful, recorded way to change it when it is not.</p>

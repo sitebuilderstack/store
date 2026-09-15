@@ -1,0 +1,351 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "tile-1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 Website Launch System",
+            "meta": "113 files — build",
+            "highlight": true
+          }
+        },
+        "tile-2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 SEO & Website Audit Toolkit",
+            "meta": "55 files — rank",
+            "highlight": true
+          }
+        },
+        "tile-3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 Conversion & Revenue Toolkit",
+            "meta": "99 files — convert",
+            "highlight": true
+          }
+        },
+        "tile-4": {
+          "type": "tile",
+          "settings": {
+            "label": "Production CLAUDE.md",
+            "meta": "Launch System"
+          }
+        },
+        "tile-5": {
+          "type": "tile",
+          "settings": {
+            "label": "Staged master build prompt",
+            "meta": "Launch System"
+          }
+        },
+        "tile-6": {
+          "type": "tile",
+          "settings": {
+            "label": "Platform build systems",
+            "meta": "Shopify, WordPress, Astro, SaaS"
+          }
+        },
+        "tile-7": {
+          "type": "tile",
+          "settings": {
+            "label": "100 reusable prompts",
+            "meta": "Launch System"
+          }
+        },
+        "tile-8": {
+          "type": "tile",
+          "settings": {
+            "label": "Launch checklists",
+            "meta": "Launch System"
+          }
+        },
+        "tile-9": {
+          "type": "tile",
+          "settings": {
+            "label": "20 audit prompts",
+            "meta": "SEO Toolkit"
+          }
+        },
+        "tile-10": {
+          "type": "tile",
+          "settings": {
+            "label": "Crawlability to Core Web Vitals",
+            "meta": "SEO Toolkit"
+          }
+        },
+        "tile-11": {
+          "type": "tile",
+          "settings": {
+            "label": "Master CRO audit",
+            "meta": "Conversion Toolkit"
+          }
+        },
+        "tile-12": {
+          "type": "tile",
+          "settings": {
+            "label": "70 conversion workflows",
+            "meta": "Conversion Toolkit"
+          }
+        },
+        "tile-13": {
+          "type": "tile",
+          "settings": {
+            "label": "68 ready commands",
+            "meta": "Conversion Toolkit"
+          }
+        },
+        "tile-14": {
+          "type": "tile",
+          "settings": {
+            "label": "Experimentation system",
+            "meta": "Conversion Toolkit"
+          }
+        },
+        "tile-15": {
+          "type": "tile",
+          "settings": {
+            "label": "Report templates",
+            "meta": "All three"
+          }
+        },
+        "tile-16": {
+          "type": "tile",
+          "settings": {
+            "label": "Security & accessibility audits",
+            "meta": "Launch System"
+          }
+        }
+      },
+      "block_order": [
+        "tile-1",
+        "tile-2",
+        "tile-3",
+        "tile-4",
+        "tile-5",
+        "tile-6",
+        "tile-7",
+        "tile-8",
+        "tile-9",
+        "tile-10",
+        "tile-11",
+        "tile-12",
+        "tile-13",
+        "tile-14",
+        "tile-15",
+        "tile-16"
+      ],
+      "settings": {
+        "summary": "Build it, rank it, convert it. All three Claude Code systems in one purchase — 267 files, three downloads.",
+        "button_label": "Get all three",
+        "note": "One payment. Three downloads, instantly. Licensed to one person for unlimited projects, including client work."
+      }
+    },
+    "value": {
+      "type": "sbs-bundle-value",
+      "blocks": {
+        "part-1": {
+          "type": "part",
+          "settings": {
+            "product": "claude-code-website-launch-system"
+          }
+        },
+        "part-2": {
+          "type": "part",
+          "settings": {
+            "product": "claude-code-seo-website-audit-toolkit"
+          }
+        },
+        "part-3": {
+          "type": "part",
+          "settings": {
+            "product": "claude-code-conversion-revenue-optimization-toolkit"
+          }
+        }
+      },
+      "block_order": [
+        "part-1",
+        "part-2",
+        "part-3"
+      ],
+      "settings": {
+        "anchor": "value",
+        "heading": "What it costs",
+        "bundle": "complete-site-builder-stack",
+        "note": "Both figures are read from the live products on this store. There is no former price: the three have never been sold together at their separate total, so presenting that as a discount would be inventing one."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "step-1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "Three ZIP archives on one order, each the same download sold on its own product page. Plain Markdown throughout — nothing to install, no account, no subscription, no runtime.",
+            "code": "claude-code-website-launch-system.zip\nclaude-code-seo-website-audit-toolkit.zip\nclaude-code-conversion-revenue-optimization-toolkit.zip"
+          }
+        },
+        "step-2": {
+          "type": "step",
+          "settings": {
+            "title": "Start where your problem is",
+            "body": "Each archive has its own START-HERE. You do not read them in order, or read all three. If the site exists and gets traffic, the conversion toolkit is the entry point; if nobody arrives, the SEO toolkit is.",
+            "code": "START-HERE.md    <- in every archive\n  routing table\n  the method\n  the four modes\n  what it will not do"
+          }
+        },
+        "step-3": {
+          "type": "step",
+          "settings": {
+            "title": "Build, if there is nothing yet",
+            "body": "The Launch System's staged master prompt establishes the repository, the CLAUDE.md and the checks before any feature work. It refuses to write code during discovery.",
+            "code": "01-start-here/\n02-claude-md/\n03-master-build-prompt/\n04-platform-systems/"
+          }
+        },
+        "step-4": {
+          "type": "step",
+          "settings": {
+            "title": "Audit, in dependency order",
+            "body": "The SEO toolkit runs crawlability first, then canonicals, then indexing decisions, then metadata, then speed. Optimising a title on a URL about to be canonicalised away is wasted work.",
+            "code": "01-technical/\n  01-crawlability.md\n  02-canonicals.md\n  03-indexation.md\n  ..."
+          }
+        },
+        "step-5": {
+          "type": "step",
+          "settings": {
+            "title": "Find where the money leaks",
+            "body": "The master CRO audit produces findings with evidence and an honesty label — proven bug, strong heuristic, experiment opportunity, or insufficient data — ranked by impact and confidence over effort.",
+            "code": "01-core/MASTER-CRO-AUDIT.md\n  > Mode: AUDIT — this workflow\n  > changes nothing. It produces\n  > findings."
+          }
+        },
+        "step-6": {
+          "type": "step",
+          "settings": {
+            "title": "Prove the change worked",
+            "body": "The experimentation system works out whether you have the traffic to test at all, and says so plainly when you do not. A test you cannot power is worse than no test, because it produces a number.",
+            "code": "08-experimentation/\n  SAMPLE-SIZE.md\n  WHEN-NOT-TO-TEST.md\n  READING-RESULTS.md"
+          }
+        }
+      },
+      "block_order": [
+        "step-1",
+        "step-2",
+        "step-3",
+        "step-4",
+        "step-5",
+        "step-6"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "What using all three looks like",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A walkthrough of the three downloads and the order to use them in.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real entry points, and the real conventions each system runs on.</p>",
+        "sample_url": "https://sitebuilderstack.com/pages/resources",
+        "sample_label": "Read two full workflows from it, free"
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "qa-1": {
+          "type": "qa",
+          "settings": {
+            "question": "Is anything in the bundle exclusive to it?",
+            "answer": "<p>No. It is the same three products sold on their own pages, at the same versions, delivered as three downloads on one order. There is no bundle-only file, and buying separately later loses you nothing but the difference in price.</p>"
+          }
+        },
+        "qa-2": {
+          "type": "qa",
+          "settings": {
+            "question": "How is it delivered?",
+            "answer": "<p>Three ZIP archives, available immediately after purchase. Each contains plain Markdown you can read in any editor, with or without Claude Code.</p>"
+          }
+        },
+        "qa-3": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need all three?",
+            "answer": "<p>Probably not today. Most people have one of the three problems right now. The bundle is worth it if you expect to meet the other two — which most sites do, in the order build, rank, convert. If you only have one problem, buy the one product.</p>"
+          }
+        },
+        "qa-4": {
+          "type": "qa",
+          "settings": {
+            "question": "What does the licence cover?",
+            "answer": "<p>One person, unlimited projects, including client work. The bundle does not change that: it is still one person, now with three products. It is not a team or company licence, and the files are not to be redistributed.</p>"
+          }
+        },
+        "qa-5": {
+          "type": "qa",
+          "settings": {
+            "question": "Do the three overlap?",
+            "answer": "<p>Deliberately very little. The Launch System has one conversion file; the SEO toolkit has none. Where the subjects touch — performance appears in both the SEO and conversion toolkits — each says where it stops and which of the others carries on.</p>"
+          }
+        },
+        "qa-6": {
+          "type": "qa",
+          "settings": {
+            "question": "Is there a subscription or an update fee?",
+            "answer": "<p>Neither. One payment, and the files are yours. Updates within a major version are free; there is no recurring charge and nothing to cancel.</p>"
+          }
+        },
+        "qa-7": {
+          "type": "qa",
+          "settings": {
+            "question": "Will it write the fixes for me?",
+            "answer": "<p>The audits deliberately will not. They run in a mode that changes nothing and produces findings, because an audit whose findings disappear into a commit leaves you with a diff and no way to tell which finding was real. Separate workflows implement, once you have decided what to do.</p>"
+          }
+        },
+        "qa-8": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I get a refund?",
+            "answer": "<p>Because these are digital downloads delivered instantly, sales are final. That is stated here before purchase rather than in the confirmation email afterwards. The full terms are in the <a href=\"/policies/refund-policy\">refund policy</a>.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "qa-1",
+        "qa-2",
+        "qa-3",
+        "qa-4",
+        "qa-5",
+        "qa-6",
+        "qa-7",
+        "qa-8"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The things worth knowing, including the ones that argue against buying it.",
+        "emit_schema": true,
+        "more_url": "/pages/build-rank-convert",
+        "more_label": "How the three fit together, stage by stage"
+      }
+    },
+    "operate": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "And after launch?",
+        "body": "The three systems here take a site from nothing to live, found and converting. The Claude Code Website Operations & Maintenance System is the fourth stage — monitoring, security, backups, updates, deployment gates, incident playbooks and monthly reporting — and it is the one you will use every week for as long as the site exists.",
+        "cta_label": "See the Operations & Maintenance System",
+        "cta_url": "/products/claude-code-website-operations-maintenance-system",
+        "note": "A separate product, not included in the bundle. There is no automatic upgrade credit.",
+        "product": "claude-code-website-operations-maintenance-system"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "value",
+    "walkthrough",
+    "questions",
+    "operate"
+  ]
+}

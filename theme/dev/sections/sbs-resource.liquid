@@ -1,0 +1,114 @@
+{%- comment -%}
+  Free resource pages: the hub at /pages/resources and the individual
+  resources beneath it.
+
+  `crumb_parent` controls breadcrumb depth. The hub sits one level under the
+  homepage; each resource sits under the hub, and `sbs-schema` emits a
+  BreadcrumbList matching whichever of the two is rendered here. The visible
+  trail and the markup are generated from the same condition so they cannot
+  drift apart.
+{%- endcomment -%}
+
+{%- assign hub_url = '/pages/resources' -%}
+
+<section class="sbs-section">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      {%- if section.settings.crumb_parent -%}
+        <a href="{{ hub_url }}">Free resources</a>
+        <span aria-hidden="true">/</span>
+      {%- endif -%}
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+
+    <div class="sbs-article__head">
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%}
+  Checklist pages get a toolbar and a wrapping form; every other resource page
+  renders exactly as before. The condition is the presence of the markup
+  md2html emits for a task list, so a page becomes interactive by containing
+  checkboxes rather than by being named in a setting.
+
+  The form exists so <button type="reset"> works natively: ticking and clearing
+  both function with JavaScript disabled. The script adds persistence, the
+  progress figure, and printing on top of that.
+{%- endcomment -%}
+{%- assign is_checklist = false -%}
+{%- if page.content contains 'data-sbs-checklist' -%}{%- assign is_checklist = true -%}{%- endif -%}
+
+<div class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    {%- if is_checklist -%}
+      <form class="sbs-cl" data-sbs-checklist-form>
+        <div class="sbs-cl__tools">
+          <div class="sbs-cl__progress">
+            {%- comment -%}
+              Rendered with the real total and a zero count, which is correct
+              before the script runs and means the toolbar never changes height.
+            {%- endcomment -%}
+            <span class="sbs-cl__count" data-sbs-cl-count>Progress saved in this browser</span>
+            <span class="sbs-cl__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                  aria-valuenow="0" aria-label="Checklist progress" data-sbs-cl-bar>
+              <span class="sbs-cl__fill" data-sbs-cl-fill></span>
+            </span>
+          </div>
+          <button type="reset" class="sbs-btn sbs-btn--ghost" data-sbs-cl-reset>Clear all</button>
+          <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-cl-print hidden>Print</button>
+          <p class="sbs-cl__note">
+            Ticks are kept in this browser only &mdash; nothing is sent anywhere and no account is needed.
+          </p>
+        </div>
+
+        <div class="sbs-rte {% unless section.settings.wide %}sbs-article__body{% endunless %}">
+          {{ page.content }}
+        </div>
+      </form>
+    {%- else -%}
+      <div class="sbs-rte {% unless section.settings.wide %}sbs-article__body{% endunless %}">
+        {{ page.content }}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- assign product = all_products[section.settings.product] -%}
+{%- if product != blank and section.settings.show_cta -%}
+  <div class="sbs-container">
+    <aside class="sbs-article__cta" aria-labelledby="sbs-resource-cta-h">
+      <h2 id="sbs-resource-cta-h">{{ section.settings.cta_heading | escape }}</h2>
+      <p>{{ section.settings.cta_body | escape }}</p>
+      <a class="sbs-btn sbs-btn--primary" href="{{ product.url }}">
+        {{ section.settings.cta_label | escape }} &mdash; {{ product.price | money_without_trailing_zeros }}
+      </a>
+    </aside>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Resource",
+  "tag": "div",
+  "settings": [
+    { "type": "checkbox", "id": "crumb_parent", "label": "Show the resources hub in the breadcrumb", "default": true },
+    { "type": "checkbox", "id": "wide", "label": "Full-width content (for the hub)", "default": false },
+    { "type": "header", "content": "Product CTA" },
+    { "type": "checkbox", "id": "show_cta", "label": "Show the product CTA", "default": true },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "cta_heading", "label": "Heading",
+      "default": "Want this assembled and tested?" },
+    { "type": "textarea", "id": "cta_body", "label": "Body",
+      "default": "These resources are free and stay free. The Claude Code Website Launch System is the same discipline packaged as runnable prompts, audits and templates rather than lists you work through by hand." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "See the Launch System" }
+  ],
+  "presets": [{ "name": "SBS — Resource" }]
+}
+{% endschema %}

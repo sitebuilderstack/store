@@ -1,0 +1,316 @@
+{%- comment -%}
+  Free interactive tools.
+
+  One section renders whichever tool the page declares in its `sbs.tool`
+  metafield, so all four share the same scaffolding: a server-rendered form, a
+  result region, copy and reset. The prose above each form is page.content, so
+  every tool page is a real crawlable page rather than an empty shell around a
+  widget.
+
+  Everything runs in the browser. Nothing typed into these forms is transmitted
+  anywhere — not to this site, not to analytics. The analytics events carry the
+  tool's name and nothing else, which is why the generated text never reaches
+  track().
+
+  Without JavaScript the form is hidden and the page's prose, its worked
+  example and its links remain. A form that cannot generate anything is worse
+  than no form.
+{%- endcomment -%}
+
+{%- assign tool = page.metafields.sbs.tool -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/pages/tools">Free tools</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Free tool</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <div class="sbs-rte sbs-article__body">{{ page.content }}</div>
+  </div>
+</div>
+
+<div class="sbs-container">
+  <div class="sbs-tool" data-sbs-tool="{{ tool | escape }}" hidden>
+    <form class="sbs-tool__form" data-sbs-tool-form>
+
+      {%- if tool == 'claudemd' -%}
+        <fieldset>
+          <legend>Your project</legend>
+          <div class="sbs-tool__grid">
+            {% render 'sbs-field', id: 'p-type', label: 'Project type', type: 'select',
+               options: 'Marketing or content site,Web application,Shopify theme,WordPress theme or plugin,Astro site,Package in a monorepo' %}
+            {% render 'sbs-field', id: 'p-name', label: 'Project name', ph: 'Northgate' %}
+            {% render 'sbs-field', id: 'p-stack', label: 'Framework or stack', ph: 'Astro 7, TypeScript' %}
+            {% render 'sbs-field', id: 'p-pm', label: 'Package manager', type: 'select',
+               options: 'npm,pnpm,yarn,bun,composer,none' %}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Commands</legend>
+          <p class="sbs-field__hint">Leave a field empty and it is left out rather than guessed at.</p>
+          <div class="sbs-tool__grid">
+            {% render 'sbs-field', id: 'p-dev', label: 'Dev command', ph: 'npm run dev' %}
+            {% render 'sbs-field', id: 'p-build', label: 'Build command', ph: 'npm run build' %}
+            {% render 'sbs-field', id: 'p-test', label: 'Test command', ph: 'npm test' %}
+            {% render 'sbs-field', id: 'p-lint', label: 'Lint / typecheck command', ph: 'npm run lint' %}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Rules</legend>
+          <div class="sbs-tool__grid sbs-tool__grid--1">
+            {% render 'sbs-field', id: 'p-deploy', label: 'Deployment target', type: 'select',
+               options: 'Not decided yet,Cloudflare Workers,Cloudflare Pages,Vercel,Netlify,Shopify,WordPress host,Own server' %}
+            {% render 'sbs-field', id: 'p-conv', label: 'Conventions worth stating', type: 'textarea', rows: 3,
+               hint: 'One per line. Only things an agent could not infer from the code.',
+               ph: 'Components are .astro unless they need state
+Tests live beside the file they test' %}
+            {% render 'sbs-field', id: 'p-never', label: 'Things it must never do', type: 'textarea', rows: 3,
+               hint: 'One per line. Rules that are mechanical belong in a hook, not here.',
+               ph: 'Never commit directly to main
+Never write to the production database' %}
+          </div>
+        </fieldset>
+
+      {%- elsif tool == 'seo-prompt' -%}
+        <fieldset>
+          <legend>Your site</legend>
+          <div class="sbs-tool__grid">
+            {% render 'sbs-field', id: 's-platform', label: 'Platform', type: 'select',
+               options: 'Shopify,WordPress,Astro,Static site,Custom application' %}
+            {% render 'sbs-field', id: 's-type', label: 'Site type', type: 'select',
+               options: 'Content or blog,Ecommerce,SaaS marketing site,Documentation,Portfolio or brochure' %}
+            {% render 'sbs-field', id: 's-goal', label: 'Primary goal', type: 'select',
+               options: 'Pages are not being indexed,Rankings have stalled,Getting ready to launch,Recovering from a migration,Improving click-through rate' %}
+            {% render 'sbs-field', id: 's-focus', label: 'Focus', type: 'select',
+               options: 'Technical and content,Technical only,Content only' %}
+            {% render 'sbs-field', id: 's-gsc', label: 'Search Console access', type: 'select',
+               options: 'Verified and I can export data,Verified but no API access,Not set up' %}
+            {% render 'sbs-field', id: 's-schema', label: 'Structured data', type: 'select',
+               options: 'Not sure,Some exists,None,Extensive' %}
+          </div>
+          <div class="sbs-tool__grid sbs-tool__grid--1">
+            {% render 'sbs-field', id: 's-url', label: 'Site URL (optional)', ph: 'https://example.com',
+               hint: 'Used only to write it into the prompt. It is not fetched or sent anywhere.' %}
+          </div>
+        </fieldset>
+
+      {%- elsif tool == 'readiness' -%}
+        <p class="sbs-tool__lead">
+          Twenty-four questions, seven categories. Answer honestly — a score you
+          argued your way to is worth nothing. Nothing is sent anywhere.
+        </p>
+        {%- assign cats = 'SEO,Performance,Accessibility,Security,Analytics and legal,Conversion,Deployment and operations' | split: ',' -%}
+        {%- assign qs = 'Every page has a unique title and meta description|Canonical URLs are absolute and self-referencing|robots.txt and the sitemap are correct and reachable|You have decided which listing pages should not be indexed;Largest Contentful Paint is under 2.5s at the 75th percentile|Images have explicit dimensions and nothing shifts on load|Third-party scripts have been counted and justified|Fonts are self-hosted or preloaded with a fallback;Every interactive control is reachable by keyboard|Colour contrast has been measured, not eyeballed|Every image has alt text that says something useful|Forms have real labels rather than placeholders;No credentials appear anywhere in the repository or the built output|Dependencies were updated and audited in the last month|Input is validated server-side, not only in the browser|Error responses do not leak stack traces or paths;Analytics is installed and you have confirmed it records a visit|Privacy, terms and cookie notices exist and are reachable;You know your conversion rate, and where the number comes from|The main call to action says what happens next, not "Submit" or "Learn more"|Every form field has been justified — you can say why each one is needed|Someone outside your team has tried to complete the main task and you watched;Deploys run through a pipeline with checks that can fail|You have performed a rollback at least once, deliberately' | split: ';' -%}
+        {%- for c in cats -%}
+          <fieldset class="sbs-tool__cat">
+            <legend>{{ c }}</legend>
+            {%- assign items = qs[forloop.index0] | split: '|' -%}
+            {%- assign ci = forloop.index0 -%}
+            {%- for q in items -%}
+              {%- capture qid -%}q{{ ci }}-{{ forloop.index0 }}{%- endcapture -%}
+              <div class="sbs-tool__q" role="group" aria-labelledby="{{ qid }}-l">
+                <p class="sbs-tool__qtext" id="{{ qid }}-l">{{ q }}</p>
+                <div class="sbs-tool__answers">
+                  {%- assign answers = 'Yes,Partly,No,Not sure' | split: ',' -%}
+                  {%- assign scores = '2,1,0,0' | split: ',' -%}
+                  {%- for a in answers -%}
+                    <span class="sbs-tool__answer">
+                      <input type="radio" name="{{ qid }}" id="{{ qid }}-{{ forloop.index0 }}"
+                             value="{{ scores[forloop.index0] }}" data-cat="{{ ci }}"
+                             {% if forloop.index0 == 3 %}checked{% endif %}>
+                      <label for="{{ qid }}-{{ forloop.index0 }}">{{ a }}</label>
+                    </span>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </fieldset>
+        {%- endfor -%}
+
+      {%- elsif tool == 'prompt-builder' -%}
+        <fieldset>
+          <legend>What you are building</legend>
+          <div class="sbs-tool__grid sbs-tool__grid--1">
+            {% render 'sbs-field', id: 'b-what', label: 'In one sentence, what is it?', type: 'textarea', rows: 2,
+               ph: 'A five-page marketing site for a B2B scheduling product, with a blog and a contact form.' %}
+          </div>
+          <div class="sbs-tool__grid">
+            {%- comment -%}
+              Task and stage decide the shape of the whole prompt, not just a
+              line in it. An audit prompt that is allowed to change files is the
+              single most expensive failure in agent-assisted work, and a
+              production-stage prompt has to say so before it says anything else.
+            {%- endcomment -%}
+            {% render 'sbs-field', id: 'b-task', label: 'What do you need Claude Code to do?', type: 'select',
+               options: 'Build it,Fix a specific problem,Audit it,Improve SEO,Review security,Improve accessibility,Improve performance,Improve conversion,Deploy it,Refactor it' %}
+            {% render 'sbs-field', id: 'b-stage', label: 'Project stage', type: 'select',
+               options: 'Planning,Initial build,Testing,Pre-production,In production,Optimising' %}
+            {% render 'sbs-field', id: 'b-platform', label: 'Platform or framework', ph: 'Astro 7' %}
+            {% render 'sbs-field', id: 'b-type', label: 'Website type', type: 'select',
+               options: 'Marketing site,Content or blog,Documentation,Ecommerce store,SaaS marketing site,Landing page,Portfolio,SaaS application,Static site' %}
+            {% render 'sbs-field', id: 'b-deploy', label: 'Deployment destination', type: 'select',
+               options: 'Cloudflare Workers,Cloudflare Pages,Vercel,Netlify,Shopify,WordPress host,Own server,Not decided' %}
+            {% render 'sbs-field', id: 'b-a11y', label: 'Accessibility target', type: 'select',
+               options: 'WCAG 2.2 AA,WCAG 2.2 A,WCAG 2.2 AAA where practical,No stated target' %}
+          </div>
+          <div class="sbs-tool__grid sbs-tool__grid--1">
+            {% render 'sbs-field', id: 'b-features', label: 'Major functionality', type: 'textarea', rows: 3,
+               hint: 'One per line.', ph: 'Contact form with server-side validation
+Blog with tags and an RSS feed' %}
+            {% render 'sbs-field', id: 'b-seo', label: 'SEO requirements', type: 'textarea', rows: 2,
+               hint: 'One per line. Leave empty for a sensible default set.',
+               ph: 'Must rank for "scheduling software for clinics"' %}
+            {% render 'sbs-field', id: 'b-constraints', label: 'Constraints', type: 'textarea', rows: 3,
+               hint: 'One per line. Budgets, banned dependencies, deadlines, anything non-negotiable.',
+               ph: 'No JavaScript framework on marketing pages
+Must work without cookies' %}
+          </div>
+        </fieldset>
+      {%- endif -%}
+
+      <div class="sbs-tool__actions">
+        <button type="submit" class="sbs-btn sbs-btn--primary" data-sbs-tool-generate>
+          {{ section.settings.generate_label | default: 'Generate' | escape }}
+        </button>
+        <button type="reset" class="sbs-btn sbs-btn--ghost" data-sbs-tool-reset>Start over</button>
+      </div>
+    </form>
+
+    <div class="sbs-tool__result" data-sbs-tool-result role="region"
+         aria-live="polite" aria-label="Your result" hidden>
+      <div class="sbs-tool__resulthead">
+        <h2>{{ section.settings.result_heading | default: 'Your result' | escape }}</h2>
+        <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-tool-copy>Copy</button>
+      </div>
+      <div data-sbs-tool-score hidden></div>
+
+      {%- comment -%}
+        Recommendation, chosen from the answers.
+
+        Every card is rendered server-side and hidden; JavaScript reveals at
+        most one. That keeps the title and price live — a recommendation naming
+        a stale price would be worse than no recommendation — and means no
+        product data is duplicated into the script.
+
+        A product that is drafted or deleted simply has no card to reveal, and
+        the block stays hidden rather than pointing at a dead URL.
+
+        Which card is shown derives from the category scores and nothing else.
+        The rule is in sbs.js next to the scoring, so the two cannot drift.
+      {%- endcomment -%}
+      <div class="sbs-tool__rec" data-sbs-tool-rec hidden>
+        <h3 class="sbs-tool__rec-h">{{ section.settings.rec_heading | default: 'Where this points' | escape }}</h3>
+        {%- assign rec_handles = 'seo,cro,launch,stack' | split: ',' -%}
+        {%- for key in rec_handles -%}
+          {%- case key -%}
+            {%- when 'seo' -%}
+              {%- assign rp = all_products['claude-code-seo-website-audit-toolkit'] -%}
+              {%- assign rwhy = 'Your weakest area is how findable the site is. This is the audit workflow for that, in dependency order.' -%}
+            {%- when 'cro' -%}
+              {%- assign rp = all_products['claude-code-conversion-revenue-optimization-toolkit'] -%}
+              {%- assign rwhy = 'Your weakest area is what happens once someone arrives. This is the workflow for finding where that breaks down, with evidence.' -%}
+            {%- when 'launch' -%}
+              {%- assign rp = all_products['claude-code-website-launch-system'] -%}
+              {%- assign rwhy = 'The gaps are in how the site is built and shipped. This is the production build system and the checks that go with it.' -%}
+            {%- when 'stack' -%}
+              {%- assign rp = all_products['complete-site-builder-stack'] -%}
+              {%- assign rwhy = 'Three or more categories came back weak, which is a build, search and conversion problem rather than one of them. This is all three systems.' -%}
+          {%- endcase -%}
+          {%- if rp != blank and rp.available -%}
+            <div class="sbs-tool__rec-card" data-rec="{{ key }}" hidden>
+              <p class="sbs-tool__rec-why">{{ rwhy }}</p>
+              <a class="sbs-btn sbs-btn--primary" href="{{ rp.url }}"
+                 data-sbs-track="readiness_product_clicked">
+                {{ rp.title | escape }} &mdash; {{ rp.price | money_without_trailing_zeros }}
+              </a>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        <p class="sbs-tool__rec-note">
+          This follows from the answers above and nothing else. It is a
+          suggestion, not a diagnosis &mdash; the questionnaire only knows what
+          you told it.
+        </p>
+      </div>
+      <pre data-sbs-tool-output></pre>
+      <p class="sbs-tool__caveat">{{ section.settings.caveat | escape }}</p>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Contextual next steps, generated from the graph rather than typed. {%- endcomment -%}
+{%- assign rel = page.metafields.sbs.related.value -%}
+{%- if rel.size > 0 -%}
+  <section class="sbs-section sbs-section--alt" aria-labelledby="sbs-tool-next-h">
+    <div class="sbs-container">
+      <h2 id="sbs-tool-next-h" class="sbs-article__related-h">{{ section.settings.related_heading | escape }}</h2>
+      <ul class="sbs-grid sbs-grid--3">
+        {%- assign tool_blog = blogs['guides'] -%}
+        {%- for h in rel -%}
+          {%- assign q = tool_blog.handle | append: '/' | append: h -%}
+          {%- assign a = tool_blog.articles | where: 'handle', q | first -%}
+          {%- unless a -%}{%- assign a = tool_blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+          {%- if a != blank -%}
+            <li class="sbs-card">
+              <h3><a href="{{ a.url }}" data-sbs-track="related_guide_clicked">{{ a.title | escape }}</a></h3>
+              {%- if a.excerpt != blank -%}<p>{{ a.excerpt | strip_html | truncate: 130 }}</p>{%- endif -%}
+            </li>
+          {%- else -%}
+            {%- assign pg = pages[h] -%}
+            {%- if pg != blank and pg.title != blank -%}
+              <li class="sbs-card">
+                <h3><a href="{{ pg.url }}" data-sbs-track="resource_cta_clicked">{{ pg.title | escape }}</a></h3>
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{%- assign tp = all_products[page.metafields.sbs.product] -%}
+{%- if tp != blank and section.settings.show_cta -%}
+  <div class="sbs-container">
+    <aside class="sbs-article__cta" aria-labelledby="sbs-tool-cta-h">
+      <h2 id="sbs-tool-cta-h">{{ section.settings.cta_heading | escape }}</h2>
+      <p>{{ page.metafields.sbs.product_note }}</p>
+      <a class="sbs-btn sbs-btn--primary" href="{{ tp.url }}" data-sbs-track="product_cta_clicked">
+        {{ tp.title | escape }} &mdash; {{ tp.price | money_without_trailing_zeros }}
+      </a>
+    </aside>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Free tool",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "generate_label", "label": "Generate button", "default": "Generate" },
+    { "type": "text", "id": "result_heading", "label": "Result heading", "default": "Your result" },
+    { "type": "textarea", "id": "caveat", "label": "Caveat",
+      "default": "Generated as a starting point. Read it, change what does not apply, and delete anything you cannot state honestly — an instruction you have not checked is worse than none." },
+    { "type": "text", "id": "rec_heading", "label": "Recommendation heading", "default": "Where this points" },
+    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Read next" },
+    { "type": "checkbox", "id": "show_cta", "label": "Show the product CTA", "default": true },
+    { "type": "text", "id": "cta_heading", "label": "CTA heading", "default": "Want this as a tested system?" }
+  ],
+  "presets": [{ "name": "SBS — Free tool" }]
+}
+{% endschema %}

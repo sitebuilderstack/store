@@ -1,0 +1,173 @@
+{%- comment -%}
+  Email capture offering the free CLAUDE.md Starter Kit.
+
+  Uses Shopify's native {% form 'customer' %}, which posts and reloads the page
+  with form.posted_successfully? true. No app, no third-party script.
+
+  Honesty note, deliberate: the download appears on submit, and the copy never
+  claims the file is otherwise unobtainable. The list is described as what it
+  actually is rather than promising a cadence nobody has built yet.
+{%- endcomment -%}
+
+{%- assign anchor = section.settings.anchor | default: 'get-templates' -%}
+
+<section class="sbs-section {% if section.settings.alt_background %}sbs-section--alt{% endif %} sbs-optin"
+         id="{{ anchor | escape }}">
+  <div class="sbs-container">
+    <div class="sbs-optin__inner">
+
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+
+      <h2>{{ section.settings.heading | escape }}</h2>
+
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="sbs-optin__list">
+          {%- for block in section.blocks -%}
+            <li {{ block.shopify_attributes }}>{{ block.settings.item | escape }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- form 'customer', id: 'sbs-optin-form', class: 'sbs-optin__form' -%}
+        {%- if form.posted_successfully? -%}
+
+          <div class="sbs-optin__done" role="status" tabindex="-1" id="{{ anchor }}-done">
+            <p class="sbs-optin__done-h">{{ section.settings.success_heading | escape }}</p>
+            <p>{{ section.settings.success_body | escape }}</p>
+            {%- if section.settings.file_url != blank -%}
+              <a class="sbs-btn sbs-btn--primary"
+                 href="{{ section.settings.file_url }}"
+                 download>
+                {{ section.settings.file_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+
+        {%- else -%}
+
+          {%- if form.errors -%}
+            <p class="sbs-optin__error" role="alert">
+              {{ form.errors | default_errors }}
+            </p>
+          {%- endif -%}
+
+          {%- comment -%}
+            Intent segmentation.
+
+            Radios named `contact[tags]` rather than a hidden field, so the
+            selected one submits and Shopify applies its comma-separated tags to
+            the customer record. No JavaScript, no second system, and the answer
+            lives on the customer where the email platform can already see it.
+
+            The base tag is carried in every option, so a signup is never left
+            untagged by the segment choice — and the first option is checked, so
+            a submission without a deliberate answer still lands somewhere real
+            rather than nowhere.
+
+            One question, three options, optional to think about. Asking more
+            would cost more signups than the segmentation is worth.
+          {%- endcomment -%}
+          {%- if section.settings.show_segment -%}
+            <fieldset class="sbs-optin__segment">
+              <legend class="sbs-optin__label">{{ section.settings.segment_label | escape }}</legend>
+              <div class="sbs-optin__segments">
+                {%- assign seg_v = 'build,rank,convert' | split: ',' -%}
+                {%- assign seg_l = section.settings.segment_options | default: 'I need to build or launch a website,I have a website and need more organic traffic,I have traffic and need more leads or sales' | split: ',' -%}
+                {%- for v in seg_v -%}
+                  <span class="sbs-optin__segment-opt">
+                    <input type="radio" name="contact[tags]" id="sbs-optin-seg-{{ v }}"
+                           value="{{ section.settings.tag | escape }},goal-{{ v }}"
+                           data-sbs-track="lead_segment_{{ v }}"
+                           {% if forloop.first %}checked{% endif %}>
+                    <label for="sbs-optin-seg-{{ v }}">{{ seg_l[forloop.index0] | strip }}</label>
+                  </span>
+                {%- endfor -%}
+              </div>
+            </fieldset>
+          {%- else -%}
+            <input type="hidden" name="contact[tags]" value="{{ section.settings.tag | escape }}">
+          {%- endif -%}
+
+          <div class="sbs-optin__row">
+            <label class="sbs-optin__label" for="sbs-optin-email">
+              {{ section.settings.field_label | escape }}
+            </label>
+            <div class="sbs-optin__controls">
+              <input
+                id="sbs-optin-email"
+                class="sbs-optin__input"
+                type="email"
+                name="contact[email]"
+                autocomplete="email"
+                inputmode="email"
+                placeholder="{{ section.settings.placeholder | escape }}"
+                aria-describedby="sbs-optin-note"
+                required>
+              <button type="submit" class="sbs-btn sbs-btn--primary">
+                {{ section.settings.button_label | escape }}
+              </button>
+            </div>
+          </div>
+
+          <p class="sbs-optin__note" id="sbs-optin-note">
+            {{ section.settings.note }}
+          </p>
+
+        {%- endif -%}
+      {%- endform -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Email capture",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "get-templates" },
+    { "type": "checkbox", "id": "alt_background", "label": "Alternate background", "default": true },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Free download" },
+    { "type": "text", "id": "heading", "label": "Heading",
+      "default": "The CLAUDE.md Starter Kit, free" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Four working CLAUDE.md files you can drop into a project today, plus the one-page checklist for what belongs in one and how to tell whether yours is actually working." },
+    { "type": "header", "content": "Form" },
+    { "type": "text", "id": "field_label", "label": "Field label", "default": "Email address" },
+    { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "you@example.com" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Send me the kit" },
+    { "type": "text", "id": "tag", "label": "Customer tag", "default": "claude-md-kit",
+      "info": "Applied to the customer record so you can tell where a signup came from." },
+    { "type": "header", "content": "Intent segmentation" },
+    { "type": "checkbox", "id": "show_segment", "label": "Ask what they are trying to do", "default": true,
+      "info": "Adds goal-build / goal-rank / goal-convert to the customer's tags alongside the tag above." },
+    { "type": "text", "id": "segment_label", "label": "Question",
+      "default": "What are you working on?" },
+    { "type": "textarea", "id": "segment_options", "label": "Three options, comma separated",
+      "default": "I need to build or launch a website,I have a website and need more organic traffic,I have traffic and need more leads or sales" },
+    { "type": "richtext", "id": "note", "label": "Note under the field",
+      "default": "<p>The download appears here as soon as you submit. I will also email you when there is a new guide worth reading. No fixed schedule, no selling your address, unsubscribe from any email. See the <a href=\"/policies/privacy-policy\">privacy policy</a>.</p>" },
+    { "type": "header", "content": "After submitting" },
+    { "type": "text", "id": "success_heading", "label": "Success heading",
+      "default": "Done — here is the kit." },
+    { "type": "textarea", "id": "success_body", "label": "Success body",
+      "default": "Four templates, a checklist, and a short guide to writing rules that actually get followed. Free to use on any project, including client work." },
+    { "type": "url", "id": "file_url", "label": "Download URL" },
+    { "type": "text", "id": "file_label", "label": "Download button label",
+      "default": "Download the CLAUDE.md Starter Kit" }
+  ],
+  "blocks": [
+    { "type": "item", "name": "What's inside", "settings": [
+      { "type": "text", "id": "item", "label": "Item" }
+    ] }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Email capture" }]
+}
+{% endschema %}

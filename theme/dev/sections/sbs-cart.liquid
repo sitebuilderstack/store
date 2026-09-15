@@ -1,0 +1,69 @@
+<section class="sbs-section">
+  <div class="sbs-container">
+    <h1>{{ section.settings.heading | default: 'Your cart' | escape }}</h1>
+
+    {%- if cart.item_count == 0 -%}
+      <div class="sbs-card" style="margin-top: var(--sp-6); max-width: 34rem;">
+        <h2 style="font-size: var(--step-1);">Your cart is empty</h2>
+        <p style="margin-top: var(--sp-3);">Nothing here yet.</p>
+        <a class="sbs-btn sbs-btn--primary" href="{{ routes.root_url }}#buy"
+           style="margin-top: var(--sp-5);">Back to the product</a>
+      </div>
+
+    {%- else -%}
+      <form action="{{ routes.cart_url }}" method="post" novalidate style="margin-top: var(--sp-6);">
+        <ul class="sbs-included" style="max-width: 46rem;">
+          {%- for item in cart.items -%}
+            <li class="sbs-included__row">
+              <div>
+                <a href="{{ item.url }}" class="sbs-included__name" style="text-decoration:none;">
+                  {{ item.product.title | escape }}
+                </a>
+                {%- unless item.product.has_only_default_variant -%}
+                  <div class="sbs-dim">{{ item.variant.title | escape }}</div>
+                {%- endunless -%}
+                <div class="sbs-dim">Digital download &middot; no shipping</div>
+              </div>
+              <div style="text-align:right;">
+                <div class="sbs-included__count">{{ item.final_line_price | money }}</div>
+                <label class="sbs-visually-hidden" for="qty-{{ item.index | plus: 1 }}">
+                  Quantity for {{ item.product.title | escape }}
+                </label>
+                <input id="qty-{{ item.index | plus: 1 }}"
+                       type="number" name="updates[]" value="{{ item.quantity }}"
+                       min="0" inputmode="numeric"
+                       style="width:4.5rem; margin-top:var(--sp-2); padding:var(--sp-2);
+                              background:var(--surface-2); color:var(--text);
+                              border:1px solid var(--border-strong); border-radius:6px;">
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        <div style="max-width:46rem; display:flex; flex-wrap:wrap; gap:var(--sp-4);
+                    align-items:center; justify-content:space-between; margin-top:var(--sp-5);">
+          <div>
+            <div class="sbs-dim">Subtotal</div>
+            <div class="sbs-buy__price" style="font-size: var(--step-2);">{{ cart.total_price | money }}</div>
+            <p class="sbs-dim" style="margin-top:var(--sp-2);">Taxes calculated at checkout.</p>
+          </div>
+          <div style="display:flex; gap:var(--sp-3); flex-wrap:wrap;">
+            <button type="submit" name="update" class="sbs-btn sbs-btn--ghost">Update</button>
+            <button type="submit" name="checkout" class="sbs-btn sbs-btn--primary">Checkout</button>
+          </div>
+        </div>
+      </form>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Cart",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Your cart" }
+  ],
+  "presets": [{ "name": "SBS — Cart" }]
+}
+{% endschema %}

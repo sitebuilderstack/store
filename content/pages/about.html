@@ -1,0 +1,154 @@
+<p class="sbs-lede">I am James Joyner IV, a senior software engineer with 25 years in
+technology. I built Site Builder Stack, and I built it with the method it sells.</p>
+
+<h2>Why this exists</h2>
+
+<p>Twenty-five years of infrastructure work leaves you with a particular instinct: most
+tools fail not because they are weak but because nobody wrote down how to use them
+properly. Claude Code is genuinely capable. What is missing is the operational layer
+around it — the constraints, the checks, the order of work, the things you verify before
+calling something finished.</p>
+
+<p>That layer is what I do for a living, applied to a different kind of system. The
+Claude Code Website Launch System is that discipline written down.</p>
+
+<h2>What I work with</h2>
+
+<p>My background is platform and infrastructure engineering rather than front-end
+design, which shapes what this product is good at. The habits come from systems where a
+mistake pages someone at three in the morning.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Area</th><th>Tools</th></tr></thead>
+<tbody>
+<tr><td>AI and agents</td><td>LLMs, Claude Code, MCP</td></tr>
+<tr><td>Platforms</td><td>Ubuntu, Kubernetes, OpenStack</td></tr>
+<tr><td>Automation and IaC</td><td>Ansible, Terraform, GitLab</td></tr>
+<tr><td>Containers</td><td>Docker</td></tr>
+<tr><td>Observability</td><td>Victoria Metrics, Prometheus, Grafana</td></tr>
+<tr><td>Languages</td><td>Python</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Observability is the one that matters most to how this product is written. When you
+have spent years building systems that tell you whether they are actually working, you
+stop accepting "it should be fine" as an answer. That is why every module in the Launch
+System ends with something you can measure rather than something you can assume.</p>
+
+<h2>Where the habits come from</h2>
+
+<p>The skills in that table are not a list of things I have read about. They describe
+the work: building and running production systems, and the operational discipline that
+goes with it.</p>
+
+<ul>
+  <li><strong>Systems and infrastructure engineering.</strong> Linux as the substrate,
+  and the assumption that anything not written down will be done differently by the next
+  person who touches it.</li>
+  <li><strong>Cloud and orchestration.</strong> Kubernetes and OpenStack &mdash; platforms
+  where a change lands across many machines at once, so "it worked on mine" stops being
+  a defence.</li>
+  <li><strong>Automation and infrastructure as code.</strong> Ansible and Terraform. The
+  reason I care so much about reproducibility: a build that only works when a particular
+  person runs it is not a build.</li>
+  <li><strong>CI/CD.</strong> GitLab pipelines. This is where the habit of making a check
+  fail on purpose comes from &mdash; a green pipeline that has never gone red is not
+  evidence of anything.</li>
+  <li><strong>Containers.</strong> Docker, mostly as a way of removing "works here"
+  from the conversation.</li>
+  <li><strong>Observability.</strong> Victoria Metrics, Prometheus, Grafana. Instrumenting
+  systems so they can tell you whether they are working, rather than being asked.</li>
+  <li><strong>Python.</strong> The language most of the automation is written in,
+  including the scripts that audit this site.</li>
+  <li><strong>AI-assisted development.</strong> Claude Code and MCP, applied to real
+  production work rather than demos. This store is the current example.</li>
+</ul>
+
+<p>The through-line is the same in all of them. Infrastructure work teaches you that the
+dangerous failure is not the one that shouts. It is the one that reports success.</p>
+
+<h2>How this content is written and checked</h2>
+
+<p>Site Builder Stack publishes technical guides, and it is worth being explicit about
+what that does and does not mean.</p>
+
+<ul>
+  <li><strong>Written against primary sources.</strong> Behaviour of Claude Code, Shopify
+  and Google is taken from their own documentation, and each guide links the pages it
+  drew on so you can check.</li>
+  <li><strong>Measured where measuring is possible.</strong> Claims about how this store
+  behaves &mdash; canonical tags, redirects, response codes, structured data &mdash; come
+  from fetching the URL and reading what came back, not from reading the template.</li>
+  <li><strong>No invented numbers.</strong> There are no search volumes, difficulty
+  scores, conversion rates or customer counts anywhere on this site, because I have no
+  data source for them. If you see a specific figure, it came from a request.</li>
+  <li><strong>Production-oriented.</strong> Every guide ends with something you can
+  verify rather than something you are asked to believe.</li>
+  <li><strong>Updated when the tooling moves.</strong> Claude Code changes quickly. When
+  something here goes out of date, it gets corrected rather than quietly left.</li>
+</ul>
+
+<p>What I am <em>not</em> claiming: that I have personally run every command in every
+guide on every platform. Where something is drawn from documentation rather than from my
+own terminal, the guide says so and links the source. If you find something that is
+wrong, I would rather hear about it than have it sit there.</p>
+
+<h2>This site is the demonstration</h2>
+
+<p>The most honest thing I can tell you about the method is that this storefront was
+built with it, and it was not smooth. Some of what went wrong:</p>
+
+<ul>
+  <li>A primary call-to-action rendered <strong>invisible</strong> — text at 1:1 contrast
+  against its own background, because a generic link rule outranked the button rule by a
+  single point of CSS specificity. Nothing in the source looked wrong.</li>
+  <li>The homepage shipped with its <code>&lt;title&gt;</code> set to the raw
+  <code>.myshopify.com</code> domain, because the theme fell back to it when a setting
+  was never filled in. It looked completely normal in a browser.</li>
+  <li>Every call-to-action on every non-home page was <strong>dead</strong> — they linked
+  to a fragment that only exists on the homepage. No error, no navigation, just a click
+  that did nothing.</li>
+  <li>The store spent a period unable to accept payments at all, displaying "This store
+  can't accept payments right now" at checkout. That notice is injected by JavaScript and
+  absent from the initial HTML, so every automated check reported a healthy checkout.</li>
+  <li>A test order fulfilled correctly and delivered nothing, because it was placed with
+  a phone number and no email address. Every status Shopify reported said success.</li>
+</ul>
+
+<p>The full account of that build, with the mechanism behind each failure and the evidence,
+is in <a href="/pages/case-study">the Site Builder Stack case study</a>.</p>
+
+<p>I mention these because they are the argument for the product. None of them were
+visible to someone looking at the site. All of them were found by fetching URLs and
+measuring what came back — which is what the checklists and audits in the Launch System
+exist to make routine.</p>
+
+<h2>What I will not tell you</h2>
+
+<p>I am not going to claim this guarantees rankings, traffic, or revenue. Anyone selling
+you that is selling you something else.</p>
+
+<p>There are no customer testimonials on this site, because there are not yet customers
+to quote. When there are, they will be real ones with names attached. I would rather have
+an empty section than a fabricated one — and the same rule is written into the product's
+own landing page prompts.</p>
+
+<p>The methodology is published in full and free to read. Nineteen guides, more than
+54,000 words, covering the same ground the paid system covers &mdash; plus five
+<a href="/pages/resources">free resources</a>: a production <code>CLAUDE.md</code>
+starter and checklists for launching, SEO, security and auditing a site, all ungated and
+downloadable as plain Markdown. If those answer your question, take them and build
+something. The product exists for people who would rather have it assembled, tested, and
+ready to run than put it together themselves.</p>
+
+<h2>Get in touch</h2>
+
+<p>If something in the guides is wrong, unclear, or out of date, I want to know. If you
+are deciding whether the Launch System fits what you are building, ask before you buy
+rather than after — the <a href="/pages/contact">contact page</a> reaches me directly.</p>
+
+<p>You can start with the <a href="/blogs/guides">free guides</a> or the
+<a href="/pages/resources">free resources</a>, or see
+<a href="/products/claude-code-website-launch-system">what is in the Launch System</a>.</p>

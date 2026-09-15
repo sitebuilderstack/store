@@ -1,0 +1,57 @@
+<section class="sbs-section sbs-section--alt">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="sbs-grid sbs-grid--3">
+      {%- for block in section.blocks -%}
+        <li class="sbs-card" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title | escape }}</h3>
+          <p>{{ block.settings.body | escape }}</p>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.not_for != blank -%}
+      <div class="sbs-card" style="margin-top: var(--sp-5); border-color: var(--border-strong);">
+        <h3>{{ section.settings.not_for_heading | default: 'Who it is not for' | escape }}</h3>
+        <p>{{ section.settings.not_for | escape }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Who it's for",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Who it's for" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Built for people shipping real work" },
+    { "type": "textarea", "id": "intro", "label": "Intro" },
+    { "type": "header", "content": "Who it is NOT for" },
+    { "type": "text", "id": "not_for_heading", "label": "Heading", "default": "Who it is not for" },
+    { "type": "textarea", "id": "not_for", "label": "Body",
+      "info": "Being specific about who this is not for increases conversion among the people it is for. Keep it honest." }
+  ],
+  "blocks": [
+    {
+      "type": "audience",
+      "name": "Audience",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "body", "label": "Body" }
+      ]
+    }
+  ],
+  "max_blocks": 9,
+  "presets": [{ "name": "SBS — Who it's for" }]
+}
+{% endschema %}
