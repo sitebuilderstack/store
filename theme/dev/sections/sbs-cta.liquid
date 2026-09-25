@@ -1,0 +1,83 @@
+{%- comment -%}
+  A closing call to action. On the homepage it is a purchase action for the
+  flagship; on a product page it is a CROSS-SELL for a different product and
+  must not read as this page's purchase action.
+
+  It used to render a primary button either way, so the last thing on seven of
+  the eight product pages was a primary button for another product — the
+  Migration System's page closed by selling the Operations System. The real
+  purchase action for the page now lives in `sbs-final-buy` above this, and
+  this section carries `style: secondary` and a standing label naming it as a
+  different product.
+
+  The old fallback, `{{ routes.root_url }}#buy`, resolved to the HOMEPAGE's buy
+  section from every other page in the store. When a product is selected the
+  link now defaults to that product's own URL instead.
+{%- endcomment -%}
+
+{%- assign cta_product = all_products[section.settings.product] -%}
+
+{%- assign cta_href = section.settings.cta_url -%}
+{%- if cta_href == blank -%}
+  {%- if cta_product != blank -%}
+    {%- assign cta_href = cta_product.url -%}
+  {%- else -%}
+    {%- assign cta_href = routes.root_url | append: '#buy' -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign btn_class = 'sbs-btn sbs-btn--primary' -%}
+{%- if section.settings.style == 'secondary' -%}
+  {%- assign btn_class = 'sbs-btn sbs-btn--ghost' -%}
+{%- endif -%}
+
+<section class="sbs-section sbs-center sbs-crosssell" data-sbs-crosssell="{{ section.settings.style | default: 'primary' }}">
+  <div class="sbs-container">
+    {%- if section.settings.style == 'secondary' -%}
+      <span class="sbs-eyebrow">{{ section.settings.kicker | default: 'A different product' | escape }}</span>
+    {%- endif -%}
+    <h2>{{ section.settings.heading | escape }}</h2>
+    {%- if section.settings.body != blank -%}
+      <p class="sbs-lede" style="margin-top: var(--sp-4);">{{ section.settings.body | escape }}</p>
+    {%- endif -%}
+    <div style="margin-top: var(--sp-6);">
+      <a class="{{ btn_class }}" href="{{ cta_href }}"
+         data-sbs-track="product_cta_clicked"
+         data-sbs-placement="{% if section.settings.style == 'secondary' %}cross_sell{% else %}closing_cta{% endif %}"
+         {% if cta_product != blank %}data-sbs-product="{{ cta_product.handle | escape }}"{% endif %}>
+        {{- section.settings.cta_label | escape -}}
+        {%- if cta_product != blank %} — {{ cta_product.price | money_without_trailing_zeros }}{% endif -%}
+      </a>
+    </div>
+    {%- if section.settings.note != blank -%}
+      <p class="sbs-cta-note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Final CTA",
+  "tag": "div",
+  "settings": [
+    { "type": "select", "id": "style", "label": "Emphasis",
+      "options": [
+        { "value": "primary", "label": "Primary — this page's own product" },
+        { "value": "secondary", "label": "Secondary — a cross-sell for another product" }
+      ],
+      "default": "primary",
+      "info": "On a product page this must be Secondary. A primary button for a different product competes with the page's own purchase action." },
+    { "type": "text", "id": "kicker", "label": "Cross-sell label", "default": "A different product",
+      "info": "Shown above the heading when Emphasis is Secondary, so the offer cannot be mistaken for this page's product." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Start with START-HERE.md" },
+    { "type": "textarea", "id": "body", "label": "Body",
+      "default": "Ten minutes of reading, then Claude Code is building to a process instead of improvising." },
+    { "type": "text", "id": "cta_label", "label": "Button", "default": "Get the Launch System" },
+    { "type": "url", "id": "cta_url", "label": "Button link",
+      "info": "Leave empty to link to the selected product's page." },
+    { "type": "text", "id": "note", "label": "Note", "default": "Instant digital access." },
+    { "type": "product", "id": "product", "label": "Product" }
+  ],
+  "presets": [{ "name": "SBS — Final CTA" }]
+}
+{% endschema %}

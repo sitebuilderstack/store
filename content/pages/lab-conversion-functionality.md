@@ -1,0 +1,1 @@
+Fifteen minutes, four decisions. A landing page the owner says "works — I filled it in myself". You get the form markup, its validation script, and a browser test somebody wrote and never ran. Find the state the owner never tested, the button that breaks its own promise, and what a green run does and does not prove.

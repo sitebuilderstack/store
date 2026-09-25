@@ -1,0 +1,90 @@
+{%- comment -%}
+  One Weekly Website Fix challenge (article template "challenge").
+
+  The article body carries the challenge itself — problem, prerequisites,
+  scope, safe inspection workflow, copyable prompt, example evidence,
+  completion criteria, common mistakes, links. This section wraps it with
+  the series furniture and the completion panel, which is rendered from
+  the metafields the publisher writes (sbs.number, sbs.criteria, sbs.lab,
+  sbs.challenge): a checklist of the completion criteria, an optional note,
+  Save to My Project (recorded as self-reported — the site checks nothing)
+  and a redacted summary export. Without JavaScript the checklist is still
+  readable; the buttons do nothing and the note under them says why.
+{%- endcomment -%}
+{%- assign cid = article.metafields.sbs.challenge -%}
+{%- assign number = article.metafields.sbs.number -%}
+{%- assign criteria = article.metafields.sbs.criteria.value -%}
+{%- assign lab_id = article.metafields.sbs.lab -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/pages/weekly-fix">Weekly Website Fix</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{% if number != blank %}#{{ number }}{% else %}{{ article.title | escape }}{% endif %}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Weekly Website Fix{% if number != blank %} #{{ number }}{% endif %} · {{ article.published_at | date: '%-d %B %Y' }}</span>
+      <h1>{{ article.title | escape }}</h1>
+      <p class="sbs-article__meta">
+        <span>By {{ article.author | escape }}</span>
+        <span aria-hidden="true">·</span>
+        <span>About 15 minutes on your own site</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="sbs-section">
+  <div class="sbs-container">
+    <div class="sbs-rte sbs-article__body">{{ article.content }}</div>
+  </div>
+</div>
+
+{%- if cid != blank -%}
+<div class="sbs-container">
+  <aside class="sbs-wf__panel" data-sbs-challenge="{{ cid | escape }}" data-sbs-challenge-title="{{ article.title | escape }}" data-sbs-challenge-lab="{{ lab_id | escape }}" aria-labelledby="wf-panel-h">
+    <p class="sbs-eyebrow">Record your completion</p>
+    <h2 id="wf-panel-h">Did you do it?</h2>
+    <p>Tick what you actually did. This is self-reported: the site checks nothing and the record says so. Keep your evidence with your own notes, and do not paste secrets here.</p>
+    <p class="sbs-wf__nojs" data-sbs-load-error hidden>The recording script could not be loaded; the list is still yours to use by hand.</p>
+    <form class="sbs-wf__form" data-ch-form>
+      <fieldset class="sbs-wf__criteria">
+        <legend>Completion criteria</legend>
+        {%- for c in criteria -%}
+          <label class="sbs-wf__crit"><input type="checkbox" name="crit-{{ forloop.index }}"> <span>{{ c }}</span></label>
+        {%- endfor -%}
+      </fieldset>
+      <div class="sbs-field">
+        <label for="wf-note">Note (optional, stays in this browser)</label>
+        <p class="sbs-field__hint" id="wf-note-hint">What you found, what you changed. No passwords, tokens or client names.</p>
+        <textarea id="wf-note" name="note" rows="3" maxlength="400" aria-describedby="wf-note-hint"></textarea>
+      </div>
+      <div class="sbs-wf__actions">
+        <button type="button" class="sbs-btn sbs-btn--ghost" data-ch-start>Mark as started</button>
+        <button type="button" class="sbs-btn sbs-btn--primary" data-ch-save>Save to My Project</button>
+        <button type="button" class="sbs-btn sbs-btn--ghost" data-ch-export>Export a redacted summary</button>
+      </div>
+      <p class="sbs-lab__feedback" data-ch-status role="status" hidden></p>
+    </form>
+    <noscript><p class="sbs-wf__nojs">Saving needs JavaScript; without it, keep the record in your own notes.</p></noscript>
+    {%- if lab_id != blank -%}
+      <p class="sbs-wf__meta">Want to see the fault before you look for it on your site? The <a href="/pages/lab-{{ lab_id }}">matching lab</a> has it, on a controlled fixture.</p>
+    {%- endif -%}
+  </aside>
+</div>
+{%- endif -%}
+
+<div class="sbs-container">
+  <p class="sbs-wf__meta sbs-wf__series"><a href="/pages/weekly-fix">All challenges and the schedule</a> · <a href="{{ blog.url }}">Archive</a> · <a href="{{ blog.url }}.atom">Feed</a></p>
+</div>
+
+{% schema %}
+{
+  "name": "Weekly Fix challenge",
+  "settings": [],
+  "presets": [{ "name": "Weekly Fix challenge" }]
+}
+{% endschema %}

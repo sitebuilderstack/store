@@ -1,0 +1,1 @@
+Fifteen minutes, four decisions. Monday's health report for a small WordPress site has six findings and you have an hour. Order them by consequence, certainty and time; choose a read-only diagnostic before any change; and read a backup log that says SUCCESS seven nights running.

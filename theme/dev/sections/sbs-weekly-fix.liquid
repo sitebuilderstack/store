@@ -1,0 +1,66 @@
+{%- comment -%}
+  Weekly Website Fix hub (/pages/weekly-fix).
+
+  This week's challenge (the newest published article in the weekly-fix
+  blog), the full schedule (generated snippet; unpublished ones are shown as
+  "coming <date>", never linked), how the series works (page copy), the
+  archive link and the feed. Reminders are the optional email opt-in section
+  that follows in the template — the same Shopify customer form the site
+  already uses, with its own tag and its own wording about frequency.
+{%- endcomment -%}
+{%- assign wf_blog = blogs['weekly-fix'] -%}
+{%- assign latest = wf_blog.articles | first -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">A challenge every Thursday</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container sbs-wf">
+  {%- if latest -%}
+    <article class="sbs-card sbs-wf__latest">
+      <p class="sbs-eyebrow">This week{% if latest.metafields.sbs.number != blank %} · #{{ latest.metafields.sbs.number }}{% endif %}</p>
+      <h2><a href="{{ latest.url }}">{{ latest.title | escape }}</a></h2>
+      <p>{{ latest.excerpt | default: latest.content | strip_html | truncatewords: 45 }}</p>
+      <p class="sbs-wf__date">Published {{ latest.published_at | date: '%-d %B %Y' }}</p>
+      <a class="sbs-btn sbs-btn--primary" href="{{ latest.url }}">Take this week's challenge</a>
+    </article>
+  {%- else -%}
+    <div class="sbs-card sbs-wf__latest">
+      <p class="sbs-eyebrow">This week</p>
+      <p>The first challenge is on its way. The schedule below has the dates.</p>
+    </div>
+  {%- endif -%}
+
+  <section class="sbs-wf__block" aria-labelledby="wf-schedule-h">
+    <h2 id="wf-schedule-h">The series</h2>
+    {% render 'sbs-weekly-schedule' %}
+    <p class="sbs-wf__meta">
+      {%- if wf_blog -%}<a href="{{ wf_blog.url }}">Archive of every published challenge</a> · <a href="{{ wf_blog.url }}.atom">RSS / Atom feed</a>{%- endif -%}
+    </p>
+  </section>
+
+  {%- if page.content != blank -%}
+    <div class="sbs-rte sbs-article__body sbs-wf__how">{{ page.content }}</div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Weekly Fix hub",
+  "settings": [],
+  "presets": [{ "name": "Weekly Fix hub" }]
+}
+{% endschema %}

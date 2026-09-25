@@ -1,0 +1,432 @@
+<title>Website Scope Builder</title>
+<style>
+:root{
+  --bg:#0B0D12; --surface:#12151D; --surface-2:#171B26; --border:#232A38;
+  --border-strong:#7D8798; --text:#E9ECF3; --muted:#A7B0C0; --dim:#7D8798;
+  --accent:#8AA6FF; --accent-ink:#0B0D12; --accent-soft:rgba(138,166,255,.12);
+  --mono-accent:#5EEAD4; --ok:#6EE7A8; --warn:#F6C177; --bad:#F472B6;
+  --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;
+  --radius:10px; --radius-lg:16px; --gutter:16px;
+  --step--1:clamp(.82rem,.80rem + .10vw,.88rem);
+  --step-0:clamp(1rem,.97rem + .16vw,1.05rem);
+  --step-1:clamp(1.12rem,1.06rem + .30vw,1.28rem);
+  --step-2:clamp(1.3rem,1.16rem + .70vw,1.68rem);
+  --step-3:clamp(1.55rem,1.3rem + 1.2vw,2.2rem);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}}
+:root[data-theme="light"]{
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  font-size:var(--step-0);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}ul,ol{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-underline-offset:3px}
+:focus{outline:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1[tabindex="-1"]:focus-visible{outline:none}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding-inline:var(--gutter)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding-block:var(--sp-3);flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:var(--sp-2);font-weight:650;color:var(--text);text-decoration:none}
+.brand__mark{width:1.65rem;height:1.65rem;display:grid;place-items:center;border-radius:7px;
+  background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.9rem}
+.brand__sub{color:var(--dim);font-size:var(--step--1);font-weight:450}
+.eyebrow{font-size:var(--step--1);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.h1{font-size:var(--step-3);line-height:1.12;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.h2{font-size:var(--step-2);line-height:1.2;letter-spacing:-.015em;font-weight:650}
+.h3{font-size:var(--step-1);line-height:1.3;font-weight:640}
+.lede{font-size:var(--step-1);color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:var(--step--1)}
+/* No white-space:nowrap. A long product name in a call to action cannot wrap
+   under it, and it pushed a 390px viewport to 442px. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:.6rem 1.05rem;border-radius:var(--radius);border:1px solid transparent;
+  background:var(--accent);color:var(--accent-ink);font-weight:620;cursor:pointer;
+  text-decoration:none;line-height:1.25;min-height:2.6rem;max-width:100%;
+  text-align:center}
+.btn:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn--ghost{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn--ghost:hover{background:var(--surface-2);filter:none}
+.btn--quiet{background:transparent;color:var(--muted);border-color:transparent;padding-inline:.6rem}
+.btn--quiet:hover{color:var(--text);background:var(--surface-2);filter:none}
+.btn--sm{padding:.36rem .7rem;font-size:var(--step--1);min-height:2.1rem}
+.card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-4);min-width:0}
+.card>*{min-width:0}
+.row{display:grid;gap:var(--sp-4);min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;min-width:0}
+.toolbar>*{min-width:0}
+.field{display:grid;gap:var(--sp-2);min-width:0}
+.lbl{font-size:var(--step--1);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .7rem;min-width:0}
+textarea{resize:vertical;font-family:inherit;line-height:1.5}
+.count{font-family:var(--font-mono);font-size:var(--step--1);font-variant-numeric:tabular-nums;color:var(--dim)}
+.count.is-over{color:var(--warn)}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;
+  font-size:var(--step--1);font-weight:600;border:1px solid var(--border);background:var(--surface-2);color:var(--muted)}
+.chip--ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.chip--bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.chip--warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.chip--same{color:var(--dim)}
+.note{border-left:3px solid var(--warn);padding:var(--sp-3) var(--sp-4);background:var(--surface);
+  border-radius:0 var(--radius) var(--radius) 0;color:var(--muted);font-size:var(--step--1)}
+.out{margin:0;padding:var(--sp-4);overflow-x:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);font-family:var(--font-mono);font-size:.8rem;line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.status{font-size:var(--step--1);color:var(--ok);min-height:1.4em}
+.status--err{color:var(--warn)}
+.foot{border-top:1px solid var(--border);padding-block:var(--sp-6);margin-top:var(--sp-7);
+  color:var(--dim);font-size:var(--step--1);display:grid;gap:var(--sp-3)}
+.cta{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-3);min-width:0}
+.cta>*{min-width:0}
+details.more{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+details.more>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-size:var(--step--1);
+  font-weight:600;list-style:none;display:flex;gap:var(--sp-2);align-items:center}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+";color:var(--accent);font-weight:700;width:1ch}
+details.more[open]>summary::before{content:"−"}
+details.more>.more__body{padding:0 var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.split{display:grid;gap:var(--sp-6);align-items:start;min-width:0}
+@media (min-width:62em){.split{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--sp-7)}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 5rem)}}
+.split>*{min-width:0}
+.checks{display:grid;gap:var(--sp-2)}
+.checks li{display:grid;grid-template-columns:1.1rem minmax(0,1fr);gap:var(--sp-3);
+  font-size:var(--step--1);color:var(--muted);align-items:start}
+.checks li .mark{font-weight:700;line-height:1.5}
+.checks li.is-ok .mark{color:var(--ok)}
+.checks li.is-no .mark{color:var(--dim)}
+#preview{max-height:26rem;overflow:auto}
+
+</style>
+
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Website Scope Builder</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load the example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Client projects</p>
+    <h1 class="h1" tabindex="-1" id="top">Write down what you do not know.</h1>
+    <p class="lede">Build a website scope from what the client actually told you. Anything you leave blank becomes a visible <strong>TBD</strong> with an owner, not a plausible guess.</p>
+    <p class="small dim">Operational project planning, not a legal agreement. It does not replace a contract. Everything stays in this tab &mdash; sanitise client notes before pasting them anywhere, here included.</p>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="edit-h">
+      <h2 class="h2" id="edit-h">The scope</h2>
+      <div id="fields" class="row"></div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="gaps-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="gaps-h">Gaps and risks</h2>
+          <span class="chip" id="score">&nbsp;</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+        <p class="small dim">A gap is not a failure. It is a question you have not asked yet, and the document is better for showing it.</p>
+      </section>
+
+      <section class="card" aria-labelledby="out-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="out-h">The document</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy Markdown</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the Markdown instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="preview"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">The rest of the engagement</p>
+    <p class="muted">A scope is one document. Discovery, proposals, onboarding, client updates, change requests and handoff are the rest of it.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/website-scope-of-work-template-claude-code?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-agency-client-delivery-system?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=primary_recommendation">Agency &amp; Client Delivery System</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Not legal advice. Independent product.</p>
+  </footer>
+</main>
+
+
+<script>
+/* Website Scope Builder — the template from the guide, as a tool.
+ *
+ * The one idea it enforces: a blank field becomes a visible TBD with an owner,
+ * never an invented fact. The "gaps" panel is not a score to get to zero; it
+ * is the open-questions list the guide argues is the most useful section in
+ * the document.
+ *
+ * No network. Nothing is stored. Client notes should be sanitised before they
+ * are pasted anywhere, and the page says so.
+ */
+(function () {
+  'use strict';
+
+  var FIELDS = [
+    { id: 'client', label: 'Client', rows: 1, tbd: 'the client’s legal name', owner: 'You' },
+    { id: 'project', label: 'Project name', rows: 1, tbd: 'a short project name', owner: 'You' },
+    { id: 'approver', label: 'Approver', rows: 1, owner: 'Client',
+      tbd: 'ONE named person who can approve', hint: 'One person. If two people can approve, two people can disagree afterwards.' },
+    { id: 'objectives', label: 'Objectives', rows: 3, owner: 'Client',
+      tbd: 'what success means to the client', hint: 'One per line. Avoid anything the website cannot influence, like a ranking position.' },
+    { id: 'pages', label: 'Pages', rows: 5, owner: 'Client',
+      tbd: 'the page list', hint: 'One per line. The count is the number everything else keys off.' },
+    { id: 'requirements', label: 'Functional requirements', rows: 4, owner: 'Client',
+      tbd: 'what the site must do', hint: 'One per line, each written so it can be demonstrated. If you cannot say how it would be shown working, it is a question, not a requirement.' },
+    { id: 'exclusions', label: 'Exclusions', rows: 4, owner: 'You',
+      tbd: 'what is NOT included', hint: 'One per line. Everything the client said “maybe” or “eventually” about belongs here by name.' },
+    { id: 'clientinputs', label: 'Client responsibilities', rows: 4, owner: 'Client',
+      tbd: 'what the client must supply', hint: 'One per line. Add a date if you have one — these are what a schedule actually rests on.' },
+    { id: 'rounds', label: 'Review rounds', rows: 2, owner: 'You',
+      tbd: 'how many rounds, and what a round is', hint: '“A few” is two to you and five to them. Define what a round is, not just how many.' },
+    { id: 'acceptance', label: 'Acceptance criteria', rows: 4, owner: 'You',
+      tbd: 'how both sides know it is done', hint: 'One per line, observable by someone who was not in the meetings.' },
+    { id: 'assumptions', label: 'Assumptions', rows: 3, owner: 'You',
+      tbd: 'what you decided without being told', hint: 'One per line. These are the things that quietly become disputes.' },
+    { id: 'questions', label: 'Open questions', rows: 3, owner: 'Client',
+      tbd: 'what you still need to ask', hint: 'One per line. An empty list here usually means they were not looked for.' }
+  ];
+
+  var EXAMPLE = {
+    client: 'Harbourline Physiotherapy Ltd (FICTIONAL EXAMPLE)',
+    project: 'Website rebuild',
+    approver: 'R. Okonkwo (Owner). Sole approver.',
+    objectives: 'The practice can update the class timetable without contacting a developer.\nEnquiries arrive by a tracked route rather than only by phone.\nThe site is accurate about both clinics: addresses, hours, and who works where.',
+    pages: 'Home\nAbout\nOur team\nServices (index)\nMusculoskeletal physiotherapy\nSports rehabilitation\nPost-operative rehabilitation\nClass timetable\nContact',
+    requirements: 'The enquiry form sends to one named address — shown by a test submission the approver confirms receiving.\nThe form rejects an empty required field with a visible message — shown by submitting empty.\nThe practice can edit the timetable unaided — shown by the manager editing a class, observed.\nEvery old URL resolves in one hop — shown by testing the redirect map.',
+    exclusions: 'Online booking or appointment scheduling\nOnline payments of any kind\nA patient portal, login, or any handling of patient data\nA blog, including its layout and any posts\nCopywriting — all page copy is supplied by the client\nPhotography\nA fourth or subsequent service page\nOngoing SEO work',
+    clientinputs: 'Final copy for all 9 pages — by 11 April\nSix practitioner headshots, minimum 1000px — by 11 April\nGA4 property ID and access — by 18 April\nDNS registrar access, or a named person who has it — by 25 April\nBoth clinics’ addresses, hours and phone numbers in writing — by 4 April',
+    rounds: '2 per deliverable. A round is one consolidated set of feedback from the approver. Typos and anything that does not match this scope are fixes and are not counted.',
+    acceptance: 'All 9 pages exist and are reachable from the navigation.\nEach functional requirement demonstrated to the approver on staging.\nNo page scrolls horizontally at 390px, checked on a real device.\nEvery old URL resolves in one hop.\nThe manager edits a timetable entry unaided, observed once.',
+    assumptions: 'No patient or health data is collected anywhere on the site — if wrong, the scope is re-drafted before any work.\nNo vector logo exists; the JPEG is used at its current quality.\nCopy is supplied as editable text, not PDFs or images.',
+    questions: 'Which registrar holds the domain, and who can access it?\nIs the timetable one table for both clinics, or one each?\nIs the existing GA4 property still receiving data?'
+  };
+
+  var data = {};
+  var downloads = null;
+
+  function el(t, a, k) {
+    var n = document.createElement(t);
+    if (a) Object.keys(a).forEach(function (key) {
+      var v = a[key];
+      if (v === null || v === undefined || v === false) return;
+      if (key === 'class') n.className = v;
+      else if (key === 'text') n.textContent = v;
+      else if (key.slice(0, 2) === 'on') n.addEventListener(key.slice(2), v);
+      else n.setAttribute(key, v === true ? '' : String(v));
+    });
+    (k || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  var $ = function (i) { return document.getElementById(i); };
+  var val = function (id) { return (data[id] || '').trim(); };
+  var lines = function (id) { return val(id).split('\n').map(function (s) { return s.trim(); }).filter(Boolean); };
+  var spec = function (id) { return FIELDS.filter(function (f) { return f.id === id; })[0]; };
+
+  /* A blank field never disappears. It becomes a TBD with an owner, which is
+     the whole argument of the guide. */
+  function textOrTbd(id) {
+    var v = val(id);
+    if (v) return v;
+    var f = spec(id);
+    return '**TBD** — ' + f.tbd + '. Owner: ' + f.owner + '.';
+  }
+  function listOrTbd(id) {
+    var l = lines(id);
+    if (l.length) return l.map(function (s) { return '- ' + s; }).join('\n');
+    var f = spec(id);
+    return '- **TBD** — ' + f.tbd + '. Owner: ' + f.owner + '.';
+  }
+
+  function markdown() {
+    var pages = lines('pages');
+    var L = [];
+    L.push('# Website scope of work — ' + textOrTbd('client'), '');
+    L.push('> Operational planning document, not a legal agreement. It records what will be',
+           '> built and how both sides know it is finished. It does not replace a contract.', '');
+    L.push('## 1. Project summary', '',
+           '- **Project:** ' + textOrTbd('project'),
+           '- **Approver:** ' + textOrTbd('approver'),
+           '- **Version:** v1 — draft for approval', '');
+    L.push('## 2. Objectives', '', listOrTbd('objectives'), '');
+    L.push('## 3. Deliverables', '',
+           '- Designed and built pages — **' + (pages.length || 'TBD') + '**' +
+           (pages.length ? '' : ' (the page list is not settled)'),
+           '- Responsive implementation across the same pages',
+           '- Handoff pack: credentials route, deploy steps, decisions log', '');
+    L.push('## 4. Page inventory', '', listOrTbd('pages'), '');
+    L.push('## 5. Functional requirements', '', listOrTbd('requirements'), '');
+    L.push('## 6. Exclusions', '',
+           'Not included in this project:', '', listOrTbd('exclusions'), '');
+    L.push('## 7. Client responsibilities', '', listOrTbd('clientinputs'), '',
+           'A dependency arriving late moves the dates that depend on it. This is stated now,',
+           'not negotiated later.', '');
+    L.push('## 8. Review rounds', '', textOrTbd('rounds'), '');
+    L.push('## 9. Acceptance criteria', '', listOrTbd('acceptance'), '');
+    L.push('## 10. Change-request process', '',
+           '1. The request is written down.',
+           '2. It is classified against this document: **in scope**, **ambiguous**, or **out of scope**.',
+           '3. Out-of-scope items get a written estimate: effort, cost, schedule impact.',
+           '4. Nothing starts until the approver says yes in writing.', '',
+           'Classification comes before pricing. A process that prices every question teaches',
+           'a client to stop asking questions.', '');
+    L.push('## 11. Assumptions', '', listOrTbd('assumptions'), '',
+           'If one of these turns out to be wrong, annotate it with the date rather than',
+           'deleting it.', '');
+    L.push('## 12. Open questions', '', listOrTbd('questions'), '');
+    L.push('---', '', '**Status:** draft for approval. Not approved. Not a contract.', '',
+           'Built with the Website Scope Builder from SiteBuilderStack.',
+           'https://sitebuilderstack.com/blogs/guides/website-scope-of-work-template-claude-code', '');
+    return L.join('\n');
+  }
+
+  /* Not a score. These are the questions the document is currently silent on,
+     plus the two risks that cost the most when they are missed. */
+  function gaps() {
+    var out = [];
+    FIELDS.forEach(function (f) {
+      if (!val(f.id)) out.push({ ok: false, text: f.label + ' — will print as TBD, owner ' + f.owner });
+    });
+    var pages = lines('pages').length;
+    if (pages) out.push({ ok: true, text: pages + ' page' + (pages === 1 ? '' : 's') + ' in the inventory, which the deliverables count uses' });
+    if (lines('exclusions').length) out.push({ ok: true, text: lines('exclusions').length + ' exclusions named' });
+    else out.push({ ok: false, text: 'No exclusions — the section that prevents most disputes is empty' });
+    if (!lines('assumptions').length) out.push({ ok: false, text: 'No assumptions recorded — you almost certainly made some' });
+    var acc = lines('acceptance');
+    var vague = acc.filter(function (a) { return /\b(works?|looks?|professional|modern|fast|nice|good)\b/i.test(a) && !/\b(shown|checked|demonstrated|measured|observed|tested)\b/i.test(a); });
+    if (vague.length) out.push({ ok: false, text: vague.length + ' acceptance criterion' + (vague.length === 1 ? '' : 'a') + ' may not be observable — add how it is checked' });
+    else if (acc.length) out.push({ ok: true, text: 'Acceptance criteria name how each is checked' });
+    var all = Object.keys(data).map(function (k) { return data[k] || ''; }).join(' ');
+    if (/\banything else\b|\bas (needed|required)\b|\betc\.?\b/i.test(all)) {
+      out.push({ ok: false, text: 'Open-ended wording found (“anything else”, “as needed”) — the most expensive phrase in freelance work' });
+    }
+    if (/\b(penalt|indemnif|liabilit|warrant)/i.test(all)) {
+      out.push({ ok: false, text: 'Legal-sounding language found — this is a planning document; leave those to the contract' });
+    }
+    return out;
+  }
+
+  function renderChecks() {
+    var list = gaps(), host = clear($('checks'));
+    list.forEach(function (g) {
+      host.appendChild(el('li', { class: g.ok ? 'is-ok' : 'is-no' }, [
+        el('span', { class: 'mark', 'aria-hidden': 'true', text: g.ok ? '✓' : '○' }),
+        el('span', { text: g.text })
+      ]));
+    });
+    var open = list.filter(function (g) { return !g.ok; }).length;
+    var chip = $('score');
+    chip.textContent = open === 0 ? 'nothing outstanding' : open + ' to settle';
+    chip.className = 'chip' + (open === 0 ? ' chip--ok' : ' chip--warn');
+  }
+
+  function refresh() { $('preview').textContent = markdown(); renderChecks(); }
+
+  function renderFields() {
+    var host = clear($('fields'));
+    FIELDS.forEach(function (f, i) {
+      var ta = el('textarea', { id: 'f-' + f.id, rows: f.rows,
+        oninput: function (e) { data[f.id] = e.target.value; refresh(); } });
+      ta.value = data[f.id] || '';
+      host.appendChild(el('div', { class: 'card' }, [
+        el('div', { class: 'field' }, [
+          el('label', { class: 'lbl', for: 'f-' + f.id, text: (i + 1) + '. ' + f.label }),
+          f.hint ? el('p', { class: 'small dim', text: f.hint }) : null,
+          ta
+        ])
+      ]));
+    });
+  }
+
+  function setStatus(m, err) {
+    var s = $('status'); s.textContent = m;
+    s.className = 'status' + (err ? ' status--err' : '');
+  }
+
+  $('example').addEventListener('click', function () {
+    data = JSON.parse(JSON.stringify(EXAMPLE)); renderFields(); refresh();
+    setStatus('Loaded the fictional Harbourline Physiotherapy project from the guide.');
+  });
+  $('reset').addEventListener('click', function () {
+    data = {}; renderFields(); refresh(); setStatus('');
+    $('top').focus({ preventScroll: true }); window.scrollTo(0, 0);
+  });
+
+  $('copy').addEventListener('click', function () {
+    var text = markdown(); clear($('fallback'));
+    var fail = function () {
+      setStatus('Could not copy automatically.', true);
+      var ta = el('textarea', { readonly: true, rows: 10, 'aria-label': 'Markdown to copy', style: 'width:100%' });
+      ta.value = text;
+      $('fallback').appendChild(el('div', { class: 'field', style: 'margin-top:var(--sp-3)' }, [
+        el('p', { class: 'small dim', text: 'Clipboard access was refused here. The text is selected below — press Ctrl+C or ⌘C.' }), ta]));
+      try { ta.focus(); ta.select(); } catch (e) {}
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { setStatus('Copied.'); }, fail);
+      } else fail();
+    } catch (e) { fail(); }
+  });
+
+  $('download').addEventListener('click', function () {
+    if (!downloads) { setStatus('File download is not available in this view.', true); return; }
+    setStatus('Waiting for you to confirm the download…');
+    downloads.save({ filename: 'website-scope-of-work.md', data: markdown() }).then(
+      function (r) { setStatus(r && r.status === 'saved' ? 'Saved.' : 'Sent to your device.'); },
+      function (e) { setStatus(e && e.code === 'declined' ? 'Download cancelled.' : 'The download could not be completed. Use “Copy Markdown” instead.', true); });
+  });
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(function (d) {
+        downloads = d; $('download').hidden = !d; $('dl-note').hidden = !!d;
+      }).catch(function () { $('dl-note').hidden = false; });
+    } catch (e) { $('dl-note').hidden = false; }
+  } else { $('dl-note').hidden = false; }
+
+  data = JSON.parse(JSON.stringify(EXAMPLE));
+  renderFields();
+  refresh();
+})();
+
+</script>

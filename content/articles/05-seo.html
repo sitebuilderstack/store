@@ -1,0 +1,571 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#short">Can Claude Code do SEO? The short answer</a></li>
+    <li><a href="#reality">What an agent can and cannot do for SEO</a></li>
+    <li><a href="#shape">The shape of the workflow</a></li>
+    <li><a href="#crawl">1. Crawlability and indexing</a></li>
+    <li><a href="#status">2. Status codes and redirects</a></li>
+    <li><a href="#canonical">3. Canonicalisation</a></li>
+    <li><a href="#sitemap">4. Sitemaps</a></li>
+    <li><a href="#metadata">5. Titles and meta descriptions</a></li>
+    <li><a href="#headings">6. Heading structure</a></li>
+    <li><a href="#schema">7. Structured data</a></li>
+    <li><a href="#links">8. Internal linking</a></li>
+    <li><a href="#duplicate">9. Duplicate content and URL parameters</a></li>
+    <li><a href="#images">10. Images</a></li>
+    <li><a href="#vitals">11. Core Web Vitals</a></li>
+    <li><a href="#mobile">12. Mobile</a></li>
+    <li><a href="#render">13. Rendering without JavaScript</a></li>
+    <li><a href="#triage">Triage: what to fix first</a></li>
+    <li><a href="#found">What this actually turned up on this site</a></li>
+    <li><a href="#content">Content quality, honestly</a></li>
+    <li><a href="#console">Search Console and submission</a></li>
+    <li><a href="#monitor">Preventing regressions</a></li>
+    <li><a href="#antipatterns">What not to do</a></li>
+  </ol>
+</nav>
+
+<h2 id="short">Can Claude Code do SEO? The short answer</h2>
+
+<p><strong>Yes, for the half of SEO that can be verified — and it should be kept away from the half that cannot.</strong></p>
+
+<p>Claude Code is very good at technical SEO: crawling your own site, checking status codes and canonicals, finding duplicate titles, validating structured data against the rendered HTML, auditing internal links, and confirming a sitemap contains what it should. All of that has a right answer that can be established by fetching a URL and reading the response, which is exactly the kind of tedious high-volume checking a person does badly.</p>
+
+<p>It is unreliable at anything requiring external data — search volume, keyword difficulty, competitor rankings, backlink counts. Asked for those, it will produce confident invented numbers. Get them from Search Console, Bing Webmaster Tools, or a keyword API instead.</p>
+
+<p>The rest of this guide is the workflow: thirteen audits in dependency order, each with the prompt that produces evidence rather than an opinion, and the guardrail that keeps the second half out. If you want the condensed version to work through, the free <a href="/pages/claude-code-seo-checklist">Claude Code SEO checklist</a> is the same ground in list form.</p>
+
+<h2 id="reality">What an agent can and cannot do for SEO</h2>
+
+<p>SEO splits cleanly into two halves, and Claude Code is excellent at one of them and dangerous at the other.</p>
+
+<p><strong>Technical SEO</strong> is verifiable. Does this URL return 200? Is there a canonical tag and does it point at itself? Is this title unique across the site? Does the sitemap contain the URLs it should? Is this structured data valid? Every one of these has a right answer that can be established by fetching a URL and reading the response. This is exactly the sort of tedious, checkable, high-volume work an agent does well and a person does badly.</p>
+
+<p><strong>Everything involving external data</strong> is not. Search volume, keyword difficulty, competitor rankings, traffic estimates, backlink counts — none of these are derivable from your codebase, and a language model asked for them will produce numbers. The numbers will be plausible, specific, confidently stated, and made up. This is the single biggest risk in using AI for SEO work and it is easy to avoid: never ask for a number that would require data the model does not have, and put an explicit prohibition in every audit prompt.</p>
+
+<pre class="sbs-prompt">Do not invent search volumes, keyword difficulty scores, traffic
+estimates, ranking positions, or competitor data. You do not have
+access to that data.
+
+If a finding would require external data, say what data is needed
+and where to get it. "Not measured" is a correct answer. A
+fabricated number is not.</pre>
+
+<p>Include that in every SEO prompt. It costs four lines and it removes the failure mode entirely.</p>
+
+<p>If you would rather not assemble the prompt by hand, the free <a href="/pages/seo-audit-prompt-generator">SEO audit prompt generator</a> builds one scoped to your platform and to what you actually have access to, with that guardrail already in it. It runs in your browser and nothing you type is transmitted.</p>
+
+<p>There is a third category worth naming: <strong>judgement about content</strong>. Whether a page genuinely serves the person who lands on it, whether it demonstrates real experience, whether it says anything a dozen other pages do not. An agent can help you assess this and can flag obvious thinness, but it cannot supply the experience — and content produced primarily to rank rather than to help is the thing Google's guidance is most directly aimed at.</p>
+
+<h2 id="shape">The shape of the workflow</h2>
+
+<p>The order below is not arbitrary. It runs from the checks that can make an entire site invisible down to the ones that adjust how well individual pages perform. Do them in this order, because there is no point optimising a title tag on a page that is blocked from crawling.</p>
+
+<ol>
+  <li><strong>Can it be crawled and indexed?</strong> Everything else is moot until yes.</li>
+  <li><strong>Do URLs behave correctly?</strong> Status codes, redirects, duplicates.</li>
+  <li><strong>Is the canonical story clear?</strong></li>
+  <li><strong>Is discovery working?</strong> Sitemaps, internal links.</li>
+  <li><strong>Is each page described accurately?</strong> Titles, descriptions, headings.</li>
+  <li><strong>Is the machine-readable layer correct?</strong> Structured data.</li>
+  <li><strong>Is the experience good?</strong> Speed, mobile, accessibility.</li>
+  <li><strong>Is the content worth ranking?</strong></li>
+</ol>
+
+<p>And one rule that applies throughout: <strong>audit before changing anything</strong>. Establish what is true now, in writing, with evidence. Then change. Then re-verify. A session that audits and fixes in the same pass gives you no way to tell what it actually improved.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-seo-audit-order.png?v=1787803713" alt="Eight audit tiers stacked as a pyramid, widest at the base: crawlable and indexable, URL behaviour, canonicalisation, discovery, description, machine-readable layer, experience, and content worth ranking at the top."
+       width="1000" height="650" loading="lazy" decoding="async">
+  <figcaption>Work up from the base. Each tier depends on the one below it.</figcaption>
+</figure>
+
+<h2 id="crawl">1. Crawlability and indexing</h2>
+
+<p>The catastrophic failures live here. A <code>noindex</code> left over from staging, a <code>robots.txt</code> that blocks a directory it should not, a redirect loop on a canonical URL — any of these can remove a site from search results entirely, and none of them are visible to a person browsing the site.</p>
+
+<pre class="sbs-prompt">Audit indexability. Do not change anything.
+
+Check:
+- robots.txt: fetch it, report its contents, and identify anything
+  blocked that should be crawlable. Confirm CSS and JS are not
+  blocked — Google needs them to render the page.
+- Any noindex directive, whether in a meta robots tag or an
+  X-Robots-Tag response header. Report every URL carrying one.
+- Any nofollow on internal links.
+- Whether any important page is reachable only via JavaScript.
+- Whether any page is orphaned — no internal link points to it.
+
+For each finding: the URL, the exact directive, and where it comes
+from — a file and line, or the response header.</pre>
+
+<p>Two subtleties worth knowing, because they cause the same confusion repeatedly.</p>
+
+<p><strong>Blocking in <code>robots.txt</code> is not the same as <code>noindex</code>.</strong> A disallowed URL is not crawled, but it can still be indexed — typically as a bare URL with no description, discovered through links elsewhere. If you want a page out of the index, use <code>noindex</code> and let it be crawled.</p>
+
+<p><strong>Which leads to the trap:</strong> a page that is both blocked in <code>robots.txt</code> and carries <code>noindex</code> will not be deindexed, because the crawler is not permitted to fetch the page and therefore never sees the <code>noindex</code>. The two directives cancel each other. Check for this combination explicitly.</p>
+
+<h2 id="status">2. Status codes and redirects</h2>
+
+<p>Every URL you have ever published should still do something sensible. The check is mechanical: extract every URL you know about — sitemap, internal links, historical URLs — and fetch each one.</p>
+
+<pre class="sbs-prompt">Fetch every internal URL and report the actual status code.
+
+Flag: any 4xx or 5xx; any redirect chain longer than one hop; any
+redirect loop; any 302 that should be a 301; any soft 404 — a page
+returning 200 whose content says nothing was found.
+
+Also check: does the site canonically prefer www or the apex domain,
+and does the other redirect to it in one hop? Does HTTP redirect to
+HTTPS? Are trailing slashes handled consistently?
+
+Report a table of URL, status, and destination. Show me what you
+found, not a summary of it.</pre>
+
+<p>The www-versus-apex and trailing-slash checks matter more than they look. If both <code>/about</code> and <code>/about/</code> return 200 with the same content, you have duplicated every page on the site.</p>
+
+<p>Soft 404s deserve their own attention because nothing surfaces them automatically — a 200 response containing "sorry, that product no longer exists" is a page the crawler will treat as real content.</p>
+
+<h2 id="canonical">3. Canonicalisation</h2>
+
+<p>Canonical tags tell search engines which URL is the real one when several serve similar content. Getting them wrong is quietly expensive.</p>
+
+<pre class="sbs-prompt">Audit canonical tags across the site.
+
+For each page, report the URL and its canonical. Flag:
+- Missing canonical tags
+- Canonicals pointing to a different page (only correct if
+  deliberate — tell me which ones look accidental)
+- Canonicals pointing to a URL that redirects, 404s, or is
+  noindexed
+- Relative canonicals
+- Protocol or hostname mismatches with the page's own URL
+- More than one canonical tag on a page
+- Pages with URL parameters that lack a canonical to the clean URL
+
+Report the actual tag content from each page.</pre>
+
+<p>Two things to keep in proportion. A canonical is a <em>hint</em>, not a directive — search engines may choose a different URL if the signals disagree, so canonicals that contradict your internal linking and sitemap will often lose. And a canonical pointing at a noindexed page is a genuinely bad combination: you have told search engines the real version of this content is one they must not index.</p>
+
+<h2 id="sitemap">4. Sitemaps</h2>
+
+<p>A sitemap helps discovery, particularly for large sites, new sites, and pages with few internal links. It is not a ranking factor and inclusion does not guarantee indexing — Google is explicit that sitemaps are a hint.</p>
+
+<p>Practical facts worth knowing: a single sitemap file is limited to 50,000 URLs and 50MB uncompressed, with a sitemap index for anything larger. Google ignores the <code>&lt;priority&gt;</code> and <code>&lt;changefreq&gt;</code> elements entirely — do not spend effort on them. It does use <code>&lt;lastmod&gt;</code>, but only when it is accurate; a sitemap that stamps today's date on every URL every day teaches search engines to disregard the field.</p>
+
+<pre class="sbs-prompt">Validate the sitemap.
+
+Confirm it returns 200 with an XML content type and is well-formed.
+If it is an index, fetch every child sitemap too.
+
+Then sample at least fifteen URLs from it and fetch each one. For
+each, report the actual status code, whether it is canonical, and
+whether it carries noindex.
+
+Flag: any URL that is not 200; any that redirects; any noindexed;
+any non-canonical; any that does not belong. Also tell me which
+important pages are missing from the sitemap entirely.
+
+Report the URLs you sampled and what each returned.</pre>
+
+<p>The sampling requirement is the point. A sitemap can be perfectly valid XML and full of URLs that 404. Only fetching them tells you.</p>
+
+<p>If your platform generates the sitemap — Shopify, most CMSs — do not replace it with a static file. A hand-written sitemap is accurate on the day it is written and drifts from that moment. Validate the generated one instead.</p>
+
+<h2 id="metadata">5. Titles and meta descriptions</h2>
+
+<p>Title tags are a real ranking signal and are what most people see first in results. Meta descriptions are not a ranking factor, but they affect click-through, and search engines frequently rewrite them when the page offers better text for the query — a good description is worth writing and not worth agonising over.</p>
+
+<pre class="sbs-prompt">Audit page titles and meta descriptions across the site.
+
+Report a table: URL, title, title length in characters, meta
+description, description length.
+
+Flag: any missing; any duplicated across pages; titles that are
+generic or that lead with the site name rather than the page
+subject; descriptions that do not describe the specific page;
+anything obviously truncated; and any page where the title is a
+fallback value rather than real content.
+
+Do not rewrite anything yet. Show me the audit first.</pre>
+
+<p>That last flag catches a real and embarrassing failure: a template that builds the title from a setting nobody filled in, producing a homepage titled with a raw domain name. It looks fine in a browser tab and terrible in search results.</p>
+
+<p>Then rewrite with the constraint that matters:</p>
+
+<pre class="sbs-prompt">Rewrite the titles and descriptions flagged in the audit.
+
+Each title: describes that specific page, front-loads the
+distinctive part, reads like something a person wrote, and is
+unique across the site.
+
+Each description: accurately describes what is on the page and gives
+someone a reason to click. Never promise something the page does
+not contain.
+
+No keyword stuffing. No repeating the same phrase in both. If a page
+genuinely duplicates another, the fix is the duplication, not the
+title.
+
+Show me the before and after side by side.</pre>
+
+<p>The "reads like something a person wrote" instruction is doing real work. Left unconstrained, generated titles converge on a mechanical <em>Keyword | Keyword | Brand</em> pattern that helps nothing.</p>
+
+<h2 id="headings">6. Heading structure</h2>
+
+<p>Headings serve two audiences at once: they give assistive technology a navigable document outline, and they give search engines a structural summary of the page. The same fix serves both, which makes this unusually good value.</p>
+
+<pre class="sbs-prompt">Audit heading structure on every page.
+
+For each: list the headings in document order with their levels.
+
+Flag: pages with no h1; pages with more than one h1; skipped levels
+(h2 to h4); headings used for visual size rather than structure;
+non-heading elements styled to look like headings; empty headings;
+and headings whose text does not describe the section below them.
+
+Report the actual outline for each page so I can see the shape.</pre>
+
+<p>The last flag is the substantive one. Structurally valid headings that say "Overview", "Details", "More" describe nothing. The outline of a good page reads like a summary of it.</p>
+
+<h2 id="schema">7. Structured data</h2>
+
+<p>Structured data makes a page's meaning explicit and can qualify it for rich results. It does not guarantee them, and it is not a general ranking boost — the honest framing is that it makes eligibility possible, not certain.</p>
+
+<pre class="sbs-prompt">Audit structured data across the site.
+
+For each page: what types are present, and is the JSON-LD valid?
+
+Check that every value matches what is actually on the page — a
+price in structured data that differs from the displayed price is a
+serious error.
+
+Check for: required properties missing; markup for content not
+visible on the page; and any review, rating, or aggregateRating
+markup.
+
+Flag every instance of review or rating markup. If we do not have
+genuine reviews, that markup must be removed — it is a spam policy
+violation and can result in a manual action.
+
+Report what is present, what is invalid, and what is inaccurate.</pre>
+
+<p>Three rules keep structured data safe over time. <strong>Mark up what is on the page</strong>, not what you wish were. <strong>Generate values from the same source as the visible content</strong>, so they cannot diverge — hard-coded structured data is correct exactly once. <strong>Never mark up reviews you do not have</strong>, which is the most commonly penalised abuse in this area and an entirely plausible thing for a helpful agent to generate as placeholder content.</p>
+
+<p>Validate against Google's Rich Results Test rather than trusting an assessment. Valid JSON-LD and eligible structured data are different bars.</p>
+
+<h2 id="links">8. Internal linking</h2>
+
+<p>Internal links are the part of SEO you have complete control over and the part most often ignored. They distribute authority, they establish which pages are important, and they are how crawlers find things.</p>
+
+<pre class="sbs-prompt">Audit internal linking.
+
+Report: which pages have the most inbound internal links and which
+have the fewest; any page with zero inbound internal links; how many
+clicks each page is from the home page; any broken internal link;
+any internal link that redirects rather than pointing at the final
+URL; and any generic anchor text — "click here", "read more", "this
+page".
+
+Then tell me: which important pages are under-linked, and where in
+the existing content would a link to them be genuinely useful to a
+reader?
+
+Do not suggest links that would not help someone reading that
+sentence.</pre>
+
+<p>That final constraint is the difference between internal linking and link spam. A link is worth adding when a reader at that point in the text would plausibly want it. Ask an agent for internal linking opportunities without the constraint and you will get a list of every possible keyword match, most of which would make the content worse.</p>
+
+<p>Two mechanical fixes worth doing while you are here: point internal links at final URLs rather than through redirects, and replace generic anchor text with text that describes the destination — which is both an SEO improvement and an accessibility one, since screen reader users routinely navigate by pulling up a list of links out of context.</p>
+
+<h2 id="duplicate">9. Duplicate content and URL parameters</h2>
+
+<p>Duplicate content is rarely deliberate. It accumulates: a page reachable at two paths, a filter that appends a parameter, a print view, a paginated series where every page carries the same title. None of it is penalised as such — search engines simply pick one URL and consolidate — but you lose control over which one they pick, and you spend crawl budget on copies.</p>
+
+<pre class="sbs-prompt">Find duplicate and near-duplicate content.
+
+Check: pages reachable at more than one URL; URL parameters that
+return the same content as the clean URL — sorting, filtering,
+tracking, session; trailing-slash and case variants both returning
+200; print or AMP-style alternate views; and paginated series where
+every page shares a title and description.
+
+For each: which URL should be canonical, and what the fix is —
+canonical tag, redirect, noindex, or a parameter that should not be
+generating a crawlable URL at all.
+
+Report the duplicate sets, not a count.</pre>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Situation</th><th>Right fix</th></tr></thead>
+<tbody>
+<tr><td>Same page, two permanent URLs</td><td>301 to the preferred one</td></tr>
+<tr><td>Filter or sort parameters</td><td>Canonical to the clean URL</td></tr>
+<tr><td>Tracking parameters</td><td>Canonical to the clean URL</td></tr>
+<tr><td>Paginated series</td><td>Self-referencing canonicals; distinct titles</td></tr>
+<tr><td>Thin variant pages with no unique value</td><td><code>noindex</code>, or do not generate them</td></tr>
+<tr><td>Internal search results</td><td><code>noindex</code>; usually block from crawling too</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two mistakes to avoid here. Do not canonicalise paginated pages to page one — each page has different content, and doing so hides everything after the first page. And do not <code>noindex</code> something merely because it duplicates: if the duplicate is the version people link to, a canonical preserves that value while <code>noindex</code> discards it.</p>
+
+<h2 id="images">10. Images</h2>
+
+<pre class="sbs-prompt">Audit images across the site.
+
+For each: the file size, the intrinsic dimensions, the rendered
+dimensions, the format, whether width and height are set, whether
+loading and decoding attributes are appropriate, and the alt text.
+
+Flag: images served substantially larger than they render; formats
+that should be modern equivalents; missing dimensions, which cause
+layout shift; missing alt attributes; alt text that is a filename or
+a keyword list; decorative images with descriptive alt instead of
+alt=""; and any image above the fold set to lazy load.
+
+Report the actual numbers.</pre>
+
+<p>On alt text specifically: describe the image's purpose in context, not its appearance. A product photo's alt text should say what the product is. A decorative flourish takes <code>alt=""</code> so it is skipped, which is correct and not a failure. Keyword-stuffed alt text is worse than none — it degrades the experience for screen reader users, which is who the attribute is for.</p>
+
+<h2 id="vitals">11. Core Web Vitals</h2>
+
+<p>Google's page experience signals centre on three metrics: <strong>Largest Contentful Paint</strong> (loading — good is 2.5 seconds or less), <strong>Interaction to Next Paint</strong> (responsiveness — 200 milliseconds or less; this replaced First Input Delay in 2024), and <strong>Cumulative Layout Shift</strong> (visual stability — 0.1 or less). Thresholds are assessed at the 75th percentile of real user visits.</p>
+
+<p>Keep the weight of this in proportion. Page experience is a real signal and a genuinely better site is worth building, but it does not outrank relevance. A fast page about the wrong thing still loses.</p>
+
+<pre class="sbs-prompt">Measure this site's performance and establish a baseline. Do not
+optimise anything yet.
+
+Build for production and report actual numbers: JS and CSS bundle
+sizes by chunk, total image weight with the largest named, font
+payload, third-party bytes by origin, and request count.
+
+Then for each key template: identify the LCP element, list every
+render-blocking resource, and identify anything that could cause
+layout shift — images without dimensions, injected content, fonts
+without a size-adjusted fallback.
+
+State how you measured. Do not present an estimate as a measurement.</pre>
+
+<p>Then fix in the order that matters: layout shift first, because it is usually a handful of missing dimension attributes and is the cheapest of the three to fix outright; then the LCP element, which is usually an oversized hero image or a render-blocking stylesheet; then interaction responsiveness, which is usually long JavaScript tasks and is the hardest.</p>
+
+<p>Re-measure after each change. Lab measurements are not field data — the assessment that counts comes from real users, which means improvements take time to show up. Do not conclude a change failed because a number did not move the same day.</p>
+
+<h2 id="mobile">12. Mobile</h2>
+
+<p>Google indexes the mobile version of your site. Whatever is missing from your mobile rendering is, for practical purposes, missing.</p>
+
+<pre class="sbs-prompt">Audit this site as a mobile crawler would see it.
+
+Render every key page at 375px wide and compare the content to the
+desktop rendering. Report anything present on desktop and absent on
+mobile — text, links, structured data, headings, metadata.
+
+Also check at 320px: horizontal overflow, text under 16px, tap
+targets smaller than 24x24 CSS px or too close together, and
+anything that requires hover.
+
+Report measured values.</pre>
+
+<p>The content-parity check is the one with SEO consequences. A responsive site that hides a block of text on small screens has removed that text from indexing.</p>
+
+<h2 id="render">13. Rendering without JavaScript</h2>
+
+<p>Google renders JavaScript, but rendering is queued and deferred rather than immediate, and other crawlers are far less capable. Content that requires JavaScript is content whose indexing is delayed and less reliable.</p>
+
+<pre class="sbs-prompt">Fetch each key page's raw HTML without executing JavaScript, and
+compare it to the fully rendered DOM.
+
+Report what is missing from the raw HTML: main content, headings,
+internal links, title, meta description, canonical, structured data.
+
+Tell me which of these would be a problem if a crawler never
+executed the JavaScript, and what it would take to render each
+server-side.</pre>
+
+<p>You do not need everything in the initial HTML. You do need the main content, the metadata, the canonical, the internal links, and the structured data.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Every audit in this guide is a reusable prompt in the Claude Code Website Launch System's SEO module, sequenced in the order above so you can run the whole pass in one sitting. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<h2 id="triage">Triage: what to fix first</h2>
+
+<p>An audit of a site that has never had one will produce a long list, and treating every item as equally urgent is how the list never gets finished. Rank by what the finding actually costs.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Severity</th><th>Findings</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><strong>Critical</strong></td><td>Accidental <code>noindex</code>; <code>robots.txt</code> blocking real content; site-wide 5xx; redirect loops on canonical URLs</td><td>Removes pages from search entirely</td></tr>
+<tr><td><strong>High</strong></td><td>Broken canonicals; 404s on linked or indexed URLs; missing or duplicated titles; content missing from mobile rendering; false structured data</td><td>Loses or misdirects existing value</td></tr>
+<tr><td><strong>Medium</strong></td><td>Redirect chains; thin internal linking; missing meta descriptions; heading structure; oversized images; layout shift</td><td>Real but incremental</td></tr>
+<tr><td><strong>Low</strong></td><td>Missing optional structured data properties; anchor text polish; alt text refinements</td><td>Worth doing, not worth blocking on</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Ask for this ranking explicitly, because an unranked audit tends to present a missing <code>&lt;meta&gt;</code> description with the same gravity as a site-wide <code>noindex</code>:</p>
+
+<pre class="sbs-prompt">Rank every finding by actual impact: critical if it removes pages
+from search, high if it loses or misdirects existing value, medium
+if it is incremental, low if it is polish.
+
+Do not inflate severity. A missing meta description is not critical.
+If nothing is critical, say so.</pre>
+
+<p>The last line matters. An audit that always finds something critical is one you will learn to discount.</p>
+
+<h2 id="found">What this actually turned up on this site</h2>
+
+<p>Running the above on this store — a small, new, carefully built site — found more than expected. Worth listing, because the pattern is instructive: almost none of it was visible to someone looking at the site.</p>
+
+<p><strong>The homepage title was the raw <code>.myshopify.com</code> domain.</strong> The layout built the title from a theme setting that had never been filled in, and fell back to the store's internal domain. The page looked completely normal. Only fetching the URL and reading the <code>&lt;title&gt;</code> surfaced it. There was no meta description either.</p>
+
+<p><strong>An <code>og:image</code> tag was emitting a Liquid error into the page head.</strong> The setting held a value but the theme's schema had no matching picker, so the object resolved to an error string that rendered inside the meta tag. Invisible in a browser; plainly wrong in the response body.</p>
+
+<p><strong>Every call-to-action on non-home pages was dead.</strong> They linked to <code>#buy</code>, a fragment that exists only on the home page. On every other page the click did nothing at all — no error, no navigation. This was found by crawling and resolving every anchor target rather than by clicking around, because clicking around on the page you built is exactly where it works.</p>
+
+<p><strong>Policy pages were rendering in the wrong layout entirely.</strong> Attempts to give them a template failed in two different ways — one with an explicit error, one silently — so they fell back to the vendor theme's default chrome while every other page used ours.</p>
+
+<p><strong>Storefront copy overstated the product.</strong> Specific numeric claims about the bundle had drifted from what the bundle actually contained as the product changed. Caught by a script that extracted every number from the page and compared it to the real artefact, which is not something you would think to check manually.</p>
+
+<p>The common thread: every one of these was found by <em>fetching a URL and reading what came back</em>, and none of them by looking at the site. That is the argument for making the audit mechanical. A person reviewing these pages would have said they looked fine, and they did.</p>
+
+<h2 id="content">Content quality, honestly</h2>
+
+<p>Everything above is necessary and none of it is sufficient. A technically flawless page about nothing ranks for nothing.</p>
+
+<p>Google's guidance here has been consistent for years and is worth reading in the original rather than in summary. The framing that has held up best is its self-assessment questions, which come down to three:</p>
+
+<ul>
+  <li><strong>Who</strong> created this content, and is that clear to a reader?</li>
+  <li><strong>How</strong> was it produced — including, explicitly, whether automation was involved and why?</li>
+  <li><strong>Why</strong> does it exist? To help someone, or to rank?</li>
+</ul>
+
+<p>That third question is the whole thing. Google's spam policies name <em>scaled content abuse</em> — producing many pages primarily to manipulate rankings rather than to help people — and the policy is about the purpose and the result, not the tool. AI-assisted content that genuinely helps someone is fine. AI-generated content produced at volume to occupy keywords is the thing the policy exists to catch, and using an agent makes that easy to do accidentally.</p>
+
+<p>The practical test: <strong>could you have written this page if you had not done the work?</strong> Specifics you could only know from experience — the error message you actually hit, the number you actually measured, the approach you tried that failed — are what separate a useful page from a fluent one. They are also, not coincidentally, what nobody else has.</p>
+
+<p>An agent is genuinely useful in this half of the work, but in a different role:</p>
+
+<pre class="sbs-prompt">Review this article critically, as an editor who is unimpressed.
+
+What claims are unsupported? What would a knowledgeable reader push
+back on? What is padding that could be cut with no loss? Where does
+it say something generic that appears on every other page about
+this topic?
+
+What does it not cover that someone with this question would need?
+
+Do not rewrite it. Tell me what is wrong with it.</pre>
+
+<p>That prompt is worth more than any generation prompt. Use the agent to find the weaknesses; supply the substance yourself.</p>
+
+<h2 id="console">Search Console and submission</h2>
+
+<p>Google Search Console is the only source of truth about how your site actually performs in Google. It is free, and no amount of local auditing substitutes for it — it reports what Google actually did, not what should happen.</p>
+
+<p>Verify ownership, submit the sitemap once, and then use it for what it is uniquely good at: the indexing report, which tells you which pages are indexed and why the others are not; the URL Inspection tool, which shows you a specific URL as Google sees it; the performance report, which is the real query and click data no model can guess; and the Core Web Vitals report, which is field data from real users.</p>
+
+<p>Bing Webmaster Tools is the equivalent for Bing, and worth ten minutes for the coverage it adds.</p>
+
+<p>Two notes on submission. <strong>IndexNow</strong> is a protocol for pinging search engines when content changes; it is supported by Bing and several others, and Google has not adopted it. It is cheap to implement and worth having if you publish frequently, but it is not a Google mechanism and should not be described as one.</p>
+
+<p>And a caution specific to agents: these are external systems that accept submissions on your behalf. Submitting a sitemap, requesting indexing, or configuring a property are outward-facing actions against accounts you own. Do them deliberately, with credentials you have chosen to provide, rather than letting them happen as a side effect of an audit task.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Launch System also ships the pre-launch and post-launch checklists that keep these standards in place after the first deploy. <a href="/products/claude-code-website-launch-system">Browse the contents</a>.</p>
+</aside>
+
+<h2 id="monitor">Preventing regressions</h2>
+
+<p>SEO breaks silently. Nobody files a bug when a canonical tag disappears; you find out from a traffic chart eight weeks later.</p>
+
+<p>The defence is to make the audit repeatable and run it automatically. Everything in this article is a script — fetch URLs, parse HTML, compare against expectations — and a script can run in CI.</p>
+
+<pre class="sbs-prompt">Write a check that runs in CI and fails the build on an SEO
+regression.
+
+Assert, for every page in the sitemap: returns 200; has exactly one
+h1; has a non-empty title under 60 characters that is unique across
+the site; has a meta description; has a self-referencing canonical;
+is not noindexed; has no broken internal links; and every image has
+an alt attribute.
+
+Output a clear report of what failed and why. Exit non-zero on any
+failure.
+
+Test it by deliberately breaking one of these and confirming the
+check catches it.</pre>
+
+<p>That last instruction is not optional. An automated check nobody has seen fail is not known to work — and a check with a bug in its filtering looks exactly like a clean site.</p>
+
+<p>The audits above are also worth saving as <a href="/blogs/guides/claude-code-skills">skills</a> so they are one command rather than a paste, and running the heavy ones in a <a href="/blogs/guides/claude-code-subagents">subagent</a> keeps a large crawl out of your session context.</p>
+
+<p>Add the standards to your <a href="/blogs/guides/production-claude-md-web-development"><code>CLAUDE.md</code></a> as well, so future sessions maintain them by default rather than needing to be told each time:</p>
+
+<pre><code>## SEO requirements
+- Every page: unique title, meta description, self-referencing
+  canonical, exactly one h1
+- Never add noindex without asking
+- Never change a published URL without a 301
+- Structured data values come from the same source as the visible
+  content; never hard-coded
+- No review or rating markup</code></pre>
+
+<h2 id="antipatterns">What not to do</h2>
+
+<h3>Generating pages at scale to occupy keywords</h3>
+<p>The exact thing the scaled content abuse policy describes. An agent makes it trivially easy and it is the fastest route to a manual action.</p>
+
+<h3>Trusting invented metrics</h3>
+<p>Search volumes, difficulty scores, competitor traffic. If it would require external data, it was made up.</p>
+
+<h3>Keyword density</h3>
+<p>Not a thing search engines use, and optimising for it makes writing worse. Write for the reader.</p>
+
+<h3>Optimising titles on pages that are blocked</h3>
+<p>Order matters. Crawlability first.</p>
+
+<h3>Accepting "done" without evidence</h3>
+<p>"I fixed the canonical tags" is a claim. Fetch the pages and read the tags.</p>
+
+<h3>Auditing the source instead of the output</h3>
+<p>What matters is what the server returns and what the browser renders, which on a templated site is frequently not what the source suggests.</p>
+
+<h3>Changing and auditing in one pass</h3>
+<p>You lose the ability to tell what any individual change did.</p>
+
+<h3>Treating structured data as a ranking lever</h3>
+<p>It makes rich results possible. It is not a boost, and adding more types does not add more benefit.</p>
+
+<h2>Where to go next</h2>
+
+<p>For the wider inspection this sits inside &mdash; conversion, accessibility, commerce and security as well as SEO &mdash; see <a href="/blogs/guides/claude-code-website-audit">the website audit guide</a> and its companion <a href="/pages/claude-code-website-audit-checklist">audit checklist</a>.</p>
+
+<p>SEO is most effective built in rather than retrofitted — the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> shows where these checks belong during a build. The audit prompts here are applications of the patterns in the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a>, and encoding the standards so they survive future changes is covered in <a href="/blogs/guides/production-claude-md-web-development">creating a production CLAUDE.md</a>. For platform specifics — what Shopify generates for you and what you must not overwrite — see the <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify guide</a>, and <a href="/blogs/guides/shopify-seo-with-claude-code">Shopify SEO with Claude Code</a> for the storefront SEO layer specifically.</p>
+
+<p>Once the site is indexed and impressions are arriving, <a href="/blogs/guides/google-search-console-claude-code">Google Search Console with Claude Code</a> covers reading that data and turning it into a short list of work. The Core Web Vitals section above has its own workflow in <a href="/blogs/guides/claude-code-performance-core-web-vitals">Claude Code performance optimization</a>.</p>
+
+<p>This guide covers <em>what</em> to check and why. For the execution — writing checks that are actually capable of failing, the four false passes this site produced, and what Search Console, Bing Webmaster Tools and IndexNow each really do — read <a href="/blogs/guides/claude-code-technical-seo-audit">how to run a technical SEO audit with Claude Code</a>. The short form of the whole thing is the free <a href="/pages/claude-code-seo-checklist">SEO checklist</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://developers.google.com/search/docs/fundamentals/creating-helpful-content" rel="noopener">Google: creating helpful, reliable, people-first content</a> — the Who / How / Why self-assessment</li>
+  <li><a href="https://developers.google.com/search/docs/essentials/spam-policies" rel="noopener">Google: spam policies</a> — including scaled content abuse</li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap" rel="noopener">Google: build and submit a sitemap</a> — limits, and which elements are ignored</li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/block-indexing" rel="noopener">Google: block indexing with noindex</a> — why it must not be combined with a robots.txt block</li>
+  <li><a href="https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls" rel="noopener">Google: canonicalisation</a></li>
+  <li><a href="https://web.dev/articles/vitals" rel="noopener">web.dev: Core Web Vitals</a> — LCP, INP, and CLS thresholds</li>
+  <li><a href="https://developers.google.com/search/docs/appearance/structured-data/search-gallery" rel="noopener">Google: structured data search gallery</a></li>
+  <li><a href="https://www.w3.org/TR/WCAG22/" rel="noopener">W3C: WCAG 2.2</a> — the overlap between accessibility and SEO</li>
+</ul>

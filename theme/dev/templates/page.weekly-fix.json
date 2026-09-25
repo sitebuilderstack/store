@@ -1,0 +1,33 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-weekly-fix",
+      "settings": {}
+    },
+    "reminders": {
+      "type": "sbs-optin",
+      "settings": {
+        "anchor": "reminders",
+        "alt_background": true,
+        "eyebrow": "Optional reminders",
+        "heading": "Get each week's challenge by email",
+        "intro": "One email when a new challenge is published — at most one a week, usually Thursday. Nothing else is sent to this list.",
+        "field_label": "Email address",
+        "placeholder": "you@example.com",
+        "button_label": "Send me the weekly challenge",
+        "tag": "weekly-fix",
+        "show_segment": false,
+        "note": "<p>Separate from the guides list: signing up here adds you only to the Weekly Website Fix reminders. At most one email a week, sent when a challenge goes live; if a week is skipped, no email. Unsubscribe from any email. See the <a href=\"/policies/privacy-policy\">privacy policy</a>.</p>",
+        "success_heading": "You're on the list.",
+        "success_body": "The next challenge will arrive by email when it is published. Until then, the schedule above has the dates and every published challenge is in the archive.",
+        "file_url": "",
+        "file_label": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "reminders"
+  ]
+}

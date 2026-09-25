@@ -1,0 +1,24 @@
+Change verification — before -> after-good
+URL: https://harbourline-physio.example/
+
+status           unchanged
+final_url        unchanged
+title            unchanged
+h1               OK — changed as expected
+                   before: Welcome
+                   after:  Physiotherapy in Harbourline — same-week appointments
+h2               unchanged
+canonical        unchanged
+robots_meta      unchanged
+x_robots_tag     unchanged
+forms            unchanged
+form_count       unchanged
+cta              unchanged
+content_sha256   changed (informational)
+                   before: 65b192b35abcb626
+                   after:  8f401d4ad1c48b8d
+content_words    changed (informational)
+                   before: 20
+                   after:  25
+
+13 checked, 0 failed

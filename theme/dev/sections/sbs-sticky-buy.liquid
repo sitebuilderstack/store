@@ -1,0 +1,81 @@
+{%- comment -%}
+  Sticky mobile purchase control.
+
+  It lives in the footer section group, so it renders on every page of the
+  store. That is why it resolves the product per page rather than trusting the
+  theme-editor setting: the setting was `claude-code-website-launch-system`,
+  and every one of the other seven product pages therefore carried the Launch
+  System's title, the Launch System's price, and a link to the homepage in its
+  markup — including the $39.99 pages, where the bar said $19.99.
+
+  It was never *visible* there: `initSticky()` returned early without
+  `[data-sbs-hero-cta]`, which only `sbs-hero` emits and only the homepage
+  uses. So this was wrong markup one change away from being a wrong-product
+  purchase block, not a defect a customer saw. It is fixed here rather than
+  left to become one.
+
+  On a product page it now shows that product and submits that product's own
+  form — the theme's native `{% form 'product' %}` posting to /cart/add, not a
+  second checkout implementation. Every product in this store has exactly one
+  variant, so `selected_or_first_available_variant` is the variant; if a
+  variant picker is ever added, this form must be wired to it or replaced with
+  a link to the main panel.
+
+  Anywhere else it is a link to the configured product's page — never the bare
+  homepage anchor, which resolved to nothing on every page but the homepage.
+{%- endcomment -%}
+
+{%- assign page_product = product -%}
+{%- assign sticky_product = all_products[section.settings.product] -%}
+{%- assign is_own_product = false -%}
+
+{%- if template.name == 'product' and page_product != blank -%}
+  {%- assign sticky_product = page_product -%}
+  {%- assign is_own_product = true -%}
+{%- endif -%}
+
+{%- if sticky_product != blank and sticky_product.available -%}
+  {%- assign variant = sticky_product.selected_or_first_available_variant -%}
+  <div class="sbs-sticky" data-sbs-sticky data-visible="false"
+       data-sbs-sticky-product="{{ sticky_product.handle | escape }}">
+    <div class="sbs-sticky__text">
+      <div class="sbs-sticky__title">{{ sticky_product.title | escape }}</div>
+      <div class="sbs-sticky__price">{{ variant.price | money }} · instant download</div>
+    </div>
+
+    {%- if is_own_product -%}
+      {%- comment -%}
+        A real add-to-cart, so the label describes what the button does.
+        A distinct form id: `sbs-product-form` is already on the page.
+      {%- endcomment -%}
+      {%- form 'product', sticky_product, id: 'sbs-sticky-form', data-sbs-buy-form: '' -%}
+        <input type="hidden" name="id" value="{{ variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add" class="sbs-btn sbs-btn--primary"
+                data-busy-label="Adding&hellip;"
+                data-sbs-track="product_cta_clicked"
+                data-sbs-placement="sticky_bar">
+          Add to cart
+        </button>
+      {%- endform -%}
+    {%- else -%}
+      <a class="sbs-btn sbs-btn--primary" href="{{ sticky_product.url }}"
+         data-sbs-track="product_cta_clicked"
+         data-sbs-placement="sticky_bar">View product</a>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Sticky buy bar",
+  "tag": "div",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Product (non-product pages)",
+      "info": "On a product page the bar always follows the product being viewed and ignores this setting." },
+    { "type": "paragraph",
+      "content": "Shown on small screens only, after the buy panel scrolls away, and hidden again over the buy panel so it never covers the real form." }
+  ],
+  "presets": [{ "name": "SBS — Sticky buy bar" }]
+}
+{% endschema %}

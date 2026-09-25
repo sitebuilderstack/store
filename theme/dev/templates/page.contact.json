@@ -1,0 +1,12 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-contact",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

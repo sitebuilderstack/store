@@ -1,0 +1,68 @@
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Website Scope Builder</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load the example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Client projects</p>
+    <h1 class="h1" tabindex="-1" id="top">Write down what you do not know.</h1>
+    <p class="lede">Build a website scope from what the client actually told you. Anything you leave blank becomes a visible <strong>TBD</strong> with an owner, not a plausible guess.</p>
+    <p class="small dim">Operational project planning, not a legal agreement. It does not replace a contract. Everything stays in this tab &mdash; sanitise client notes before pasting them anywhere, here included.</p>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="edit-h">
+      <h2 class="h2" id="edit-h">The scope</h2>
+      <div id="fields" class="row"></div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="gaps-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="gaps-h">Gaps and risks</h2>
+          <span class="chip" id="score">&nbsp;</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+        <p class="small dim">A gap is not a failure. It is a question you have not asked yet, and the document is better for showing it.</p>
+      </section>
+
+      <section class="card" aria-labelledby="out-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="out-h">The document</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy Markdown</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the Markdown instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="preview"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">The rest of the engagement</p>
+    <p class="muted">A scope is one document. Discovery, proposals, onboarding, client updates, change requests and handoff are the rest of it.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/website-scope-of-work-template-claude-code?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-agency-client-delivery-system?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=primary_recommendation">Agency &amp; Client Delivery System</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=scope_builder&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Not legal advice. Independent product.</p>
+  </footer>
+</main>

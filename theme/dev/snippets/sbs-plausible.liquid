@@ -1,0 +1,13 @@
+{%- comment -%}
+  Plausible Analytics — the owner's script, verbatim, rendered in the <head>
+  of every layout branch (landing, the policy branch of theme.liquid, and
+  the ONE fallback). Cookieless; no personal data; Shopify's own analytics
+  and the sbs.js engagement events are unchanged and unaffected.
+  Rollback: remove the three {% render 'sbs-plausible' %} lines.
+{%- endcomment -%}
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-z2VuG5J4PEn80otsE-Ymx.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>

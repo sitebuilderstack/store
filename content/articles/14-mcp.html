@@ -1,0 +1,260 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What MCP is for</a></li>
+    <li><a href="#transports">The four transports</a></li>
+    <li><a href="#add">Adding a server</a></li>
+    <li><a href="#scopes">Scopes, and which file each writes to</a></li>
+    <li><a href="#mcpjson">The .mcp.json format</a></li>
+    <li><a href="#auth">Authenticating remote servers</a></li>
+    <li><a href="#tools">How MCP tools appear</a></li>
+    <li><a href="#status">Reading the status output</a></li>
+    <li><a href="#security">The risk you are taking on</a></li>
+    <li><a href="#limits">Limits that bite in practice</a></li>
+    <li><a href="#worth">Which servers are actually worth adding</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What MCP is for</h2>
+
+<p>The Model Context Protocol is an open standard for connecting AI tools to external systems — databases, APIs, ticketing systems, error logs. An MCP server exposes capabilities; Claude Code calls them directly.</p>
+
+<p>The practical value is narrow and real: <strong>it removes the copy-and-paste step.</strong> Instead of pulling an error from your monitoring dashboard, pasting it in, then pasting back the fix, Claude queries the monitoring system itself. Instead of describing your database schema, it reads it.</p>
+
+<p>That also describes when <em>not</em> to bother. If the data is already in the repository, MCP adds nothing — Claude Code can already read files. MCP earns its place when the information lives somewhere the filesystem cannot reach.</p>
+
+<h2 id="transports">The four transports</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Transport</th><th>Flag</th><th>Use for</th></tr></thead>
+<tbody>
+<tr><td><strong>HTTP</strong></td><td><code>--transport http</code></td><td>Remote services. The recommended default, with OAuth support.</td></tr>
+<tr><td><strong>Stdio</strong></td><td><code>--transport stdio</code></td><td>A local process on your machine.</td></tr>
+<tr><td><strong>SSE</strong></td><td><code>--transport sse</code></td><td>Legacy remote services. <strong>Deprecated</strong> — use HTTP where available.</td></tr>
+<tr><td><strong>WebSocket</strong></td><td>none</td><td>Persistent bidirectional connections. Configured only through <code>.mcp.json</code> or <code>claude mcp add-json</code>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>In practice you will use HTTP for hosted services and stdio for anything running locally. If a server's documentation still tells you to use SSE, check whether it offers HTTP first.</p>
+
+<h2 id="add">Adding a server</h2>
+
+<p>A remote HTTP server:</p>
+
+<pre><code>claude mcp add --transport http stripe https://mcp.stripe.com</code></pre>
+
+<p>With a static auth header:</p>
+
+<pre><code>claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
+  --header "Authorization: Bearer YOUR_GITHUB_PAT"</code></pre>
+
+<p>A local stdio server:</p>
+
+<pre><code>claude mcp add --env AIRTABLE_API_KEY=YOUR_KEY --transport stdio airtable \
+  -- npx -y airtable-mcp-server</code></pre>
+
+<p><strong>The <code>--</code> separator is required for stdio servers</strong> and is the single most common mistake here. Everything before it is Claude's options; everything after is the command to run. Omit it and your server command gets parsed as flags.</p>
+
+<p>The rest of the surface:</p>
+
+<pre><code>claude mcp list                    # every server, with health status
+claude mcp get &lt;name&gt;              # details for one
+claude mcp remove &lt;name&gt;           # remove it
+claude mcp login &lt;name&gt;            # OAuth
+claude mcp logout &lt;name&gt;           # clear credentials
+claude mcp add-json &lt;name&gt; '...'   # add from raw JSON config
+claude mcp reset-project-choices   # re-run project approvals
+claude mcp serve                   # run Claude Code itself as an MCP server</code></pre>
+
+<p>Inside a session, <code>/mcp</code> opens a panel where you can authenticate and toggle servers on and off.</p>
+
+<h2 id="scopes">Scopes, and which file each writes to</h2>
+
+<p>Three scopes, and choosing wrong is why a colleague cannot see the server you added.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Scope</th><th>Available in</th><th>Shared with the team</th><th>Written to</th></tr></thead>
+<tbody>
+<tr><td><strong>Local</strong> (default)</td><td>This project only</td><td>No</td><td><code>~/.claude.json</code></td></tr>
+<tr><td><strong>Project</strong></td><td>This project only</td><td><strong>Yes</strong> — commit it</td><td><code>.mcp.json</code> at the project root</td></tr>
+<tr><td><strong>User</strong></td><td>All your projects</td><td>No</td><td><code>~/.claude.json</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<pre><code>claude mcp add --transport http shared-server --scope project https://example.com/mcp
+claude mcp add --transport http hubspot --scope user https://mcp.hubspot.com/anthropic</code></pre>
+
+<p>Note that local and user scope both land in <code>~/.claude.json</code> — local under a per-project key, user at the top level. Neither is shareable. Only <code>--scope project</code> produces a committable file.</p>
+
+<p>The recommendation for teams is unambiguous: one central team configures the servers and commits <code>.mcp.json</code>, so everyone gets them without wiring anything up. That is also a security benefit — one team reviews what is connected, rather than a long tail of individual setups nobody has audited.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>MCP is one layer of a working setup. The Claude Code Website Launch System covers the rest &mdash; the project context, the prompts, the audits, and the launch checklists, from a real build. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-mcp-scopes.png?v=1787943937" alt="Three MCP scopes compared. Local writes to ~/.claude.json, loads in this project, not shared. Project writes to .mcp.json at the repo root, loads in this project, and is shared — commit it. User writes to ~/.claude.json, loads in all your projects, not shared."
+       width="1000" height="440" loading="lazy" decoding="async">
+  <figcaption>Only the highlighted row produces a file that travels with the repository.</figcaption>
+</figure>
+
+<h2 id="mcpjson">The .mcp.json format</h2>
+
+<pre><code>{
+  "mcpServers": {
+    "issues": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${API_TOKEN}"
+      },
+      "timeout": 600000
+    },
+    "local-db": {
+      "command": "/path/to/server",
+      "args": ["--config", "${CLAUDE_PROJECT_DIR}/config.json"],
+      "env": {
+        "DB_URL": "${DATABASE_URL:-sqlite://default.db}"
+      }
+    }
+  }
+}</code></pre>
+
+<p>Two things make this file safe to commit.</p>
+
+<p><strong>Environment variable expansion.</strong> <code>${VAR}</code> expands from the environment, and <code>${VAR:-default}</code> falls back. It works in <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, and <code>headers</code> — which is exactly the set you need to keep secrets out of the file. Commit the reference, never the token.</p>
+
+<p><strong><code>${CLAUDE_PROJECT_DIR}</code></strong> resolves to the project root, so paths do not depend on where anyone checked the repository out.</p>
+
+<p>For authentication schemes that need a fresh value each time — Kerberos, short-lived tokens, internal SSO — use <code>headersHelper</code> instead of static headers. It points at a script that prints a JSON object of header key-value pairs to stdout, runs with a 10-second timeout, and is called fresh on every connection.</p>
+
+<h2 id="auth">Authenticating remote servers</h2>
+
+<p>For an OAuth server, add it and then authenticate:</p>
+
+<pre><code>claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+claude mcp login sentry</code></pre>
+
+<p>Or run <code>/mcp</code> in a session and follow the browser flow. On a headless machine, <code>claude mcp login sentry --no-browser</code>.</p>
+
+<p>If you have your own client credentials, pass them rather than going through discovery:</p>
+
+<pre><code>claude mcp add --transport http \
+  --client-id your-client-id --client-secret --callback-port 8080 \
+  my-server https://mcp.example.com/mcp</code></pre>
+
+<p><code>--client-secret</code> with no value prompts with masked input. For scripting, set <code>MCP_CLIENT_SECRET</code> in the environment instead — which is the right pattern, because a secret on a command line ends up in your shell history.</p>
+
+<h2 id="tools">How MCP tools appear</h2>
+
+<p>MCP tools are namespaced:</p>
+
+<pre><code>mcp__&lt;server-name&gt;__&lt;tool-name&gt;
+
+mcp__github__create_issue
+mcp__notion__query_database</code></pre>
+
+<p>You need this format any time you write a permission rule, a <a href="/blogs/guides/claude-code-subagents">subagent</a> <code>tools</code> list, or an <code>--allowedTools</code> argument. Getting the double underscores wrong is a quiet failure — the rule simply never matches.</p>
+
+<p>Servers bundled in a <a href="/blogs/guides/claude-code-plugins">plugin</a> carry a longer name:</p>
+
+<pre><code>mcp__plugin_&lt;plugin-name&gt;_&lt;server-name&gt;__&lt;tool-name&gt;</code></pre>
+
+<h2 id="status">Reading the status output</h2>
+
+<p><code>claude mcp list</code> reports a state per server, and most of them mean something specific:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>✔ Connected</td><td>Working</td></tr>
+<tr><td>! Needs authentication</td><td>Run <code>claude mcp login &lt;name&gt;</code> or <code>/mcp</code></td></tr>
+<tr><td>⏸ Pending approval</td><td>A project <code>.mcp.json</code> server you have not trusted yet</td></tr>
+<tr><td>⊘ Disabled for this project</td><td>Toggled off in <code>/mcp</code></td></tr>
+<tr><td>✘ Failed to connect</td><td>With a detail explaining why</td></tr>
+<tr><td>cached 2h ago</td><td>Tools came from the discovery cache, not a live connection</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That last one matters when you are debugging: a cached entry can look healthy while the server is down.</p>
+
+<h2 id="security">The risk you are taking on</h2>
+
+<p>This section is the reason to read the article rather than skim the commands.</p>
+
+<p><strong>Verify you trust a server before connecting it.</strong> A server that fetches external content can expose you to prompt injection — content it returns is text Claude reads, and text Claude reads can attempt to instruct it. That is a genuine attack surface, not a theoretical one.</p>
+
+<p>Practical rules:</p>
+
+<ul>
+  <li><strong>Prefer read-only where the work is read-only.</strong> A database server pointed at a read-only user cannot be talked into a write.</li>
+  <li><strong>Scope credentials narrowly.</strong> A personal access token with full repository access does more damage than one scoped to issues.</li>
+  <li><strong>Review project servers before accepting the trust dialogue.</strong> That prompt is doing real work; a <code>.mcp.json</code> arriving in a pull request is a capability grant arriving in a pull request.</li>
+</ul>
+
+<p>Non-interactive runs cannot show an approval dialogue, so <code>claude -p</code> and Agent SDK sessions need project servers pre-approved in settings, or <code>--strict-mcp-config</code> to use only what <code>--mcp-config</code> supplies. If you are running Claude Code in <a href="/blogs/guides/claude-code-github-actions">CI</a>, that distinction is the one to get right.</p>
+
+<h2 id="limits">Limits that bite in practice</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Limit</th><th>Default</th><th>Override</th></tr></thead>
+<tbody>
+<tr><td>Tool output warning</td><td>10,000 tokens</td><td>—</td></tr>
+<tr><td>Tool output cap</td><td>25,000 tokens</td><td><code>MAX_MCP_OUTPUT_TOKENS</code></td></tr>
+<tr><td>Long calls move to background</td><td>2 minutes</td><td><code>CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS</code></td></tr>
+<tr><td>Idle timeout</td><td>5 min HTTP, 30 min stdio</td><td><code>CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT</code></td></tr>
+<tr><td>Reconnect attempts</td><td>5, exponential backoff</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The output cap is the one that surprises people. A query returning a large result set gets truncated at 25,000 tokens, and the truncation is not always obvious in the response. If you are querying a database, put the <code>LIMIT</code> in the query rather than relying on the cap to do it for you.</p>
+
+<h2 id="worth">Which servers are actually worth adding</h2>
+
+<p>An honest filter, because it is easy to accumulate servers that never get used and cost context on every session.</p>
+
+<p><strong>Add a server when the data lives outside your repository and you reference it often.</strong> Error tracking, issue tracking, a database schema you query while building, analytics you check while optimising.</p>
+
+<p><strong>Do not add one for data already in the repository.</strong> Claude Code reads files. An MCP server that reads your code is a slower version of a tool it already has.</p>
+
+<p><strong>Do not add one you will use twice.</strong> A one-off query is faster to run yourself and paste.</p>
+
+<p>Two concrete examples worth the setup for most web projects:</p>
+
+<pre><code># GitHub — issues and pull requests without leaving the terminal
+claude mcp add --transport http github https://api.githubcopilot.com/mcp/ \
+  --header "Authorization: Bearer YOUR_GITHUB_PAT"
+
+# A read-only database connection for schema questions
+claude mcp add --transport stdio db -- npx -y @bytebase/dbhub \
+  --dsn "postgresql://readonly:pass@host:5432/db"</code></pre>
+
+<p>Note the <code>readonly</code> user in the second. That is the pattern: connect with the least privilege that makes the tool useful.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Connecting tools is the easy half; knowing what to do with them is the rest. <a href="/products/claude-code-website-launch-system">Browse the contents</a> of the Launch System for the workflows and audits that use them.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>MCP extends what Claude Code can reach. <a href="/blogs/guides/claude-code-skills">Skills</a> package what it does with that reach, <a href="/blogs/guides/claude-code-subagents">subagents</a> isolate the work and restrict the tools, and <a href="/blogs/guides/claude-code-plugins">plugins</a> ship all three to a team in one install. For enforcing rules around MCP calls, see <a href="/blogs/guides/claude-code-hooks">hooks</a>. New to the tool entirely? Start with <a href="/blogs/guides/claude-code-terminal-setup">getting started in the terminal</a>.</p>
+
+<p>For where a connected toolchain fits in real work, the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> covers the full build, the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> covers directing it, and <a href="/blogs/guides/production-claude-md-web-development">a production CLAUDE.md</a> covers the context every session starts from.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/mcp" rel="noopener">Claude Code: MCP</a> — commands, scopes, transports, authentication, limits</li>
+  <li><a href="https://modelcontextprotocol.io/introduction" rel="noopener">Model Context Protocol</a> — the open standard itself</li>
+  <li><a href="https://code.claude.com/docs/en/security" rel="noopener">Claude Code: security</a> — including prompt injection</li>
+</ul>

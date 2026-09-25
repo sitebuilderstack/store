@@ -1,0 +1,82 @@
+{%- comment -%}
+  The recommended-tools hub. The page body carries the editorial framing; the
+  recommendations themselves are blocks, each rendered by snippets/sbs-recommend
+  so the same card can be dropped into a guide.
+
+  Disclosure state comes from the block, and a block's `affiliate` checkbox must
+  only be ticked when docs/monetization/PARTNER-REGISTER.md records an approved
+  relationship with a working tracking URL. Today none is.
+{%- endcomment -%}
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">{{ section.settings.eyebrow | default: 'Recommended tools' | escape }}</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container">
+  {%- if section.settings.disclosure != blank -%}
+    <div class="sbs-offer__status sbs-offer__status--inquiry">{{ section.settings.disclosure }}</div>
+  {%- endif -%}
+
+  {%- if page.content != blank -%}
+    <div class="sbs-rte sbs-article__body">{{ page.content }}</div>
+  {%- endif -%}
+
+  <div class="sbs-recs">
+    {%- for block in section.blocks -%}
+      {%- assign aff = 'false' -%}
+      {%- if block.settings.affiliate -%}{%- assign aff = 'true' -%}{%- endif -%}
+      {% render 'sbs-recommend',
+         name: block.settings.name, url: block.settings.url, role: block.settings.role,
+         who: block.settings.who, problem: block.settings.problem, limits: block.settings.limits,
+         alternative: block.settings.alternative, basis: block.settings.basis,
+         partner: block.settings.partner, affiliate: aff, placement: 'hub',
+         link_label: block.settings.link_label %}
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.footnote != blank -%}
+    <div class="sbs-rte sbs-article__body">{{ section.settings.footnote }}</div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "SBS — Recommendations",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Recommended tools" },
+    { "type": "richtext", "id": "disclosure", "label": "Disclosure banner",
+      "info": "State plainly whether any link on the page earns a commission." },
+    { "type": "richtext", "id": "footnote", "label": "Footnote" }
+  ],
+  "blocks": [
+    { "type": "tool", "name": "Tool", "settings": [
+      { "type": "text", "id": "name", "label": "Name" },
+      { "type": "text", "id": "partner", "label": "Partner id (analytics)", "info": "Lowercase, hyphenated." },
+      { "type": "text", "id": "role", "label": "Role" },
+      { "type": "url", "id": "url", "label": "Link" },
+      { "type": "text", "id": "link_label", "label": "Link label", "default": "Official site" },
+      { "type": "richtext", "id": "who", "label": "Who it suits" },
+      { "type": "richtext", "id": "problem", "label": "The problem it solves" },
+      { "type": "richtext", "id": "limits", "label": "Limitations" },
+      { "type": "richtext", "id": "alternative", "label": "When you may not need it" },
+      { "type": "richtext", "id": "basis", "label": "Basis for the description" },
+      { "type": "checkbox", "id": "affiliate", "label": "Compensated link", "default": false,
+        "info": "Tick ONLY when the partner register records an approved relationship and this link is the approved tracking URL." }
+    ] }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "SBS — Recommendations" }]
+}
+{% endschema %}

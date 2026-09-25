@@ -1,0 +1,47 @@
+{%- comment -%}
+  One tool recommendation, wherever it appears — the hub page or inside a guide.
+
+  Parameters:
+    name, url, role, who, problem, limits, alternative, basis, partner
+    placement  — where this instance sits (analytics only)
+    affiliate  — 'true' only when docs/monetization/PARTNER-REGISTER.md records
+                 an APPROVED relationship and the url is the approved tracking
+                 URL. Anything else must be left unset.
+
+  The disclosure is rendered immediately above the link, never only in the
+  footer, and only when the link is actually compensated. When it is not, the
+  card says plainly that it is an ordinary link — the credibility of the
+  recommendation is the product here, and a disclosure nobody needs is cheaper
+  than a missing one.
+
+  rel: sponsored + nofollow on a compensated link, per search-engine guidance
+  for links with a commercial relationship; noopener on every external link.
+{%- endcomment -%}
+{%- assign is_aff = false -%}
+{%- if affiliate == 'true' or affiliate == true -%}{%- assign is_aff = true -%}{%- endif -%}
+<article class="sbs-rec{% if is_aff %} sbs-rec--aff{% endif %}">
+  <div class="sbs-rec__head">
+    <h3>{{ name | escape }}</h3>
+    <span class="sbs-rec__role">{{ role | escape }}</span>
+  </div>
+  {%- if is_aff -%}
+    <p class="sbs-rec__disclosure"><strong>Affiliate link.</strong> If you sign up through this link, Site Builder Stack may earn a commission. It costs you nothing extra and does not change what is written below.</p>
+  {%- endif -%}
+  <dl class="sbs-rec__body">
+    <dt>Who it suits</dt><dd>{{ who }}</dd>
+    <dt>The problem it solves</dt><dd>{{ problem }}</dd>
+    <dt>Limitations</dt><dd>{{ limits }}</dd>
+    <dt>When you may not need it</dt><dd>{{ alternative }}</dd>
+  </dl>
+  <div class="sbs-rec__basis">{{ basis }}</div>
+  <p class="sbs-rec__link">
+    <a href="{{ url }}" target="_blank"
+       rel="{% if is_aff %}sponsored nofollow noopener{% else %}noopener{% endif %}"
+       data-sbs-affiliate="{{ partner | escape }}"
+       data-sbs-affiliate-mode="{% if is_aff %}affiliate{% else %}editorial{% endif %}"
+       data-sbs-placement="{{ placement | default: 'hub' | escape }}">{{ link_label | default: 'Official site' | escape }}</a>
+    {%- unless is_aff -%}
+      <span class="sbs-rec__plain">Ordinary link — no commission is earned from it.</span>
+    {%- endunless -%}
+  </p>
+</article>

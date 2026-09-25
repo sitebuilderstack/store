@@ -1,0 +1,9 @@
+{
+  "pages": [
+    { "url": "https://example.com/", "expect": "Example" },
+    { "url": "https://example.com/contact", "expect": "<form" }
+  ],
+  "max_links": 100,
+  "timeout": 8,
+  "min_cert_days": 14
+}

@@ -1,0 +1,25 @@
+Change verification — before -> after-bad
+URL: https://harbourline-physio.example/
+
+status           unchanged
+final_url        unchanged
+title            unchanged
+h1               FAIL — new value does not contain 'Physiotherapy in Harbourline'
+                   before: Welcome
+                   after:  []
+h2               unchanged
+canonical        unchanged
+robots_meta      unchanged
+x_robots_tag     unchanged
+forms            unchanged
+form_count       unchanged
+cta              unchanged
+content_sha256   changed (informational)
+                   before: 65b192b35abcb626
+                   after:  8f401d4ad1c48b8d
+content_words    changed (informational)
+                   before: 20
+                   after:  25
+
+13 checked, 1 failed
+Failed: h1

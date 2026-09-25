@@ -1,0 +1,419 @@
+{
+  "$comment": "Build-time catalogue snapshot. Verified against the live Shopify Admin API (product status, handle, title, variant price, currency, availableForSale, onlineStoreUrl) and against each product's own published description on the date below. The artifact NEVER calls Shopify at runtime. Refresh with: python3 refresh-catalogue.py --write (see README.md).",
+  "snapshot": {
+    "verifiedOn": "2026-09-24",
+    "freshnessWindowDays": 30,
+    "currency": "USD",
+    "source": "Shopify Admin GraphQL API 2025-07 + published product descriptions",
+    "priceDisclosure": "Prices are a snapshot taken on the date above. The storefront is the authority."
+  },
+  "site": "https://sitebuilderstack.com",
+  "format": {
+    "summary": "Every paid product is a one-time download: a ZIP of plain Markdown workflows, prompts, templates and checklists (some also ship small standard-library Python scripts) that you run yourself inside Claude Code.",
+    "notAService": "These are not autonomous services. Nothing runs on your site for you, nothing is hosted, and no work happens without you running it."
+  },
+  "bundles": {
+    "complete-site-builder-stack": {
+      "members": [
+        "website-launch-system",
+        "seo-audit-toolkit",
+        "conversion-toolkit"
+      ],
+      "note": "Verified 24 September 2026: the bundle is these three products only, delivered as three downloads on one order. It does not contain the Operations, Shopify Automation, Migration or Agency products."
+    }
+  },
+  "products": [
+    {
+      "id": "website-launch-system",
+      "handle": "claude-code-website-launch-system",
+      "title": "The Claude Code Website Launch System",
+      "shortName": "Website Launch System",
+      "url": "https://sitebuilderstack.com/products/claude-code-website-launch-system",
+      "price": 19.99,
+      "currency": "USD",
+      "sku": "SBS-CCWLS-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Directing Claude Code through a complete website build, from research and planning to the first thirty days after launch.",
+      "prerequisites": "Claude Code installed, a terminal, and a project you are willing to build or rebuild from a documented plan.",
+      "benefits": [
+        "113 files across 17 modules, more than 110,000 words of plain Markdown you own outright.",
+        "A staged master build prompt across fifteen gated phases, plus a production CLAUDE.md template.",
+        "Platform build systems for Shopify, WordPress, Astro, SaaS applications and landing pages, each with its own audits and launch checklist."
+      ],
+      "inclusions": [
+        "01 — Master System: the end-to-end build prompt plus the discovery, planning and roadmap chain",
+        "02 — Claude Code Configuration: a production CLAUDE.md template and how memory files actually load",
+        "03 — SEO System: search architecture, technical audit, keyword research, clusters, internal linking, schema, sitemaps, robots.txt",
+        "04–08 — Platform Systems: Shopify, WordPress, Astro, SaaS, landing pages",
+        "09–10 — Deployment: GitHub repository setup, CI/CD, four working GitHub Actions files, Cloudflare DNS/Pages/caching/security",
+        "11–12 — Security and Accessibility audits with checklists",
+        "13–14 — Search Engines and the pre-launch, launch-day, 24-hour, 7-day and 30-day checklists",
+        "15 — Prompt Library: 100 reusable single-purpose prompts"
+      ],
+      "exclusions": [
+        "It does not audit a site that already exists in depth — that is the SEO & Website Audit Toolkit.",
+        "It does not cover ongoing operations after the first thirty days — that is the Operations & Maintenance System.",
+        "It does not write your content or run the prompts for you."
+      ],
+      "inBundle": "complete-site-builder-stack"
+    },
+    {
+      "id": "seo-audit-toolkit",
+      "handle": "claude-code-seo-website-audit-toolkit",
+      "title": "Claude Code SEO & Website Audit Toolkit",
+      "shortName": "SEO & Website Audit Toolkit",
+      "url": "https://sitebuilderstack.com/products/claude-code-seo-website-audit-toolkit",
+      "price": 19.99,
+      "currency": "USD",
+      "sku": "SBS-CCSAT-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Finding out why an existing website is not performing in search, with evidence rather than a confident summary.",
+      "prerequisites": "A website that is already live and reachable, and the ability to read a diff and run a command.",
+      "benefits": [
+        "Fourteen modules, twenty prompts, four report templates and three checklists — 26,000 words of plain Markdown.",
+        "The prompts run in dependency order: crawlability before on-page, because optimising a title on a URL about to be canonicalised away is wasted work.",
+        "Every prompt demands evidence and forbids fixing in the same run, so an audit leaves a report rather than an unreviewed diff."
+      ],
+      "inclusions": [
+        "01-technical-seo: crawlability, indexability, robots, sitemaps, canonicals, redirects, status codes, pagination",
+        "02-on-page-seo: titles, descriptions, heading hierarchy, alt text, duplicate metadata",
+        "03-indexation: why pages are not indexed and what actually helps",
+        "04-structured-data: schema that describes what is visibly on the page, by page type",
+        "Four report templates and three checklists"
+      ],
+      "exclusions": [
+        "It is not for a site that does not exist yet — start with the Website Launch System.",
+        "It does not include a crawler or a rank tracker; it directs Claude Code against your live site.",
+        "It makes no ranking promises and no traffic forecasts."
+      ],
+      "inBundle": "complete-site-builder-stack"
+    },
+    {
+      "id": "conversion-toolkit",
+      "handle": "claude-code-conversion-revenue-optimization-toolkit",
+      "title": "Claude Code Conversion & Revenue Optimization Toolkit",
+      "shortName": "Conversion & Revenue Optimization Toolkit",
+      "url": "https://sitebuilderstack.com/products/claude-code-conversion-revenue-optimization-toolkit",
+      "price": 19.99,
+      "currency": "USD",
+      "sku": "SBS-CCCRO-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Working out where traffic that already exists is being lost, and whether a change actually worked.",
+      "prerequisites": "A live site that already receives traffic. The product's own description says plainly: if nobody is arriving yet, this is the wrong product.",
+      "benefits": [
+        "Thirteen modules, 70 workflows, 68 commands, six report templates and four worked examples — 65,000 words.",
+        "Findings carry evidence and an honesty label: proven bug, strong heuristic, experiment opportunity, or insufficient data.",
+        "Tracking is verified in both directions before any number is trusted, and the experimentation module tells you when you do not have the traffic to test at all."
+      ],
+      "inclusions": [
+        "01-core: the master conversion audit, the four modes, the finding format",
+        "Funnel analysis and analytics verification workflows",
+        "An experimentation system that refuses to run a test the traffic cannot support",
+        "Six report templates and four worked examples"
+      ],
+      "exclusions": [
+        "No workflow predicts a percentage lift, because nobody can know that in advance.",
+        "It explicitly refuses manipulative tactics — countdowns, fake stock warnings, invented scarcity.",
+        "It will not help a site nobody has found yet."
+      ],
+      "inBundle": "complete-site-builder-stack"
+    },
+    {
+      "id": "operations-system",
+      "handle": "claude-code-website-operations-maintenance-system",
+      "title": "Claude Code Website Operations & Maintenance System",
+      "shortName": "Operations & Maintenance System",
+      "url": "https://sitebuilderstack.com/products/claude-code-website-operations-maintenance-system",
+      "price": 39.99,
+      "currency": "USD",
+      "sku": "SBS-CCWOMS-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Running a production website after launch: monitoring, security checks, dependency updates, backup verification, deployment gates, incident diagnosis and monthly reporting.",
+      "prerequisites": "A live website you are responsible for keeping up, and permission to run read-only checks against it.",
+      "benefits": [
+        "17 modules, 19 slash commands, 11 working scripts, 9 checklists, 8 report templates and 4 platform guides.",
+        "The scripts measure the site from outside — HTTP, TLS, DNS, headers, exposure, links, redirects, sitemap, endpoints, baseline — and merge into one report with a health score.",
+        "A safety system that never touches production without your say-so."
+      ],
+      "inclusions": [
+        "Standard-library Python scripts — nothing to install",
+        "Slash commands that run the scripts and read the results",
+        "Backup-restore verification, deployment gates on both sides of a deploy, incident playbooks",
+        "A monthly operations report template"
+      ],
+      "exclusions": [
+        "It is not a hosted monitoring service and sends no alerts on its own — you run the checks.",
+        "It does not build or migrate a site.",
+        "It does not fix production for you; changes stay gated behind your approval."
+      ],
+      "inBundle": null
+    },
+    {
+      "id": "shopify-automation",
+      "handle": "claude-code-shopify-automation-admin-api-toolkit",
+      "title": "Claude Code Shopify Automation & Admin API Toolkit",
+      "shortName": "Shopify Automation & Admin API Toolkit",
+      "url": "https://sitebuilderstack.com/products/claude-code-shopify-automation-admin-api-toolkit",
+      "price": 39.99,
+      "currency": "USD",
+      "sku": "SBS-CCSHOP-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Bulk and repetitive Shopify administration — products, collections, SEO fields, metafields, inventory, redirects, catalogue auditing — through the Admin GraphQL API.",
+      "prerequisites": "A Shopify store you administer, and the ability to create a custom app with Admin API access. This is API work, not theme work.",
+      "benefits": [
+        "32 working scripts, 34 Claude Code commands, 18 validated GraphQL documents and 19 modules.",
+        "A preview before every write, a backup, and a read-back after — so a bulk mutation is reviewable and reversible.",
+        "A GraphQL client with retries, throttling and cost awareness, plus export/audit/write scripts per catalogue area."
+      ],
+      "inclusions": [
+        "CONNECT → AUDIT → EXPORT → AUTOMATE → VALIDATE → REPORT as a working sequence",
+        "Products, variants, collections, metafields, metaobjects, media, SEO, inventory and pricing scripts",
+        "Templates for every input, and modules that state what each workflow refuses to do"
+      ],
+      "exclusions": [
+        "It is not a Shopify theme or storefront design product.",
+        "It does not apply to WordPress, Astro or custom applications.",
+        "Simply being on Shopify is not a reason to buy it — it earns its place when the catalogue work is repetitive or bulk."
+      ],
+      "inBundle": null
+    },
+    {
+      "id": "migration-system",
+      "handle": "claude-code-website-migration-replatforming-system",
+      "title": "Claude Code Website Migration & Replatforming System",
+      "shortName": "Migration & Replatforming System",
+      "url": "https://sitebuilderstack.com/products/claude-code-website-migration-replatforming-system",
+      "price": 29.99,
+      "currency": "USD",
+      "sku": "SBS-CCWMRS-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "Planning, executing and validating a move between platforms, hosts, themes or domains without losing URLs, metadata, media, forms or search traffic.",
+      "prerequisites": "An existing site with URLs worth preserving, and access to both the source and the destination.",
+      "benefits": [
+        "28 working scripts, 37 Claude Code commands, 20 modules including seven platform guides, and 13 checklists.",
+        "A crawler that builds the URL inventory, page-by-page metadata and structured-data comparison, and redirect testing.",
+        "A cut-over scorecard that returns GO, GO WITH WARNINGS or NO-GO from evidence, plus a complete fictional migration to read first."
+      ],
+      "inclusions": [
+        "DISCOVER → INVENTORY → BASELINE → MAP → BUILD → MIGRATE → VALIDATE → CUT OVER → MONITOR → ROLL BACK",
+        "Seven platform guides (including WordPress→Astro, WordPress→Shopify, Shopify replatforming)",
+        "DNS recorded before it is touched, and a rollback path"
+      ],
+      "exclusions": [
+        "It does not move your content for you or host the new site.",
+        "It is not a substitute for the destination platform's own build system.",
+        "It cannot recover URLs from a site that has already been taken down."
+      ],
+      "inBundle": null
+    },
+    {
+      "id": "agency-system",
+      "handle": "claude-code-agency-client-delivery-system",
+      "title": "Claude Code Agency & Client Delivery System",
+      "shortName": "Agency & Client Delivery System",
+      "url": "https://sitebuilderstack.com/products/claude-code-agency-client-delivery-system",
+      "price": 39.99,
+      "currency": "USD",
+      "sku": "SBS-CCACDS-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "useCase": "The engagement around the build: discovery, scoping, proposals, onboarding, review, launch, handoff and retention for client website work.",
+      "prerequisites": "You deliver websites for other people, and you are willing to keep one set of files per client.",
+      "benefits": [
+        "21 modules, 37 commands, 29 templates plus a client-project skeleton, 17 checklists, 12 report shapes and 3 worksheets.",
+        "One set of files per client — client-config.yaml for the facts, CLAUDE.md for the rules, the scope as the contract, and four logs as the memory.",
+        "A person sits between every draft and the client; no command invents a requirement, a budget or a promise."
+      ],
+      "inclusions": [
+        "DISCOVER → SCOPE → PROPOSE → ONBOARD → BUILD → REVIEW → LAUNCH → HANDOFF → RETAIN",
+        "Proposal, scope, change-order and handoff templates",
+        "One complete fictional engagement to read before you run your own"
+      ],
+      "exclusions": [
+        "It is not a contract and not legal advice; the templates are drafts for you to review.",
+        "It does not build the website — pair it with the build, SEO or migration product the project actually needs.",
+        "It is not a CRM, an invoicing tool or a project-management app."
+      ],
+      "inBundle": null
+    },
+    {
+      "id": "complete-stack",
+      "handle": "complete-site-builder-stack",
+      "title": "Complete Site Builder Stack",
+      "shortName": "Complete Site Builder Stack",
+      "url": "https://sitebuilderstack.com/products/complete-site-builder-stack",
+      "price": 39.99,
+      "currency": "USD",
+      "sku": "SBS-CCSTACK-V1",
+      "status": "ACTIVE",
+      "availableOnDate": true,
+      "verifiedOn": "2026-09-24",
+      "isBundle": true,
+      "useCase": "The build → rank → convert sequence bought together, when more than one of those three stages is genuinely in front of you.",
+      "prerequisites": "The same prerequisites as its members. It is only worth buying when you will actually use more than one of them.",
+      "benefits": [
+        "The Website Launch System, the SEO & Website Audit Toolkit and the Conversion & Revenue Optimization Toolkit, as three downloads on one order.",
+        "267 files, around 206,000 words of plain Markdown.",
+        "Nothing is abridged and nothing is exclusive to the bundle — they are the same three products."
+      ],
+      "inclusions": [
+        "Claude Code Website Launch System",
+        "Claude Code SEO & Website Audit Toolkit",
+        "Claude Code Conversion & Revenue Optimization Toolkit"
+      ],
+      "exclusions": [
+        "It does NOT include the Operations & Maintenance System.",
+        "It does NOT include the Shopify Automation, Migration or Agency products.",
+        "Buying it for one product is more expensive than buying that product on its own."
+      ],
+      "inBundle": null
+    }
+  ],
+  "freeResources": [
+    {
+      "id": "free-build-guide",
+      "title": "How to build a website with Claude Code",
+      "url": "https://sitebuilderstack.com/blogs/guides/how-to-build-a-website-with-claude-code",
+      "kind": "guide"
+    },
+    {
+      "id": "free-claude-md",
+      "title": "CLAUDE.md Starter Generator",
+      "url": "https://sitebuilderstack.com/pages/claude-md-generator",
+      "kind": "tool"
+    },
+    {
+      "id": "free-prompt-builder",
+      "title": "Claude Code Website Prompt Builder",
+      "url": "https://sitebuilderstack.com/pages/website-prompt-builder",
+      "kind": "tool"
+    },
+    {
+      "id": "free-launch-checklist",
+      "title": "Claude Code Website Launch Checklist",
+      "url": "https://sitebuilderstack.com/pages/claude-code-launch-checklist",
+      "kind": "checklist"
+    },
+    {
+      "id": "free-seo-hub",
+      "title": "Claude Code SEO",
+      "url": "https://sitebuilderstack.com/pages/claude-code-seo",
+      "kind": "hub"
+    },
+    {
+      "id": "free-technical-seo",
+      "title": "Claude Code technical SEO audit",
+      "url": "https://sitebuilderstack.com/blogs/guides/claude-code-technical-seo-audit",
+      "kind": "guide"
+    },
+    {
+      "id": "free-seo-generator",
+      "title": "Claude Code SEO Audit Prompt Generator",
+      "url": "https://sitebuilderstack.com/pages/seo-audit-prompt-generator",
+      "kind": "tool"
+    },
+    {
+      "id": "free-cro-guide",
+      "title": "Claude Code conversion rate optimization",
+      "url": "https://sitebuilderstack.com/blogs/guides/claude-code-conversion-rate-optimization",
+      "kind": "guide"
+    },
+    {
+      "id": "free-conversion-lab",
+      "title": "Conversion Functionality Lab",
+      "url": "https://sitebuilderstack.com/pages/lab-conversion-functionality",
+      "kind": "lab"
+    },
+    {
+      "id": "free-maintenance-guide",
+      "title": "Claude Code website maintenance",
+      "url": "https://sitebuilderstack.com/blogs/guides/claude-code-website-maintenance",
+      "kind": "guide"
+    },
+    {
+      "id": "free-operations-lab",
+      "title": "Website Operations Lab",
+      "url": "https://sitebuilderstack.com/pages/lab-website-operations",
+      "kind": "lab"
+    },
+    {
+      "id": "free-shopify-admin-guide",
+      "title": "Shopify Admin API with Claude Code",
+      "url": "https://sitebuilderstack.com/blogs/guides/shopify-admin-api-claude-code",
+      "kind": "guide"
+    },
+    {
+      "id": "free-shopify-hub",
+      "title": "Claude Code Shopify Development",
+      "url": "https://sitebuilderstack.com/pages/claude-code-shopify",
+      "kind": "hub"
+    },
+    {
+      "id": "free-migration-guide",
+      "title": "Website migration SEO checklist",
+      "url": "https://sitebuilderstack.com/blogs/guides/website-migration-seo-checklist-claude-code",
+      "kind": "guide"
+    },
+    {
+      "id": "free-terminal-setup",
+      "title": "Claude Code terminal setup",
+      "url": "https://sitebuilderstack.com/blogs/guides/claude-code-terminal-setup",
+      "kind": "guide"
+    },
+    {
+      "id": "free-resources-hub",
+      "title": "Free Claude Code website development resources",
+      "url": "https://sitebuilderstack.com/pages/resources",
+      "kind": "hub"
+    },
+    {
+      "id": "free-tools-hub",
+      "title": "Free Claude Code website tools",
+      "url": "https://sitebuilderstack.com/pages/tools",
+      "kind": "hub"
+    },
+    {
+      "id": "free-labs-hub",
+      "title": "Practical Labs",
+      "url": "https://sitebuilderstack.com/pages/labs",
+      "kind": "hub"
+    },
+    {
+      "id": "free-readiness-score",
+      "title": "Website Launch Readiness Score",
+      "url": "https://sitebuilderstack.com/pages/launch-readiness-score",
+      "kind": "tool"
+    },
+    {
+      "id": "free-wordpress-hub",
+      "title": "Claude Code WordPress Development",
+      "url": "https://sitebuilderstack.com/pages/claude-code-wordpress",
+      "kind": "hub"
+    },
+    {
+      "id": "free-astro-hub",
+      "title": "Claude Code Astro Development",
+      "url": "https://sitebuilderstack.com/pages/claude-code-astro",
+      "kind": "hub"
+    },
+    {
+      "id": "free-failure-library",
+      "title": "Claude Code Web Development Failure Library",
+      "url": "https://sitebuilderstack.com/pages/claude-code-failure-library",
+      "kind": "hub"
+    }
+  ]
+}

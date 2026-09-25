@@ -1,0 +1,347 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#answer">The short answer</a></li>
+    <li><a href="#method">Pick the method before you pick the tool</a></li>
+    <li><a href="#fields">Four fields that are easy to confuse</a></li>
+    <li><a href="#export">Export, and take a small batch</a></li>
+    <li><a href="#draft">Drafting from facts you already have</a></li>
+    <li><a href="#review">The review, with three real decisions</a></li>
+    <li><a href="#apply">Applying only what was approved</a></li>
+    <li><a href="#verify">Verifying, and what Google actually promises</a></li>
+    <li><a href="#trouble">When it goes wrong</a></li>
+    <li><a href="#worksheet">Download the review worksheet</a></li>
+    <li><a href="#faq">Questions</a></li>
+    <li><a href="#next">Next action</a></li>
+  </ol>
+</nav>
+
+<h2 id="answer">The short answer</h2>
+
+<p>Editing SEO titles and meta descriptions across a catalogue is five steps, and only one of them involves a machine writing anything: <strong>export</strong> the current values, <strong>draft</strong> replacements from facts the product already states, <strong>review</strong> them one by one and record a decision, <strong>apply</strong> only the approved rows, then <strong>verify</strong> what is stored and what renders. The review is the part that matters. Everything either side of it is plumbing.</p>
+
+<p>Before any of that: <strong>you may not need an API workflow at all.</strong> Shopify's own bulk editor handles the SEO title and description columns directly, and for thirty products on a quiet afternoon it is the right tool. The workflow below earns its place when the batch is large, recurring, or needs a record of who approved what.</p>
+
+<p>The worksheet this guide uses — blank template and a filled-in example — is <a href="#worksheet">a free download</a>, and it is useful on its own with no code involved.</p>
+
+<h2 id="method">Pick the method before you pick the tool</h2>
+
+<p>Three routes, and the honest comparison is about batch size and auditability rather than sophistication.</p>
+
+<div class="sbs-table">
+<table>
+  <thead>
+    <tr><th>Route</th><th>Good for</th><th>What it costs you</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Product page, one at a time</strong><br>Admin → Products → a product → <em>Search engine listing</em> → Edit</td>
+      <td>A handful of products, or a single fix you want to see rendered immediately.</td>
+      <td>Nothing, until the tenth product. No record of what the old value was.</td>
+    </tr>
+    <tr>
+      <td><strong>Native bulk editor</strong><br>Select products → <em>Bulk edit</em> → add the <em>SEO title</em> and <em>SEO description</em> columns</td>
+      <td>Tens of products. A spreadsheet-like grid in the admin, no export, no import, no access tokens.</td>
+      <td>No before/after record, no approval trail, and it is a live edit — there is no staging step between typing and saving.</td>
+    </tr>
+    <tr>
+      <td><strong>Product CSV export and import</strong></td>
+      <td>Larger catalogues, and teams who already work in spreadsheets.</td>
+      <td>The file has to keep Shopify's own column names and row structure. A CSV round-trip touches more fields than the two you meant to change, so an error is wider than an error in the bulk editor.</td>
+    </tr>
+    <tr>
+      <td><strong>Reviewed Admin API workflow</strong></td>
+      <td>Hundreds of products, a recurring job, or when you need to answer "who approved this, and what did it say before?"</td>
+      <td>Setup: an app, scopes, a token you have to keep out of your repository. Worth it on the second run, rarely on the first.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Nothing below requires a paid toolkit. If you finish this guide and conclude the native bulk editor is enough for your store, that is the correct outcome and you should use it.</p>
+
+<h3>Access, if you go the API route</h3>
+
+<p>You need an app with the <code>write_products</code> scope (and <code>read_products</code>, which it implies for this work) and an Admin API access token installed on the store.</p>
+
+<p><strong>Check the date before you follow an older tutorial.</strong> Shopify's changelog states: <em>"Starting January 1, 2026, you can no longer create new custom apps in the Shopify admin."</em> Existing ones are unaffected — <em>"Existing custom apps aren't affected and will continue to work"</em> — but a new one is created in the <a href="https://changelog.shopify.com/posts/legacy-custom-apps-can-t-be-created-after-january-1-2026">Dev Dashboard and then installed on the store</a>. A guide that tells you to go to Settings → Apps and sales channels → Develop apps is describing the route that closed. If you are working on a client's store rather than your own, the right authentication depends on that relationship — a token installed on one store is not the same thing as an app distributed to several — and it is worth settling before you write any code.</p>
+
+<h2 id="fields">Four fields that are easy to confuse</h2>
+
+<p>This is where the damage happens. Shopify keeps four separate things, and only two of them are the ones you came to edit:</p>
+
+<ul>
+  <li><strong>SEO title</strong> — the <code>&lt;title&gt;</code> of the product page. In the Admin API this is <code>seo.title</code>.</li>
+  <li><strong>SEO description</strong> — the meta description. In the API, <code>seo.description</code>.</li>
+  <li><strong>Product title</strong> — the name shown on the page, in collections, in the cart and on the order. In the API, <code>title</code>. Changing this changes what customers see everywhere.</li>
+  <li><strong>Handle</strong> — the URL slug. In the API, <code>handle</code>. Changing it changes the product's URL and breaks any link to the old one.</li>
+</ul>
+
+<p>They really are distinct inputs, not aliases. Asking the live schema what <code>ProductInput</code> accepts returns <code>seo</code>, <code>title</code>, <code>handle</code> and <code>descriptionHtml</code> as four separate fields, and <code>SEOInput</code> itself has exactly two members:</p>
+
+<pre>seo         -&gt; SEOInput   { title: String, description: String }
+title       -&gt; String     (the displayed product name)
+handle      -&gt; String     (the URL slug)
+descriptionHtml -&gt; String (the body copy on the page)
+
+# checked against the Admin GraphQL schema, API version 2025-07</pre>
+
+<p>The practical rule: <strong>a metadata job sends <code>seo</code> and nothing else.</strong> If your payload contains <code>title</code> or <code>handle</code>, you are no longer doing the job you thought you were doing. The worksheet in this guide carries a <code>handle</code> column for human readability and never writes it, which is a deliberate asymmetry worth copying.</p>
+
+<h2 id="export">Export, and take a small batch</h2>
+
+<p>Export first, because the export is your backup. Here is a real read-only export — three products, run against this store on 24 September 2026, no writes:</p>
+
+<pre>id:         gid://shopify/Product/10808909201700
+handle:     claude-code-agency-client-delivery-system
+title:      Claude Code Agency &amp; Client Delivery System
+seo.title:  'Claude Code Agency &amp; Client Delivery System | SiteBuilderStack'
+
+id:         gid://shopify/Product/10793863250212
+handle:     claude-code-conversion-revenue-optimization-toolkit
+title:      Claude Code Conversion &amp; Revenue Optimization Toolkit
+seo.title:  'Claude Code Conversion &amp; Revenue Toolkit'
+
+id:         gid://shopify/Product/10793567224100
+handle:     claude-code-seo-website-audit-toolkit
+title:      Claude Code SEO &amp; Website Audit Toolkit
+seo.title:  'Claude Code SEO &amp; Audit Toolkit'</pre>
+
+<p>Two things to notice. The SEO title and the product title are <em>different strings</em> on two of the three, which is normal and usually deliberate — the displayed name can afford to be long, the <code>&lt;title&gt;</code> cannot. And the id, not the handle, is what you key on: a handle can change, and if it does mid-job your rows silently stop matching.</p>
+
+<p><strong>Do not export the whole catalogue and rewrite it.</strong> A full-catalogue pass is the version of this job most likely to go wrong and least likely to be reviewed properly, because nobody reads four hundred rows carefully. Take a batch with a reason attached to it: products with an empty SEO description, or one collection, or the twenty products with impressions and no clicks in Search Console. A batch you can explain is a batch you can check.</p>
+
+<h2 id="draft">Drafting from facts you already have</h2>
+
+<p>The failure mode when a model writes product metadata is not clumsy prose. It is <strong>invention</strong> — a material, a certification, a guarantee, a dimension, a shipping promise. None of it malicious, all of it plausible, and all of it now published on a page a customer can act on.</p>
+
+<p>The defence is structural: give the model only what the product already says, and require it to flag a gap rather than fill it.</p>
+
+<pre data-sbs-copy="prompt">You are drafting SEO metadata for Shopify products. You are drafting only.
+You will not call any API and you will not modify anything.
+
+INPUT
+I will give you rows exported from a Shopify store. Each row has: product_id,
+handle, product_url, current_seo_title, current_seo_description, and the
+product's existing title and body copy.
+
+YOUR TASK
+For each row, propose a seo title and a meta description.
+
+RULES ON FACTS
+- Use ONLY facts present in that row's own title and body copy.
+- Do not add a material, size, weight, capacity, certification, warranty,
+  guarantee, delivery time, price, discount or country of origin that is not
+  already stated in that row.
+- Do not write comparative or superlative claims ("best", "leading",
+  "highest quality"). They cannot be checked and they date badly.
+- Do not write a policy as if it were a product fact. Shipping and returns
+  are set elsewhere and change without the product changing.
+- If a row does not contain enough to write something specific, put
+  "TBC - needs product facts" in both proposed fields, set approval_status
+  to "needs info", and say in reviewer_notes exactly which fact is missing.
+
+RULES ON WRITING
+- Lead with what the thing is, in the words a buyer would use.
+- Prefer a concrete detail over an adjective: a number, a size, a count.
+- Roughly 60 characters for the title and roughly 155 for the description,
+  as guidance for readability. Do not pad to reach it and do not truncate a
+  clearer sentence to meet it.
+- If the current value is already accurate and specific, propose the SAME
+  text and set approval_status to "no change". Do not churn a good field.
+
+OUTPUT
+A CSV with exactly these columns, every value quoted:
+product_id, handle, product_url, current_seo_title, current_seo_description,
+proposed_seo_title, proposed_seo_description, approval_status, reviewer_notes
+
+Set approval_status to "needs review" for anything you are proposing to
+change. A human sets "approved" or "rejected", not you.
+
+In reviewer_notes, say which facts in the source you used. One line.
+
+STOP
+Output the CSV and stop. Do not write to Shopify. Do not suggest a command
+that would.</pre>
+
+<p>The <code>approval_status</code> rule is the load-bearing one. The model never marks its own work approved, so a script that writes only <code>approved</code> rows cannot act on anything a person has not read.</p>
+
+<h2 id="review">The review, with three real decisions</h2>
+
+<p>Here is the middle of a review on a fictional homewares store. Three rows, three different outcomes — this is what the worksheet looks like when it is doing its job:</p>
+
+<div class="sbs-table">
+<table>
+  <thead>
+    <tr><th>Product</th><th>Current</th><th>Proposed</th><th>Decision</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Linen tea towel set</td>
+      <td><em>Title:</em> Linen Tea Towel Set<br><em>Description:</em> Linen tea towel set. Buy now. Best prices. Free shipping on all orders.</td>
+      <td><em>Title:</em> Linen Tea Towel Set of 3 | Example Store<br><em>Description:</em> Three washed-linen tea towels, 50 x 70 cm, with hanging loops. Sold as a set.</td>
+      <td><strong>Approved.</strong> "Best prices" cannot be checked and "free shipping" is a policy that changes without the product changing. The count and the dimensions are in the product body, so they are safe to promote into the description.</td>
+    </tr>
+    <tr>
+      <td>Navy enamel mug</td>
+      <td><em>Title:</em> Navy Enamel Mug 350ml | Example Store<br><em>Description:</em> A 350 ml navy enamel camping mug with a rolled rim. Dishwasher safe.</td>
+      <td>Identical to current.</td>
+      <td><strong>No change.</strong> Already specific, accurate and readable. Rewriting it would churn the field, cost a review, and give a reader nothing.</td>
+    </tr>
+    <tr>
+      <td>Cast iron skillet 26cm</td>
+      <td><em>Title:</em> Cast Iron Skillet 26cm | Example Store<br><em>Description:</em> A 26 cm pre-seasoned cast iron skillet with a helper handle.</td>
+      <td><em>Title:</em> Cast Iron Skillet 26cm - Lifetime Guarantee | Example Store<br><em>Description:</em> Our lifetime-guaranteed 26 cm skillet is the last pan you will ever buy. Oven safe to 260 C.</td>
+      <td><strong>Rejected.</strong> There is no lifetime guarantee on this product. "The last pan you will ever buy" is unsupportable, and the 260 °C figure appears nowhere in the product data. Three inventions in one row, each individually plausible. Keep the current description.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Note what the reasoning is <em>not</em>: nobody here claims the approved rows will rank better. The case for the tea towel rewrite is that it is true, specific and useful to someone deciding whether to click. That is a defensible reason to change a field. "It will improve our SEO" is not, because you cannot check it afterwards.</p>
+
+<p>The rejected row is the argument for the whole workflow. A model produced it in good faith from a plausible-sounding pattern, and an unreviewed pipeline would have published all three inventions to a live product page.</p>
+
+<h2 id="apply">Applying only what was approved</h2>
+
+<p>Be precise about what protects you here, because it is easy to assume Shopify provides safeguards it does not.</p>
+
+<p><strong>Shopify gives you:</strong> a GraphQL API that validates input against a schema, and <code>userErrors</code> on the mutation response. Note that <code>userErrors</code> arrives inside an HTTP <strong>200</strong> — a write can fail completely while the request "succeeds", so a script that only checks the status code will report success it did not have.</p>
+
+<p><strong>Shopify does not give you</strong> a dry-run mode for <code>productUpdate</code>, a transaction you can roll back, or an undo. There is no <code>--dry-run</code> flag. Anything resembling one is something your own script implements, and it is worth implementing:</p>
+
+<ul>
+  <li><strong>A reviewed target list.</strong> Read the worksheet, keep only <code>approval_status == "approved"</code>, and refuse to run if any row has a status the script does not recognise.</li>
+  <li><strong>A backup.</strong> Write the current values to a timestamped file before the first mutation. This is your restore path; there is no other one.</li>
+  <li><strong>A preview.</strong> Print every planned change — id, field, from, to — and require an explicit confirmation before the first write. This is your dry run, because Shopify has not got one.</li>
+  <li><strong>A staleness check.</strong> Re-read each product immediately before writing it and compare against <code>current_seo_title</code> and <code>current_seo_description</code> from the export. If they differ, someone edited that product after your export — skip the row and report it. Overwriting a colleague's fix with a two-day-old draft is the quiet failure in this job.</li>
+  <li><strong>A read-back.</strong> After each write, read the product again and assert the stored value equals the approved value. A mutation that returned no error is not the same as a field that changed.</li>
+  <li><strong>Error handling that stops.</strong> On the first unexpected <code>userErrors</code>, stop the batch rather than continuing through two hundred products.</li>
+</ul>
+
+<p>The mutation itself is small. It sends <code>seo</code>, and that is all it sends:</p>
+
+<pre>mutation UpdateProductSeo($input: ProductInput!) {
+  productUpdate(input: $input) {
+    product { id handle seo { title description } }
+    userErrors { field message }
+  }
+}
+
+# variables, one product per call:
+# { "input": { "id": "gid://shopify/Product/1111111111111",
+#              "seo": { "title": "...", "description": "..." } } }
+#
+# No "title". No "handle". No "descriptionHtml". The payload is the
+# smallest thing that does the job, which is also the smallest thing
+# that can go wrong.</pre>
+
+<p>The implementation prompt should refuse to move without both the list and the confirmation:</p>
+
+<pre data-sbs-copy="prompt">Write a script that applies approved SEO metadata changes to Shopify
+products from a reviewed worksheet.
+
+REQUIRED BEFORE ANY WRITE
+- Read the worksheet CSV I name. Keep only rows where approval_status is
+  exactly "approved". If any row has a status that is not one of
+  approved / rejected / no change / needs info, stop and tell me.
+- Write every current value to a timestamped backup file. Stop if it fails.
+- For each target, re-read the live product and compare its stored seo
+  title and description with current_seo_title and current_seo_description
+  from the worksheet. If either differs, SKIP that row, record it as stale,
+  and continue.
+- Print the full plan: product id, handle, field, from, to. Then stop and
+  wait for me to type the number of rows I expect you to change. Do not
+  write until I answer, and refuse if my number does not match your plan.
+
+THE WRITE
+- productUpdate, sending only the seo field. Never title, handle or
+  descriptionHtml.
+- One product per call.
+- Check userErrors on every response. It arrives inside an HTTP 200, so a
+  200 is not success on its own. On the first unexpected userErrors, stop
+  the batch and report what was already written.
+
+AFTER EACH WRITE
+- Read the product back and assert the stored values equal the approved
+  values. Report any mismatch as a failure, not a warning.
+
+OUTPUT
+A report: changed, skipped-as-stale, failed, and the backup file path.
+Tell me the exact command that restores from that backup.
+
+Never print or log the access token.</pre>
+
+<h2 id="verify">Verifying, and what Google actually promises</h2>
+
+<p>Three checks, in this order:</p>
+
+<ol>
+  <li><strong>Stored values.</strong> Read <code>seo { title description }</code> back from the API and compare against what you approved.</li>
+  <li><strong>Rendered output.</strong> Fetch the live product URL and read the <code>&lt;title&gt;</code> and <code>&lt;meta name="description"&gt;</code> from the HTML. A theme can append a store suffix, or ignore the field altogether. The stored value and the rendered value are different things, and only one of them is what a crawler sees.</li>
+  <li><strong>The fields you did not touch.</strong> Confirm the handle, product title and body are unchanged. If your batch is large, diff the whole product record against the backup rather than eyeballing it.</li>
+</ol>
+
+<p>Then the expectation-setting, which matters more than the checks. <strong>A correct meta description does not guarantee Google will show it.</strong> Google's own documentation is direct about this: <em>"Snippets are primarily created from the page content itself"</em>, and Google uses the meta description tag <em>"if we think it gives users a more accurate description than would be possible purely from the on-page content"</em>. On length, Google states there is <em>"no limit on how long a meta description can be, but the snippet is truncated in Google Search results as needed, typically to fit the device width"</em>.</p>
+
+<p>The same applies to titles. Read Google's guidance on <a href="https://developers.google.com/search/docs/appearance/title-link">title links</a> and <a href="https://developers.google.com/search/docs/appearance/snippet">snippets</a> before you promise anyone a result. What you control is whether the page states clearly and truthfully what it is. What gets displayed is Google's call, and it may differ per query and per device.</p>
+
+<h2 id="trouble">When it goes wrong</h2>
+
+<div class="sbs-table">
+<table>
+  <thead><tr><th>Symptom</th><th>Usually</th><th>Do this</th></tr></thead>
+  <tbody>
+    <tr><td><code>Access denied</code> on <code>productUpdate</code>, reads fine</td><td>The app has read scope but not <code>write_products</code>.</td><td>Add the scope, reinstall the app, and get a new token. Changing scopes does not upgrade an existing token.</td></tr>
+    <tr><td><code>Invalid API key or access token</code></td><td>The token was rotated, the app uninstalled, or you are pointing at the wrong store.</td><td>Confirm the shop domain first — it is the more common of the two, and it looks like an auth failure.</td></tr>
+    <tr><td>HTTP 200, nothing changed</td><td><code>userErrors</code> is populated and nobody read it.</td><td>Print <code>userErrors</code> on every response. Treat a non-empty array as a failure.</td></tr>
+    <tr><td>Fields you did not mean to edit have changed</td><td>The payload carried <code>title</code> or <code>handle</code>, or a CSV round-trip rewrote columns you left blank.</td><td>Restore from the backup. Then narrow the payload to <code>seo</code> and re-run.</td></tr>
+    <tr><td>A row wrote the wrong product</td><td>Keyed on handle, and a handle changed between export and write.</td><td>Key on <code>product_id</code>. Handles are not stable identifiers.</td></tr>
+    <tr><td>Your change disappeared a day later</td><td>Someone edited in the admin, or an older export was re-applied.</td><td>This is what the staleness check prevents. Add it before the next batch.</td></tr>
+    <tr><td>CSV import rejected</td><td>The review worksheet was uploaded as if it were a Shopify import file.</td><td>They are different formats. See the worksheet README — approved values go into Shopify's own export columns, or through the API.</td></tr>
+    <tr><td><code>Throttled</code> on a large batch</td><td>GraphQL cost limits.</td><td>Read <code>extensions.cost</code> and pace the calls. It is a budget, not an error.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="worksheet">Download the review worksheet</h2>
+
+<p>A blank CSV template and a filled-in example on a fictional store, showing an approved rewrite, a product deliberately left alone, a rejected suggestion, and a row flagged for missing facts. The README explains the columns, the staleness check, and — importantly — why this is a review document and <strong>not</strong> a Shopify import file.</p>
+
+<div class="sbs-resource-download">
+  <a class="sbs-btn sbs-btn--ghost" href="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/shopify-seo-review-worksheet.zip?v=1790289824" download>Download the SEO review worksheet (zip)</a>
+</div>
+
+<p>Every field is quoted, the encoding is UTF-8, and no value starts with <code>=</code>, <code>+</code>, <code>-</code> or <code>@</code> — a cell beginning with one of those is executed as a formula by Excel and Google Sheets.</p>
+
+<p>If you would rather not open a spreadsheet, the same review runs in a browser: <a href="https://claude.ai/artifact/SZ9koPaqBPCxshyQ98vTmg" rel="noopener">the Shopify SEO Review Worksheet</a>. It shows live length guidance, records a decision and a reason on each row, and exports the identical CSV. It holds nothing but what you type, connects to no store, and needs no account — which is also why it cannot fetch your products for you.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Need this workflow packaged for repeat use? The <a href="/products/claude-code-shopify-automation-admin-api-toolkit">Claude Code Shopify Automation &amp; Admin API Toolkit</a> covers catalogue audits, reviewed updates and verification workflows — with a preview before every write, a backup, and a read-back after, across products, collections, metafields, inventory and redirects rather than SEO fields alone.</p>
+</aside>
+
+<div data-sbs-try-slot></div>
+
+<h2 id="faq">Questions</h2>
+
+<h3>Do I need the API to bulk edit SEO fields?</h3>
+<p>No. Shopify's native bulk editor exposes the SEO title and description columns, and for a batch you can read in one sitting it is the faster, safer choice — no app, no token, no script. The API route earns its place when the batch is large, recurring, or needs an approval record.</p>
+
+<h3>Will this improve my rankings?</h3>
+<p>Nobody can promise that, and this guide does not. Accurate, specific metadata helps a searcher decide whether your page answers their question. Whether it ranks depends on a great deal you do not control, and Google may display text other than what you supplied.</p>
+
+<h3>Can Claude Code write the changes directly to my store?</h3>
+<p>It can, if you give it a token and ask it to. The argument of this guide is that it should not do so unreviewed. Keep the drafting step read-only, put a human decision between the draft and the write, and let the script act only on rows a person marked approved.</p>
+
+<h3>What about collections, pages and blog posts?</h3>
+<p>Same two fields, different resources — <code>collectionUpdate</code>, <code>pageUpdate</code>, <code>articleUpdate</code>. The export → review → apply → verify shape is identical. Start with products, get the review habit working, then widen.</p>
+
+<h3>How big should a batch be?</h3>
+<p>Small enough that you will genuinely read every row. In practice that is twenty to fifty. If a batch is too large to review properly, the review becomes a rubber stamp and the workflow has stopped protecting you.</p>
+
+<h2 id="next">Next action</h2>
+
+<p>Export ten products with an empty SEO description. Draft with the prompt above, review the ten rows, and apply the ones you approve through the native bulk editor. You will know by the end of it whether your store needs the API route at all — and if it does, you will have a reviewed batch already behind you.</p>
+
+<p>Related reading: <a href="/blogs/guides/shopify-seo-with-claude-code">Shopify SEO With Claude Code</a> covers what these fields do and the Shopify-specific traps around them, and <a href="/blogs/guides/shopify-admin-api-claude-code">Automating Shopify With the Admin API and Claude Code</a> covers the API mechanics — clients, <code>userErrors</code>, rate limits and scripts you can safely run twice.</p>

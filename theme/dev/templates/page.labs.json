@@ -1,0 +1,12 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-labs-hub",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

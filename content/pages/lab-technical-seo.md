@@ -1,0 +1,1 @@
+Fifteen minutes, four decisions. A physiotherapy clinic moved its site last week and one service page has disappeared from search while an old short link lands somewhere odd. You get the live responses, one row of the migration's URL map, and three lines of template — and you get to find out why auditing the template instead of the response misses the fault entirely.

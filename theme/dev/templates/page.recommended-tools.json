@@ -1,0 +1,62 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-recommendations",
+      "blocks": {
+        "t1": { "type": "tool", "settings": {
+          "name": "Cloudflare Pages and Workers", "partner": "cloudflare", "role": "Hosting and deployment",
+          "url": "https://developers.cloudflare.com/pages/", "link_label": "Cloudflare Pages documentation",
+          "who": "<p>Someone deploying a static site, an Astro or Next.js build, or a small full-stack app, who also wants DNS and a CDN in one account.</p>",
+          "problem": "<p>Getting a built site onto the internet, fast, with previews per branch and no server to maintain. It is what the <a href=\"/blogs/guides/claude-code-github-actions-cloudflare\">GitHub Actions and Cloudflare deployment guide</a> targets.</p>",
+          "limits": "<p>The Workers runtime is not Node.js; libraries that expect a filesystem or long-running processes need adapting. The free tier's Workers limits are 100k requests a day and 10 ms CPU per request — generous for a marketing site, not for a busy application. Pages allows 500 deploys a month on the free plan.</p>",
+          "alternative": "<p>If your site is a handful of HTML files and you already have hosting that serves them over HTTPS with a certificate that renews, you do not need to move.</p>",
+          "basis": "<p>Described from Cloudflare's own pricing and Pages documentation, read 24 September 2026. Not independently benchmarked by us.</p>",
+          "affiliate": false } },
+        "t2": { "type": "tool", "settings": {
+          "name": "Netlify", "partner": "netlify", "role": "Hosting and deployment",
+          "url": "https://www.netlify.com/pricing/", "link_label": "Netlify pricing",
+          "who": "<p>Someone who wants Git-push deploys and preview URLs with the least configuration, and does not need Cloudflare's edge runtime.</p>",
+          "problem": "<p>Connecting a repository to a live site and getting a preview URL per pull request without writing a pipeline.</p>",
+          "limits": "<p>Bandwidth and build-minute allowances are not stated on the pricing page; check the current limits before assuming the free tier fits. The first paid tier is $9 a month per member, so a two-person team is $18.</p>",
+          "alternative": "<p>If you are already deploying through GitHub Actions to somewhere that works, this is a lateral move.</p>",
+          "basis": "<p>Described from Netlify's own pricing page, read 24 September 2026. Not used by this site.</p>",
+          "affiliate": false } },
+        "t3": { "type": "tool", "settings": {
+          "name": "UptimeRobot", "partner": "uptimerobot", "role": "Monitoring",
+          "url": "https://uptimerobot.com/pricing/", "link_label": "UptimeRobot pricing",
+          "who": "<p>Anyone responsible for a live site who would currently find out it was down from a customer.</p>",
+          "problem": "<p>The cheapest useful maintenance check there is: something watching the site from outside and telling you before anyone else notices. The <a href=\"/blogs/guides/claude-code-website-maintenance\">maintenance checklist</a> opens with this check for a reason.</p>",
+          "limits": "<p>The free plan checks every five minutes, so a short outage can fall between checks. It tells you the page responded — not that a form still delivers or a certificate is about to expire. Those stay manual.</p>",
+          "alternative": "<p>If your host already alerts you on downtime and you have tested that it does, you have this covered.</p>",
+          "basis": "<p>Free plan (50 monitors, 5-minute interval) and the $13/month Solo tier read from UptimeRobot's pricing page on 24 September 2026. Not used by this site.</p>",
+          "affiliate": false } },
+        "t4": { "type": "tool", "settings": {
+          "name": "Plausible Analytics", "partner": "plausible", "role": "Analytics",
+          "url": "https://plausible.io/", "link_label": "Plausible",
+          "who": "<p>A site owner who wants to know what pages are read without running Google Analytics, and without adding a cookie banner.</p>",
+          "problem": "<p>Page-level traffic you can act on, from a script that sets no cookies and collects no personal data. Search Console tells you what Google served; this tells you what happened on the site.</p>",
+          "limits": "<p>It is deliberately shallow: no user-level journeys, no cohorts, no session replay. If you need to follow one person across visits, this is the wrong tool by design. From $9/month at 10k monthly pageviews, with a 30-day trial and no card.</p>",
+          "alternative": "<p>On a small store, Shopify's own analytics plus Search Console already answer most questions. Add this when you want page-level data the platform does not give you.</p>",
+          "basis": "<p><strong>Used by this site.</strong> Installed on sitebuilderstack.com on 17 September 2026 and running on every page since. Pricing and trial terms read from plausible.io on 24 September 2026.</p>",
+          "affiliate": false } },
+        "t5": { "type": "tool", "settings": {
+          "name": "Buttondown", "partner": "buttondown", "role": "Email",
+          "url": "https://buttondown.com/pricing", "link_label": "Buttondown pricing",
+          "who": "<p>Someone whose site has readers but no shop, who wants a list without a marketing suite.</p>",
+          "problem": "<p>Writing to people who asked to hear from you, in plain text, without automations you will never build.</p>",
+          "limits": "<p>Deliberately minimal: no visual builder, no CRM, no complex segmentation. Base paid pricing is not stated on the pricing page — check before committing. The first 100 subscribers are free.</p>",
+          "alternative": "<p>If you sell through Shopify, its own customer list and email tool already exist and already hold your buyers — that is what this site uses. Adding a second list is a decision, not a default.</p>",
+          "basis": "<p>Described from Buttondown's pricing page, read 24 September 2026. Not used by this site.</p>",
+          "affiliate": false } }
+      },
+      "block_order": ["t1", "t2", "t3", "t4", "t5"],
+      "settings": {
+        "eyebrow": "Recommended tools",
+        "disclosure": "<p><strong>No link on this page earns a commission.</strong> Site Builder Stack has no affiliate relationship with any tool listed here — none has been applied for and none is pending. Every link goes to the vendor's own site, unmodified. If that ever changes, the affected recommendation will carry a commission disclosure directly above its link, and the <a href=\"https://github.com/sitebuilderstack/store/blob/main/docs/monetization/PARTNER-REGISTER.md\">partner register</a> will record the date.</p>",
+        "footnote": "<h2>Why publish this at all, then</h2><p>Because the recommendation is useful whether or not it pays. The tools above are what the guides on this site lead you to need, and answering \"which one\" is part of the job the guides are doing. If a commission arrives later it will be disclosed on the card, not buried in a footer — and nothing written above will change because of it.</p><p>The full status of every relationship, with the dates each fact was verified, is in the <a href=\"https://github.com/sitebuilderstack/store/blob/main/docs/monetization/PARTNER-REGISTER.md\">partner register</a>, published with the rest of this site's source.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

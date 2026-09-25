@@ -1,0 +1,234 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#answer">The short answer</a></li>
+    <li><a href="#can">What a browser test can and cannot verify</a></li>
+    <li><a href="#prereq">Prerequisites and setup</a></li>
+    <li><a href="#project">The demo project</a></li>
+    <li><a href="#form">Testing the form: required fields, errors, a mocked submission</a></li>
+    <li><a href="#cta">Call-to-action destinations and navigation</a></li>
+    <li><a href="#regression">A regression test for a bug that was fixed once</a></li>
+    <li><a href="#locators">Locators that survive a redesign, and no sleeps</a></li>
+    <li><a href="#fail">Run it, break it, watch it fail, fix it</a></li>
+    <li><a href="#delivery">Mocked versus real: what green does not mean</a></li>
+    <li><a href="#ci">Running it in CI</a></li>
+    <li><a href="#claude">Where Claude Code fits</a></li>
+    <li><a href="#validate">How you know it worked</a></li>
+    <li><a href="#download">Download the suite</a></li>
+    <li><a href="#next">Next action</a></li>
+  </ol>
+</nav>
+
+<h2 id="answer">The short answer</h2>
+
+<p>A small Playwright suite — a dozen tests, a minute to run — catches the things that break silently on a marketing site: a required field that stopped being required, a success message that appears before the request completes, a button whose label promises a booking and whose href goes to the contact page, a mobile menu that opens and never closes. Claude Code writes the first version of each test quickly and well when it is given the page and a precise statement of what the visitor should see; it writes them badly when asked for "tests for the site". This guide builds the suite for a demo site, shows it passing, breaks the site on purpose, shows the failure, and restores it. The suite is a download and runs in about ten seconds.</p>
+
+<p>Everything shown here was run: Playwright 1.63.0, Node 22, on 17 September 2026. The command outputs are pasted from that run.</p>
+
+<h2 id="can">What a browser test can and cannot verify</h2>
+
+<p>A browser test drives a real browser against your page and asserts what a visitor could observe: text that appeared, a URL the page ended up on, a request the page made, an element that gained focus. It is very good at the visible half of a site's behaviour and blind to the rest.</p>
+
+<p>It <strong>can</strong> verify: that an empty required field produces a visible error and no request; that the page posts the right fields to the right endpoint; that a call to action lands where its label promises; that the navigation opens and closes at phone width and reports its state; that a fix made last month still holds.</p>
+
+<p>It <strong>cannot</strong> verify: that an email arrived (the browser never sees the inbox); that production is up (the suite runs against a copy); that the page ranks, converts, or is secure; that a state the suite does not cover behaves. A green run is exactly as wide as its assertions. The <a href="/blogs/guides/claude-code-landing-page-audit">landing page audit</a> and the <a href="/blogs/guides/claude-code-website-audit">website audit</a> cover the judgements a test cannot make; this guide covers the ones it can.</p>
+
+<h2 id="prereq">Prerequisites and setup</h2>
+
+<p>Playwright's own setup, verified against its documentation on the day this was written:</p>
+
+<ul>
+  <li>Node.js — the docs list the current 22.x, 24.x and 26.x lines. The demo was run on 22.</li>
+  <li><code>npm init playwright@latest</code> scaffolds a project: <code>playwright.config.ts</code>, <code>package.json</code>, a <code>tests/</code> directory and an example spec. The current release of <code>@playwright/test</code> is 1.63.0; the download pins it.</li>
+  <li><code>npx playwright install --with-deps chromium</code> downloads the browser build (the headless shell was about 115 MB) and, on Linux, the system libraries it needs. The demo uses chromium only, in a desktop and a phone-sized project.</li>
+  <li><code>npx playwright test</code> runs the suite; <code>npx playwright show-report</code> opens the HTML report after a run.</li>
+</ul>
+
+<p>Two settings in the config do most of the work. <code>webServer</code> starts the fixture site before the tests and waits for it, so a test never runs against nothing; <code>baseURL</code> lets every test say <code>page.goto('/')</code> instead of hard-coding a host. Both are in the download's <code>playwright.config.ts</code>.</p>
+
+<h2 id="project">The demo project</h2>
+
+<p>The fixture is a fictional physiotherapy clinic — the same one used in this site's <a href="/pages/labs">labs</a> — with a homepage, a booking form, two secondary pages, a mobile menu, and a 40-line script that validates the form and posts it. A dependency-free static server serves it on <code>127.0.0.1:4173</code>. Nothing in the project touches a real site, and the form's endpoint is mocked in every test that submits it.</p>
+
+<pre>playwright-website-tests/
+├── site/                      the fixture site (index, services, about, app.js, style.css)
+├── serve.mjs                  static server, no dependencies
+├── playwright.config.ts       baseURL, webServer, desktop + mobile projects
+├── tests/
+│   ├── booking-form.spec.ts   required fields, errors, mocked submission, failed send
+│   ├── cta-and-navigation.spec.ts   CTA destination, nav links, mobile menu
+│   └── regression.spec.ts     the success message waits for the response
+└── .github/workflows/playwright.yml</pre>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-test-loop.png?v=1789652931" alt="A loop of five stages: write a test that asserts what the visitor sees; run it and watch it pass; break the page on purpose; watch the test fail with the received value; restore the page and watch it pass again. The third and fourth stages are highlighted, with the note that a test never seen failing is not yet a test." width="1000" height="352" loading="lazy" decoding="async">
+  <figcaption>The suite earns trust in the middle of the loop, not at the end.</figcaption>
+</figure>
+
+<h2 id="form">Testing the form: required fields, errors, a mocked submission</h2>
+
+<p>Four tests, one visitor-visible outcome each. The first asserts that submitting with an empty name shows the exact error, focuses the field, and — the part that matters — makes no request. Intercepting the endpoint with <code>page.route</code> is how a test can say "nothing was sent":</p>
+
+<pre>test('required name shows an error and nothing is sent', async ({ page }) => {
+  let posted = false;
+  await page.route('**/api/book', (route) => { posted = true; return route.fulfill({ status: 200, body: '{"ok":true}' }); });
+
+  await page.getByRole('button', { name: 'Request my assessment' }).click();
+
+  await expect(page.getByRole('status')).toHaveText('Please enter your name.');
+  await expect(page.getByLabel('Your name')).toBeFocused();
+  expect(posted).toBe(false);
+});</pre>
+
+<p>The second test — an empty or malformed email — is the one this guide breaks on purpose later, and it carries a lesson in its comment. An early draft asserted <code>toContainText(/email/i)</code>. That passed when the validation was working. It <em>also</em> passed when the validation was removed, because the success message is "Thanks! We will email you to confirm." — which contains the word email. The loose pattern was found only by breaking the page. The shipped test asserts the exact error text and that nothing was posted:</p>
+
+<pre>const error = 'Please enter a valid email address so we can confirm your slot.';
+let posted = false;
+await page.route('**/api/book', (route) => { posted = true; return route.fulfill({ status: 200, body: '{"ok":true}' }); });
+
+await page.getByLabel('Your name').fill('Test Visitor');
+await page.getByRole('button', { name: 'Request my assessment' }).click();
+await expect(page.getByRole('status')).toHaveText(error);
+
+await page.getByLabel(/Email/).fill('bob@');
+await page.getByRole('button', { name: 'Request my assessment' }).click();
+await expect(page.getByRole('status')).toHaveText(error);
+expect(posted, 'nothing should be sent with a missing or malformed email').toBe(false);</pre>
+
+<p>The third test fills the form correctly and reads what the page posted. The route handler captures the request body, fulfils it with a 200, and the test asserts both the confirmation text and the fields — name, email, slot — that left the page. The fourth fulfils the route with a 500 and asserts the visitor is told it did not send, rather than shown "Thanks!". That last one is the most common real-world defect on small sites: a success message written unconditionally after <code>fetch()</code> is called.</p>
+
+<h2 id="cta">Call-to-action destinations and navigation</h2>
+
+<p>A button is a promise. The test clicks the primary call to action from a secondary page and asserts two things: the URL it lands on, and that the booking heading is in the viewport — because landing on the right page with the form three screens down is keeping the promise slowly.</p>
+
+<pre>await page.goto('/services.html');
+await page.getByRole('link', { name: 'Book a free 15-minute assessment' }).click();
+await expect(page).toHaveURL(/\/#book$/);
+await expect(page.getByRole('heading', { name: 'Request your free assessment' })).toBeInViewport();</pre>
+
+<p>The navigation test walks every link in the main navigation landmark and asserts a 200 for each. It produced the one surprise of the build. On the mobile project the test found zero links: the menu is collapsed with <code>display:none</code> at phone width, and <code>getByRole</code> excludes hidden elements by design — including the <code>navigation</code> landmark itself. The fix is <code>includeHidden: true</code> on both the landmark and the links, with a comment explaining why a hidden link still has to resolve. That is a correct behaviour of the tool teaching you something about the page.</p>
+
+<p>The mobile menu test runs only on the phone-sized project (<code>test.skip</code> when <code>isMobile</code> is false) and asserts the sequence a visitor experiences: hidden, tap, visible with <code>aria-expanded="true"</code>, tap, hidden again. Both halves matter; a menu that opens and never closes is a common regression after a script change.</p>
+
+<h2 id="regression">A regression test for a bug that was fixed once</h2>
+
+<p>The fixture's script once showed "Thanks!" as soon as the request was <em>sent</em>, so a failed request still produced a success message. It was fixed; the test makes sure it stays fixed. It holds the mocked response open, asserts the interim "Sending…" state and the absence of "Thanks", then releases the response and asserts the confirmation:</p>
+
+<pre>let release!: () => void;
+const gate = new Promise&lt;void&gt;((r) => { release = r; });
+await page.route('**/api/book', async (route) => {
+  await gate;
+  await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+});
+// fill and submit …
+await expect(page.getByRole('status')).toHaveText('Sending…');
+await expect(page.getByRole('status')).not.toContainText('Thanks');
+release();
+await expect(page.getByRole('status')).toHaveText('Thanks! We will email you to confirm.');</pre>
+
+<p>A regression test is named after the bug, not the feature. Six months from now the name is the only documentation anyone reads.</p>
+
+<h2 id="locators">Locators that survive a redesign, and no sleeps</h2>
+
+<p>Every locator in the suite is a role, a label or visible text: <code>getByRole('button', { name: 'Request my assessment' })</code>, <code>getByLabel('Your name')</code>, <code>getByRole('status')</code>. Playwright's best-practice guidance says to "prefer user-facing attributes to XPath or CSS selectors", and the reason is practical: a redesign changes classes and structure and leaves the label alone, so the test keeps describing what a visitor would do. The side effect is a quiet accessibility check — a button that <code>getByRole</code> cannot find by name is a button a screen reader cannot announce either. The <a href="/blogs/guides/claude-code-accessibility-audit">accessibility audit</a> goes further; this is the free version.</p>
+
+<p>There are no fixed waits in the suite. Every <code>expect(locator)</code> retries until it passes or times out, so a test says what should be true and waits exactly as long as needed. The docs' warning is against assertions that do not await — <code>expect(await locator.isVisible()).toBe(true)</code> checks once and moves on. A <code>waitForTimeout(2000)</code> is the same mistake with a number in it: it passes on a fast machine, fails in CI, and is "fixed" by making the number bigger.</p>
+
+<p>Each test starts from <code>page.goto</code> in its own browser context, so nothing one test does leaks into another. That is the isolation the docs ask for, and it is what makes the suite safe to run in parallel with <code>fullyParallel: true</code>.</p>
+
+<h2 id="fail">Run it, break it, watch it fail, fix it</h2>
+
+<p>The full run, both projects:</p>
+
+<pre>Running 16 tests using 4 workers
+
+  ✓  [desktop-chromium] › tests/booking-form.spec.ts › required name shows an error and nothing is sent
+  ✓  [desktop-chromium] › tests/booking-form.spec.ts › empty or malformed email is rejected before any success message
+  ✓  [desktop-chromium] › tests/booking-form.spec.ts › a valid submission posts the fields and shows the confirmation (mocked endpoint)
+  ✓  [desktop-chromium] › tests/booking-form.spec.ts › a failed submission is reported, not hidden behind Thanks
+  ✓  [desktop-chromium] › tests/cta-and-navigation.spec.ts › the primary call to action lands on the booking form
+  ✓  [desktop-chromium] › tests/cta-and-navigation.spec.ts › every main-navigation link returns 200
+  -  [desktop-chromium] › tests/cta-and-navigation.spec.ts › mobile navigation › menu opens and closes and reports its state
+  ✓  [desktop-chromium] › tests/regression.spec.ts › success message waits for the server response (regression)
+  ✓  [mobile-chromium]  › … the same seven, plus the mobile navigation test
+
+  1 skipped
+  15 passed (8.5s)</pre>
+
+<p>Then the defect. In <code>site/app.js</code> the email check was replaced with <code>if (false)</code> — the kind of change that arrives as "temporarily disable validation while we debug" and stays. The suite, desktop project only:</p>
+
+<pre>  ✘  [desktop-chromium] › tests/booking-form.spec.ts:23:7 › booking form › empty or malformed email is rejected before any success message (5.8s)
+
+    Error: expect(locator).toHaveText(expected) failed
+    Locator:  getByRole('status')
+    Expected: "Please enter a valid email address so we can confirm your slot."
+    Received: "Thanks! We will email you to confirm."
+    Timeout:  5000ms
+    Call log:
+      - Expect "toHaveText" getByRole('status') with timeout 5000ms
+      - waiting for getByRole('status')
+        14 × locator resolved to &lt;p class="ok" id="form-msg" role="status" aria-live="polite"&gt;Thanks! We will email you to confirm.&lt;/p&gt;
+           - unexpected value "Thanks! We will email you to confirm."
+
+  1 failed
+  3 passed (8.6s)</pre>
+
+<p>That is the diagnosis in one line: the page showed the success message to a visitor who had not entered an email. The other three form tests still passed, which is also information — the defect is in one state, not the whole form. The file was restored and the full suite re-run: 15 passed, 1 skipped.</p>
+
+<p>A test you have never seen fail is not yet a test. The <a href="/blogs/guides/claude-code-technical-seo-audit">technical SEO audit guide</a> makes the same rule for crawlers; it holds harder here, because a browser test that passes for the wrong reason (the loose <code>/email/i</code> pattern above) looks identical to one that passes for the right one until you break the page.</p>
+
+<h2 id="delivery">Mocked versus real: what green does not mean</h2>
+
+<p>Every submitting test in the suite mocks the endpoint. That is correct and it has a consequence worth stating in the README, which the download does: a passing run proves the page posts the right fields and handles a 200 and a 500 correctly. It proves nothing about whether a message reaches an inbox. The mock is the only responsible choice — the suite runs on laptops and in CI, and a real submission from either would create test enquiries or, worse, real ones — but it means delivery is checked another way: a marked submission against the real form and a look at the inbox. That check is manual, weekly, and the first <a href="/pages/weekly-fix">Weekly Website Fix</a>.</p>
+
+<p>The same boundary applies to the environment. The suite runs against a local copy; a staging copy is the next step up; production is not a target for anything that submits, orders or changes state. A read-only smoke test against production (the homepage returns 200 and contains the brand) is a different, tiny suite with a different schedule — the <a href="/blogs/guides/claude-code-github-actions-cloudflare">deployment guide</a> has it.</p>
+
+<h2 id="ci">Running it in CI</h2>
+
+<p>The download includes a GitHub Actions workflow adapted from Playwright's CI documentation: checkout, Node from <code>lts/*</code>, <code>npm ci</code>, <code>npx playwright install --with-deps chromium</code>, <code>npx playwright test</code>, and the HTML report uploaded as an artifact whether or not the run passed. It runs on push and pull request. Fifteen tests take about ten seconds on the fixture; the browser download dominates the job time, which is why the workflow installs chromium only.</p>
+
+<p>Where it sits in a pipeline: after the build, before deploy, as a gate that can fail — the same position as the link and accessibility checks in the deployment guide. A suite that runs but cannot block a deploy is a dashboard, not a test.</p>
+
+<h2 id="claude">Where Claude Code fits</h2>
+
+<p>The agent is good at the first draft of a test when the prompt names the page, the behaviour and the exact visible outcome. It is poor at "write tests for the site", which produces tests of the DOM rather than of the visitor. A prompt that worked for this suite:</p>
+
+<pre data-sbs-copy="prompt">Write one Playwright test for site/index.html. Behaviour: submitting the
+booking form with the email field empty shows the exact text "Please
+enter a valid email address so we can confirm your slot." in the element
+with role=status, focuses the email field, and makes NO request to
+/api/book. Use getByRole/getByLabel locators only; no CSS selectors, no
+waitForTimeout. Intercept /api/book with page.route to prove nothing was
+sent. Then tell me how to make the page fail this test on purpose so I
+can see it fail before I trust it.</pre>
+
+<p>The last sentence is the important one. Asking the agent for the defect that would make the test fail costs nothing and turns "the test passed" into "the test can fail". Two other places it earns its keep: reading a failure's call log and explaining which of three plausible causes fits the received value; and, in plan mode, proposing the regression test for a bug you have just fixed, named after the bug. A <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a> line that names the test command is what makes the agent run it without being asked; the <a href="/blogs/guides/claude-code-hooks">hooks guide</a> shows how to run the suite automatically after edits, which is the point at which it stops being a chore.</p>
+
+<h2 id="validate">How you know it worked</h2>
+
+<ul>
+  <li>The suite passes locally and in CI, and the CI run can block a deploy.</li>
+  <li>Each test has been seen failing once, with a received value that matched the deliberate defect.</li>
+  <li>No locator uses a CSS class or an XPath; no test uses a fixed wait.</li>
+  <li>Every test that submits mocks the endpoint and says so in its name or comment.</li>
+  <li>The README states what the suite does not cover, and the delivery check is on a schedule elsewhere.</li>
+</ul>
+
+<h2 id="download">Download the suite</h2>
+
+<p>The project — fixture site, server, config, three spec files, the CI workflow and the README — with <code>@playwright/test</code> pinned to 1.63.0. Unzip, <code>npm install</code>, <code>npx playwright install --with-deps chromium</code>, <code>npx playwright test</code>.</p>
+
+<div class="sbs-resource-download">
+  <a class="sbs-btn sbs-btn--ghost" href="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/playwright-website-tests.zip?v=1789652955" download>Download the Playwright suite (zip)</a>
+</div>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the system</span>
+  <p>The Claude Code Website Launch System puts a suite like this at the gate of its launch checklist, next to the functional, SEO and accessibility checks, so "tests pass" is one line of evidence in a go/no-go report rather than the whole of it. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<div data-sbs-try-slot></div>
+
+<h2 id="next">Next action</h2>
+
+<p>Write the regression-test plan above for your own site — three to five flows, what each asserts, what stays out of scope — and save it to <a href="/pages/my-projects">My Projects</a>. Then take the <a href="/pages/lab-conversion-functionality">Conversion Functionality Lab</a>, where the same form fault is planted in a fixture and the failing run is the evidence, and do the first Weekly Website Fix: the delivery check no browser test can make.</p>

@@ -1,0 +1,69 @@
+<p class="sbs-lede">Every site has a rollback story. Most of them are told after the fact: “we could have gone back if we had known which version”, “the old theme had been deleted”, “the database had moved on”. This week: take the last deployment you made — however small — and prove you can reverse it. Not in principle. With the steps written down, rehearsed somewhere safe, and the data question answered.</p>
+
+<h2 id="problem">The problem</h2>
+<p>“We can roll back” is one of the most common untested claims in web operations. It rests on a chain: knowing what the last deploy changed, knowing exactly what was there before, having that version still available, having a way to put it back, and knowing what happens to anything created since. Any link can be missing, and the only time most people find out is during an incident, when the person who knows is unavailable and the notes say “roll back”.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+  <li>A site you deploy — through Git and a pipeline, a hosted platform's publish button, a Shopify theme, a WordPress update, anything with a “before” and an “after”.</li>
+  <li>Access to the deployment history: commits, releases, theme library, plugin versions, or the platform's activity log.</li>
+  <li>A non-production copy (staging, a preview deploy, a duplicate unpublished theme, a local environment) — or a quiet window and a very small deploy.</li>
+</ul>
+
+<h2 id="scope">Scope</h2>
+<p>The last deployment only. The exercise is not to build a rollback system; it is to find out whether one exists for one real change. Rehearse on a non-production copy wherever possible. If the only way to rehearse is on production — a hosted platform with a one-click rollback and no staging — do it in a quiet window with a change small enough that a minute of the previous version costs nothing, and undo it immediately.</p>
+
+<h2 id="workflow">Safe inspection workflow</h2>
+<ol>
+  <li><strong>Name the deploy.</strong> What changed, when, and who did it. A commit hash, a release tag, a theme name and time, a plugin version pair (3.4.1 → 3.4.2). If you cannot name it, that is the first finding.</li>
+  <li><strong>Name the previous version.</strong> The exact thing you would return to. Check it still exists: the commit is on the remote, the previous theme is still in the theme library, the previous plugin version is downloadable, the platform's history still lists it. Retention windows expire.</li>
+  <li><strong>Write the steps as commands or clicks.</strong> <code>git revert &lt;hash&gt; &amp;&amp; git push</code> and what the pipeline then does; “Online Store → Themes → previous theme → Publish”; the platform's “Rollback to this deployment” button; the plugin's version-rollback tool. Include how long it takes and how you would know it worked (the URL to fetch, the thing to look for).</li>
+  <li><strong>Answer the data question.</strong> What has been created since the deploy — orders, form submissions, content edits, settings changes — and does the rollback touch it? Code rollbacks usually leave data alone; database restores do not; theme publishes on Shopify keep settings per theme; content-platform rollbacks vary. Write the answer down, including “unknown”.</li>
+  <li><strong>Rehearse.</strong> On the non-production copy, perform the rollback and confirm the “before” version is what appears. Then roll forward again. If rehearsing on production in a quiet window, keep it under a minute and fetch the page before and after.</li>
+  <li><strong>Hand it to someone.</strong> Read the notes as a stranger: could a colleague execute them at 2 a.m. without asking you anything? If a step needs a password or a token, write down where it lives — never the value.</li>
+</ol>
+
+<h2 id="prompt">Copyable prompt</h2>
+<p>For a Git-based project with Claude Code. It reconstructs the deploy from the repository and drafts the rollback notes; it does not deploy, revert, or push.</p>
+<pre data-sbs-copy="prompt">Read-only. Do not run git revert, reset, checkout, push, or any deploy command. Do not edit files.
+
+1. Identify the most recent deployment from this repository: the latest tag or release, the last commit on the deploy branch, or the last pipeline run recorded in the repository (workflow files, CHANGELOG, release notes). State which of these you used and how confident you are.
+2. Summarise what that deployment changed (files, and in one line each, what the change does).
+3. Identify the exact previous deployable version (tag/commit) and confirm it exists on the remote from the information available to you.
+4. Draft rollback notes for a colleague: the exact commands, in order, that would return production to the previous version through the same pipeline; how long each step takes; the URL(s) to fetch afterwards and what to look for.
+5. Answer the data question: from the code and migrations, does rolling back this deployment touch stored data (schema migrations, content, settings)? If you cannot tell, say so.
+6. List what you could not verify from the repository alone (platform-side history, secrets, DNS).</pre>
+
+<h2 id="evidence">Example evidence</h2>
+<p>An example written for this page.</p>
+<pre>Weekly Fix #3 — rollback rehearsal — 2026-10-01
+Deploy: 2026-09-29 16:40, commit 8f3c2a1 "Add size guide to product page" (theme, Shopify)
+Previous: theme "Live 2026-09-22" — still in theme library, unpublished ✔
+Steps: Online Store → Themes → "Live 2026-09-22" → Publish (≈10 s). Verify: fetch /products/x, size guide absent, add-to-cart works.
+Data: theme settings live per theme; orders and customers untouched. Size-guide metafield content stays (harmless).
+Rehearsal: duplicated "Live 2026-09-22" → published in quiet window 07:02 → fetched product page: previous version ✔ → republished current 07:03.
+Handover: notes in /ops/rollback.md; the receptionist executed step 1 from the notes in a dry run without help.</pre>
+
+<h2 id="criteria">Completion criteria</h2>
+<ul>
+  <li>The last deployment is identified: what changed, when, and the exact previous version.</li>
+  <li>The rollback steps are written as commands or clicks.</li>
+  <li>The rollback was rehearsed on a non-production copy, or performed and undone in a quiet window.</li>
+  <li>The data question is answered — including “unknown” if that is the answer.</li>
+  <li>Someone other than you could execute it from the notes alone.</li>
+</ul>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+  <li><strong>Assuming the previous version is still there.</strong> Theme libraries get tidied, retention windows expire, branches get deleted.</li>
+  <li><strong>Rolling back the database with the code.</strong> A backup restore that returns yesterday's database also returns yesterday's orders.</li>
+  <li><strong>Notes that say “redeploy the previous version”.</strong> That is the goal, not a step.</li>
+  <li><strong>Rehearsing nothing because “it's obvious”.</strong> The rehearsal finds the missing permission, the expired token, the button that moved.</li>
+  <li><strong>Writing a secret into the notes.</strong> Where it lives, never what it is.</li>
+</ul>
+
+<h2 id="next">Go further</h2>
+<ul>
+  <li>The <a href="/pages/lab-launch-readiness">Launch Readiness Lab</a> has a release summary whose “rollback: previous version available” line is worth reading twice.</li>
+  <li><a href="/blogs/guides/claude-code-github-actions-cloudflare">Deploying with GitHub Actions and Cloudflare</a> has a rollback section and a regression-plan generator; the <a href="/blogs/guides/claude-code-website-maintenance">maintenance checklist</a> keeps rollback readiness on the monthly list.</li>
+</ul>

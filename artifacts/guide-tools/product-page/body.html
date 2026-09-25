@@ -1,0 +1,68 @@
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Digital Product Page Builder</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load the example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Shopify digital products</p>
+    <h1 class="h1" tabindex="-1" id="top">Twelve sections, in the order a buyer needs them.</h1>
+    <p class="lede">Fill in the sections on the left. The finished copy assembles on the right, and the checklist tells you what is still missing before the page is worth publishing.</p>
+    <p class="small dim">A copy-and-layout template &mdash; prose and structure. Not a Shopify theme, an app or a Liquid section. Nothing installs. Everything stays in this tab.</p>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="edit-h">
+      <h2 class="h2" id="edit-h">Sections</h2>
+      <div id="fields" class="row"></div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="score-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="score-h">Checklist</h2>
+          <span class="chip" id="score">0 / 0</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+        <p class="small dim">Every line is checkable by looking. None of them is an opinion about the design.</p>
+      </section>
+
+      <section class="card" aria-labelledby="out-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="out-h">The copy</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy Markdown</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the Markdown instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="preview"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">After the page is written</p>
+    <p class="muted">The template helps you structure the page. The next step is identifying what still gets in the buyer's way &mdash; which is a measurement problem before it is a writing problem.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/shopify-digital-product-page-template?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-conversion-revenue-optimization-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=primary_recommendation">Conversion &amp; Revenue Optimization Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product, not affiliated with Shopify or Anthropic.</p>
+  </footer>
+</main>

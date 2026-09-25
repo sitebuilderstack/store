@@ -1,0 +1,15 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-collection",
+      "settings": {
+        "heading": "Everything Site Builder Stack sells",
+        "body": "Seven products, sold separately: build the site, get it found, turn the traffic into revenue, keep it running, move it when it has to move, automate the Shopify admin — and run the whole thing as a client engagement. The methodology behind all seven is published in full and free to read in the guides."
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

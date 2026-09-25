@@ -1,0 +1,8 @@
+source_url,target_url,expected_status,identity,notes
+https://old.example/physio,https://new.example/services/physiotherapy,301,Physiotherapy,MOVE — short link from business cards
+https://old.example/services/physio.html,https://new.example/services/physiotherapy,301,Physiotherapy,MOVE — platform change dropped .html
+https://old.example/about-us,https://new.example/about,301,About,MOVE
+https://old.example/blog/2019/opening-hours,https://new.example/contact,301,Contact,MERGE — content folded into contact page
+https://old.example/christmas-2019,,410,,REMOVE — no equivalent; 410 rather than a homepage redirect
+https://new.example/,,200,Harbourline,KEEP — must stay 200 and not be noindexed
+https://new.example/services/physiotherapy,,200,Physiotherapy,KEEP

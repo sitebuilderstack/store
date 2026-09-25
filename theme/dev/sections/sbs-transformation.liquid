@@ -1,0 +1,76 @@
+<section class="sbs-section">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="sbs-compare">
+      <div class="sbs-compare__panel">
+        <span class="sbs-compare__label">{{ section.settings.before_label | escape }}</span>
+        <div class="sbs-terminal" style="flex:1;">
+          <div class="sbs-terminal__bar" aria-hidden="true">
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__title">without the system</span>
+          </div>
+          <pre class="sbs-terminal__body"><span class="c">$</span> claude
+<span class="a">&gt;</span> {{ section.settings.before_prompt | escape }}
+
+<span class="c">{{ section.settings.before_result | escape }}</span></pre>
+        </div>
+      </div>
+
+      <div class="sbs-compare__arrow" aria-hidden="true">&rarr;</div>
+
+      <div class="sbs-compare__panel sbs-compare__panel--good">
+        <span class="sbs-compare__label">{{ section.settings.after_label | escape }}</span>
+        <div class="sbs-terminal" style="flex:1;">
+          <div class="sbs-terminal__bar" aria-hidden="true">
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__dot"></span>
+            <span class="sbs-terminal__title">with the system</span>
+          </div>
+          <pre class="sbs-terminal__body">{% for block in section.blocks %}<span class="k">{{ forloop.index0 | plus: 1 | prepend: '0' | slice: -2, 2 }}</span>  {{ block.settings.step | escape }}
+{% endfor %}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Transformation",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The difference" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "One prompt, or one process" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Both of these run in the same tool. Only one of them produces something you can put in front of customers." },
+    { "type": "header", "content": "Without" },
+    { "type": "text", "id": "before_label", "label": "Label", "default": "Without the system" },
+    { "type": "text", "id": "before_prompt", "label": "Prompt shown", "default": "build me a website" },
+    { "type": "textarea", "id": "before_result", "label": "Result shown",
+      "default": "a website. a different one each time." },
+    { "type": "header", "content": "With" },
+    { "type": "text", "id": "after_label", "label": "Label", "default": "With the system" }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [ { "type": "text", "id": "step", "label": "Step" } ]
+    }
+  ],
+  "max_blocks": 14,
+  "presets": [{ "name": "SBS — Transformation" }]
+}
+{% endschema %}

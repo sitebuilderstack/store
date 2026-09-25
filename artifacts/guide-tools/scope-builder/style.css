@@ -1,0 +1,11 @@
+.split{display:grid;gap:var(--sp-6);align-items:start;min-width:0}
+@media (min-width:62em){.split{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--sp-7)}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 5rem)}}
+.split>*{min-width:0}
+.checks{display:grid;gap:var(--sp-2)}
+.checks li{display:grid;grid-template-columns:1.1rem minmax(0,1fr);gap:var(--sp-3);
+  font-size:var(--step--1);color:var(--muted);align-items:start}
+.checks li .mark{font-weight:700;line-height:1.5}
+.checks li.is-ok .mark{color:var(--ok)}
+.checks li.is-no .mark{color:var(--dim)}
+#preview{max-height:26rem;overflow:auto}

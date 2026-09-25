@@ -1,0 +1,286 @@
+# Engagement events
+
+## What this uses, and what it does not
+
+The engagement events below go to Shopify's own analytics, through
+`Shopify.analytics.publish`. They have no second vendor and add no network
+request beyond the ones the storefront already makes.
+
+**Since 14 September 2026 the site also loads Plausible Analytics** — the
+owner's script, verbatim, in `snippets/sbs-plausible.liquid`, rendered in the
+`<head>` of every layout branch (`layout/landing.liquid`, the policy branch of
+`layout/theme.liquid`, and the ONE fallback). Plausible records pageviews
+(and, if configured in the Plausible dashboard, its own outbound-link and
+file-download goals); it is cookieless and stores no personal data, so the
+consent question stays as it was. The two systems will report different
+session counts — Plausible counts what its script sees, Shopify counts what
+its own does — and neither is "wrong"; compare trends, not totals. The
+`data-sbs-track` events are not sent to Plausible.
+
+Rollback: remove the three `{% render 'sbs-plausible' %}` lines.
+
+**Nothing personal is sent.** Every payload is an event name, a short `label`
+(a link's visible text truncated to 80 characters, or a filter value), and for
+links an `href`. No identifiers, no input contents, no email addresses. The
+checklist's saved progress never leaves the browser at all — it is
+`localStorage`, keyed per page, and is not sent anywhere.
+
+## How it is wired
+
+One delegated listener on `document` handles anything carrying
+`data-sbs-track="<event name>"`, so markup added later reports without new
+JavaScript. Components that need more than a click — the selector, the library
+filter, the checklists — call the same `track()` helper directly.
+
+`track()` is guarded in both directions: if `Shopify.analytics.publish` is
+missing it is a no-op, and if it throws the exception is swallowed. Analytics is
+never allowed to break a page. That guard is asserted by
+`scripts/test-analytics-events.js`, which stubs `publish` to throw and confirms
+the workflow selector still works.
+
+## The events
+
+Every one below is verified firing against the live site by
+`scripts/test-analytics-events.js` — it stubs `Shopify.analytics.publish`,
+performs the real interaction, and asserts the event was published. An event
+listed here that stopped firing would fail that test.
+
+### Discovery and navigation
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `pillar_view` | A topic hub link is clicked from the library or the selector | Hub title |
+| `pillar_article_click` | A guide is opened from a hub's guide list | Guide title |
+| `pillar_up_click` | The hub link in an article's header or footer is clicked | Hub title |
+| `pillar_cross_link` | Another hub is opened from a hub page | Hub title |
+| `related_guide_clicked` | A related guide is opened, from the in-article card or the footer block | Guide title |
+| `next_step_clicked` | The in-article "Next in this path" card is clicked | Guide title |
+| `learning_path_next_clicked` | A link in the end-of-guide continue block is clicked | Guide title |
+| `resource_cta_clicked` | A resource is opened from a tool page | Resource title |
+| `product_selector_started` | The product picker is started on the picker page | picker |
+| `product_selector_completed` | The picker reaches a recommendation | picker |
+| `product_selector_cta_clicked` | The recommended product is opened from the picker | Product title |
+| `product_selector_alt_clicked` | An alternative to the recommendation is opened from the picker | Product title |
+| `product_recommended` | A recommended product card is opened from the picker's result | Product title |
+| `lifecycle_guide_clicked` | A guide is opened from the Build, Rank, Convert, Operate page | Guide title |
+| `lifecycle_product_clicked` | A product is opened from the Build, Rank, Convert, Operate page | Product title |
+| `nav_menu_opened` | The header products menu is opened | (none) |
+
+### Learning paths
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `learning_path_started` | The "Start with…" button on a hub is clicked | First guide title |
+| `learning_path_step` | A specific step is opened from a hub's path list | Guide title |
+| `learning_path_next` | The Next link at the foot of a guide is clicked | Guide title |
+| `learning_path_prev` | The Previous link at the foot of a guide is clicked | Guide title |
+
+There is no `learning_path_completed`. Completion cannot be observed without
+tracking a visitor across sessions, which would mean an identifier this site
+does not set. Reaching the last step is measurable as a `learning_path_next`
+whose label is the final guide.
+
+### Guide library
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `guide_filter_used` | A topic, level, goal or type filter changes | Number of results |
+| `guide_search_used` | The search box is used | Number of results |
+
+Both are debounced by 500 ms, so typing produces one event rather than one per
+keystroke.
+
+### Learning-path engine
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `route_started` | The first answer is given | — |
+| `route_goal_selected` | A goal is chosen | Goal slug |
+| `route_stage_selected` | A stage is chosen | Stage slug |
+| `route_level_selected` | An experience level is chosen | Level slug |
+| `route_generated` | All three answers are in and a roadmap is shown | `goal/stage/level` |
+| `route_step_clicked` | A step in the roadmap is opened | Step title |
+| `route_step_completed` | A step is ticked | Step id |
+| `route_step_uncompleted` | A step is unticked | Step id |
+| `route_completed` | All seven steps are ticked | Goal slug |
+| `route_reset` | Progress is reset for that roadmap | Goal slug |
+
+Progress itself never leaves the browser. The step id in the label is
+`<goal>:<index>` — a position in a published roadmap, not anything about the
+visitor.
+
+### Free tools
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `tool_started` | The first field is touched | Tool name |
+| `tool_completed` | A result is generated | Tool name |
+| `tool_result_copied` | The result is copied | Tool name |
+| `tool_reset` | The form is cleared | Tool name |
+
+**The label is the tool's name and nothing else.** Generated CLAUDE.md files,
+project descriptions, site URLs and questionnaire answers are never sent. The
+test types a sentinel string into every field and then searches every published
+payload for it, so this is asserted rather than promised.
+
+### Learning progress
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `lesson_completed` | A guide is marked complete | Guide handle |
+| `lesson_saved` | A guide is saved for later | Guide handle |
+| `learning_reset` | Progress is cleared on `/pages/my-learning` | `my-learning` |
+| `readiness_product_clicked` | The readiness score's recommendation is opened | Product title |
+| `tool_cta_clicked` | The matched free tool is opened from the foot of a guide | Button label |
+
+Only the handle is sent, and only on the transition into the state — unmarking a
+guide publishes nothing. **The stored progress itself never leaves the browser.**
+It is `localStorage` under one key, and there is no identifier tying it to a
+visitor, so the site can see that *a* guide was completed and never which browser
+completed it. `scripts/test-learning.js` asserts the storage behaviour, including
+that a reset actually empties it rather than only clearing the view.
+
+### Lead capture
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `lead_segment_build` | The signup form's "build" option is chosen | — |
+| `lead_segment_rank` | The signup form's "rank" option is chosen | — |
+| `lead_segment_convert` | The signup form's "convert" option is chosen | — |
+
+The choice is also written to the customer record as a Shopify tag
+(`goal-build`, `goal-rank`, `goal-convert`) through the native customer form, so
+the segmentation lives where the email platform can already read it rather than
+in a second system. No email address is ever published to analytics.
+
+### Copyable resources
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `prompt_copied` | A `.sbs-prompt` block is copied | Button label |
+| `command_copied` | A single-line shell command is copied | Button label |
+| `claudemd_example_copied` | A CLAUDE.md example is copied | Button label |
+| `code_copied` | Any other code block is copied | Button label |
+
+### Checklists and resources
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `checklist_item_toggled` | An item is ticked or unticked | `checked` / `unchecked` |
+| `checklist_reset` | Clear all is used | — |
+| `checklist_printed` | Print is used | — |
+| `lead_magnet_clicked` | A free resource is opened from an article, hub or selector | Resource title |
+
+### Commerce
+
+| Event | Fires when | Label |
+| --- | --- | --- |
+| `product_cta_clicked` | Any product call to action is clicked | Button text |
+| `product_nav_clicked` | A product is opened from the header menu | Product title |
+| `product_ecosystem_clicked` | A product is opened from the product row (seven on the homepage, the other six on a product page) | Product title |
+| `product_sample_viewed` | The free sample workflow is opened from a product page | Link text |
+| `bundle_cta_clicked` | The bundle line under a guide's product CTA is clicked | Bundle title |
+
+Four separate names for four placements on purpose. Merging them into one
+`product_click` would make all four unreadable — the question worth answering is
+*which placement* sells, and a combined number cannot answer it.
+
+Checkout starts and purchases are already recorded by Shopify's own analytics
+and are not duplicated here.
+
+### Engagement layer (Try-this modules, labs, My Projects, Weekly Fix)
+
+Added 17 September 2026. These twelve names are a closed allowlist enforced
+inside `track()` in `assets/sbs.js`: a payload is reduced to the keys
+`module`, `guide`, `lab`, `challenge`, `product`, `kind`, `source`, each of
+which must match `^[a-z0-9-]{1,80}$`. Anything else — a project name, a URL,
+an objective, generated text, a score — is dropped before publish, whatever
+the caller sent. The "started", "completed" and "resumed" events are sent once
+per page view per subject, so typing in a form does not produce a stream of
+`engagement_module_started`.
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `engagement_module_started` | First input into a "Try this on your project" module (once per page view) | `module`, `guide` |
+| `artifact_generated` | Generate produced a result | `module`, `guide` |
+| `artifact_copied` | Copy on a result, in the module or in My Projects | `module`, `guide` / `source: workspace` |
+| `artifact_exported` | Download of a result, a lab report, a challenge summary, or a project export | `module`, `guide` / `kind: project-json…` |
+| `artifact_saved` | A result, lab report or challenge record was written to the browser store (only after the write succeeded) | `module`, `guide` / `lab` / `challenge` |
+| `lab_started` | First decision checked in a lab (once per page view) | `lab` |
+| `lab_completed` | The corrected version was reached (once per page view) | `lab` |
+| `challenge_started` | "Mark as started" or the first criterion ticked (once) | `challenge` |
+| `challenge_completed` | Saved with every criterion ticked — self-reported (once) | `challenge` |
+| `project_created` | A project was created in My Projects | `kind: <platform>` |
+| `project_resumed` | The "Continue your project" action was clicked (once per page view) | `kind: task/lab/…` |
+| `related_product_clicked` | A product link inside a lab or challenge was clicked | `product`, `source: lab` |
+
+### Monetization (team licences, membership, review service, recommendations)
+
+Added 24 September 2026 with the four commercial paths (`docs/monetization/`).
+Same allowlist machinery as the engagement layer: the payload is reduced to
+ids and one path, and nothing a visitor typed can reach a provider. `offer_id`,
+`partner`, `placement`, `mode`, `kind` and `stream` must match
+`^[a-z0-9-]{1,80}$`; `source_path` is the template's own path (slashes allowed,
+**no query string**), so a campaign parameter cannot ride along.
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `monetization_offer_view` | An offer page renders (once per page view) | `offer_id`, `mode`, `source_path`, `stream` |
+| `monetization_cta_click` | A CTA carrying `data-sbs-offer-cta` is clicked | `offer_id`, `placement`, `mode`, `source_path` |
+| `monetization_lead_submitted` | **Shopify has confirmed the submission** — the event fires from the success element, which only exists after a successful POST. Clicking Submit cannot produce it. | `offer_id`, `mode`, `source_path` |
+| `affiliate_link_clicked` | An outbound tool link is clicked | `partner`, `placement`, `mode` (`affiliate` only where the partner register records an approved relationship; otherwise `editorial`), `source_path` |
+
+**What these numbers are not.** A `monetization_lead_submitted` is a request,
+not a booking, a member or a sale. An `affiliate_link_clicked` is a click, not
+a commission — commissions are read from a partner program's own dashboard, and
+today there are none (see `docs/monetization/PARTNER-REGISTER.md`). Orders
+remain the only source for revenue, through Shopify's own `checkout_completed`.
+
+### SEO Audit Navigator funnel (cross-domain)
+
+Added 18 September 2026 for the claude.ai artifact *SEO Audit Navigator*; the
+full design is in `docs/analytics/ARTIFACT-FUNNEL.md`. The artifact fires its
+own five events inside its sandbox (which cannot reach any server); the three
+below originate here, from authoritative sources only.
+
+| Event | Fires when | Payload |
+| --- | --- | --- |
+| `sitebuilderstack_product_page_visited` | Once per session, on the page a visitor lands on with `artifact_ref=v_…` in the URL — after the page has actually loaded (storefront JS, `initArtifactAttribution`) | `artifact_ref`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `product_identifier`, `product_price`, `landing_page`, `platform`, `primary_problem`, `funnel_stage` |
+| `product_purchased` | From Shopify's standard `checkout_completed` in the custom pixel — the order exists — one per line item, with the order id; the collector counts an order id once, ever | `product_identifier`, `order_id` (pixel `o`), `value` (`v`), `artifact_ref` from the `sbs_aref` cookie (`r`) |
+| `account_created` | From the `customers/create` webhook at the collector's `/webhooks/customers-create`, HMAC-verified; the customer id is counted once | attribution only when the customer note carries `artifact_ref=` |
+
+**Activation**, for reporting purposes, is defined as a visitor who has
+produced at least one `artifact_saved`, `lab_completed` or
+`challenge_completed` — the three events that mean something was made or
+finished, not merely opened. No rate is claimed for it here: nothing has been
+measured yet, and the events have no subscriber until a custom pixel exists
+(see below).
+
+Verified in `scripts/test-engagement.js` (payload reduction, dedupe) and
+`scripts/test-engagement-browser.js` (a real journey: each event fires once,
+no request leaves the browser carrying the project name, URL or typed text).
+Plausible sees page views only; it receives none of these events.
+
+## Reading the results
+
+Shopify surfaces custom events to Web Pixels rather than in the standard
+Analytics reports. To use them, add a custom pixel in
+**Settings → Customer events** that subscribes to the event names above and
+forwards them wherever you want them. Until such a pixel exists the events are
+published and simply have no subscriber — which is why this document does not
+claim the data is already being collected somewhere.
+
+## What is deliberately not tracked
+
+- Scroll depth. It correlates poorly with reading and costs a listener on every page.
+- Time on page. Shopify already reports session duration; a second measurement would disagree with it.
+- Anything typed into the search box. Only the result count is sent.
+- Checklist contents. Which items a person ticked stays in their browser.
+
+## Baselines
+
+None are recorded here, because none have been measured since these events
+started firing. The `Before` column of any future comparison has to come from
+Search Console and Shopify analytics for the period before 6 September 2026 —
+see `docs/analytics/BASELINE-2026-09-06.md` for what was actually measured on
+the day this shipped.

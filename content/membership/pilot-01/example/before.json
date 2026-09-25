@@ -1,0 +1,27 @@
+{
+ "label": "before",
+ "url": "https://harbourline-physio.example/",
+ "final_url": "https://harbourline-physio.example/",
+ "status": 200,
+ "x_robots_tag": null,
+ "captured": "2026-09-24T04:44:17+00:00",
+ "title": "Harbourline Physio — Physiotherapy in Harbourline",
+ "h1": [
+  "Welcome"
+ ],
+ "canonical": "https://harbourline-physio.example/",
+ "robots_meta": "index,follow",
+ "h2": [
+  "Our services"
+ ],
+ "forms": [
+  "/api/contact"
+ ],
+ "form_count": 1,
+ "cta": {
+  "text": "Book an assessment",
+  "href": "/book"
+ },
+ "content_sha256": "65b192b35abcb626",
+ "content_words": 20
+}

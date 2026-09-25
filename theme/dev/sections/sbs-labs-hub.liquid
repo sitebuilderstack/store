@@ -1,0 +1,41 @@
+{%- comment -%}
+  Labs hub (/pages/labs): the four practical labs as cards, generated from
+  content/labs/*.json by scripts/build-labs.py, followed by the page's own
+  copy on how labs work and what "example verified" means. Fully static.
+{%- endcomment -%}
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Practical labs</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container">
+  {% render 'sbs-labs-index' %}
+</div>
+
+{%- if page.content != blank -%}
+  <div class="sbs-section sbs-section--tight">
+    <div class="sbs-container">
+      <div class="sbs-rte sbs-article__body">{{ page.content }}</div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Labs hub",
+  "settings": [],
+  "presets": [{ "name": "Labs hub" }]
+}
+{% endschema %}

@@ -1,0 +1,275 @@
+{
+  "id": "technical-seo",
+  "handle": "lab-technical-seo",
+  "title": "Technical SEO Lab",
+  "eyebrow": "Lab B · 15 minutes",
+  "short": "Find the canonical that lies",
+  "summary": "A controlled fixture with a deliberately wrong canonical and a redirect that lands in the wrong place. Investigate the evidence, decide what is wrong and what to fix first, then inspect the corrected version.",
+  "guide": {
+    "url": "/blogs/guides/claude-code-technical-seo-audit",
+    "title": "How to run a technical SEO audit with Claude Code"
+  },
+  "product": {
+    "handle": "claude-code-seo-website-audit-toolkit",
+    "label": "Claude Code SEO & Website Audit Toolkit",
+    "note": "The audit prompts and the redirect checker in the toolkit are the production versions of what you just did by hand."
+  },
+  "resource": {
+    "url": "/pages/claude-code-seo-checklist",
+    "title": "Technical SEO checklist"
+  },
+  "module": {
+    "url": "/blogs/guides/claude-code-technical-seo-audit#try-seo-audit-prompt",
+    "title": "Build a scoped audit prompt for your own pages"
+  },
+  "scenario": "Harbourline Physio, a fictional three-location clinic, moved its site from a staging host to production last week. The owner reports that the physiotherapy service page \"dropped out of Google\" and an old short link on their business cards \"goes to the wrong page\". You have read-only access to the live responses below. Nothing else has been checked.",
+  "sample": {
+    "label": "Declared sample data",
+    "note": "Every response below is a fixture written for this lab. harbourline.example and staging.harbourline.example do not exist; nothing was fetched from a real site. The fixture files are public downloads so you can run your own checks against them.",
+    "artifacts": [
+      {
+        "name": "lab-technical-seo-fixture.zip",
+        "label": "Fixture: two HTML responses and the redirect log (zip)",
+        "url": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/lab-technical-seo-fixture.zip?v=1789652965"
+      }
+    ]
+  },
+  "starting": "Two pages and one redirect from the live site, captured as the server returned them. Your job is to find what is wrong from the evidence, not from the template, and to decide what gets fixed first and how.",
+  "evidence": [
+    {
+      "id": "page-head",
+      "title": "GET https://harbourline.example/services/physiotherapy — response head (200)",
+      "kind": "html",
+      "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Physiotherapy in Harbourline | Harbourline Physio</title>\n  <meta name=\"description\" content=\"Hands-on physiotherapy for backs, knees and sports injuries at three Harbourline clinics. Same-week appointments.\">\n  <link rel=\"canonical\" href=\"https://staging.harbourline.example/services/physiotherapy\">\n  <meta name=\"robots\" content=\"index,follow\">\n  <script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"MedicalBusiness\",\"name\":\"Harbourline Physio\",\"url\":\"https://harbourline.example/\"}</script>\n</head>"
+    },
+    {
+      "id": "redirect-log",
+      "title": "GET https://harbourline.example/physio — redirect trace",
+      "kind": "text",
+      "content": "> GET /physio HTTP/1.1\n> Host: harbourline.example\n< HTTP/1.1 301 Moved Permanently\n< Location: https://harbourline.example/\n\n> GET / HTTP/1.1\n> Host: harbourline.example\n< HTTP/1.1 200 OK\n< Content-Type: text/html; charset=utf-8\n\nHops: 1 · Final URL: https://harbourline.example/ · Final status: 200"
+    },
+    {
+      "id": "old-map",
+      "title": "From the migration's url-map.csv (row 41)",
+      "kind": "table",
+      "columns": [
+        "source_url",
+        "target_url",
+        "disposition",
+        "expected_status"
+      ],
+      "rows": [
+        [
+          "https://harbourline.example/physio",
+          "https://harbourline.example/services/physiotherapy",
+          "MOVE",
+          "301"
+        ]
+      ]
+    },
+    {
+      "id": "template",
+      "title": "layouts/theme.liquid, lines 12–14 (repository, for reference)",
+      "kind": "html",
+      "content": "<link rel=\"canonical\" href=\"{{ settings.site_origin }}{{ request.path }}\">\n<!-- settings.site_origin is set in the platform admin, not in this file -->"
+    }
+  ],
+  "steps": [
+    {
+      "id": "canonical",
+      "title": "What is wrong with the physiotherapy page?",
+      "instruction": "Read the response head as the server returned it. The template is included so you can see where the value comes from — but audit the response, not the template.",
+      "evidence": [
+        "page-head",
+        "template"
+      ],
+      "decision": {
+        "question": "Which statement is correct?",
+        "options": [
+          {
+            "id": "missing",
+            "label": "The canonical tag is missing, so search engines cannot tell which URL is preferred."
+          },
+          {
+            "id": "staging",
+            "label": "The canonical points at the staging host, so it tells search engines the preferred copy of this page lives on a site that should not be indexed."
+          },
+          {
+            "id": "noindex",
+            "label": "The page is set to noindex, which is why it dropped out."
+          },
+          {
+            "id": "fine",
+            "label": "Nothing is wrong with the head; the drop must be a content problem."
+          }
+        ],
+        "correct": "staging",
+        "explain": {
+          "correct": "The canonical is present and well-formed, but its host is staging.harbourline.example. A canonical is a claim that another URL is the preferred version of this content; when that URL is the staging copy, the production page is telling search engines to prefer a copy that is (or should be) blocked. The robots meta is index,follow — it is not the cause. This is exactly the fault that reading the template misses: the template is correct, and the value of settings.site_origin was never changed after cutover.",
+          "wrong": {
+            "missing": "Look again at line 7 of the response: the canonical is there. A missing canonical is a weaker signal than a wrong one — the search engine falls back to its own choice. A wrong one is actively misleading.",
+            "noindex": "The robots meta says index,follow. Read the value, not the presence of the tag.",
+            "fine": "The head contains a canonical to a host that is not this site. That is the single most likely reason a page 'drops out' after a move."
+          }
+        }
+      }
+    },
+    {
+      "id": "redirect",
+      "title": "What is wrong with the /physio short link?",
+      "instruction": "Compare the redirect trace with the row from the migration's own URL map.",
+      "evidence": [
+        "redirect-log",
+        "old-map"
+      ],
+      "decision": {
+        "question": "Which statement is correct?",
+        "options": [
+          {
+            "id": "chain",
+            "label": "It is a redirect chain — too many hops."
+          },
+          {
+            "id": "loop",
+            "label": "It loops."
+          },
+          {
+            "id": "homepage",
+            "label": "It redirects in one hop with a 301, but to the homepage instead of the mapped destination — the visitor loses the page they were promised, and the search engine treats it as a soft 404."
+          },
+          {
+            "id": "ok",
+            "label": "It is a single 301 that ends in a 200, so it is correct."
+          }
+        ],
+        "correct": "homepage",
+        "explain": {
+          "correct": "Status and hop count are fine; the destination is not. The map says /physio should land on /services/physiotherapy. A redirect to the homepage discards the intent of the link and, in bulk, is what Google's documentation on site moves describes as treated like a soft 404. A checker that only asserts 'one hop, 301, final 200' passes this. A checker must compare the final URL with the mapped destination.",
+          "wrong": {
+            "chain": "One hop. Count the request/response pairs in the trace.",
+            "loop": "The final response is a 200 on a different URL. A loop would keep returning 3xx.",
+            "ok": "Status alone is not the test. The mapped target is /services/physiotherapy; the trace lands on /. Right shape, wrong place."
+          }
+        }
+      }
+    },
+    {
+      "id": "priority",
+      "title": "What do you fix first, and how?",
+      "instruction": "You have read-only access and a change window later today. Choose the first safe change.",
+      "evidence": [
+        "template",
+        "page-head"
+      ],
+      "decision": {
+        "question": "Which is the right first move?",
+        "options": [
+          {
+            "id": "setting",
+            "label": "Change the one platform setting (site_origin) to the production host on the staging copy, verify the rendered canonical there, then release — because every page on the site carries the same wrong host."
+          },
+          {
+            "id": "perpage",
+            "label": "Hard-code the correct canonical into the physiotherapy page's template so at least that page is right."
+          },
+          {
+            "id": "resubmit",
+            "label": "Resubmit the sitemap in Search Console so Google re-reads the page."
+          },
+          {
+            "id": "redirect-first",
+            "label": "Fix the /physio redirect first; it is the one the owner noticed."
+          }
+        ],
+        "correct": "setting",
+        "explain": {
+          "correct": "The evidence says the canonical is built from one setting, so the fault is site-wide, not one page — every page is telling search engines to prefer staging. One setting change fixes all of them, is trivially reversible, and can be verified on the staging copy before release. The redirect fix is the second change in the same window; it is one row in the redirect table.",
+          "wrong": {
+            "perpage": "That fixes one page and leaves the rest wrong, and it leaves a second source of truth in the template to drift later. The fault is in a setting, so fix the setting.",
+            "resubmit": "Resubmitting asks Google to re-read a page that still says 'prefer staging'. Fix first, then submit.",
+            "redirect-first": "The redirect costs one link's visitors; the canonical costs every page's indexing. Both get fixed today, but the setting comes first."
+          }
+        }
+      }
+    },
+    {
+      "id": "verify",
+      "title": "Which evidence proves it is fixed?",
+      "instruction": "The change was released. Below is the after-state. Decide whether it is evidence, and of what.",
+      "evidence": [
+        "after-head",
+        "after-redirect"
+      ],
+      "decision": {
+        "question": "What does the after-state establish?",
+        "options": [
+          {
+            "id": "both",
+            "label": "Both faults are fixed on the live origin: the canonical is self-referencing on the production host, and /physio lands on the mapped destination in one 301 hop."
+          },
+          {
+            "id": "template-only",
+            "label": "The template was fixed; the live page still needs to be checked."
+          },
+          {
+            "id": "ranking",
+            "label": "The page will rank again."
+          }
+        ],
+        "correct": "both",
+        "explain": {
+          "correct": "Both after-state captures are live responses, so they verify the change on the real origin — not in the template, not on staging. Note what they do not prove: that Google has re-crawled, or that any ranking will return. That is what monitoring over the next weeks is for.",
+          "wrong": {
+            "template-only": "These are responses from the production host, not template source. That is the point of auditing rendered output.",
+            "ranking": "Nothing in a response header can establish a ranking outcome. The fix removes a cause; whether the effect follows is observed later in Search Console, not asserted now."
+          }
+        }
+      }
+    }
+  ],
+  "after": [
+    {
+      "id": "after-head",
+      "title": "After: GET https://harbourline.example/services/physiotherapy — response head (200)",
+      "kind": "html",
+      "content": "<link rel=\"canonical\" href=\"https://harbourline.example/services/physiotherapy\">\n<meta name=\"robots\" content=\"index,follow\">"
+    },
+    {
+      "id": "after-redirect",
+      "title": "After: GET https://harbourline.example/physio — redirect trace",
+      "kind": "text",
+      "content": "> GET /physio HTTP/1.1\n< HTTP/1.1 301 Moved Permanently\n< Location: https://harbourline.example/services/physiotherapy\n\n> GET /services/physiotherapy HTTP/1.1\n< HTTP/1.1 200 OK\n\nHops: 1 · Final URL matches url-map.csv row 41 · verified"
+    }
+  ],
+  "closing": "What you did here — reading the rendered response, comparing a redirect's destination against a map instead of trusting its status, and choosing the smallest reversible change — is the whole discipline. The scoped audit prompt in the guide writes those rules down so an agent follows them on your pages.",
+  "walkthrough": [
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-technical-seo-1.png?v=1789654644",
+      "width": 1076,
+      "height": 1538,
+      "alt": "Step 1 of 4 of the Technical SEO Lab: the rendered response head with a canonical pointing at staging.harbourline.example, the template lines for reference, and the four-option decision.",
+      "caption": "Step 1: audit the response, not the template."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-technical-seo-2.png?v=1789654647",
+      "width": 1076,
+      "height": 1672,
+      "alt": "The wrong option 'the canonical tag is missing' is checked; the red feedback box points at line 7 of the response, where the canonical is present but on the wrong host.",
+      "caption": "A wrong answer, explained from the evidence."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-technical-seo-3.png?v=1789654651",
+      "width": 1076,
+      "height": 1727,
+      "alt": "The correct option — the canonical points at the staging host — is checked; the green feedback box explains the fault and the Next step button is visible.",
+      "caption": "The matching answer unlocks the next step."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-technical-seo-4.png?v=1789654654",
+      "width": 1076,
+      "height": 993,
+      "alt": "The end of the lab: the corrected response head with a self-referencing production canonical, the /physio redirect trace landing on the mapped page in one hop, the score, Save to My Project and the next-step links.",
+      "caption": "The corrected version: both faults fixed on the live origin."
+    }
+  ]
+}

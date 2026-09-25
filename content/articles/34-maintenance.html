@@ -1,0 +1,217 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#answer">The short answer</a></li>
+    <li><a href="#what">What maintenance is, and what it is not</a></li>
+    <li><a href="#prereq">Prerequisites</a></li>
+    <li><a href="#cadence">The checklist: daily, weekly, monthly</a></li>
+    <li><a href="#forms">Forms, navigation and links</a></li>
+    <li><a href="#deps">Dependencies and configuration drift</a></li>
+    <li><a href="#certs">Certificates, and the renewal that says "enabled"</a></li>
+    <li><a href="#backup">Backup success is not restore success</a></li>
+    <li><a href="#hosted">Reader-controlled versus hosted platforms</a></li>
+    <li><a href="#prompts">The two prompts, kept apart</a></li>
+    <li><a href="#example">A controlled example: the check that failed</a></li>
+    <li><a href="#validate">How you know it worked</a></li>
+    <li><a href="#download">Download the checklist and report template</a></li>
+    <li><a href="#next">Next action</a></li>
+  </ol>
+</nav>
+
+<h2 id="answer">The short answer</h2>
+
+<p>Website maintenance with Claude Code is a recurring, read-only inspection that produces a report with evidence, followed by separate, small, reversible changes for anything the report found. The agent reads the repository and the configuration and tells you what it observed; the checks that can only be made from outside — does the form deliver, is the certificate valid, does the backup restore — are made by you, from a phone or a scratch host, and written into the same report. The checklist below is daily, weekly and monthly. Most sites need the weekly column and one hour a month.</p>
+
+<p>The failure this guide is built around is the quiet one. Nothing on a small business site announces itself when it breaks: the form shows "Thanks!" and delivers nothing; the certificate renewal is "enabled" and has failed three nights running; the backup job says SUCCESS with zero bytes uploaded. Each of those is in the controlled example further down, because each one was found on a real site by someone who thought it was fine.</p>
+
+<h2 id="what">What maintenance is, and what it is not</h2>
+
+<p>Four kinds of work get called maintenance, and mixing them is how a weekly check turns into an afternoon of unplanned changes.</p>
+
+<ul>
+  <li><strong>Maintenance</strong> is inspection on a schedule, plus the small corrections it produces: a dependency update, a broken link, a stale redirect. Its output is a report and a short list of changes, each reversible.</li>
+  <li><strong>Development</strong> is new capability. It has a branch, a review, a test plan, and it does not happen inside the maintenance window, because a change that arrived "while I was in there" has no record.</li>
+  <li><strong>Emergency response</strong> is when something is down or leaking. It has its own discipline — stop the bleeding, preserve evidence, communicate — and it is not made better by a checklist designed for Tuesday mornings.</li>
+  <li><strong>Deployment</strong> is the act of putting a change live. Maintenance depends on it (a dependency update has to ship) but is not it. The <a href="/blogs/guides/claude-code-github-actions-cloudflare">deployment pipeline guide</a> covers the gates and the rollback; this guide assumes you have one, or that your platform is the pipeline.</li>
+</ul>
+
+<p>The practical rule: the weekly check changes nothing. It observes and writes down. Changes happen afterwards, one at a time, each with a way back. This is the same separation the <a href="/blogs/guides/claude-code-website-audit">website audit</a> and the <a href="/blogs/guides/claude-code-technical-seo-audit">technical SEO audit</a> insist on, for the same reason: an audit that also fixes things leaves no record of what was wrong.</p>
+
+<h2 id="prereq">Prerequisites</h2>
+
+<ul>
+  <li>Claude Code installed and working in the site's repository, with a <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a> that names the real commands and the things that must never be done.</li>
+  <li>A recorded baseline: the redirects, the DNS records, the security headers and the platform settings as they are today. If you do not have one, the first weekly check produces it.</li>
+  <li>Somewhere off the server to put the reports. A <code>reports/</code> directory in the repository is fine.</li>
+  <li>For your own hosting: shell access, the certificate tooling's logs, and the backup job's log. For a hosted platform: admin access and the export functions.</li>
+  <li>Python 3.8 or later if you want to run the small outside-in checker in the download; it has no dependencies.</li>
+</ul>
+
+<h2 id="cadence">The checklist: daily, weekly, monthly</h2>
+
+<p>The cadence is a starting point. Move items between columns as the site's risk changes: a site that takes bookings tests its form weekly; a brochure site that changes twice a year can test monthly and spend the weekly minutes on links.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-maintenance-cadence.png?v=1789652924" alt="Three columns — daily, weekly, monthly — with the checks in each; the weekly column contains the marked form test, links, certificate and headers; the monthly column contains dependencies, drift, a backup restore and rollback readiness. Items a hosted platform handles are marked with a small tag." width="1000" height="508" loading="lazy" decoding="async">
+  <figcaption>The columns are about how fast each thing fails, not about how important it is.</figcaption>
+</figure>
+
+<h3 id="daily">Daily, two minutes or automated</h3>
+<ul>
+  <li>The homepage and the one page that earns money return 200 from outside. An uptime monitor does this for you; if you do not have one, a phone on mobile data does.</li>
+  <li>No incident overnight.</li>
+</ul>
+
+<aside class="sbs-rec sbs-rec--inline">
+  <div class="sbs-rec__head"><h3>If you have no uptime monitor: UptimeRobot</h3><span class="sbs-rec__role">Monitoring</span></div>
+  <p>Fifty monitors on the free plan, checked every five minutes. A short outage can fall between two checks, so it is a floor rather than a guarantee &mdash; but it is the difference between finding out yourself and being told by a customer.</p>
+  <p class="sbs-rec__basis">Free-plan limits read from UptimeRobot's pricing page on 24 September 2026. Not used by this site.</p>
+  <p class="sbs-rec__link"><a href="https://uptimerobot.com/pricing/" target="_blank" rel="noopener" data-sbs-affiliate="uptimerobot" data-sbs-affiliate-mode="editorial" data-sbs-placement="guide-maintenance">UptimeRobot pricing</a><span class="sbs-rec__plain">Ordinary link &mdash; no commission is earned from it. <a href="/pages/recommended-tools">All recommended tools</a>.</span></p>
+</aside>
+
+<h3 id="weekly">Weekly, fifteen to thirty minutes</h3>
+<ul>
+  <li>Every form that matters: one marked test submission, confirmed where a human reads it, with the send and arrival times written down.</li>
+  <li>Navigation and footer links resolve to the page their label names.</li>
+  <li>Broken links on the key pages; new entries in the 404 log.</li>
+  <li>Certificate valid with more than fourteen days to expiry.</li>
+  <li>Security headers unchanged from the baseline.</li>
+  <li>Analytics still receiving events (the real-time view, not the monthly graph).</li>
+</ul>
+
+<h3 id="monthly">Monthly, one to two hours</h3>
+<ul>
+  <li>Dependencies: platform, plugins or packages, theme — reviewed; updates applied on staging first, then production, with a rollback point.</li>
+  <li>Configuration drift: settings, redirects, DNS compared with the baseline.</li>
+  <li>Backup: restore one somewhere and open it.</li>
+  <li>Rollback readiness: the previous release still exists and the steps are written down.</li>
+  <li>Performance on the key pages against last month.</li>
+  <li>The report, written from evidence.</li>
+</ul>
+
+<p>Adapt it in the file, not in your head. The download has the checklist as Markdown with an evidence column; if a line does not apply to your site, delete it there so the next person does not tick it anyway.</p>
+
+<h2 id="forms">Forms, navigation and links</h2>
+
+<p>The form test is the most valuable line on the list, and the one most often skipped because "it worked last time". A form has two halves: the half a visitor sees, tested every time anyone fills it in, and the half that matters — the message arriving — tested only when someone checks deliberately. Between checks it fails silently. Plugin updates, a changed SMTP password, a spam filter learning a rule, a hosting move that dropped an environment variable: all of these leave the visitor looking at "Thanks!".</p>
+
+<p>The check is: a unique marker (<code>WK-2026-09-17-1412</code>), submitted from a phone on mobile data, found in the inbox, with the time between send and arrival recorded. Then the failure case: a required field left empty should produce a visible error, not a success message. The <a href="/pages/lab-conversion-functionality">Conversion Functionality Lab</a> has a form that fails exactly that way, and the first <a href="/pages/weekly-fix">Weekly Website Fix</a> is this test, step by step.</p>
+
+<p>Navigation and links are two different checks. "Resolves" — every link returns a 200 — can be scripted, and the checker in the download does it for the same-host links on the pages you name, within a budget. "Goes where its label promises" cannot be scripted: a link labelled Book that lands on a generic contact page resolves perfectly. That one is a person on a phone reading labels, and the second Weekly Fix.</p>
+
+<h2 id="deps">Dependencies and configuration drift</h2>
+
+<p>Dependencies are the monthly item that most often becomes an emergency. The read-only inspection prompt below asks the agent to compare declared versions with available ones and to run the audit tooling the project already has — <code>npm audit --omit=dev</code>, <code>composer audit</code>, <code>pip-audit</code> — in read-only mode and report what it says. It does not update anything. Updates are applied on staging, tested with the same marked form submission and the same link check, and then applied to production with the previous version kept as the rollback. On WordPress that is the <a href="/blogs/guides/claude-code-wordpress">staging-first workflow</a> with the database left alone; on a static site it is a branch and a preview deploy.</p>
+
+<p>Configuration drift is the quiet cousin. Redirects get "tidied", a DNS record is changed for an email tool, a header is dropped during a CDN change. None of it is visible until something depends on it. The defence is a baseline — a file in the repository that records what the redirects, the DNS zone, the security headers and the platform settings were on a known date — and a monthly comparison against it. The first time you run the inspection there is no baseline; the prompt says so, and the report becomes it.</p>
+
+<h2 id="certs">Certificates, and the renewal that says "enabled"</h2>
+
+<p>If your certificate is managed by the platform (Shopify, most managed hosts, Cloudflare in front of anything), this section is a weekly glance at the expiry date and nothing more. If you run your own, it is the item most likely to take the site down on a date you could have known in advance.</p>
+
+<p>Let's Encrypt's default certificates are valid for 90 days and the project recommends renewing every 60; there is also an opt-in six-day certificate renewed every three. Automatic renewal is the norm, and "auto-renew: enabled" is what every dashboard says, including on the day the certificate expires — because enabled describes the timer, not the outcome. The check is the number of days to expiry (the checker in the download reads it from the live TLS handshake), and, when it is under about 30 for a 90-day certificate, the renewal log. Three consecutive "challenge failed" lines mean the timer is running and the renewal is not.</p>
+
+<p>The next step is a diagnostic, not a fix: fetch the challenge path from outside and run the tooling's dry-run mode. Both are read-only and both tell you what is blocking the challenge — usually a firewall rule or a blanket redirect to HTTPS that fires before the challenge path. Forcing a renewal repeats the same failure and can consume rate-limited attempts. The <a href="/pages/lab-website-operations">Website Operations Lab</a> walks through this exact case on a fixture.</p>
+
+<h2 id="backup">Backup success is not restore success</h2>
+
+<p>A backup job reports on itself. "STATUS: SUCCESS" means the process exited without an error it recognised. It does not mean the files were the right files, that the database was included, or that the archive can be opened. Two failure patterns turn up often enough to name:</p>
+
+<ul>
+  <li><strong>The empty success.</strong> A source path with a typo. The job copies nothing, uploads zero bytes, and reports success every night for months.</li>
+  <li><strong>The half backup.</strong> The files are copied and the database step is skipped because the dump tool is missing — inside a job that still says SUCCESS. On WordPress and most CMSs the database <em>is</em> the site; the files are furniture.</li>
+</ul>
+
+<p>The monthly item is therefore not "check the backup log". It is: restore one backup somewhere that is not production, open it, and look at a page and a recent record. Then read the log for the two patterns above. On a hosted platform where you cannot restore, the equivalent is an export you can open: the theme download, the data CSVs, the content export — taken on a schedule and kept off the platform.</p>
+
+<p>Rollback belongs next to backup in the report because it answers the other half of the question: not "can we get the data back" but "can we get the previous version back, quickly, without losing what happened since". The third Weekly Fix rehearses it on the last deployment you made.</p>
+
+<h2 id="hosted">Reader-controlled versus hosted platforms</h2>
+
+<p>The checklist marks items <em>(host)</em> where a hosted platform runs them for you. The distinction matters in both directions.</p>
+
+<p>On a platform you control — a VPS, a static host with your own pipeline, self-hosted WordPress — everything on the list is yours, and the agent can read most of it from the repository and the server: renewal timers, backup scripts, header configuration, dependency manifests. The inspection prompt is written for this case.</p>
+
+<p>On a hosted platform — Shopify, managed WordPress, Webflow, Squarespace — certificates, headers, platform updates and infrastructure backups are the host's. What remains yours is smaller but not nothing: apps and their scripts (the equivalent of dependencies; the <a href="/blogs/guides/build-shopify-store-with-claude-code">Shopify guide</a> covers the leftover-app problem), theme code in your repository, redirects and settings that drift, the forms that still have to deliver, and exports you can actually open. The agent reads the repository half; you read the admin half. The report template has rows for both and does not let "the host does that" stand in for a check you could have made.</p>
+
+<h2 id="prompts">The two prompts, kept apart</h2>
+
+<p>One prompt inspects and changes nothing. A second prompt fixes exactly one finding from the first prompt's report. They are never merged, and the second is never run without the first's output in front of you. Both are in the download as <code>prompts.md</code>; the inspection prompt in full:</p>
+
+<pre data-sbs-copy="prompt">Read-only weekly inspection of this website's repository and configuration.
+Do not edit any file, run any command that writes, deploys, installs or
+updates, or submit any form. If a fix seems obvious, write it as a
+recommendation.
+
+Check and report, with evidence (file:line, command output, URL) for each:
+1. Dependencies: declared versions vs latest available where a lockfile or
+   manifest exists; advisories the tooling reports (npm audit --omit=dev,
+   composer audit, pip-audit — run read-only).
+2. Configuration drift: compare deploy/redirect/robots/security-header
+   configuration in the repository with docs/BASELINE.md (or say the
+   baseline does not exist).
+3. Forms: each form's delivery path and every place a failure would be
+   silent. Do not submit anything; say that delivery must be tested by hand
+   with a marked submission.
+4. Certificates and DNS: what the repository/config says about renewal —
+   not whether it worked; that is checked from outside.
+5. Backup and rollback: what the repository says exists (scripts, workflows,
+   documented steps) and what evidence of a successful RESTORE exists.
+   "Job succeeded" is not restore evidence.
+6. Output: a table (check · observed · pass/fail/unknown · evidence), then
+   findings by priority with a recommended change and its rollback, then
+   "Not checked" with reasons. Do not invent numbers.</pre>
+
+<p>Running it in plan mode (<code>claude --permission-mode plan</code>) adds a second guarantee: Claude reads files and proposes but makes no edits until you approve, so even a prompt that drifted could not write. The remediation prompt takes one pasted finding, states the change, the files, the verification and the rollback before touching anything, works on a branch or the development theme, runs the project's checks and shows the output, and ends with what was verified and what was not.</p>
+
+<p>The report template is the third piece. Its Evidence column is the whole point: a row that says "Forms deliver — PASS" with an empty evidence cell is not a pass, and the template's last section, "Not checked (and why)", exists so a blank is never read as one.</p>
+
+<h2 id="example">A controlled example: the check that failed</h2>
+
+<p>The outside-in checker in the download (<code>weekly_check.py</code>, standard-library Python) was run against a small fixture site built for this guide — a homepage with navigation and a contact page — with two faults planted: a navigation link to a page that does not exist, and a contact page whose form had been removed. The run is reproduced by <code>scripts/test-weekly-check.py</code> in this site's repository; the output below is from that run, not typed from memory.</p>
+
+<pre>Checks: 8 · passed: 6 · failed: 2
+
+| Check                       | Subject                        | Result | Evidence                  |
+|-----------------------------|--------------------------------|--------|---------------------------|
+| page 200                    | http://127.0.0.1:8080/         | PASS   | 200                       |
+| page contains 'Harbourline' | http://127.0.0.1:8080/         | PASS   | found                     |
+| certificate                 | 127.0.0.1                      | PASS   | skipped (http)            |
+| link resolves               | http://127.0.0.1:8080/services | PASS   | 200                       |
+| link resolves               | http://127.0.0.1:8080/contact  | PASS   | 200                       |
+| link resolves               | http://127.0.0.1:8080/team     | FAIL   | 404                       |
+| page 200                    | http://127.0.0.1:8080/contact  | PASS   | 200                       |
+| page contains '&lt;form'       | http://127.0.0.1:8080/contact  | FAIL   | not found in first 400 KB |</pre>
+
+<p>Two findings, each with the evidence beside it. The resolution followed the remediation prompt: one change per finding — the link removed from the navigation, the form restored to the contact page — each verified by re-running the same check. The second run: seven checks (the dead link is gone, so it is no longer checked), seven passed, exit status 0. That is the whole loop: a check that can fail, a failure with evidence, a change small enough to describe in a sentence, and the same check passing afterwards.</p>
+
+<p>Note what the checker did not do, because it cannot from outside: it did not tell you whether the restored form delivers. That row in the report was filled in by hand, with a marker and an inbox timestamp. The report template lists the four things the script cannot check so that nobody mistakes a green run for a maintained site.</p>
+
+<h2 id="validate">How you know it worked</h2>
+
+<ul>
+  <li>Every row in the report has evidence: a URL, a timestamp, a command's output, a file and line. A row without one is moved to "Not checked".</li>
+  <li>The form test has a marker in the inbox with a time. The certificate has a day count. The backup has a restored page someone opened.</li>
+  <li>Every change made after the inspection is a separate commit or a separate platform action, each with the previous version still available.</li>
+  <li>The check that found a fault was re-run after the fix and passed. If it was never seen failing, treat it as untested — the <a href="/blogs/guides/claude-code-technical-seo-audit">technical SEO audit guide</a> makes the same rule for crawlers, and it holds here.</li>
+  <li>Next month's report can be compared with this one, line by line.</li>
+</ul>
+
+<h2 id="download">Download the checklist and report template</h2>
+
+<p>The kit contains the daily/weekly/monthly checklist with an evidence column, the report template, both prompts, and the outside-in checker with an example configuration. No account, no email address.</p>
+
+<div class="sbs-resource-download">
+  <a class="sbs-btn sbs-btn--ghost" href="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/claude-code-maintenance-kit.zip?v=1789652949" download>Download the maintenance kit (zip)</a>
+</div>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the system</span>
+  <p>The Claude Code Website Operations &amp; Maintenance System packages this into a weekly operations workflow, an incident runbook, and the report and baseline templates that keep the two prompts apart on every site you look after. <a href="/products/claude-code-website-operations-maintenance-system">See what is included</a>.</p>
+</aside>
+
+<div data-sbs-try-slot></div>
+
+<h2 id="next">Next action</h2>
+
+<p>Run the weekly column once, today, on one site, and write the report — including the rows you could not check. That report is the baseline for next week. Then take the <a href="/pages/lab-website-operations">Website Operations Lab</a>, which hands you a health report with six findings and asks you to choose what comes first, and put the form test on your calendar as the first <a href="/pages/weekly-fix">Weekly Website Fix</a>. The generator above writes the checklist for your platform and adds the tasks to <a href="/pages/my-projects">My Projects</a>, so next Monday starts with "continue" rather than "where was I".</p>

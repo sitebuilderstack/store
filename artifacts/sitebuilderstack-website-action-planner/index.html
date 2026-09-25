@@ -1,0 +1,2517 @@
+<title>SiteBuilderStack Website Action Planner</title>
+<meta name="description" content="Answer a few questions and get a practical website action plan, a starter Claude Code prompt and a matched toolkit recommendation.">
+<style>
+/* SiteBuilderStack Website Action Planner — visual system.
+ *
+ * Dark-first, because the storefront is. The bare :root block carries the
+ * complete dark palette (the design's primary state); a light palette is
+ * redefined under prefers-color-scheme: light guarded so an explicit dark
+ * choice still wins, and again under [data-theme="light"] so the viewer's
+ * toggle wins in both directions. Every colour below comes from a token.
+ *
+ * Colour and type tokens are the storefront's own (theme/dev/assets/sbs.css),
+ * so the planner looks like the site it recommends. No web font is loaded:
+ * the page must stay usable with every external request blocked.
+ */
+
+:root {
+  --bg: #0B0D12;
+  --surface: #12151D;
+  --surface-2: #171B26;
+  --border: #232A38;
+  --border-strong: #7D8798;
+  --text: #E9ECF3;
+  --muted: #A7B0C0;
+  --dim: #7D8798;
+  --accent: #8AA6FF;
+  --accent-ink: #0B0D12;
+  --accent-soft: rgba(138, 166, 255, .12);
+  --mono-accent: #5EEAD4;
+  --ok: #6EE7A8;
+  --warn: #F6C177;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.28);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --step--1: clamp(.82rem, .80rem + .10vw, .88rem);
+  --step-0: clamp(1rem, .97rem + .16vw, 1.06rem);
+  --step-1: clamp(1.14rem, 1.08rem + .30vw, 1.32rem);
+  --step-2: clamp(1.34rem, 1.20rem + .70vw, 1.74rem);
+  --step-3: clamp(1.60rem, 1.34rem + 1.25vw, 2.30rem);
+  --step-4: clamp(1.95rem, 1.50rem + 2.10vw, 3.00rem);
+
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem;
+  --sp-5: 1.5rem; --sp-6: 2rem; --sp-7: 3rem; --sp-8: 4rem;
+  --radius: 10px; --radius-lg: 16px;
+  --dur: 170ms; --ease: cubic-bezier(.2,.7,.3,1);
+  --gutter: 16px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #F6F7FB;
+    --surface: #FFFFFF;
+    --surface-2: #EEF1F7;
+    --border: #DCE1EC;
+    --border-strong: #5C6579;
+    --text: #131722;
+    --muted: #515A70;
+    --dim: #6C7589;
+    --accent: #2F4FC7;
+    --accent-ink: #FFFFFF;
+    --accent-soft: rgba(47, 79, 199, .10);
+    --mono-accent: #0B6B5C;
+    --ok: #0F7A4A;
+    --warn: #8A5A00;
+    --shadow: 0 1px 2px rgba(19,23,34,.06), 0 8px 24px rgba(19,23,34,.08);
+  }
+}
+:root[data-theme="light"] {
+  --bg: #F6F7FB;
+  --surface: #FFFFFF;
+  --surface-2: #EEF1F7;
+  --border: #DCE1EC;
+  --border-strong: #5C6579;
+  --text: #131722;
+  --muted: #515A70;
+  --dim: #6C7589;
+  --accent: #2F4FC7;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(47, 79, 199, .10);
+  --mono-accent: #0B6B5C;
+  --ok: #0F7A4A;
+  --warn: #8A5A00;
+  --shadow: 0 1px 2px rgba(19,23,34,.06), 0 8px 24px rgba(19,23,34,.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, p, ul, ol, figure, dl, dd, blockquote { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus { outline: none; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+/* Headings are focused programmatically so a screen reader lands on the new
+   screen. That is not a control, so it gets no focus ring. */
+h1[tabindex="-1"]:focus-visible { outline: none; }
+
+.wrap { width: 100%; max-width: 820px; margin: 0 auto; padding-inline: var(--gutter); }
+.wrap--wide { max-width: 1060px; }
+
+/* ---- shell --------------------------------------------------------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar__in {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  padding-block: var(--sp-3); flex-wrap: wrap;
+}
+.brand { display: inline-flex; align-items: center; gap: var(--sp-2); font-weight: 650; letter-spacing: -.01em; color: var(--text); text-decoration: none; }
+.brand__mark {
+  width: 1.7rem; height: 1.7rem; flex: 0 0 auto; display: grid; place-items: center;
+  border-radius: 7px; background: var(--accent); color: var(--accent-ink);
+  font-weight: 800; font-size: .95rem; letter-spacing: -.02em;
+}
+.brand__sub { color: var(--dim); font-size: var(--step--1); font-weight: 450; }
+.topbar__acts { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+/* The wordmark already links to the storefront; the second link is a
+   convenience that is not worth a second row on a phone. */
+@media (max-width: 640px) { .topbar__acts { display: none; } }
+
+main { padding-block: var(--sp-6) var(--sp-8); }
+.screen[hidden] { display: none !important; }
+
+/* ---- type ---------------------------------------------------------- */
+.eyebrow {
+  font-size: var(--step--1); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); font-weight: 600;
+}
+.h-hero { font-size: var(--step-4); line-height: 1.05; letter-spacing: -.03em; font-weight: 700; text-wrap: balance; }
+.h-1 { font-size: var(--step-3); line-height: 1.12; letter-spacing: -.02em; font-weight: 680; text-wrap: balance; }
+.h-2 { font-size: var(--step-2); line-height: 1.2; letter-spacing: -.015em; font-weight: 650; text-wrap: balance; }
+.h-3 { font-size: var(--step-1); line-height: 1.3; letter-spacing: -.01em; font-weight: 640; }
+.lede { font-size: var(--step-1); color: var(--muted); max-width: 60ch; }
+.muted { color: var(--muted); }
+.dim { color: var(--dim); }
+.small { font-size: var(--step--1); }
+.prose { max-width: 66ch; }
+
+/* ---- intro --------------------------------------------------------- */
+.hero { display: grid; gap: var(--sp-5); padding-block: var(--sp-6) var(--sp-4); }
+.hero__acts { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.facts { display: grid; gap: var(--sp-2); margin-top: var(--sp-2); }
+.facts li { display: grid; grid-template-columns: 1.1rem 1fr; gap: var(--sp-3); align-items: start; color: var(--muted); font-size: var(--step--1); }
+.facts svg { width: 1.1rem; height: 1.1rem; margin-top: .28rem; color: var(--mono-accent); }
+
+/* ---- buttons ------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  padding: .68rem 1.15rem; border-radius: var(--radius); border: 1px solid transparent;
+  background: var(--accent); color: var(--accent-ink); font-weight: 620; cursor: pointer;
+  text-decoration: none; line-height: 1.25; transition: filter var(--dur) var(--ease), transform var(--dur) var(--ease);
+  min-width: 0;
+}
+.btn:hover { filter: brightness(1.08); text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.btn--ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+.btn--ghost:hover { background: var(--surface-2); filter: none; }
+.btn--quiet { background: transparent; color: var(--muted); border-color: transparent; padding-inline: .6rem; }
+.btn--quiet:hover { color: var(--text); background: var(--surface-2); filter: none; }
+.btn--sm { padding: .42rem .75rem; font-size: var(--step--1); }
+.btn--block { width: 100%; }
+
+/* ---- progress ------------------------------------------------------ */
+.progress { display: grid; gap: var(--sp-2); margin-bottom: var(--sp-5); }
+.progress__bar { display: flex; gap: 4px; }
+.progress__seg { height: 4px; flex: 1 1 0; border-radius: 2px; background: var(--border); }
+.progress__seg.is-done { background: var(--accent); }
+.progress__seg.is-now { background: var(--mono-accent); }
+.progress__txt { display: flex; justify-content: space-between; gap: var(--sp-3); font-size: var(--step--1); color: var(--dim); }
+
+/* ---- question ------------------------------------------------------ */
+.q { display: grid; gap: var(--sp-5); }
+.q__group { display: grid; gap: var(--sp-3); border: 0; padding: 0; margin: 0; min-width: 0; }
+.q__legend { padding: 0; }
+.q__opts { display: grid; gap: var(--sp-2); }
+.opt {
+  display: grid; grid-template-columns: 1.15rem 1fr; gap: var(--sp-3); align-items: start;
+  padding: .85rem 1rem; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); cursor: pointer; min-width: 0;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.opt:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.opt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opt__dot {
+  width: 1.15rem; height: 1.15rem; border-radius: 50%; border: 2px solid var(--border-strong);
+  margin-top: .22rem; display: grid; place-items: center; flex: 0 0 auto;
+}
+.opt__dot--box { border-radius: 5px; }
+.opt__dot::after { content: ""; width: .55rem; height: .55rem; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform var(--dur) var(--ease); }
+.opt__dot--box::after { border-radius: 2px; }
+.opt__txt { min-width: 0; }
+.opt__note { display: block; color: var(--dim); font-size: var(--step--1); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt:has(input:checked) .opt__dot { border-color: var(--accent); }
+.opt:has(input:checked) .opt__dot::after { transform: scale(1); }
+.opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.nav { display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; padding-top: var(--sp-2); }
+.nav__spacer { flex: 1 1 auto; }
+
+/* ---- result -------------------------------------------------------- */
+.result { display: grid; gap: var(--sp-6); }
+.result__cols { display: grid; gap: var(--sp-6); align-items: start; }
+@media (min-width: 900px) {
+  .result__cols { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--sp-7); }
+  .result__rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 5.5rem); }
+}
+.section { display: grid; gap: var(--sp-4); min-width: 0; }
+.section + .section { padding-top: var(--sp-6); border-top: 1px solid var(--border); }
+
+.verdict { display: grid; gap: var(--sp-3); }
+.chip {
+  display: inline-flex; align-items: center; gap: .4rem; align-self: start;
+  padding: .28rem .6rem; border-radius: 999px; font-size: var(--step--1); font-weight: 600;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--muted);
+}
+.chip--free { color: var(--mono-accent); border-color: color-mix(in srgb, var(--mono-accent) 40%, transparent); }
+.chip--owned { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip--qualified { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+
+.note {
+  border-left: 3px solid var(--warn); padding: var(--sp-3) var(--sp-4);
+  background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--muted); font-size: var(--step--1);
+}
+.note + .note { margin-top: var(--sp-2); }
+
+.because { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.because li {
+  font-size: var(--step--1); color: var(--muted);
+  border: 1px solid var(--border); border-radius: 999px; padding: .22rem .65rem;
+  background: var(--surface); max-width: 100%; overflow-wrap: anywhere;
+}
+
+/* The three actions are genuinely ordered, so they are numbered. */
+.actions { display: grid; gap: var(--sp-5); counter-reset: step; }
+.action { display: grid; grid-template-columns: 2.1rem minmax(0, 1fr); gap: var(--sp-4); min-width: 0; }
+.action__n {
+  counter-increment: step; width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--accent); font-weight: 700; font-size: var(--step--1); font-variant-numeric: tabular-nums;
+}
+.action__n::before { content: counter(step); }
+.action__body { display: grid; gap: var(--sp-3); min-width: 0; }
+.action__what { font-size: var(--step-1); font-weight: 600; line-height: 1.35; letter-spacing: -.01em; }
+.meta { display: grid; gap: var(--sp-2); }
+.meta div { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: var(--sp-3); align-items: baseline; }
+.meta dt { font-size: var(--step--1); color: var(--dim); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; white-space: nowrap; }
+.meta dd { margin: 0; color: var(--muted); font-size: var(--step--1); min-width: 0; }
+.meta .verify { color: var(--text); font-family: var(--font-mono); font-size: .82rem; }
+@media (max-width: 560px) {
+  .meta div { grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); }
+}
+
+/* ---- prompt -------------------------------------------------------- */
+.promptbox { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
+.promptbox__head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); background: var(--surface-2);
+  flex-wrap: wrap;
+}
+.promptbox__title { font-size: var(--step--1); font-weight: 650; letter-spacing: -.005em; }
+.promptbox__body { margin: 0; padding: var(--sp-4); overflow-x: auto; }
+.promptbox__body code {
+  font-family: var(--font-mono); font-size: .8rem; line-height: 1.65; color: var(--text);
+  white-space: pre-wrap; overflow-wrap: anywhere; display: block;
+}
+.copyfallback { display: grid; gap: var(--sp-2); padding: var(--sp-4); border-top: 1px solid var(--border); }
+.copyfallback textarea {
+  width: 100%; min-height: 8rem; background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: var(--sp-3);
+  font-family: var(--font-mono); font-size: .78rem; resize: vertical;
+}
+
+/* ---- product card -------------------------------------------------- */
+.card {
+  border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface);
+  padding: var(--sp-5); display: grid; gap: var(--sp-4); min-width: 0; box-shadow: var(--shadow);
+}
+.card--flat { box-shadow: none; background: transparent; }
+.card__head { display: grid; gap: var(--sp-2); }
+.card__price {
+  font-family: var(--font-mono); font-size: var(--step-1); color: var(--mono-accent);
+  font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+}
+.card__list { display: grid; gap: var(--sp-2); }
+.card__list li { display: grid; grid-template-columns: .9rem minmax(0, 1fr); gap: var(--sp-3); font-size: var(--step--1); color: var(--muted); align-items: start; }
+.card__list li::before { content: "▸"; color: var(--accent); line-height: 1.6; }
+.limit { font-size: var(--step--1); color: var(--dim); border-top: 1px dashed var(--border); padding-top: var(--sp-3); }
+.disclosure { font-size: var(--step--1); color: var(--dim); }
+
+details.more { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+details.more > summary {
+  cursor: pointer; padding: var(--sp-3) var(--sp-4); font-size: var(--step--1); font-weight: 600;
+  list-style: none; display: flex; align-items: center; gap: var(--sp-2);
+}
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "+"; color: var(--accent); font-weight: 700; width: 1ch; }
+details.more[open] > summary::before { content: "−"; }
+details.more > .more__body { padding: 0 var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-3); }
+
+.table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.table th, .table td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+.table th { color: var(--dim); font-weight: 600; }
+.table td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tablewrap { overflow-x: auto; }
+
+.maths { display: grid; gap: var(--sp-2); font-size: var(--step--1); }
+.maths__row { display: flex; justify-content: space-between; gap: var(--sp-3); }
+.maths__row span:last-child { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.maths__verdict { font-weight: 600; color: var(--text); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.status { font-size: var(--step--1); color: var(--ok); min-height: 1.4em; }
+.status--err { color: var(--warn); }
+
+footer.foot { border-top: 1px solid var(--border); padding-block: var(--sp-6); color: var(--dim); font-size: var(--step--1); }
+.foot__in { display: grid; gap: var(--sp-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+</style>
+
+<header class="topbar">
+  <div class="wrap wrap--wide topbar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=website_action_planner&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Website Action Planner</span>
+    </a>
+    <div class="topbar__acts">
+      <a class="btn btn--quiet btn--sm" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=website_action_planner&amp;utm_content=header_brand" target="_blank" rel="noopener">sitebuilderstack.com &#8599;</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div id="app"></div>
+</main>
+
+<script>
+window.SBS_PRODUCTS = {"$comment": "Build-time catalogue snapshot. Verified against the live Shopify Admin API (product status, handle, title, variant price, currency, availableForSale, onlineStoreUrl) and against each product's own published description on the date below. The artifact NEVER calls Shopify at runtime. Refresh with: python3 refresh-catalogue.py --write (see README.md).", "snapshot": {"verifiedOn": "2026-09-24", "freshnessWindowDays": 30, "currency": "USD", "source": "Shopify Admin GraphQL API 2025-07 + published product descriptions", "priceDisclosure": "Prices are a snapshot taken on the date above. The storefront is the authority."}, "site": "https://sitebuilderstack.com", "format": {"summary": "Every paid product is a one-time download: a ZIP of plain Markdown workflows, prompts, templates and checklists (some also ship small standard-library Python scripts) that you run yourself inside Claude Code.", "notAService": "These are not autonomous services. Nothing runs on your site for you, nothing is hosted, and no work happens without you running it."}, "bundles": {"complete-site-builder-stack": {"members": ["website-launch-system", "seo-audit-toolkit", "conversion-toolkit"], "note": "Verified 24 September 2026: the bundle is these three products only, delivered as three downloads on one order. It does not contain the Operations, Shopify Automation, Migration or Agency products."}}, "products": [{"id": "website-launch-system", "handle": "claude-code-website-launch-system", "title": "The Claude Code Website Launch System", "shortName": "Website Launch System", "url": "https://sitebuilderstack.com/products/claude-code-website-launch-system", "price": 19.99, "currency": "USD", "sku": "SBS-CCWLS-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Directing Claude Code through a complete website build, from research and planning to the first thirty days after launch.", "prerequisites": "Claude Code installed, a terminal, and a project you are willing to build or rebuild from a documented plan.", "benefits": ["113 files across 17 modules, more than 110,000 words of plain Markdown you own outright.", "A staged master build prompt across fifteen gated phases, plus a production CLAUDE.md template.", "Platform build systems for Shopify, WordPress, Astro, SaaS applications and landing pages, each with its own audits and launch checklist."], "inclusions": ["01 — Master System: the end-to-end build prompt plus the discovery, planning and roadmap chain", "02 — Claude Code Configuration: a production CLAUDE.md template and how memory files actually load", "03 — SEO System: search architecture, technical audit, keyword research, clusters, internal linking, schema, sitemaps, robots.txt", "04–08 — Platform Systems: Shopify, WordPress, Astro, SaaS, landing pages", "09–10 — Deployment: GitHub repository setup, CI/CD, four working GitHub Actions files, Cloudflare DNS/Pages/caching/security", "11–12 — Security and Accessibility audits with checklists", "13–14 — Search Engines and the pre-launch, launch-day, 24-hour, 7-day and 30-day checklists", "15 — Prompt Library: 100 reusable single-purpose prompts"], "exclusions": ["It does not audit a site that already exists in depth — that is the SEO & Website Audit Toolkit.", "It does not cover ongoing operations after the first thirty days — that is the Operations & Maintenance System.", "It does not write your content or run the prompts for you."], "inBundle": "complete-site-builder-stack"}, {"id": "seo-audit-toolkit", "handle": "claude-code-seo-website-audit-toolkit", "title": "Claude Code SEO & Website Audit Toolkit", "shortName": "SEO & Website Audit Toolkit", "url": "https://sitebuilderstack.com/products/claude-code-seo-website-audit-toolkit", "price": 19.99, "currency": "USD", "sku": "SBS-CCSAT-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Finding out why an existing website is not performing in search, with evidence rather than a confident summary.", "prerequisites": "A website that is already live and reachable, and the ability to read a diff and run a command.", "benefits": ["Fourteen modules, twenty prompts, four report templates and three checklists — 26,000 words of plain Markdown.", "The prompts run in dependency order: crawlability before on-page, because optimising a title on a URL about to be canonicalised away is wasted work.", "Every prompt demands evidence and forbids fixing in the same run, so an audit leaves a report rather than an unreviewed diff."], "inclusions": ["01-technical-seo: crawlability, indexability, robots, sitemaps, canonicals, redirects, status codes, pagination", "02-on-page-seo: titles, descriptions, heading hierarchy, alt text, duplicate metadata", "03-indexation: why pages are not indexed and what actually helps", "04-structured-data: schema that describes what is visibly on the page, by page type", "Four report templates and three checklists"], "exclusions": ["It is not for a site that does not exist yet — start with the Website Launch System.", "It does not include a crawler or a rank tracker; it directs Claude Code against your live site.", "It makes no ranking promises and no traffic forecasts."], "inBundle": "complete-site-builder-stack"}, {"id": "conversion-toolkit", "handle": "claude-code-conversion-revenue-optimization-toolkit", "title": "Claude Code Conversion & Revenue Optimization Toolkit", "shortName": "Conversion & Revenue Optimization Toolkit", "url": "https://sitebuilderstack.com/products/claude-code-conversion-revenue-optimization-toolkit", "price": 19.99, "currency": "USD", "sku": "SBS-CCCRO-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Working out where traffic that already exists is being lost, and whether a change actually worked.", "prerequisites": "A live site that already receives traffic. The product's own description says plainly: if nobody is arriving yet, this is the wrong product.", "benefits": ["Thirteen modules, 70 workflows, 68 commands, six report templates and four worked examples — 65,000 words.", "Findings carry evidence and an honesty label: proven bug, strong heuristic, experiment opportunity, or insufficient data.", "Tracking is verified in both directions before any number is trusted, and the experimentation module tells you when you do not have the traffic to test at all."], "inclusions": ["01-core: the master conversion audit, the four modes, the finding format", "Funnel analysis and analytics verification workflows", "An experimentation system that refuses to run a test the traffic cannot support", "Six report templates and four worked examples"], "exclusions": ["No workflow predicts a percentage lift, because nobody can know that in advance.", "It explicitly refuses manipulative tactics — countdowns, fake stock warnings, invented scarcity.", "It will not help a site nobody has found yet."], "inBundle": "complete-site-builder-stack"}, {"id": "operations-system", "handle": "claude-code-website-operations-maintenance-system", "title": "Claude Code Website Operations & Maintenance System", "shortName": "Operations & Maintenance System", "url": "https://sitebuilderstack.com/products/claude-code-website-operations-maintenance-system", "price": 39.99, "currency": "USD", "sku": "SBS-CCWOMS-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Running a production website after launch: monitoring, security checks, dependency updates, backup verification, deployment gates, incident diagnosis and monthly reporting.", "prerequisites": "A live website you are responsible for keeping up, and permission to run read-only checks against it.", "benefits": ["17 modules, 19 slash commands, 11 working scripts, 9 checklists, 8 report templates and 4 platform guides.", "The scripts measure the site from outside — HTTP, TLS, DNS, headers, exposure, links, redirects, sitemap, endpoints, baseline — and merge into one report with a health score.", "A safety system that never touches production without your say-so."], "inclusions": ["Standard-library Python scripts — nothing to install", "Slash commands that run the scripts and read the results", "Backup-restore verification, deployment gates on both sides of a deploy, incident playbooks", "A monthly operations report template"], "exclusions": ["It is not a hosted monitoring service and sends no alerts on its own — you run the checks.", "It does not build or migrate a site.", "It does not fix production for you; changes stay gated behind your approval."], "inBundle": null}, {"id": "shopify-automation", "handle": "claude-code-shopify-automation-admin-api-toolkit", "title": "Claude Code Shopify Automation & Admin API Toolkit", "shortName": "Shopify Automation & Admin API Toolkit", "url": "https://sitebuilderstack.com/products/claude-code-shopify-automation-admin-api-toolkit", "price": 39.99, "currency": "USD", "sku": "SBS-CCSHOP-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Bulk and repetitive Shopify administration — products, collections, SEO fields, metafields, inventory, redirects, catalogue auditing — through the Admin GraphQL API.", "prerequisites": "A Shopify store you administer, and the ability to create a custom app with Admin API access. This is API work, not theme work.", "benefits": ["32 working scripts, 34 Claude Code commands, 18 validated GraphQL documents and 19 modules.", "A preview before every write, a backup, and a read-back after — so a bulk mutation is reviewable and reversible.", "A GraphQL client with retries, throttling and cost awareness, plus export/audit/write scripts per catalogue area."], "inclusions": ["CONNECT → AUDIT → EXPORT → AUTOMATE → VALIDATE → REPORT as a working sequence", "Products, variants, collections, metafields, metaobjects, media, SEO, inventory and pricing scripts", "Templates for every input, and modules that state what each workflow refuses to do"], "exclusions": ["It is not a Shopify theme or storefront design product.", "It does not apply to WordPress, Astro or custom applications.", "Simply being on Shopify is not a reason to buy it — it earns its place when the catalogue work is repetitive or bulk."], "inBundle": null}, {"id": "migration-system", "handle": "claude-code-website-migration-replatforming-system", "title": "Claude Code Website Migration & Replatforming System", "shortName": "Migration & Replatforming System", "url": "https://sitebuilderstack.com/products/claude-code-website-migration-replatforming-system", "price": 29.99, "currency": "USD", "sku": "SBS-CCWMRS-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "Planning, executing and validating a move between platforms, hosts, themes or domains without losing URLs, metadata, media, forms or search traffic.", "prerequisites": "An existing site with URLs worth preserving, and access to both the source and the destination.", "benefits": ["28 working scripts, 37 Claude Code commands, 20 modules including seven platform guides, and 13 checklists.", "A crawler that builds the URL inventory, page-by-page metadata and structured-data comparison, and redirect testing.", "A cut-over scorecard that returns GO, GO WITH WARNINGS or NO-GO from evidence, plus a complete fictional migration to read first."], "inclusions": ["DISCOVER → INVENTORY → BASELINE → MAP → BUILD → MIGRATE → VALIDATE → CUT OVER → MONITOR → ROLL BACK", "Seven platform guides (including WordPress→Astro, WordPress→Shopify, Shopify replatforming)", "DNS recorded before it is touched, and a rollback path"], "exclusions": ["It does not move your content for you or host the new site.", "It is not a substitute for the destination platform's own build system.", "It cannot recover URLs from a site that has already been taken down."], "inBundle": null}, {"id": "agency-system", "handle": "claude-code-agency-client-delivery-system", "title": "Claude Code Agency & Client Delivery System", "shortName": "Agency & Client Delivery System", "url": "https://sitebuilderstack.com/products/claude-code-agency-client-delivery-system", "price": 39.99, "currency": "USD", "sku": "SBS-CCACDS-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "useCase": "The engagement around the build: discovery, scoping, proposals, onboarding, review, launch, handoff and retention for client website work.", "prerequisites": "You deliver websites for other people, and you are willing to keep one set of files per client.", "benefits": ["21 modules, 37 commands, 29 templates plus a client-project skeleton, 17 checklists, 12 report shapes and 3 worksheets.", "One set of files per client — client-config.yaml for the facts, CLAUDE.md for the rules, the scope as the contract, and four logs as the memory.", "A person sits between every draft and the client; no command invents a requirement, a budget or a promise."], "inclusions": ["DISCOVER → SCOPE → PROPOSE → ONBOARD → BUILD → REVIEW → LAUNCH → HANDOFF → RETAIN", "Proposal, scope, change-order and handoff templates", "One complete fictional engagement to read before you run your own"], "exclusions": ["It is not a contract and not legal advice; the templates are drafts for you to review.", "It does not build the website — pair it with the build, SEO or migration product the project actually needs.", "It is not a CRM, an invoicing tool or a project-management app."], "inBundle": null}, {"id": "complete-stack", "handle": "complete-site-builder-stack", "title": "Complete Site Builder Stack", "shortName": "Complete Site Builder Stack", "url": "https://sitebuilderstack.com/products/complete-site-builder-stack", "price": 39.99, "currency": "USD", "sku": "SBS-CCSTACK-V1", "status": "ACTIVE", "availableOnDate": true, "verifiedOn": "2026-09-24", "isBundle": true, "useCase": "The build → rank → convert sequence bought together, when more than one of those three stages is genuinely in front of you.", "prerequisites": "The same prerequisites as its members. It is only worth buying when you will actually use more than one of them.", "benefits": ["The Website Launch System, the SEO & Website Audit Toolkit and the Conversion & Revenue Optimization Toolkit, as three downloads on one order.", "267 files, around 206,000 words of plain Markdown.", "Nothing is abridged and nothing is exclusive to the bundle — they are the same three products."], "inclusions": ["Claude Code Website Launch System", "Claude Code SEO & Website Audit Toolkit", "Claude Code Conversion & Revenue Optimization Toolkit"], "exclusions": ["It does NOT include the Operations & Maintenance System.", "It does NOT include the Shopify Automation, Migration or Agency products.", "Buying it for one product is more expensive than buying that product on its own."], "inBundle": null}], "freeResources": [{"id": "free-build-guide", "title": "How to build a website with Claude Code", "url": "https://sitebuilderstack.com/blogs/guides/how-to-build-a-website-with-claude-code", "kind": "guide"}, {"id": "free-claude-md", "title": "CLAUDE.md Starter Generator", "url": "https://sitebuilderstack.com/pages/claude-md-generator", "kind": "tool"}, {"id": "free-prompt-builder", "title": "Claude Code Website Prompt Builder", "url": "https://sitebuilderstack.com/pages/website-prompt-builder", "kind": "tool"}, {"id": "free-launch-checklist", "title": "Claude Code Website Launch Checklist", "url": "https://sitebuilderstack.com/pages/claude-code-launch-checklist", "kind": "checklist"}, {"id": "free-seo-hub", "title": "Claude Code SEO", "url": "https://sitebuilderstack.com/pages/claude-code-seo", "kind": "hub"}, {"id": "free-technical-seo", "title": "Claude Code technical SEO audit", "url": "https://sitebuilderstack.com/blogs/guides/claude-code-technical-seo-audit", "kind": "guide"}, {"id": "free-seo-generator", "title": "Claude Code SEO Audit Prompt Generator", "url": "https://sitebuilderstack.com/pages/seo-audit-prompt-generator", "kind": "tool"}, {"id": "free-cro-guide", "title": "Claude Code conversion rate optimization", "url": "https://sitebuilderstack.com/blogs/guides/claude-code-conversion-rate-optimization", "kind": "guide"}, {"id": "free-conversion-lab", "title": "Conversion Functionality Lab", "url": "https://sitebuilderstack.com/pages/lab-conversion-functionality", "kind": "lab"}, {"id": "free-maintenance-guide", "title": "Claude Code website maintenance", "url": "https://sitebuilderstack.com/blogs/guides/claude-code-website-maintenance", "kind": "guide"}, {"id": "free-operations-lab", "title": "Website Operations Lab", "url": "https://sitebuilderstack.com/pages/lab-website-operations", "kind": "lab"}, {"id": "free-shopify-admin-guide", "title": "Shopify Admin API with Claude Code", "url": "https://sitebuilderstack.com/blogs/guides/shopify-admin-api-claude-code", "kind": "guide"}, {"id": "free-shopify-hub", "title": "Claude Code Shopify Development", "url": "https://sitebuilderstack.com/pages/claude-code-shopify", "kind": "hub"}, {"id": "free-migration-guide", "title": "Website migration SEO checklist", "url": "https://sitebuilderstack.com/blogs/guides/website-migration-seo-checklist-claude-code", "kind": "guide"}, {"id": "free-terminal-setup", "title": "Claude Code terminal setup", "url": "https://sitebuilderstack.com/blogs/guides/claude-code-terminal-setup", "kind": "guide"}, {"id": "free-resources-hub", "title": "Free Claude Code website development resources", "url": "https://sitebuilderstack.com/pages/resources", "kind": "hub"}, {"id": "free-tools-hub", "title": "Free Claude Code website tools", "url": "https://sitebuilderstack.com/pages/tools", "kind": "hub"}, {"id": "free-labs-hub", "title": "Practical Labs", "url": "https://sitebuilderstack.com/pages/labs", "kind": "hub"}, {"id": "free-readiness-score", "title": "Website Launch Readiness Score", "url": "https://sitebuilderstack.com/pages/launch-readiness-score", "kind": "tool"}, {"id": "free-wordpress-hub", "title": "Claude Code WordPress Development", "url": "https://sitebuilderstack.com/pages/claude-code-wordpress", "kind": "hub"}, {"id": "free-astro-hub", "title": "Claude Code Astro Development", "url": "https://sitebuilderstack.com/pages/claude-code-astro", "kind": "hub"}, {"id": "free-failure-library", "title": "Claude Code Web Development Failure Library", "url": "https://sitebuilderstack.com/pages/claude-code-failure-library", "kind": "hub"}]};
+</script>
+<script>
+/* recommendation-rules.js — the SiteBuilderStack Website Action Planner's
+ * decision engine.
+ *
+ * Pure functions over a plain answers object. No DOM, no network, no storage,
+ * no timers. The interface in index.html renders whatever this returns; the
+ * Node test suite in tests/test-rules.js exercises it directly. If a routing
+ * decision is not expressible here, it does not belong in the UI.
+ *
+ * The catalogue is passed in (products.json) rather than imported, so the
+ * same engine runs against a stale snapshot, a refreshed one, or a fixture.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.SBS_RULES = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ *
+   * Vocabulary. These ids are the contract with the UI and the tests.
+   * ------------------------------------------------------------------ */
+  var GOALS = [
+    ['build', 'Build or launch a website'],
+    ['seo', 'Improve search visibility'],
+    ['convert', 'Turn existing traffic into more leads or sales'],
+    ['maintain', 'Maintain a live website'],
+    ['shopify_admin', 'Automate Shopify administration'],
+    ['migrate', 'Migrate to another platform'],
+    ['agency', 'Improve client-project delivery'],
+  ];
+  var PLATFORMS = [
+    ['shopify', 'Shopify'],
+    ['wordpress', 'WordPress / WooCommerce'],
+    ['astro', 'Astro or another code-based website'],
+    ['saas', 'SaaS / custom web application'],
+    ['undecided', 'Other / not decided'],
+  ];
+  var STAGES = [
+    ['idea', 'Idea or planning'],
+    ['building', 'Building, but not live'],
+    ['live_no_traffic', 'Live, with little or no traffic'],
+    ['live_traffic', 'Live, receiving traffic'],
+    ['multi_site', 'Operating several websites or client projects'],
+  ];
+  var READINESS = [
+    ['using', 'I already use Claude Code'],
+    ['access_help', 'I have access but need help getting started'],
+    ['exploring', 'Exploring — not comfortable with a terminal yet'],
+  ];
+
+  /* Goal → the product that answers it, before any qualification. */
+  var GOAL_PRODUCT = {
+    build: 'website-launch-system',
+    seo: 'seo-audit-toolkit',
+    convert: 'conversion-toolkit',
+    maintain: 'operations-system',
+    shopify_admin: 'shopify-automation',
+    migrate: 'migration-system',
+    agency: 'agency-system',
+  };
+
+  /* Contextual questions, and the goals that make each one relevant. */
+  var CONTEXT = {
+    build_blocker: {
+      goals: ['build'],
+      question: 'What is actually in the way right now?',
+      options: [
+        ['no_plan', 'There is no written plan or structure yet'],
+        ['stalled', 'The build has stalled or keeps being rewritten'],
+        ['quality', 'It builds, but I do not trust the quality'],
+        ['notsure', 'Not sure'],
+      ],
+    },
+    seo_symptom: {
+      goals: ['seo'],
+      question: 'Which of these is closest to what you are seeing?',
+      options: [
+        ['not_indexed', 'Pages are not in the index, or are indexed slowly'],
+        ['indexed_no_rank', 'Pages are indexed but rank for nothing'],
+        ['traffic_dropped', 'Search traffic dropped'],
+        ['never_audited', 'Nothing obvious — it has just never been audited'],
+        ['notsure', 'Not sure'],
+      ],
+    },
+    conv_measurement: {
+      goals: ['convert'],
+      question: 'Is traffic measured, and is the main conversion tracked?',
+      options: [
+        ['yes', 'Yes — analytics is installed and the conversion event fires'],
+        ['partial', 'Analytics is installed, but I do not trust the conversion number'],
+        ['no', 'No conversion tracking'],
+        ['notsure', 'Not sure'],
+      ],
+    },
+    maintain_checks: {
+      goals: ['maintain'],
+      multi: true,
+      question: 'Which routine checks are already in place?',
+      options: [
+        ['backups', 'Backups — and a restore has been tested'],
+        ['monitoring', 'Uptime, TLS and certificate monitoring'],
+        ['updates', 'A dependency / plugin update cadence'],
+        ['deploy_gate', 'A check that runs on both sides of a deploy'],
+        ['none', 'None of these'],
+        ['notsure', 'Not sure'],
+      ],
+      exclusive: ['none', 'notsure'],
+    },
+    admin_task: {
+      goals: ['shopify_admin'],
+      question: 'Which repetitive administrative task is the problem?',
+      options: [
+        ['catalogue_seo', 'Product titles, descriptions, SEO fields or alt text at scale'],
+        ['collections_metafields', 'Collections, metafields or metaobjects'],
+        ['inventory_pricing', 'Inventory, variants or pricing across many products'],
+        ['redirects', 'Redirects and URL clean-up'],
+        ['reporting', 'Exports, audits and catalogue reporting'],
+        ['none', 'None — I am on Shopify, but bulk admin is not my problem'],
+        ['notsure', 'Not sure'],
+      ],
+    },
+    migrate_from: {
+      goals: ['migrate'],
+      question: 'What are you moving from?',
+      options: [
+        ['wordpress', 'WordPress'],
+        ['shopify', 'Shopify'],
+        ['hosted_builder', 'Wix, Squarespace or another hosted builder'],
+        ['custom', 'A custom or static site'],
+        ['notsure', 'Not sure yet'],
+      ],
+    },
+    migrate_to: {
+      goals: ['migrate'],
+      question: 'What are you moving to?',
+      options: [
+        ['shopify', 'Shopify'],
+        ['wordpress', 'WordPress'],
+        ['astro', 'Astro or another code-based site'],
+        ['saas', 'A custom application'],
+        ['same_platform', 'The same platform — new host, theme or domain'],
+        ['notsure', 'Not decided'],
+      ],
+    },
+    agency_problem: {
+      goals: ['agency'],
+      question: 'Where does client work usually go wrong for you?',
+      options: [
+        ['scoping', 'Scoping and estimating'],
+        ['qa', 'Review and QA before the client sees it'],
+        ['handoff', 'Handoff and documentation'],
+        ['reporting', 'Reporting and retention afterwards'],
+        ['notsure', 'Not sure — all of it feels ad hoc'],
+      ],
+    },
+  };
+
+  /* ------------------------------------------------------------------ *
+   * Small helpers
+   * ------------------------------------------------------------------ */
+  function label(pairs, id) {
+    for (var i = 0; i < pairs.length; i++) if (pairs[i][0] === id) return pairs[i][1];
+    return '';
+  }
+  function goalLabel(id) { return label(GOALS, id); }
+  function platformLabel(id) { return label(PLATFORMS, id); }
+  function stageLabel(id) { return label(STAGES, id); }
+  function readinessLabel(id) { return label(READINESS, id); }
+  function contextLabel(key, id) {
+    var c = CONTEXT[key];
+    return c ? label(c.options, id) : '';
+  }
+  function money(n) { return Math.round(n * 100) / 100; }
+  function fmt(n, currency) {
+    var s = money(n).toFixed(2);
+    return (currency === 'USD' ? '$' : (currency || '') + ' ') + s;
+  }
+  function uniq(a) { var o = [], s = {}; a.forEach(function (x) { if (x && !s[x]) { s[x] = 1; o.push(x); } }); return o; }
+  function arr(v) { return Array.isArray(v) ? v : (v === undefined || v === null || v === '' ? [] : [v]); }
+
+  /* ------------------------------------------------------------------ *
+   * Catalogue
+   * ------------------------------------------------------------------ */
+  function indexCatalogue(cat) {
+    var by = {};
+    (cat.products || []).forEach(function (p) { by[p.id] = p; });
+    var bundleKey = Object.keys(cat.bundles || {})[0] || null;
+    return {
+      raw: cat,
+      byId: by,
+      bundleProductId: 'complete-stack',
+      bundleMembers: bundleKey ? cat.bundles[bundleKey].members.slice() : [],
+      bundleNote: bundleKey ? cat.bundles[bundleKey].note : '',
+      free: cat.freeResources || [],
+      snapshot: cat.snapshot || {},
+    };
+  }
+  function freeById(C, id) {
+    for (var i = 0; i < C.free.length; i++) if (C.free[i].id === id) return C.free[i];
+    return null;
+  }
+
+  /* Price freshness. After the window, exact prices and savings are replaced
+     with "See current price" — the store stays the authority. */
+  function priceState(C, today) {
+    var s = C.snapshot || {};
+    if (!s.verifiedOn) return { fresh: false, ageDays: null, reason: 'no verification date in the snapshot' };
+    var v = Date.parse(s.verifiedOn + 'T00:00:00Z');
+    var t = Date.parse((today || isoToday()) + 'T00:00:00Z');
+    if (isNaN(v) || isNaN(t)) return { fresh: false, ageDays: null, reason: 'unreadable verification date' };
+    var age = Math.floor((t - v) / 86400000);
+    var win = s.freshnessWindowDays || 30;
+    return {
+      fresh: age >= 0 && age <= win,
+      ageDays: age,
+      windowDays: win,
+      verifiedOn: s.verifiedOn,
+      reason: age > win ? 'snapshot is ' + age + ' days old (window ' + win + ')' : (age < 0 ? 'verification date is in the future' : ''),
+    };
+  }
+  function isoToday() { return new Date().toISOString().slice(0, 10); }
+
+  function priceText(C, product, ps) {
+    if (!product) return '';
+    if (!ps.fresh || product.availableOnDate !== true || typeof product.price !== 'number') return 'See current price';
+    return fmt(product.price, product.currency);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Which questions apply, given the answers so far
+   * ------------------------------------------------------------------ */
+  function activeGoals(a) {
+    return uniq([a.goal, a.goal_secondary]).filter(function (g) { return g && g !== 'none' && GOAL_PRODUCT[g]; });
+  }
+  function relevantContextKeys(a) {
+    var gs = activeGoals(a), out = [];
+    Object.keys(CONTEXT).forEach(function (k) {
+      if (CONTEXT[k].goals.some(function (g) { return gs.indexOf(g) !== -1; })) out.push(k);
+    });
+    return out;
+  }
+  /* Answers to questions that no longer apply are dropped before anything
+     reads them, so a changed earlier answer cannot leak into the result. */
+  function normalize(answers) {
+    var a = {};
+    ['goal', 'goal_secondary', 'platform', 'stage', 'readiness'].forEach(function (k) {
+      if (answers[k]) a[k] = answers[k];
+    });
+    if (a.goal_secondary === a.goal) delete a.goal_secondary;
+    var keep = relevantContextKeys(a);
+    keep.forEach(function (k) {
+      if (answers[k] === undefined || answers[k] === null || answers[k] === '') return;
+      a[k] = CONTEXT[k].multi ? arr(answers[k]).slice() : answers[k];
+    });
+    var owns = arr(answers.owns);
+    if (owns.indexOf('none') !== -1) owns = ['none'];
+    else if (owns.indexOf('notsure') !== -1) owns = ['notsure'];
+    a.owns = owns;
+    return a;
+  }
+  function ownedIds(a) {
+    return a.owns.filter(function (x) { return x !== 'none' && x !== 'notsure'; });
+  }
+  /* Owning the bundle means owning its three members. */
+  function expandOwned(C, ids) {
+    var out = ids.slice();
+    if (ids.indexOf(C.bundleProductId) !== -1) out = out.concat(C.bundleMembers);
+    return uniq(out);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Qualification. Runs before ranking, as the brief requires.
+   * Each gate returns a note the result page prints verbatim, so the
+   * visitor can see why they were routed where they were.
+   * ------------------------------------------------------------------ */
+  function qualify(a) {
+    var notes = [], flags = {}, live = a.stage === 'live_no_traffic' || a.stage === 'live_traffic' || a.stage === 'multi_site';
+    var route = {};   // goal id → replacement goal id
+    var gs = activeGoals(a);
+
+    gs.forEach(function (g) {
+      if (g === 'convert') {
+        if (a.stage === 'idea' || a.stage === 'building') {
+          route.convert = 'build';
+          flags.convert_not_live = true;
+          notes.push('Conversion work needs a site that is live and receiving traffic. Yours is not live yet, so the plan below finishes the build first.');
+        } else if (a.stage === 'live_no_traffic') {
+          route.convert = 'seo';
+          flags.convert_no_traffic = true;
+          notes.push('You said the site is live with little or no traffic. Optimising conversion before anyone arrives changes a percentage of almost nothing, so the plan below works on discovery first.');
+        }
+      }
+      if (g === 'seo' && (a.stage === 'idea' || a.stage === 'building')) {
+        route.seo = 'build';
+        flags.seo_before_launch = true;
+        notes.push('An audit needs something to audit. Until the site is live, the search work belongs inside the build rather than in a separate audit pass.');
+      }
+      if (g === 'maintain' && (a.stage === 'idea' || a.stage === 'building')) {
+        route.maintain = 'build';
+        flags.maintain_not_live = true;
+        notes.push('There is nothing in production to maintain yet, so the plan below gets you to a launch you can then operate.');
+      }
+      if (g === 'migrate' && a.stage === 'idea') {
+        flags.migrate_nothing_yet = true;
+        notes.push('You selected a migration from the planning stage. If there is no existing site with URLs worth preserving, this is a build rather than a migration — say so by changing the stage answer.');
+      }
+      if (g === 'shopify_admin') {
+        if (a.platform && a.platform !== 'shopify') {
+          delete route.shopify_admin;
+          flags.shopify_admin_wrong_platform = true;
+          notes.push('Shopify administration was selected, but the platform answer is ' + platformLabel(a.platform) + '. The Admin API toolkit only applies to a Shopify store, so it is not recommended here.');
+        } else if (a.admin_task === 'none') {
+          flags.shopify_admin_no_task = true;
+          notes.push('Being on Shopify is not on its own a reason to automate it. You said bulk administration is not the problem, so no automation product is recommended.');
+        } else if (a.admin_task === 'notsure') {
+          flags.shopify_admin_task_unknown = true;
+          notes.push('You were not sure which administrative task is the problem. The first action below names it before anything is bought.');
+        }
+      }
+    });
+
+    /* "Agency" is an engagement problem, not a project. If a real project
+       problem was also stated, that project leads and the agency system
+       supports it. */
+    if (a.goal === 'agency' && a.goal_secondary && a.goal_secondary !== 'agency') {
+      flags.agency_defers = true;
+      notes.push('You lead with client delivery and also named ' + goalLabel(a.goal_secondary).toLowerCase() + '. The delivery system organises the engagement; it does not do the project work, so the project problem is treated as the primary one.');
+    }
+
+    if (a.readiness === 'exploring') {
+      flags.not_ready = true;
+      notes.push('You said you are not comfortable with a terminal yet. Every paid product here is a set of workflows you run inside Claude Code, so the plan below starts with a free path to get there.');
+    }
+
+    if (!live && a.stage === 'multi_site') live = true;
+    return { notes: notes, flags: flags, route: route, live: live };
+  }
+
+  /* Apply the routing table to a goal. */
+  function routed(q, g) { return q.route[g] || g; }
+
+  /* ------------------------------------------------------------------ *
+   * Product selection
+   * ------------------------------------------------------------------ */
+  function selectProducts(a, q) {
+    var primaryGoal = a.goal, secondaryGoal = a.goal_secondary;
+    if (q.flags.agency_defers) { primaryGoal = a.goal_secondary; secondaryGoal = 'agency'; }
+
+    var pg = primaryGoal ? routed(q, primaryGoal) : null;
+    var sg = secondaryGoal ? routed(q, secondaryGoal) : null;
+    if (sg === pg) sg = null;
+
+    var primary = pg ? GOAL_PRODUCT[pg] : null;
+    var secondary = sg ? GOAL_PRODUCT[sg] : null;
+
+    /* Gates that remove a product entirely. */
+    if (q.flags.shopify_admin_wrong_platform || q.flags.shopify_admin_no_task) {
+      if (primary === 'shopify-automation') { primary = secondary; secondary = null; }
+      if (secondary === 'shopify-automation') secondary = null;
+    }
+    if (secondary === primary) secondary = null;
+    return { primaryGoal: pg, secondaryGoal: sg, primary: primary, secondary: secondary, statedGoal: a.goal, statedSecondary: a.goal_secondary };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Bundle arithmetic. Always computed, never assumed.
+   * `selected` is the set of bundle members the visitor's answers justify,
+   * or the set they ticked in the on-demand comparison.
+   * ------------------------------------------------------------------ */
+  function bundleComparison(C, selectedIds, owned, ps) {
+    var bundle = C.byId[C.bundleProductId];
+    var members = C.bundleMembers;
+    var want = members.filter(function (id) { return selectedIds.indexOf(id) !== -1; });
+    var need = want.filter(function (id) { return owned.indexOf(id) === -1; });
+    var alreadyOwned = members.filter(function (id) { return owned.indexOf(id) !== -1; });
+    var out = {
+      bundleProduct: bundle || null,
+      members: members.slice(),
+      selected: want,
+      unowned: need,
+      ownedMembers: alreadyOwned,
+      bundlePrice: bundle ? bundle.price : null,
+      individualTotal: null,
+      difference: null,
+      verdict: 'not_applicable',
+      pricesUsable: !!(ps.fresh && bundle && bundle.availableOnDate === true),
+      statement: '',
+    };
+    if (owned.indexOf(C.bundleProductId) !== -1) {
+      out.verdict = 'already_owned';
+      out.statement = 'You already own the Complete Site Builder Stack, so all three of its products are yours. Nothing to buy.';
+      return out;
+    }
+    if (!out.pricesUsable) {
+      out.verdict = need.length >= 2 ? 'prices_unavailable' : 'not_applicable';
+      out.statement = need.length >= 2
+        ? 'The price snapshot in this planner is out of date, so no saving is claimed. Open the bundle page and the individual product pages and compare the current prices yourself.'
+        : '';
+      return out;
+    }
+    var total = 0;
+    need.forEach(function (id) { var p = C.byId[id]; if (p && typeof p.price === 'number') total += p.price; });
+    out.individualTotal = money(total);
+    out.difference = money(out.individualTotal - bundle.price);
+
+    if (need.length === 0) {
+      out.verdict = 'not_applicable';
+      out.statement = alreadyOwned.length ? 'You already own everything in the bundle that your answers point to.' : '';
+      return out;
+    }
+    if (need.length === 1) {
+      out.verdict = 'single_product';
+      out.statement = 'Your answers point to one product in the bundle. Buying it on its own costs ' + fmt(out.individualTotal, bundle.currency) +
+        '; the bundle is ' + fmt(bundle.price, bundle.currency) + '. Buying the bundle for one product costs ' + fmt(bundle.price - out.individualTotal, bundle.currency) + ' more.';
+      return out;
+    }
+    if (out.difference > 0) {
+      out.verdict = 'bundle_cheaper';
+      out.statement = need.length + ' of the bundle’s 3 products individually: ' + fmt(out.individualTotal, bundle.currency) +
+        '. The bundle: ' + fmt(bundle.price, bundle.currency) + '. That is ' + fmt(out.difference, bundle.currency) + ' less' +
+        (alreadyOwned.length ? ', though it re-delivers ' + alreadyOwned.length + ' product you already own.' : ' and includes the third product as well.');
+    } else if (out.difference < 0) {
+      out.verdict = 'individual_cheaper';
+      out.statement = need.length + ' of the bundle’s 3 products individually: ' + fmt(out.individualTotal, bundle.currency) +
+        '. The bundle: ' + fmt(bundle.price, bundle.currency) + '. Buying the two you named is ' + fmt(-out.difference, bundle.currency) +
+        ' cheaper. The bundle adds the third product for the difference — worth it only if you will actually use it.';
+    } else {
+      out.verdict = 'equal';
+      out.statement = 'The products you named cost the same individually as the bundle (' + fmt(bundle.price, bundle.currency) +
+        '). The bundle includes a third product you did not ask for; that is the only difference.';
+    }
+    if (alreadyOwned.length && out.verdict !== 'bundle_cheaper') {
+      out.statement += ' You already own ' + alreadyOwned.length + ' of the three, and the bundle would deliver ' + (alreadyOwned.length === 1 ? 'it' : 'them') + ' again.';
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Actions. Three per result: what / why / deliverable / verify.
+   * Every branch below is reachable from the questionnaire.
+   * ------------------------------------------------------------------ */
+  var PLATFORM_NOUN = {
+    shopify: 'Shopify store', wordpress: 'WordPress site', astro: 'Astro site',
+    saas: 'application', undecided: 'site',
+  };
+  function pn(a) { return PLATFORM_NOUN[a.platform] || 'site'; }
+
+  function actionsFor(a, sel, q) {
+    var g = sel.primaryGoal, A;
+    if (q.flags.not_ready) return actionsGettingStarted(a);
+    switch (g) {
+      case 'build': A = actionsBuild(a, q); break;
+      case 'seo': A = actionsSeo(a); break;
+      case 'convert': A = actionsConvert(a); break;
+      case 'maintain': A = actionsMaintain(a); break;
+      case 'shopify_admin': A = actionsShopify(a, q); break;
+      case 'migrate': A = actionsMigrate(a); break;
+      case 'agency': A = actionsAgency(a); break;
+      default: A = actionsUnclear(a); break;
+    }
+    return A.slice(0, 3);
+  }
+
+  function actionsGettingStarted(a) {
+    return [
+      {
+        what: 'Install Claude Code and open it once in the folder that holds your ' + pn(a) + ' project (or an empty folder if there is nothing yet).',
+        why: 'Every paid workflow on SiteBuilderStack is a prompt you run inside Claude Code. Until it opens and reads a directory, none of them can help you.',
+        deliverable: 'A terminal session where Claude Code starts and lists the files it can see.',
+        verify: 'Ask it "list the files in this project and tell me what kind of project this is" and check the answer matches reality.',
+      },
+      {
+        what: 'Run one read-only task and nothing else: ask Claude Code to describe what the project does, and explicitly tell it to change no files.',
+        why: 'The first thing to learn is that a good session is bounded. A tool that only reads cannot break anything, so it is the safe place to build confidence.',
+        deliverable: 'A written description of your project produced without a single file being modified.',
+        verify: 'Run `git status` (or look at the folder’s modified dates). Nothing should have changed.',
+      },
+      {
+        what: 'Write a short CLAUDE.md in the project root: what the project is, the commands to build and test it, and two or three things that must never be done.',
+        why: 'A memory file is what turns a general assistant into one that knows your project. It is also the single highest-leverage free thing you can do before buying any workflow.',
+        deliverable: 'A CLAUDE.md of under a page that a new session reads automatically.',
+        verify: 'Start a fresh session and ask "what are the rules for this project?" — it should answer from the file, not from guesswork.',
+      },
+    ];
+  }
+
+  function actionsBuild(a, q) {
+    var noun = pn(a);
+    if (a.stage === 'idea' || !a.stage) {
+      return [
+        {
+          what: 'Write a one-page brief and a URL map before any code is generated: the pages, their addresses, and what each one is for.',
+          why: 'Asked to "build a website", Claude Code will build a different one each time. A URL map is the smallest artefact that makes the output repeatable' + (a.platform === 'undecided' ? ' — and it is also how you find out which platform you actually need.' : '.'),
+          deliverable: 'A brief plus a table of every intended URL with its purpose and its primary content.',
+          verify: 'Read the map back and check that no page exists twice under two addresses, and that every page has a reason to exist.',
+        },
+        {
+          what: 'Create CLAUDE.md in the repository root with the stack, the build/test/deploy commands, the coding standards, and an explicit list of things that must never be done.',
+          why: 'Constraints stated once in a memory file are applied on every later turn. Constraints stated in chat are forgotten at the next session.',
+          deliverable: 'A CLAUDE.md under a page long, with every command in it actually runnable.',
+          verify: 'Run each command the file names. If one fails or does not exist, the file is already lying to the model.',
+        },
+        a.platform === 'undecided' ? {
+          what: 'Decide the platform against the brief, not against preference: who edits the content, whether you need a checkout, and what you are willing to maintain in two years.',
+          why: 'Platform choice determines the whole build system. Choosing it after the first thousand lines exist is a rewrite.',
+          deliverable: 'A one-paragraph decision naming the platform and the two constraints that decided it.',
+          verify: 'Write down the scenario that would make the decision wrong. If you cannot, you have not compared anything.',
+        } : {
+          what: 'Set up the repository and the deployment path before the first feature: a git repository, a branch you do not deploy from directly, and a build that runs in CI.',
+          why: 'A ' + noun + ' that has never been deployed is not "nearly done". The first deploy finds the problems, and finding them on day one is cheap.',
+          deliverable: 'A repository with CI running the build on every push, and one successful deploy to a preview URL.',
+          verify: 'Push a deliberate syntax error on a branch. CI must fail. Then remove it.',
+        },
+      ];
+    }
+    if (a.stage === 'building') {
+      return [
+        {
+          what: 'Put a gate in front of the build: the project’s build, lint and tests must run and pass before anything is deployed.',
+          why: a.build_blocker === 'quality'
+            ? 'You said you do not trust the quality of what is being generated. A gate converts that feeling into a specific, repeatable check that either passes or does not.'
+            : 'Generated code is fast to produce and slow to review. A gate is what stops speed becoming an outage.',
+          deliverable: 'A CI workflow that fails the pipeline on a build, lint or test failure.',
+          verify: 'Break one test on a branch on purpose and confirm the pipeline goes red before the deploy step runs.',
+        },
+        {
+          what: 'Run a read-only audit of what has been generated so far against the brief, with an explicit instruction to change nothing and report findings with file and line.',
+          why: a.build_blocker === 'stalled'
+            ? 'A build that keeps being rewritten usually has no agreed definition of done. An audit against the brief produces that definition as a list.'
+            : 'An audit that fixes as it goes leaves a diff across thirty files and no record of what was actually wrong.',
+          deliverable: 'A findings list: file, line, what was expected, what is there, severity.',
+          verify: 'Confirm `git status` is clean after the audit. If files changed, the audit was not read-only and the findings cannot be trusted.',
+        },
+        {
+          what: 'Work the pre-launch list on the ' + noun + ' while it is still cheap: canonical URLs, robots, redirects, form delivery, a real 404, and analytics that fires once rather than twice.',
+          why: 'Every one of these is a five-minute fix before launch and a three-week investigation afterwards.',
+          deliverable: 'A checklist with an observed value beside each line, not a tick.',
+          verify: 'Fetch the production HTML for two pages and read the head. Do not take the template’s word for it.',
+        },
+      ];
+    }
+    /* Live already, but the stated goal is build/relaunch quality. */
+    return [
+      {
+        what: 'Run a read-only audit of the live ' + noun + ' first: rendered head tags, status codes, forms, and the pages that actually get traffic.',
+        why: 'Rebuilding before you know what the current site does well is how a relaunch loses traffic it used to have.',
+        deliverable: 'A baseline report of the current site: URLs, titles, status codes, and anything already broken.',
+        verify: 'Spot-check three URLs from the report by hand. The report and the browser must agree.',
+      },
+      {
+        what: 'Write CLAUDE.md for the existing repository, including the commands that already work and the parts of the codebase that must not be touched.',
+        why: 'On an existing project the highest-value memory content is the prohibitions — the things a confident model will otherwise happily rewrite.',
+        deliverable: 'A CLAUDE.md that a new session reads before it proposes anything.',
+        verify: 'Ask a fresh session to describe the project’s constraints and compare the answer with the file.',
+      },
+      {
+        what: 'Rehearse the rollback before you change anything on production.',
+        why: 'A relaunch is a deploy with more surface area. The question is never whether something breaks, only how long it stays broken.',
+        deliverable: 'Written rollback steps, as exact commands, with the way to confirm the rollback worked.',
+        verify: 'Execute the rollback on a preview environment and confirm the old version serves.',
+      },
+    ];
+  }
+
+  function actionsSeo(a) {
+    var s = a.seo_symptom || 'notsure';
+    var noun = pn(a);
+    var first;
+    if (s === 'not_indexed') {
+      first = {
+        what: 'Take three URLs that are not indexed and read the rendered HTML Google would see: status code, robots meta, X-Robots-Tag, canonical target, and whether the content is in the HTML or only after JavaScript.',
+        why: 'Most "not indexed" cases are one of five mechanical causes, and all five are visible in the response. Guessing at content quality before checking them wastes weeks.',
+        deliverable: 'A table: URL, status, robots directive, canonical, content-in-HTML yes/no.',
+        verify: 'Fetch each URL with a plain HTTP client, not a browser with your session. A 200 in your browser and a 404 for a crawler is a common and invisible failure.',
+      };
+    } else if (s === 'indexed_no_rank') {
+      first = {
+        what: 'Export the queries and pages that already get impressions from Search Console, and sort by impressions with a click-through rate near zero.',
+        why: 'Pages with impressions and no clicks are the cheapest work on the site: search already shows them, so the gap is the title, the description or the intent match.',
+        deliverable: 'A list of the ten pages with the most impressions and the worst click-through rate.',
+        verify: 'For each one, read the query it ranks for and the page’s title. If the title does not contain the thing the query asked for, you have found the problem.',
+      };
+    } else if (s === 'traffic_dropped') {
+      first = {
+        what: 'Fix the date the drop began, then list every change made to the ' + noun + ' in the two weeks before it — deploys, redirects, canonical or template changes, plugin or theme updates.',
+        why: 'A drop with a sharp edge is almost always a change, not an algorithm. The date narrows the suspect list to something you can actually read.',
+        deliverable: 'The drop date from Search Console, and a dated change log beside it.',
+        verify: 'Compare the rendered head of an affected URL against an archived copy from before the date.',
+      };
+    } else {
+      first = {
+        what: 'Run a crawlability and indexability audit of the live ' + noun + ' in read-only mode: robots.txt, sitemap contents versus real URLs, status codes, redirect chains, and canonical targets.',
+        why: 'These come first because everything else depends on them. Optimising a title on a URL that is about to be canonicalised away is wasted work.',
+        deliverable: 'A findings report with the URL, the observed value and why it matters for each issue.',
+        verify: 'Confirm no files were changed during the audit, and re-fetch two of the reported URLs by hand to check the observation.',
+      };
+    }
+    return [
+      first,
+      {
+        what: 'Check that the sitemap and the canonical tags agree with each other and with reality: every URL in the sitemap returns 200 and is self-canonical, and no canonical points at a redirect.',
+        why: 'Contradictory signals are resolved by the search engine, not by you, and it usually resolves them the way you did not want.',
+        deliverable: 'A list of every sitemap URL with its status code and its canonical target.',
+        verify: 'The count of sitemap URLs and the count of 200-and-self-canonical URLs should match. Where they do not, that difference is the work.',
+      },
+      {
+        what: 'Add internal links to the pages you care about from the pages that already get crawled — from within the body copy, with the wording a reader would use.',
+        why: 'An orphaned page with no internal links is one a crawler has little reason to prioritise, however good it is. Internal links are the one ranking input entirely under your control.',
+        deliverable: 'Three to five new contextual links per target page, from pages with existing impressions.',
+        verify: 'Re-crawl and confirm each target page is reachable from the homepage in three clicks or fewer.',
+      },
+    ];
+  }
+
+  function actionsConvert(a) {
+    var m = a.conv_measurement || 'notsure';
+    var noun = pn(a);
+    var unknown = (m === 'no' || m === 'notsure' || m === 'partial');
+    var first = unknown ? {
+      what: 'Before any diagnosis: verify the conversion event. Complete the action yourself and confirm the event fires exactly once, with the right value, and does not fire on page load or on a back-button return.',
+      why: m === 'no'
+        ? 'You said there is no conversion tracking. Any conclusion about where visitors are lost would be invented, so measurement is the first piece of work, not the second.'
+        : 'A conversion event that fires twice makes every number in the funnel wrong in the same direction, and nothing about the report looks unusual.',
+      deliverable: 'A short note: which event, fired from where, observed once per completed action, with the value it carried.',
+      verify: 'Do the conversion action three times in a private window and count three events. Then load the confirmation page directly and confirm no event fires.',
+    } : {
+      what: 'Build the funnel with real numbers: every step from landing to completed conversion, with the count at each step and the drop between them.',
+      why: 'The biggest absolute drop is not always the biggest opportunity, but you cannot tell which is which until the steps are counted rather than assumed.',
+      deliverable: 'A table of funnel steps with counts and step-to-step drop-off for the last 28 days.',
+      verify: 'The top of the funnel should reconcile with your sessions figure. If it does not, the funnel definition is wrong before you interpret it.',
+    };
+    return [
+      first,
+      {
+        what: 'Functionally test the thing you are asking visitors to do on the ' + noun + ': submit the form or complete the checkout yourself, on a phone, and confirm the submission actually arrives.',
+        why: 'A meaningful share of "conversion problems" are delivery problems. A form that posts to nothing looks identical to a form nobody wanted to fill in.',
+        deliverable: 'A marked test submission confirmed received, with the date and the route it arrived by.',
+        verify: 'Check the destination inbox or the orders list, not the on-page success message. The success message proves the JavaScript ran, nothing more.',
+      },
+      {
+        what: 'Pick one change from the evidence, define what "it worked" means before you ship it, and change one thing.',
+        why: 'Shipping five changes at once on ' + (a.stage === 'live_traffic' ? 'a site with traffic' : 'a live site') + ' means learning nothing from any of them.',
+        deliverable: 'A one-line hypothesis: the step, the change, the metric, and the number that would count as a result.',
+        verify: 'After the change, compare the same metric over the same length of period. If the traffic is too small to separate the change from noise, record that honestly rather than claiming a lift.',
+      },
+    ];
+  }
+
+  function actionsMaintain(a) {
+    var have = arr(a.maintain_checks);
+    var has = function (k) { return have.indexOf(k) !== -1; };
+    var noun = pn(a);
+    var list = [];
+    if (!has('backups')) {
+      list.push({
+        what: 'Restore a backup into a throwaway environment and open the restored site.',
+        why: 'A backup nobody has restored is a hypothesis. The failure is nearly always discovered on the day it matters.',
+        deliverable: 'A restored copy you have actually looked at, and a note of how long the restore took.',
+        verify: 'Check the restored copy contains content created in the last week. A backup job that has been silently failing still produces a file.',
+      });
+    }
+    if (!has('monitoring')) {
+      list.push({
+        what: 'Take an outside baseline of the ' + noun + ': HTTP status and redirect chain, TLS certificate expiry, DNS records as they are today, and the security headers actually served.',
+        why: 'Operations starts with knowing the current state. Certificates that stop auto-renewing and DNS that nobody wrote down are the two classic silent failures.',
+        deliverable: 'One baseline report, dated, that you can diff against next month.',
+        verify: 'Confirm the certificate expiry date and set a calendar reminder two weeks before it.',
+      });
+    }
+    if (!has('deploy_gate')) {
+      list.push({
+        what: 'Put a check on both sides of every deploy: the build and tests before, and a smoke check of the live URLs after.',
+        why: 'The expensive outages are the ones where the deploy succeeded. A post-deploy check is what turns "it deployed" into "it works".',
+        deliverable: 'A pre-deploy gate in CI and a post-deploy script that fetches the key URLs and checks status and one string on each.',
+        verify: 'Deploy a harmless change and watch both run. Then make the post-deploy check fail on purpose and confirm you find out.',
+      });
+    }
+    if (!has('updates')) {
+      list.push({
+        what: 'Establish an update cadence: list the dependencies, plugins or themes in use with their current and latest versions, and set a fixed day for applying them behind the gate.',
+        why: 'A plugin two majors behind with a published exploit is the most common way a small site is compromised, and it never announces itself.',
+        deliverable: 'A dated dependency inventory with a known-vulnerability column.',
+        verify: 'Apply one update on a branch, watch the gate run, and confirm the rollback path still works.',
+      });
+    }
+    if (!list.length) {
+      list = [
+        {
+          what: 'Turn the checks you already run into one scheduled report with a score, so a change in the trend is visible without reading four dashboards.',
+          why: 'You have the individual checks. What is usually missing is the one page that says whether this month is worse than last month.',
+          deliverable: 'A monthly operations report: uptime, certificate status, dependency drift, backup restore date, deploy count, incidents.',
+          verify: 'Produce two consecutive months and confirm you can see the difference without interpretation.',
+        },
+        {
+          what: 'Write the incident procedure while nothing is on fire: who is called, where the rollback command lives, and what is checked first.',
+          why: 'The decisions made at 18:00 on a Friday are worse than the same decisions made now.',
+          deliverable: 'A one-page incident playbook with exact commands.',
+          verify: 'Hand it to someone who does not maintain the site and ask them to follow step one.',
+        },
+        {
+          what: 'Re-test the restore. Set a recurring date for it.',
+          why: 'A restore that worked in March proves nothing about the backup taken last night.',
+          deliverable: 'A dated restore record.',
+          verify: 'The restored copy contains this week’s content.',
+        },
+      ];
+    }
+    return list;
+  }
+
+  function actionsShopify(a, q) {
+    var t = a.admin_task || 'notsure';
+    var TASK = {
+      catalogue_seo: 'product titles, descriptions, SEO fields and alt text',
+      collections_metafields: 'collections, metafields and metaobjects',
+      inventory_pricing: 'inventory, variants and pricing',
+      redirects: 'redirects and URL clean-up',
+      reporting: 'catalogue exports, audits and reporting',
+      notsure: 'the catalogue work that keeps coming back',
+    };
+    var task = TASK[t] || TASK.notsure;
+    var first = (t === 'notsure' || q.flags.shopify_admin_task_unknown) ? {
+      what: 'Name the task before automating anything: write down the last three admin jobs that took more than an hour, how many products each touched, and how often they recur.',
+      why: 'Automation is worth it when the work is repetitive, large and recurring. Two of those three is usually a case for doing it by hand once more.',
+      deliverable: 'Three named tasks with a product count and a frequency beside each.',
+      verify: 'If the largest one touches fewer than about fifty products and happens once a year, the honest answer is that no toolkit is needed.',
+    } : {
+      what: 'Export the current state of ' + task + ' to a file before touching anything, through the Admin API rather than by hand.',
+      why: 'The export is the rollback. A bulk mutation with no export to return to is the single most expensive mistake available in a Shopify admin.',
+      deliverable: 'A dated export file covering every product or object the change will touch.',
+      verify: 'Open the export and confirm the row count matches the catalogue count in the admin. A silently truncated export is worse than none.',
+    };
+    return [
+      first,
+      {
+        what: 'Audit the export against explicit rules before writing: what a correct value looks like for ' + task + ', and which records fail that rule.',
+        why: 'An audit that reads from a file cannot damage the store, and it turns a vague "the catalogue is a mess" into a countable list.',
+        deliverable: 'A list of failing records with the current value and the rule it breaks.',
+        verify: 'Pick three failures at random and confirm them in the Shopify admin by hand.',
+      },
+      {
+        what: 'Apply the change to a single product first, read the value back from the API, and only then run the batch.',
+        why: 'A preview, a backup and a read-back after every write is the difference between an automated catalogue and a thousand wrong titles by lunchtime.',
+        deliverable: 'One product changed, its value read back and confirmed, and the batch script ready but not yet run.',
+        verify: 'Read the changed product back through the API, not from the script’s own log. Then check it on the storefront.',
+      },
+    ];
+  }
+
+  function actionsMigrate(a) {
+    var from = contextLabel('migrate_from', a.migrate_from) || 'the current platform';
+    var to = a.migrate_to === 'same_platform' ? 'the new host or theme' : (contextLabel('migrate_to', a.migrate_to) || 'the destination');
+    return [
+      {
+        what: 'Inventory every URL on the existing site before anything is built: address, status code, title, canonical, and whether it has traffic or inbound links.',
+        why: 'Most of what a migration loses was never on anyone’s list. The inventory is the list, and it can only be made while the old site is still up.',
+        deliverable: 'One row per URL, exported to a file, taken from a crawl plus Search Console rather than from memory.',
+        verify: 'Compare the crawl count with the sitemap count and with Search Console’s indexed count. Three different numbers is normal; understanding why is the point.',
+      },
+      {
+        what: 'Map old URL to new URL for every row, decide explicitly what is being dropped, and test the redirects return a single 301 to a 200.',
+        why: 'Redirecting everything that moved to the homepage is the most common migration failure. It reads as "handled" and loses the value of every link.',
+        deliverable: 'A redirect map with old, new, and a tested status chain for each.',
+        verify: 'Request twenty old URLs and confirm one hop, status 301, landing on 200 — not a chain and not a soft 404.',
+      },
+      {
+        what: 'Record the DNS exactly as it is today before you change a nameserver, and write the cut-over go/no-go from evidence rather than from readiness.',
+        why: 'Losing MX records during a nameserver change is silent, classic, and only discovered when someone says they never got your reply. Moving from ' + from + ' to ' + to + ' does not change that.',
+        deliverable: 'A full dated record of current DNS, plus a go/no-go scorecard with the checks that must pass.',
+        verify: 'After cut-over, re-check mail delivery, the redirect map, and that the destination is not still serving a staging noindex.',
+      },
+    ];
+  }
+
+  function actionsAgency(a) {
+    var p = a.agency_problem || 'notsure';
+    var first;
+    if (p === 'scoping') {
+      first = {
+        what: 'Turn your next proposal into a scope document with explicit exclusions and a named number of revision rounds.',
+        why: 'Scope creep is not caused by difficult clients. It is caused by a scope that said "and anything else needed" and an estimate that was a guess.',
+        deliverable: 'A scope with in-scope items, out-of-scope items, assumptions, and the change-order process for anything else.',
+        verify: 'Ask someone outside the project to read it and say what is not included. If they cannot, the exclusions are not explicit enough.',
+      };
+    } else if (p === 'qa') {
+      first = {
+        what: 'Write the review checklist that runs before a client ever sees the work, and run it on the current project.',
+        why: 'The expensive review comments are the ones the client makes about things you would have caught yourself. A checklist moves that discovery earlier.',
+        deliverable: 'A pre-client review checklist with an observed value per line.',
+        verify: 'Run it on a project you thought was finished. If it finds nothing, it is too shallow.',
+      };
+    } else if (p === 'handoff') {
+      first = {
+        what: 'Define the handoff pack once: credentials route, deployment steps, the decisions log, what the client can change safely, and what they should not.',
+        why: 'A handoff that is a folder of files becomes a support obligation. A handoff that is a document ends the engagement cleanly.',
+        deliverable: 'A handoff template you can fill in for any project in under an hour.',
+        verify: 'Hand it to the client and ask them to deploy a text change. If they cannot, the pack is incomplete.',
+      };
+    } else if (p === 'reporting') {
+      first = {
+        what: 'Define one monthly client report shape — what it measures, where each number comes from, and what it deliberately does not claim.',
+        why: 'Reporting that is improvised each month is both expensive to produce and impossible to compare over time.',
+        deliverable: 'A report template with a named data source beside every figure.',
+        verify: 'Produce two consecutive months for one client and check the numbers are comparable.',
+      };
+    } else {
+      first = {
+        what: 'Set up one client file set for your current project: the facts in a config file, the rules in CLAUDE.md, the scope as the contract, and four logs — decisions, assumptions, changes, risks.',
+        why: 'When every engagement starts from scratch, each one teaches the same lesson again. One set of files per client is what makes the second project cheaper than the first.',
+        deliverable: 'A client folder with those six artefacts, populated for a real project.',
+        verify: 'Ask a question about the project and answer it from the files alone. If you cannot, the files are not yet the memory.',
+      };
+    }
+    return [
+      first,
+      {
+        what: 'Keep a decisions log and an assumptions log from the first client call, and put the assumptions in the proposal.',
+        why: 'The disputes that damage a relationship are almost always about an assumption one side made and never stated.',
+        deliverable: 'Two running logs, each entry dated, with who decided it.',
+        verify: 'At the next change request, find the entry that governs it. If there is none, add one now.',
+      },
+      {
+        what: 'Put a person between every generated draft and the client — no proposal, estimate or report goes out unread.',
+        why: 'A confident document containing an invented requirement, a budget the client never stated, or a promise about rankings will cost more than it saved.',
+        deliverable: 'A named review step in your own process, written down.',
+        verify: 'Take the last generated document you sent and check every factual claim in it against the client file.',
+      },
+    ];
+  }
+
+  function actionsUnclear(a) {
+    return [
+      {
+        what: 'Write one sentence describing the outcome you want in ninety days, with a number in it.',
+        why: 'Your answers did not point clearly at one problem, and the planner will not invent a diagnosis to fill the gap. A single sentence with a number in it usually resolves it.',
+        deliverable: 'One sentence, for example "the contact form produces at least four enquiries a month" or "the site is live and indexed".',
+        verify: 'If you cannot put a number in it, the goal is still a wish rather than an objective.',
+      },
+      {
+        what: 'Take a read-only baseline of what exists today: the URLs, their status codes, and whatever measurement is already installed.',
+        why: 'Whatever the goal turns out to be, the baseline is the same work, and it is the thing that makes the next decision cheap.',
+        deliverable: 'A dated snapshot of the current state.',
+        verify: 'Check two facts in the snapshot by hand.',
+      },
+      {
+        what: 'Come back and answer the planner again with the sharper goal.',
+        why: 'The routing here is deterministic: a clearer goal, stage and platform produce a specific plan rather than this general one.',
+        deliverable: 'A plan matched to one stated problem.',
+        verify: 'The recommendation should name one product and explain which answers produced it.',
+      },
+    ];
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Starter prompt. Original text, scoped to the answers, useful to
+   * someone who never buys anything. No paid module content is reproduced.
+   * ------------------------------------------------------------------ */
+  function promptFor(a, sel, q) {
+    var noun = pn(a), plat = platformLabel(a.platform) || 'not stated';
+    var stage = stageLabel(a.stage) || 'not stated';
+    var g = q.flags.not_ready ? 'getting_started' : (sel.primaryGoal || 'unclear');
+
+    var HEAD = 'CONTEXT\n' +
+      '- Platform: ' + plat + '\n' +
+      '- Stage: ' + stage + '\n' +
+      '- Goal: ' + (goalLabel(a.goal) || 'not stated') + '\n' +
+      (a.goal_secondary ? '- Also working on: ' + goalLabel(a.goal_secondary) + '\n' : '');
+
+    var TAIL = '\nBOUNDARIES\n' +
+      '- Read and report only. Do not edit, create, delete or move any file in this first run.\n' +
+      '- Do not run any command that writes to a live environment, a database or a third-party API.\n' +
+      '- Do not commit, push, deploy or change configuration.\n' +
+      '- If a check cannot be run, say so and say why. Do not substitute an assumption for a result.\n' +
+      '\nEVIDENCE\n' +
+      '- Every finding must carry what you observed: a file and line, a command and its output, a URL and its status code, or the exact text you read.\n' +
+      '- Label each finding: confirmed (you observed it), likely (consistent with what you observed), or unknown (you could not check).\n' +
+      '- Do not report a check as passed unless you ran it and saw it pass.\n' +
+      '\nVALIDATION\n' +
+      '- Before you report, name one finding that would have been wrong if the check had silently failed, and say how you ruled that out.\n' +
+      '- List anything you could not verify, as its own section.\n' +
+      '\nSTOP HERE\n' +
+      '- Output the findings and stop. Do not begin fixing anything.\n' +
+      '- End with: the three findings you would address first, and the single question you most need me to answer.\n';
+
+    var body, title;
+    switch (g) {
+      case 'getting_started':
+        title = 'A safe first Claude Code session';
+        body = HEAD + '\nOBJECTIVE\nTell me what this project is, in plain language, without changing anything.\n' +
+          '\nDISCOVERY\n' +
+          '1. List the files and folders in this directory, to a depth of two.\n' +
+          '2. Identify what kind of project this is and what it would take to run it locally.\n' +
+          '3. Find the commands that build, test and start it, and tell me where you found each one.\n' +
+          '4. Tell me which three files a new person should read first, and why.\n';
+        break;
+      case 'build':
+        title = 'Pre-build review of the plan and the repository';
+        body = HEAD + '\nOBJECTIVE\nTell me what is missing before this ' + noun + ' can be built to a production standard, and produce nothing else.\n' +
+          '\nDISCOVERY (in this order)\n' +
+          '1. Read any brief, requirements, README or CLAUDE.md in this repository and summarise what the project is meant to be.\n' +
+          '2. List every page or route that the documentation implies, with its intended URL. Mark any that exist twice under two addresses.\n' +
+          '3. Report whether a build, test and deploy command exists, and run each one you find, reporting what actually happened.\n' +
+          '4. Identify what is undecided: content source, data source, authentication, hosting, and the definition of done.\n' +
+          (a.build_blocker === 'quality' ? '5. Inspect the generated code for the three things most likely to be wrong in agent-generated work: error handling that swallows failures, tests that cannot fail, and configuration hard-coded for one environment.\n' : '') +
+          (a.platform === 'undecided' ? '5. From the requirements only, list what each candidate platform would have to support. Do not recommend one yet.\n' : '');
+        break;
+      case 'seo':
+        title = 'Read-only technical SEO review';
+        body = HEAD + '\nOBJECTIVE\n' +
+          (a.seo_symptom === 'not_indexed' ? 'Find the mechanical reasons specific pages on this ' + noun + ' are not being indexed.'
+            : a.seo_symptom === 'indexed_no_rank' ? 'Find the gap between what these pages are about and what they are being shown for.'
+            : a.seo_symptom === 'traffic_dropped' ? 'Find what changed on this site around the date search traffic dropped.'
+            : 'Establish whether this ' + noun + ' can be crawled, indexed and understood, before anything is optimised.') + '\n' +
+          '\nDISCOVERY (in this order — do not skip ahead)\n' +
+          '1. Fetch robots.txt and the sitemap. Report the number of URLs in the sitemap and any disallow rule that affects them.\n' +
+          '2. For each of up to twenty URLs, fetch the page with a plain HTTP request and report: final status code, number of redirect hops, robots meta and X-Robots-Tag, canonical target, title, meta description, and h1.\n' +
+          '3. Flag every URL where the canonical points somewhere other than itself, or where the sitemap and the canonical disagree.\n' +
+          '4. Report whether the main content is present in the HTML response or only after JavaScript runs.\n' +
+          '5. List pages with a duplicate title or duplicate description, grouped.\n' +
+          (a.seo_symptom === 'traffic_dropped' ? '6. List the changes visible in version control in the four weeks before the date I give you, filtered to templates, redirects, robots and head tags.\n' : '');
+        break;
+      case 'convert':
+        title = 'Read-only conversion measurement and funnel review';
+        body = HEAD + '\nOBJECTIVE\nTell me whether the conversion on this ' + noun + ' is measured correctly, and where the funnel loses people. Diagnose nothing that the data does not support.\n' +
+          '\nDISCOVERY (in this order)\n' +
+          '1. Identify every analytics or tag script loaded on the site, and report each one once with the page it loads on.\n' +
+          '2. Identify the primary conversion action and the event that is supposed to represent it. Report where in the code that event is fired from.\n' +
+          '3. Report every place that event could fire more than once: page load, route change, back navigation, a re-render, or two scripts firing the same event.\n' +
+          '4. Locate the form or checkout that completes the conversion, and report where the submission is sent and what happens if that request fails.\n' +
+          '5. List the steps between arriving and converting, in order, as they exist in the code.\n' +
+          '\nEXPLICITLY DO NOT\n' +
+          '- Do not tell me a change will increase conversions by a percentage. Nobody can know that in advance.\n' +
+          '- Do not propose countdown timers, stock warnings or any other invented urgency.\n';
+        break;
+      case 'maintain':
+        title = 'Outside-in operations baseline';
+        body = HEAD + '\nOBJECTIVE\nProduce a dated baseline of this ' + noun + '’s operational state, from the outside, changing nothing.\n' +
+          '\nDISCOVERY\n' +
+          '1. For each key URL: final status code, redirect chain, response time, and the security headers actually served.\n' +
+          '2. TLS: issuer, expiry date, and how many days remain.\n' +
+          '3. DNS: every record as it is right now, recorded verbatim, including MX.\n' +
+          '4. Dependencies, plugins or themes in use, with current version and latest version, and any with a published advisory.\n' +
+          '5. Report whether a backup exists, when it last ran, and whether a restore has ever been tested. If you cannot tell, say you cannot tell.\n' +
+          '6. Report what runs before and after a deploy, reading the CI configuration.\n';
+        break;
+      case 'shopify_admin':
+        title = 'Read-only Shopify catalogue audit';
+        body = HEAD + '\nOBJECTIVE\nAudit the parts of this Shopify catalogue I am about to change, and tell me exactly how many records are affected, before any write happens.\n' +
+          '\nDISCOVERY\n' +
+          '1. Confirm which store you are connected to and which Admin API scopes are available. Report them. Never print the access token.\n' +
+          '2. Export, to a local file, the current values for the objects in scope. Report the row count.\n' +
+          '3. Reconcile that row count against the catalogue total, and tell me if the export is short.\n' +
+          '4. Audit the export against these rules and list the failures with their current values.\n' +
+          '5. Report how many records a change would touch, and what the exact before value is for the first five.\n' +
+          '\nBOUNDARIES SPECIFIC TO THIS RUN\n' +
+          '- Read-only API calls only. No mutation, no bulk operation, no metafield write.\n' +
+          '- Never print, log or write an API access token anywhere.\n';
+        break;
+      case 'migrate':
+        title = 'Pre-migration inventory and baseline';
+        body = HEAD + '\nOBJECTIVE\nInventory the existing site completely while it is still up, so that nothing is discovered missing after cut-over.\n' +
+          '\nDISCOVERY\n' +
+          '1. Crawl the existing site and produce one row per URL: address, status code, title, canonical, indexability, and internal link count.\n' +
+          '2. Reconcile the crawl against the sitemap and list what is in one and not the other.\n' +
+          '3. Record every form on the site, where it posts to, and what confirms a successful submission.\n' +
+          '4. Record every third-party script and embed, and what would break without it.\n' +
+          '5. Record the current DNS verbatim, including MX and TXT records.\n' +
+          '6. Produce the redirect map as a draft: old URL, proposed new URL, and mark every row you are guessing at.\n' +
+          '\nEXPLICITLY DO NOT\n' +
+          '- Do not redirect anything to the homepage as a default.\n' +
+          '- Do not touch DNS, and do not deploy the destination.\n';
+        break;
+      case 'agency':
+        title = 'Client engagement file review';
+        body = HEAD + '\nOBJECTIVE\nRead everything that exists for this client engagement and tell me what a person joining the project could not answer from it.\n' +
+          '\nDISCOVERY\n' +
+          '1. List every document that describes this engagement and what each one claims to define.\n' +
+          '2. Extract the agreed scope, and separately every sentence that could be read as open-ended.\n' +
+          '3. List the assumptions the work depends on that are not written down anywhere the client has seen.\n' +
+          '4. List decisions that have been made in conversation and never recorded.\n' +
+          '5. Report whether revision rounds, the change process and the handoff are defined, quoting the text where they are.\n' +
+          '\nEXPLICITLY DO NOT\n' +
+          '- Do not draft anything for the client in this run.\n' +
+          '- Do not invent a requirement, a budget, a deadline or a promise about results.\n';
+        break;
+      default:
+        title = 'Read-only project baseline';
+        body = HEAD + '\nOBJECTIVE\nTell me what this project is and what state it is in, so I can decide what to work on. Change nothing.\n' +
+          '\nDISCOVERY\n' +
+          '1. Summarise what the project is, from its own files.\n' +
+          '2. List the URLs or routes it serves and their status.\n' +
+          '3. Report what measurement is installed, if any.\n' +
+          '4. List the three things most likely to be wrong, with the evidence for each.\n';
+    }
+    return { title: title, text: body + TAIL };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Free next step
+   * ------------------------------------------------------------------ */
+  var FREE_BY_GOAL = {
+    build: { shopify: 'free-shopify-hub', wordpress: 'free-wordpress-hub', astro: 'free-astro-hub', _: 'free-build-guide' },
+    seo: { _: 'free-technical-seo' },
+    convert: { _: 'free-cro-guide' },
+    maintain: { _: 'free-maintenance-guide' },
+    shopify_admin: { _: 'free-shopify-admin-guide' },
+    migrate: { _: 'free-migration-guide' },
+    agency: { _: 'free-labs-hub' },
+  };
+  function freeStepFor(C, a, sel, q) {
+    if (q.flags.not_ready) {
+      var r = freeById(C, 'free-terminal-setup');
+      return r ? { resource: r, why: 'It is the shortest route from "I have not used a terminal" to a working Claude Code session, and it costs nothing.' } : null;
+    }
+    var g = sel.primaryGoal;
+    var map = FREE_BY_GOAL[g];
+    var id = map ? (map[a.platform] || map._) : 'free-resources-hub';
+    if (q.flags.shopify_admin_no_task) id = 'free-shopify-hub';
+    if (!g) id = 'free-resources-hub';
+    var res = freeById(C, id) || freeById(C, 'free-resources-hub');
+    if (!res) return null;
+    var WHY = {
+      build: 'It covers the same first moves as the plan above, in more depth, and it is free to read before you spend anything.',
+      seo: 'It walks through the read-only audit sequence the first action describes, with the commands.',
+      convert: 'It explains the measurement checks the plan starts with, which is the part most conversion advice skips.',
+      maintain: 'It covers the recurring checks in the plan above and what each one is actually looking for.',
+      shopify_admin: 'It shows what Admin API work looks like in practice, so you can judge whether the paid toolkit is worth it before buying.',
+      migrate: 'It is the checklist version of the inventory and redirect work in the plan above.',
+      agency: 'The labs are short, hands-on exercises you can run against a real project today.',
+    };
+    return { resource: res, why: WHY[g] || 'A free starting point while you decide what to work on.' };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * decide() — the whole result
+   * ------------------------------------------------------------------ */
+  function decide(rawAnswers, catalogue, options) {
+    options = options || {};
+    var C = indexCatalogue(catalogue);
+    var a = normalize(rawAnswers || {});
+    var q = qualify(a);
+    var sel = selectProducts(a, q);
+    var ps = priceState(C, options.today);
+    var owned = expandOwned(C, ownedIds(a));
+    var ownsUnknown = a.owns.indexOf('notsure') !== -1;
+
+    /* --- ownership ------------------------------------------------- */
+    var ownershipNotes = [];
+    var primaryId = sel.primary, complementaryId = sel.secondary;
+    var ownedPrimary = null;
+
+    if (primaryId && owned.indexOf(primaryId) !== -1) {
+      ownedPrimary = primaryId;
+      ownershipNotes.push('You already own the ' + C.byId[primaryId].shortName + ', which is the product your answers point to. Nothing to buy — the plan below is how to use it.');
+      primaryId = (complementaryId && owned.indexOf(complementaryId) === -1) ? complementaryId : null;
+      complementaryId = null;
+    }
+    if (complementaryId && owned.indexOf(complementaryId) !== -1) {
+      ownershipNotes.push('You already own the ' + C.byId[complementaryId].shortName + ', so it is not offered again.');
+      complementaryId = null;
+    }
+    if (ownsUnknown) {
+      ownershipNotes.push('You were not sure what you already own. Check your order confirmation emails before buying anything below — every purchase is a one-time download and there is no reason to buy one twice.');
+    }
+
+    /* --- bundle ------------------------------------------------------ */
+    var answerDerived = uniq([sel.primary, sel.secondary].filter(Boolean))
+      .filter(function (id) { return C.bundleMembers.indexOf(id) !== -1; });
+    var bundle = bundleComparison(C, answerDerived, owned, ps);
+    /* The bundle is only offered when the arithmetic says it costs less
+       for the products the visitor actually needs. */
+    var offerBundle = bundle.verdict === 'bundle_cheaper';
+    if (offerBundle) complementaryId = null;
+
+    /* --- mode -------------------------------------------------------- */
+    var mode = 'recommend';
+    if (q.flags.not_ready) mode = 'free_first';
+    else if (ownedPrimary && !primaryId) mode = 'use_what_you_own';
+    else if (!primaryId && !offerBundle) mode = 'qualified';
+
+    /* --- reasoning --------------------------------------------------- */
+    var because = [];
+    if (a.goal) because.push('your goal: ' + goalLabel(a.goal).toLowerCase());
+    if (a.goal_secondary) because.push('and ' + goalLabel(a.goal_secondary).toLowerCase());
+    if (a.platform) because.push('platform: ' + platformLabel(a.platform));
+    if (a.stage) because.push('stage: ' + stageLabel(a.stage).toLowerCase());
+    relevantContextKeys(a).forEach(function (k) {
+      var v = a[k];
+      if (v === undefined) return;
+      if (CONTEXT[k].multi) {
+        if (arr(v).length) because.push(CONTEXT[k].question.replace(/\?$/, '') + ': ' + arr(v).map(function (x) { return contextLabel(k, x); }).join(', '));
+      } else {
+        because.push(CONTEXT[k].question.replace(/\?$/, '') + ': ' + contextLabel(k, v));
+      }
+    });
+
+    /* --- headline ---------------------------------------------------- */
+    var headline, summary;
+    if (mode === 'free_first') {
+      headline = 'Start free, and buy nothing yet.';
+      summary = 'Based on your answers, the thing standing between you and any of these workflows is Claude Code itself, not the workflows. Get a session running and write one memory file; that is a genuinely useful afternoon and it costs nothing. The ' + (sel.primary ? C.byId[sel.primary].shortName : 'matching toolkit') + ' is the right product for your goal, but it is worth buying after you have run a first session, not before.';
+    } else if (mode === 'use_what_you_own') {
+      headline = 'You already own what you need. Use it.';
+      summary = 'Based on your answers, the product that matches your goal is one you have already bought. The three actions below are the sequence to run from it, and the free resource at the end covers the same ground if you want a refresher first.';
+    } else if (mode === 'qualified') {
+      headline = 'Your answers do not point at one product yet.';
+      summary = 'Based on your answers, there is no single toolkit that clearly fits, and this planner will not invent one. The actions below are worth doing regardless, and the free resource is a better next step than any purchase right now.';
+    } else {
+      var p = C.byId[primaryId];
+      headline = goalHeadline(sel.primaryGoal, a, q);
+      summary = 'Based on your answers, the work in front of you is ' + goalSummary(sel.primaryGoal, a, q) +
+        ' The three actions below are in the order they should be done, and the ' + p.shortName + ' is the SiteBuilderStack product written for exactly this.';
+    }
+
+    /* --- assemble ---------------------------------------------------- */
+    var primaryProduct = primaryId ? C.byId[primaryId] : null;
+    var complementaryProduct = complementaryId ? C.byId[complementaryId] : null;
+
+    return {
+      version: '1.0.0',
+      answers: a,
+      mode: mode,
+      headline: headline,
+      summary: summary,
+      qualificationNotes: q.notes,
+      flags: q.flags,
+      because: because,
+      actions: actionsFor(a, sel, q),
+      prompt: promptFor(a, sel, q),
+      primary: primaryProduct ? {
+        id: primaryProduct.id,
+        product: primaryProduct,
+        priceText: priceText(C, primaryProduct, ps),
+        fit: fitText(sel.primaryGoal, a, q, primaryProduct),
+        limitation: limitationText(primaryProduct, a, q),
+        freeVsPaid: freeVsPaid(sel.primaryGoal, primaryProduct),
+        cta: 'View the complete ' + primaryProduct.shortName,
+        deEmphasised: mode === 'free_first',
+      } : null,
+      complementary: complementaryProduct ? {
+        id: complementaryProduct.id,
+        product: complementaryProduct,
+        priceText: priceText(C, complementaryProduct, ps),
+        why: 'You also named ' + goalLabel(sel.statedSecondary || sel.secondaryGoal).toLowerCase() + '. That is a different problem with a different product, and it is optional — the primary recommendation stands on its own.',
+      } : null,
+      bundle: bundle,
+      offerBundle: offerBundle,
+      ownership: { owned: owned, unknown: ownsUnknown, notes: ownershipNotes, ownedPrimary: ownedPrimary },
+      freeStep: freeStepFor(C, a, sel, q),
+      priceState: ps,
+      selection: sel,
+    };
+  }
+
+  function goalHeadline(g, a, q) {
+    var H = {
+      build: 'Get this build to a launch you can defend.',
+      seo: 'Find out why search cannot see this site.',
+      convert: 'Trust the numbers before you change the page.',
+      maintain: 'Turn maintenance into checks with a rhythm.',
+      shopify_admin: 'Export first, audit second, write last.',
+      migrate: 'Inventory everything while the old site is still up.',
+      agency: 'Make the engagement repeatable, not the argument.',
+    };
+    if (q.flags.convert_not_live || q.flags.seo_before_launch || q.flags.maintain_not_live) return 'First, finish the build.';
+    if (q.flags.convert_no_traffic) return 'You need arrivals before you optimise them.';
+    return H[g] || 'Start with a baseline.';
+  }
+  function goalSummary(g, a, q) {
+    if (q.flags.convert_not_live) return 'getting the site live and correct, not optimising a conversion rate on a site nobody can reach yet.';
+    if (q.flags.convert_no_traffic) return 'discovery — the site is live, but conversion work on almost no traffic optimises a percentage of nearly nothing.';
+    if (q.flags.seo_before_launch) return 'building the search architecture into the site now, rather than auditing a site that is not published.';
+    if (q.flags.maintain_not_live) return 'reaching a launch, after which the operations work has something to operate.';
+    var S = {
+      build: 'a build problem: structure and constraints decided before code, then a gate in front of every deploy.',
+      seo: 'a discovery problem, and it is almost certainly mechanical rather than a matter of writing more.',
+      convert: 'a measurement problem before it is a design problem.',
+      maintain: 'operational: the failures that matter are the quiet ones, and they are found by checks that run on a schedule.',
+      shopify_admin: 'catalogue automation, which is safe only with an export to roll back to and a read-back after every write.',
+      migrate: 'a mapping and validation exercise — a migration is not a copy.',
+      agency: 'in the engagement rather than the build: scope, review, handoff and the record of what was decided.',
+    };
+    return S[g] || 'not yet clearly defined.';
+  }
+
+  function fitText(g, a, q, p) {
+    var bits = [];
+    if (q.flags.convert_not_live) bits.push('Your goal was conversion, but the site is not live yet, so the build product comes first.');
+    if (q.flags.convert_no_traffic) bits.push('Your goal was conversion, but with little or no traffic the constraint is discovery, so this is the product for that.');
+    if (q.flags.seo_before_launch) bits.push('An audit toolkit needs a published site; this one builds the search architecture in from the start.');
+    if (q.flags.agency_defers) bits.push('Client delivery is the way you work; this product is for the project itself.');
+    bits.push(p.useCase);
+    return bits.join(' ');
+  }
+  function limitationText(p, a, q) {
+    var ex = (p.exclusions || [])[0] || '';
+    var base = 'Reasons this might not be for you yet: ' + ex;
+    if (a.readiness === 'access_help') base += ' It also assumes you will run the prompts yourself inside Claude Code — there is a learning curve, and nothing here does the work unattended.';
+    return base;
+  }
+  function freeVsPaid(g, p) {
+    var F = {
+      build: 'The plan above gets you a brief, a memory file and a gate. The product adds the staged build prompt, the platform systems, the security and accessibility audits, and the launch checklists.',
+      seo: 'The plan above is the first three checks. The product adds the remaining seventeen prompts in dependency order, the report templates, and the rules that stop an audit quietly reporting a success it never checked.',
+      convert: 'The plan above verifies measurement and tests one change. The product adds the full funnel and analytics-verification workflows, the finding format with honesty labels, and an experimentation system that refuses tests the traffic cannot support.',
+      maintain: 'The plan above is the first baseline. The product adds the scripts that produce it every month, the health score, the deploy gates, the incident playbooks and the reporting.',
+      shopify_admin: 'The plan above is export, audit, single write. The product adds the scripts and validated GraphQL for every catalogue area, with a preview, a backup and a read-back built into each one.',
+      migrate: 'The plan above is the inventory and the redirect map. The product adds the crawler, the page-by-page metadata comparison, the platform guides and the GO / NO-GO scorecard.',
+      agency: 'The plan above sets up one client file set. The product adds the commands for every stage from discovery to retention, the templates, the checklists and a complete worked engagement.',
+    };
+    return F[g] || 'The plan above is free and yours to keep. The product is the complete workflow set for the same problem.';
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Export as Markdown (used by the copy and download controls)
+   * ------------------------------------------------------------------ */
+  function toMarkdown(result, catalogue) {
+    var C = indexCatalogue(catalogue), L = [];
+    L.push('# Your SiteBuilderStack website action plan');
+    L.push('');
+    L.push('_Generated by the SiteBuilderStack Website Action Planner. This plan is based entirely on the answers you selected — nothing about your website was scanned, crawled or measured._');
+    L.push('');
+    L.push('## Your answers');
+    result.because.forEach(function (b) { L.push('- ' + b); });
+    L.push('');
+    L.push('## Your next move');
+    L.push('**' + result.headline + '**');
+    L.push('');
+    L.push(result.summary);
+    if (result.qualificationNotes.length) {
+      L.push('');
+      result.qualificationNotes.forEach(function (n) { L.push('> ' + n); L.push('>'); });
+    }
+    L.push('');
+    L.push('## Three prioritised actions');
+    result.actions.forEach(function (ac, i) {
+      L.push('');
+      L.push('### ' + (i + 1) + '. ' + ac.what);
+      L.push('');
+      L.push('- **Why:** ' + ac.why);
+      L.push('- **Deliverable:** ' + ac.deliverable);
+      L.push('- **How to verify it is done:** ' + ac.verify);
+    });
+    L.push('');
+    L.push('## Free starter Claude Code prompt');
+    L.push('');
+    L.push('**' + result.prompt.title + '**');
+    L.push('');
+    L.push('```');
+    L.push(result.prompt.text);
+    L.push('```');
+    if (result.primary) {
+      L.push('');
+      L.push('## Recommended toolkit');
+      L.push('');
+      L.push('**' + result.primary.product.title + '** — ' + result.primary.priceText);
+      L.push('');
+      L.push(result.primary.fit);
+      L.push('');
+      (result.primary.product.benefits || []).slice(0, 3).forEach(function (b) { L.push('- ' + b); });
+      L.push('');
+      L.push('- **Prerequisites:** ' + result.primary.product.prerequisites);
+      L.push('- **What the free plan does vs the product:** ' + result.primary.freeVsPaid);
+      L.push('- **' + result.primary.limitation + '**');
+      L.push('');
+      L.push(result.primary.product.url);
+    }
+    if (result.offerBundle && result.bundle.statement) {
+      L.push('');
+      L.push('## Bundle comparison');
+      L.push('');
+      L.push(result.bundle.statement);
+      L.push('');
+      L.push(C.byId['complete-stack'].url);
+    }
+    if (result.ownership.notes.length) {
+      L.push('');
+      L.push('## What you already own');
+      result.ownership.notes.forEach(function (n) { L.push('- ' + n); });
+    }
+    if (result.freeStep) {
+      L.push('');
+      L.push('## A free next step');
+      L.push('');
+      L.push('[' + result.freeStep.resource.title + '](' + result.freeStep.resource.url + ') — ' + result.freeStep.why);
+    }
+    L.push('');
+    L.push('---');
+    L.push('');
+    L.push('Produced by SiteBuilderStack — https://sitebuilderstack.com');
+    L.push('');
+    L.push('This plan reflects self-reported answers. It is not an audit, a measurement, or a verified assessment of your website. Prices were last verified on ' + (result.priceState.verifiedOn || 'an unknown date') + '.');
+    L.push('');
+    return L.join('\n');
+  }
+
+  return {
+    GOALS: GOALS, PLATFORMS: PLATFORMS, STAGES: STAGES, READINESS: READINESS,
+    CONTEXT: CONTEXT, GOAL_PRODUCT: GOAL_PRODUCT,
+    goalLabel: goalLabel, platformLabel: platformLabel, stageLabel: stageLabel,
+    readinessLabel: readinessLabel, contextLabel: contextLabel,
+    normalize: normalize, relevantContextKeys: relevantContextKeys, activeGoals: activeGoals,
+    qualify: qualify, selectProducts: selectProducts,
+    bundleComparison: bundleComparison, indexCatalogue: indexCatalogue,
+    priceState: priceState, priceText: priceText, fmt: fmt, money: money,
+    decide: decide, toMarkdown: toMarkdown,
+  };
+});
+
+</script>
+<script>
+/* src/analytics.js — the measurement interface, and the attribution links.
+ *
+ * WHAT THIS DOES NOT DO: it does not transmit anything. The claude.ai
+ * artifact sandbox serves the page under a Content Security Policy that
+ * allows fetch, XHR and WebSocket only to the page's own origin and the
+ * Google Fonts hosts. No permitted destination for these events has been
+ * verified, so REMOTE is false and the only provider is a local debug
+ * journal that never leaves the visitor's browser. Turning it on is one
+ * object with a send(name, props) method — and a verified destination.
+ *
+ * The journal is DEBUG INSTRUMENTATION. It counts what one browser did.
+ * It is not analytics, it is not a visitor count, and the page says so.
+ *
+ * The only thing that actually reaches SiteBuilderStack is the campaign
+ * parameters on an outbound link the visitor chooses to follow, and those
+ * carry a fixed placement name — never an answer.
+ */
+window.SBSPlannerAnalytics = (function () {
+  'use strict';
+
+  var VERSION = '1.0.0';
+  var NAME = 'sitebuilderstack-website-action-planner';
+
+  /* The ten canonical events. Nothing else is ever recorded. */
+  var EVENTS = [
+    'artifact_opened',
+    'planner_started',
+    'planner_completed',
+    'recommendation_viewed',
+    'starter_prompt_copied',
+    'plan_export_requested',
+    'plan_export_completed',
+    'product_cta_clicked',
+    'free_resource_clicked',
+    'planner_share_clicked',
+  ];
+  /* Fired at most once per page view. */
+  var ONCE = ['artifact_opened', 'planner_started', 'planner_completed'];
+
+  /* The only properties that may travel with an event. Questionnaire
+     answers, ownership selections, free text, email addresses and website
+     URLs are not on this list and are dropped by reduce(). */
+  var ALLOWED = ['artifact_name', 'artifact_version', 'product_id', 'cta_placement', 'environment', 'timestamp'];
+
+  /* Fixed, documented utm_content values. An outbound link may use one of
+     these and nothing else — see measurement.md. */
+  var PLACEMENTS = [
+    'primary_recommendation',
+    'recommendation_repeat',
+    'complementary_recommendation',
+    'bundle_comparison',
+    'product_comparison',
+    'free_next_step',
+    'example_result',
+    'header_brand',
+    'footer_brand',
+  ];
+  /* Note: there is no 'share_planner' placement. The share control copies the
+     artifact's own claude.ai URL, which is not a sitebuilderstack.com link and
+     carries no campaign parameters at all. */
+
+  var CAMPAIGN = {
+    utm_source: 'claude_artifact',
+    utm_medium: 'interactive_tool',
+    utm_campaign: 'website_action_planner',
+  };
+
+  /* Remote transmission is off until a permitted destination and the full
+     delivery path have been verified. Neither has been. */
+  var REMOTE = false;
+  var REMOTE_REASON = 'No permitted destination has been verified for this runtime. The artifact sandbox blocks outbound requests, so nothing is sent.';
+
+  var environment = (typeof window !== 'undefined' && window.Shopify && window.Shopify.analytics && typeof window.Shopify.analytics.publish === 'function')
+    ? 'sitebuilderstack' : 'claude_artifact';
+
+  var journal = [];
+  var MAX = 200;
+  var fired = {};
+
+  function reduce(props) {
+    var out = {};
+    ALLOWED.forEach(function (k) {
+      var v = props[k];
+      if (v === undefined || v === null || v === '') return;
+      out[k] = typeof v === 'string' ? v.slice(0, 80) : (typeof v === 'number' || typeof v === 'boolean') ? v : String(v).slice(0, 80);
+    });
+    return out;
+  }
+
+  function track(name, props) {
+    try {
+      if (EVENTS.indexOf(name) === -1) return false;
+      if (ONCE.indexOf(name) !== -1) { if (fired[name]) return false; fired[name] = true; }
+      var payload = reduce(Object.assign({
+        artifact_name: NAME,
+        artifact_version: VERSION,
+        environment: environment,
+        timestamp: new Date().toISOString(),
+      }, props || {}));
+      journal.push({ event: name, props: payload });
+      if (journal.length > MAX) journal = journal.slice(-MAX);
+      persist();
+      /* if (REMOTE) providers.forEach(function (p) { p.send(name, payload); }); */
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function persist() {
+    try { window.sessionStorage.setItem('sbs-planner-journal', JSON.stringify(journal)); } catch (e) { /* private window, blocked storage — the journal stays in memory */ }
+  }
+  function restore() {
+    try {
+      var v = window.sessionStorage.getItem('sbs-planner-journal');
+      if (v) { var j = JSON.parse(v); if (Array.isArray(j)) journal = j.slice(-MAX); }
+    } catch (e) { /* ignored on purpose */ }
+  }
+  restore();
+
+  /* Outbound links. Existing query parameters on the target are preserved;
+     the campaign parameters are set, not appended blindly. */
+  function tag(url, placement) {
+    try {
+      var u = new URL(url, 'https://sitebuilderstack.com');
+      if (u.protocol !== 'https:' || u.hostname !== 'sitebuilderstack.com') return url;
+      Object.keys(CAMPAIGN).forEach(function (k) { u.searchParams.set(k, CAMPAIGN[k]); });
+      u.searchParams.set('utm_content', PLACEMENTS.indexOf(placement) !== -1 ? placement : 'unknown_placement');
+      return u.toString();
+    } catch (e) { return url; }
+  }
+
+  return {
+    VERSION: VERSION, NAME: NAME,
+    EVENTS: EVENTS, ALLOWED: ALLOWED, PLACEMENTS: PLACEMENTS, CAMPAIGN: CAMPAIGN,
+    remoteEnabled: REMOTE, remoteReason: REMOTE_REASON,
+    environment: environment,
+    track: track, tag: tag,
+    journal: function () { return journal.slice(); },
+    clear: function () { journal = []; fired = {}; persist(); },
+  };
+})();
+
+</script>
+<script>
+/* src/config.js — the facts that are only known after publishing.
+ *
+ * SHARE_URL is the artifact's real, published URL. It is filled in after the
+ * first publish and the page is republished; while it is empty the share
+ * control is hidden rather than pointing at a URL that does not exist.
+ * It is the planner's own address and carries no answers.
+ *
+ * COMPANION_PAGE is the proposed sitebuilderstack.com landing page. It is
+ * empty because that page does not exist yet — see launch-copy.md.
+ */
+window.SBS_PLANNER_CONFIG = {
+  SHARE_URL: 'https://claude.ai/artifact/8oUQrAFJyAZdKG86KeNZLX',
+  COMPANION_PAGE: '',
+};
+
+</script>
+<script>
+/* src/app.js — the interface. All routing decisions come from
+ * recommendation-rules.js; this file only asks the questions and draws
+ * the answer. Nothing here fetches, and nothing is persisted except the
+ * local debug journal, which holds no answers.
+ *
+ * Every node is built with createElement and textContent. No markup is
+ * ever assembled from data, so there is no path from an answer to HTML.
+ */
+(function () {
+  'use strict';
+
+  var R = window.SBS_RULES;
+  var CAT = window.SBS_PRODUCTS;
+  var AN = window.SBSPlannerAnalytics;
+  var CFG = window.SBS_PLANNER_CONFIG || { SHARE_URL: '', COMPANION_PAGE: '' };
+  var C = R.indexCatalogue(CAT);
+
+  /* ---------------- tiny DOM helpers ---------------- */
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v === null || v === undefined || v === false) return;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k === 'html') n.innerHTML = v;            /* only ever called with literal icon markup below */
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : String(v));
+    });
+    (kids || []).forEach(function (k) { if (k) n.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); });
+    return n;
+  }
+  function frag(kids) { var f = document.createDocumentFragment(); kids.forEach(function (k) { if (k) f.appendChild(k); }); return f; }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  var TICK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 6.2 12 13 4.5"/></svg>';
+
+  /* ---------------- state ---------------- */
+  var state = { step: -1, answers: { owns: [] }, result: null, isExample: false };
+  var downloads = null;
+
+  var STEPS = ['goal', 'platform', 'stage', 'context', 'readiness', 'owns'];
+  var STEP_TITLE = {
+    goal: 'What are you trying to do?',
+    platform: 'What is the site built on?',
+    stage: 'Where is it right now?',
+    context: 'A little more about the problem',
+    readiness: 'How are you placed for Claude Code?',
+    owns: 'Do you already own any of these?',
+  };
+
+  /* ---------------- shell ---------------- */
+  var root = document.getElementById('app');
+
+  function mount() {
+    AN.track('artifact_opened', {});
+    if (window.claude && typeof window.claude.use === 'function') {
+      try {
+        window.claude.use('downloads').then(function (d) { downloads = d; if (state.step === 99) render(); })
+          .catch(function () { downloads = null; });
+      } catch (e) { downloads = null; }
+    }
+    render();
+  }
+
+  function render() {
+    clear(root);
+    if (state.step === -1) root.appendChild(viewIntro());
+    else if (state.step === 99) root.appendChild(viewResult());
+    else root.appendChild(viewStep());
+    var h = root.querySelector('[data-focus]');
+    if (h && state.step !== -1) { h.focus({ preventScroll: true }); window.scrollTo(0, 0); }
+  }
+
+  /* ---------------- intro ---------------- */
+  function viewIntro() {
+    var facts = [
+      'The plan is free, and the whole result is on one page.',
+      'No email address is required to see it — SiteBuilderStack does not ask for one here.',
+      'Recommendations come from your answers and nothing else.',
+      'This tool does not scan, crawl or audit a live website.',
+    ];
+    return el('div', { class: 'wrap' }, [
+      el('section', { class: 'hero' }, [
+        el('p', { class: 'eyebrow', text: 'SiteBuilderStack · Website Action Planner' }),
+        el('h1', { class: 'h-hero', text: 'Find your next website move.' }),
+        el('p', { class: 'lede', text: 'Answer a few questions to get a practical action plan, a starter Claude Code prompt, and a toolkit recommendation matched to your goal.' }),
+        el('div', { class: 'hero__acts' }, [
+          el('button', { class: 'btn', type: 'button', id: 'start', onclick: start }, ['Build my free plan']),
+          el('button', { class: 'btn btn--ghost', type: 'button', id: 'example', onclick: showExample }, ['See an example']),
+        ]),
+        el('ul', { class: 'facts' }, facts.map(function (f) {
+          return el('li', {}, [el('span', { html: TICK }), el('span', { text: f })]);
+        })),
+      ]),
+      el('section', { class: 'section', style: 'margin-top:1rem' }, [
+        el('p', { class: 'small dim prose', text: 'This planner is made by SiteBuilderStack and recommends SiteBuilderStack products. It is not an independent review site. The paid products are downloadable workflows, prompts, templates and checklists you run yourself inside Claude Code — not services that do the work for you.' }),
+      ]),
+    ]);
+  }
+
+  function start() {
+    state.isExample = false;
+    state.answers = { owns: [] };
+    state.step = 0;
+    AN.track('planner_started', {});
+    render();
+  }
+
+  var EXAMPLE = {
+    goal: 'seo', goal_secondary: '', platform: 'wordpress', stage: 'live_no_traffic',
+    seo_symptom: 'not_indexed', readiness: 'using', owns: ['none'],
+  };
+  function showExample() {
+    state.isExample = true;
+    state.answers = JSON.parse(JSON.stringify(EXAMPLE));
+    state.result = R.decide(state.answers, CAT);
+    state.step = 99;
+    render();
+  }
+
+  /* ---------------- questions ---------------- */
+  function activeContextKeys() { return R.relevantContextKeys(state.answers); }
+
+  function viewStep() {
+    var id = STEPS[state.step];
+    var body;
+    if (id === 'goal') body = qGoal();
+    else if (id === 'platform') body = qSingle('platform', 'Which of these is closest?', R.PLATFORMS);
+    else if (id === 'stage') body = qSingle('stage', 'Where is the project today?', R.STAGES);
+    else if (id === 'context') body = qContext();
+    else if (id === 'readiness') body = qSingle('readiness', 'Pick the one that fits.', R.READINESS);
+    else body = qOwns();
+
+    return el('div', { class: 'wrap' }, [
+      progress(),
+      el('div', { class: 'q' }, [
+        el('h1', { class: 'h-1', tabindex: '-1', 'data-focus': '1', text: STEP_TITLE[id] }),
+        body,
+        navRow(),
+      ]),
+    ]);
+  }
+
+  function progress() {
+    var segs = STEPS.map(function (_, i) {
+      return el('div', { class: 'progress__seg' + (i < state.step ? ' is-done' : i === state.step ? ' is-now' : '') });
+    });
+    return el('div', { class: 'progress' }, [
+      el('div', { class: 'progress__bar', role: 'presentation' }, segs),
+      el('div', { class: 'progress__txt' }, [
+        el('span', { text: 'Step ' + (state.step + 1) + ' of ' + STEPS.length, 'aria-live': 'polite' }),
+        el('span', { text: 'No email required' }),
+      ]),
+    ]);
+  }
+
+  function optionRow(type, name, value, text, note, checked, onchange) {
+    var input = el('input', { type: type, name: name, value: value, checked: checked || null, onchange: onchange });
+    return el('label', { class: 'opt' }, [
+      input,
+      el('span', { class: 'opt__dot' + (type === 'checkbox' ? ' opt__dot--box' : ''), 'aria-hidden': 'true' }),
+      el('span', { class: 'opt__txt' }, [el('span', { text: text }), note ? el('span', { class: 'opt__note', text: note }) : null]),
+    ]);
+  }
+
+  function group(legend, rows, hint) {
+    return el('fieldset', { class: 'q__group' }, [
+      el('legend', { class: 'q__legend h-3' }, [legend]),
+      hint ? el('p', { class: 'small dim', text: hint }) : null,
+      el('div', { class: 'q__opts' }, rows),
+    ]);
+  }
+
+  function qSingle(key, legend, pairs, hint) {
+    var rows = pairs.map(function (p) {
+      return optionRow('radio', key, p[0], p[1], null, state.answers[key] === p[0], function () {
+        state.answers[key] = p[0];
+        updateNav();
+      });
+    });
+    return group(legend, rows, hint);
+  }
+
+  function qGoal() {
+    var primary = R.GOALS.map(function (g) {
+      return optionRow('radio', 'goal', g[0], g[1], null, state.answers.goal === g[0], function () {
+        state.answers.goal = g[0];
+        if (state.answers.goal_secondary === g[0]) state.answers.goal_secondary = '';
+        /* a changed goal invalidates the contextual answers it owned */
+        Object.keys(R.CONTEXT).forEach(function (k) {
+          if (activeContextKeys().indexOf(k) === -1) delete state.answers[k];
+        });
+        render();
+      });
+    });
+    var secondaryOpts = [optionRow('radio', 'goal_secondary', '', 'Nothing else for now', null, !state.answers.goal_secondary, function () {
+      state.answers.goal_secondary = '';
+      Object.keys(R.CONTEXT).forEach(function (k) { if (activeContextKeys().indexOf(k) === -1) delete state.answers[k]; });
+    })].concat(R.GOALS.filter(function (g) { return g[0] !== state.answers.goal; }).map(function (g) {
+      return optionRow('radio', 'goal_secondary', g[0], g[1], null, state.answers.goal_secondary === g[0], function () {
+        state.answers.goal_secondary = g[0];
+        Object.keys(R.CONTEXT).forEach(function (k) { if (activeContextKeys().indexOf(k) === -1) delete state.answers[k]; });
+      });
+    }));
+
+    return frag([
+      group('Your main goal', primary),
+      state.answers.goal ? el('details', { class: 'more' }, [
+        el('summary', { text: 'Add a second goal (optional)' }),
+        el('div', { class: 'more__body' }, [
+          el('p', { class: 'small dim', text: 'Only if a second problem is genuinely in front of you. It changes the plan, and it is used to compare the bundle price honestly — never to add products you did not ask for.' }),
+          el('div', { class: 'q__opts' }, secondaryOpts),
+        ]),
+      ]) : null,
+    ]);
+  }
+
+  function qContext() {
+    var keys = activeContextKeys();
+    if (!keys.length) {
+      return el('p', { class: 'muted', text: 'Nothing else is needed for this goal — go on to the next step.' });
+    }
+    return frag(keys.map(function (k) {
+      var q = R.CONTEXT[k];
+      if (q.multi) {
+        var current = Array.isArray(state.answers[k]) ? state.answers[k] : [];
+        var rows = q.options.map(function (o) {
+          return optionRow('checkbox', k + '[]', o[0], o[1], null, current.indexOf(o[0]) !== -1, function (ev) {
+            var arr = Array.isArray(state.answers[k]) ? state.answers[k].slice() : [];
+            var excl = q.exclusive || [];
+            if (ev.target.checked) {
+              if (excl.indexOf(o[0]) !== -1) arr = [o[0]];
+              else arr = arr.filter(function (x) { return excl.indexOf(x) === -1; }).concat([o[0]]);
+            } else {
+              arr = arr.filter(function (x) { return x !== o[0]; });
+            }
+            state.answers[k] = arr;
+            render();
+          });
+        });
+        return group(q.question, rows, 'Select any that apply.');
+      }
+      var rows2 = q.options.map(function (o) {
+        return optionRow('radio', k, o[0], o[1], null, state.answers[k] === o[0], function () {
+          state.answers[k] = o[0];
+          updateNav();
+        });
+      });
+      return group(q.question, rows2);
+    }));
+  }
+
+  function qOwns() {
+    var owns = Array.isArray(state.answers.owns) ? state.answers.owns : [];
+    var rows = [optionRow('checkbox', 'owns[]', 'none', 'I own none of them', null, owns.indexOf('none') !== -1, onOwn('none'))];
+    C.raw.products.forEach(function (p) {
+      rows.push(optionRow('checkbox', 'owns[]', p.id, p.title, p.isBundle ? 'Counts as owning its three products' : null, owns.indexOf(p.id) !== -1, onOwn(p.id)));
+    });
+    rows.push(optionRow('checkbox', 'owns[]', 'notsure', 'Not sure', null, owns.indexOf('notsure') !== -1, onOwn('notsure')));
+    return group('This is optional, and nothing is looked up.', rows, 'No login, no purchase history, nothing sent anywhere. It is here so the planner does not recommend something you have already bought.');
+  }
+  function onOwn(id) {
+    return function (ev) {
+      var owns = Array.isArray(state.answers.owns) ? state.answers.owns.slice() : [];
+      if (ev.target.checked) {
+        if (id === 'none' || id === 'notsure') owns = [id];
+        else owns = owns.filter(function (x) { return x !== 'none' && x !== 'notsure'; }).concat([id]);
+      } else {
+        owns = owns.filter(function (x) { return x !== id; });
+      }
+      state.answers.owns = owns;
+      render();
+    };
+  }
+
+  /* ---------------- navigation ---------------- */
+  function canAdvance() {
+    var id = STEPS[state.step];
+    if (id === 'goal') return !!state.answers.goal;
+    if (id === 'platform') return !!state.answers.platform;
+    if (id === 'stage') return !!state.answers.stage;
+    if (id === 'readiness') return !!state.answers.readiness;
+    if (id === 'context') {
+      return activeContextKeys().every(function (k) {
+        var q = R.CONTEXT[k];
+        return q.multi ? (Array.isArray(state.answers[k]) && state.answers[k].length > 0) : !!state.answers[k];
+      });
+    }
+    return Array.isArray(state.answers.owns) && state.answers.owns.length > 0;
+  }
+  function updateNav() {
+    var n = document.getElementById('next');
+    if (n) n.disabled = !canAdvance();
+  }
+  function navRow() {
+    var last = state.step === STEPS.length - 1;
+    return el('div', { class: 'nav' }, [
+      state.step > 0 ? el('button', { class: 'btn btn--ghost', type: 'button', onclick: back }, ['Back']) : null,
+      el('button', { class: 'btn', type: 'button', id: 'next', disabled: !canAdvance() || null, onclick: next }, [last ? 'Show my plan' : 'Next']),
+      el('span', { class: 'nav__spacer' }),
+      el('button', { class: 'btn btn--quiet btn--sm', type: 'button', onclick: reset }, ['Start again']),
+    ]);
+  }
+  function back() { if (state.step > 0) { state.step--; render(); } }
+  function next() {
+    if (!canAdvance()) return;
+    if (state.step === STEPS.length - 1) {
+      state.result = R.decide(state.answers, CAT);
+      state.step = 99;
+      AN.track('planner_completed', {});
+      AN.track('recommendation_viewed', { product_id: state.result.primary ? state.result.primary.id : 'none' });
+      render();
+      return;
+    }
+    state.step++;
+    render();
+  }
+  function reset() {
+    state.step = -1; state.answers = { owns: [] }; state.result = null; state.isExample = false;
+    render();
+  }
+
+  /* ---------------- result ---------------- */
+  function viewResult() {
+    var r = state.result;
+    var chip = r.mode === 'free_first' ? ['chip chip--free', 'Free path first']
+      : r.mode === 'use_what_you_own' ? ['chip chip--owned', 'You already own it']
+      : r.mode === 'qualified' ? ['chip chip--qualified', 'Qualified result']
+      : ['chip', 'Matched to your answers'];
+
+    var left = el('div', { class: 'result__main' }, [
+      sectionNextMove(r, chip),
+      sectionActions(r),
+      sectionPrompt(r),
+      sectionFreeStep(r),
+      sectionControls(r),
+    ]);
+    var rail = el('aside', { class: 'result__rail' }, [sectionToolkit(r)]);
+
+    return el('div', { class: 'wrap wrap--wide result' }, [
+      state.isExample ? exampleBanner() : null,
+      el('div', { class: 'result__cols' }, [left, rail]),
+      footerNote(r),
+    ]);
+  }
+
+  function exampleBanner() {
+    return el('div', { class: 'note', style: 'border-left-color: var(--accent)' }, [
+      el('strong', { text: 'Example project. ' }),
+      el('span', { text: 'A WordPress site that is live, gets almost no traffic, and has pages missing from the index. It is an illustration of the output — not a real customer, not a case study, and not a measurement of any website.' }),
+      el('div', { style: 'margin-top:.6rem' }, [
+        el('button', { class: 'btn btn--sm', type: 'button', onclick: start }, ['Build my own plan']),
+      ]),
+    ]);
+  }
+
+  function sectionNextMove(r, chip) {
+    return el('section', { class: 'section' }, [
+      el('span', { class: chip[0], text: chip[1] }),
+      el('h1', { class: 'h-1', tabindex: '-1', 'data-focus': '1', text: r.headline }),
+      el('p', { class: 'lede', text: r.summary }),
+      r.qualificationNotes.length ? el('div', {}, r.qualificationNotes.map(function (n) { return el('p', { class: 'note', text: n }); })) : null,
+      el('div', {}, [
+        el('p', { class: 'eyebrow', text: 'Recommended because you selected', style: 'margin-bottom:.5rem' }),
+        el('ul', { class: 'because' }, r.because.map(function (b) { return el('li', { text: b }); })),
+      ]),
+      r.ownership.notes.length ? el('div', {}, r.ownership.notes.map(function (n) { return el('p', { class: 'note', style: 'border-left-color: var(--ok)', text: n }); })) : null,
+    ]);
+  }
+
+  function sectionActions(r) {
+    return el('section', { class: 'section' }, [
+      el('h2', { class: 'h-2', text: 'Three prioritised actions' }),
+      el('p', { class: 'small dim', text: 'In this order. Each one names what you will have when it is finished, and how to tell.' }),
+      el('ol', { class: 'actions' }, r.actions.map(function (a) {
+        return el('li', { class: 'action' }, [
+          el('span', { class: 'action__n', 'aria-hidden': 'true' }),
+          el('div', { class: 'action__body' }, [
+            el('p', { class: 'action__what', text: a.what }),
+            el('dl', { class: 'meta' }, [
+              el('div', {}, [el('dt', { text: 'Why' }), el('dd', { text: a.why })]),
+              el('div', {}, [el('dt', { text: 'You get' }), el('dd', { text: a.deliverable })]),
+              el('div', {}, [el('dt', { text: 'Verify' }), el('dd', { class: 'verify', text: a.verify })]),
+            ]),
+          ]),
+        ]);
+      })),
+    ]);
+  }
+
+  function sectionPrompt(r) {
+    var box = el('div', { class: 'promptbox' }, [
+      el('div', { class: 'promptbox__head' }, [
+        el('span', { class: 'promptbox__title', text: r.prompt.title }),
+        el('button', { class: 'btn btn--sm btn--ghost', type: 'button', id: 'copy-prompt', onclick: function () { doCopy(r.prompt.text, 'prompt-status', 'starter_prompt_copied'); } }, ['Copy prompt']),
+      ]),
+      el('pre', { class: 'promptbox__body' }, [el('code', { text: r.prompt.text })]),
+    ]);
+    return el('section', { class: 'section' }, [
+      el('h2', { class: 'h-2', text: 'Your free starter Claude Code prompt' }),
+      el('p', { class: 'small dim prose', text: 'Paste this into Claude Code in your project folder. It reads and reports; it changes nothing. It is yours to keep and edit whether or not you buy anything.' }),
+      box,
+      el('p', { class: 'status', id: 'prompt-status', role: 'status', 'aria-live': 'polite' }),
+      el('div', { id: 'prompt-fallback' }),
+    ]);
+  }
+
+  function sectionToolkit(r) {
+    var kids = [];
+    if (r.primary) {
+      var p = r.primary.product;
+      kids.push(el('div', { class: 'card' }, [
+        el('div', { class: 'card__head' }, [
+          el('p', { class: 'eyebrow', text: r.primary.deEmphasised ? 'When you are ready' : 'Your recommended toolkit' }),
+          el('h2', { class: 'h-3', text: p.title }),
+          el('p', { class: 'card__price', text: r.primary.priceText }),
+        ]),
+        el('p', { class: 'small muted', text: r.primary.fit }),
+        el('ul', { class: 'card__list' }, p.benefits.slice(0, 3).map(function (b) { return el('li', {}, [el('span', { text: b })]); })),
+        el('p', { class: 'small muted' }, [el('strong', { text: 'Free plan vs the product. ' }), el('span', { text: r.primary.freeVsPaid })]),
+        el('p', { class: 'small muted' }, [el('strong', { text: 'You need first. ' }), el('span', { text: p.prerequisites })]),
+        ctaLink(p, r.primary.cta, 'primary_recommendation', r.primary.deEmphasised),
+        el('p', { class: 'limit', text: r.primary.limitation }),
+      ]));
+    } else if (r.mode === 'use_what_you_own') {
+      kids.push(el('div', { class: 'card' }, [
+        el('p', { class: 'eyebrow', text: 'Nothing to buy' }),
+        el('h2', { class: 'h-3', text: 'You already have the right product' }),
+        el('p', { class: 'small muted', text: 'The plan on this page is how to use it. If you want a refresher on the workflow it belongs to, the free resource below covers the same ground.' }),
+      ]));
+    } else {
+      kids.push(el('div', { class: 'card' }, [
+        el('p', { class: 'eyebrow', text: 'No product recommended' }),
+        el('h2', { class: 'h-3', text: 'Your answers do not justify a purchase yet' }),
+        el('p', { class: 'small muted', text: 'Buying something now would be a guess. Work the three actions, then come back — the routing is deterministic, so a sharper answer produces a specific recommendation.' }),
+      ]));
+    }
+
+    if (r.complementary) {
+      var c = r.complementary.product;
+      kids.push(el('div', { class: 'card card--flat' }, [
+        el('p', { class: 'eyebrow', text: 'Optional, and only if the second problem is real' }),
+        el('h3', { class: 'h-3', text: c.title }),
+        el('p', { class: 'card__price', text: r.complementary.priceText }),
+        el('p', { class: 'small muted', text: r.complementary.why }),
+        ctaLink(c, 'View the ' + c.shortName, 'complementary_recommendation', true),
+      ]));
+    }
+
+    if (r.offerBundle) {
+      kids.push(bundleCard(r));
+    }
+
+    kids.push(comparisonPanel(r));
+    kids.push(el('p', { class: 'disclosure', text: 'SiteBuilderStack makes this planner and sells these products. Prices were last verified on ' + (r.priceState.verifiedOn || 'an unknown date') + '; the product page is always the authority.' }));
+    return el('section', { class: 'section', style: 'gap:1.25rem' }, kids);
+  }
+
+  function bundleCard(r) {
+    var b = C.byId['complete-stack'];
+    return el('div', { class: 'card' }, [
+      el('p', { class: 'eyebrow', text: 'Cheaper for what you named' }),
+      el('h3', { class: 'h-3', text: b.title }),
+      el('p', { class: 'card__price', text: R.priceText(C, b, r.priceState) }),
+      el('p', { class: 'small muted', text: r.bundle.statement }),
+      ctaLink(b, 'View the ' + b.shortName, 'bundle_comparison', false),
+    ]);
+  }
+
+  /* The comparison is available on demand, never eight buttons by default.
+     Ticking products recalculates the bundle arithmetic honestly. */
+  function comparisonPanel(r) {
+    var chosen = (r.bundle.selected || []).slice();
+    var out = el('div', { class: 'more__body' });
+    var details = el('details', { class: 'more' }, [
+      el('summary', { text: 'Compare the bundle, and see every product' }),
+      out,
+    ]);
+
+    function redraw() {
+      clear(out);
+      var cmp = R.bundleComparison(C, chosen, r.ownership.owned, r.priceState);
+      out.appendChild(el('p', { class: 'small dim', text: 'Tick what you genuinely expect to use in the next few months. The comparison is arithmetic, not a recommendation.' }));
+      var rows = C.bundleMembers.map(function (id) {
+        var p = C.byId[id];
+        var ownedAlready = r.ownership.owned.indexOf(id) !== -1;
+        return optionRow('checkbox', 'cmp[]', id, p.shortName + ' — ' + R.priceText(C, p, r.priceState), ownedAlready ? 'You said you own this' : null, chosen.indexOf(id) !== -1, function (ev) {
+          chosen = ev.target.checked ? chosen.concat([id]) : chosen.filter(function (x) { return x !== id; });
+          redraw();
+        });
+      });
+      out.appendChild(el('div', { class: 'q__opts' }, rows));
+      var maths = el('div', { class: 'maths' }, []);
+      if (cmp.individualTotal !== null) {
+        maths.appendChild(el('div', { class: 'maths__row' }, [el('span', { text: 'Those you do not own, individually' }), el('span', { text: R.fmt(cmp.individualTotal, 'USD') })]));
+        maths.appendChild(el('div', { class: 'maths__row' }, [el('span', { text: 'Complete Site Builder Stack' }), el('span', { text: R.fmt(cmp.bundlePrice, 'USD') })]));
+      }
+      maths.appendChild(el('p', { class: 'maths__verdict small', text: cmp.statement || 'Tick at least one product to compare.' }));
+      out.appendChild(maths);
+      out.appendChild(el('p', { class: 'small dim', text: C.bundleNote }));
+
+      out.appendChild(el('h4', { class: 'eyebrow', style: 'margin-top:.75rem', text: 'Every product, for reference' }));
+      var wrap = el('div', { class: 'tablewrap' });
+      var table = el('table', { class: 'table' }, [
+        el('thead', {}, [el('tr', {}, [el('th', { text: 'Product' }), el('th', { text: 'For' }), el('th', { text: 'Price' })])]),
+        el('tbody', {}, C.raw.products.map(function (p) {
+          return el('tr', {}, [
+            el('td', {}, [el('a', { href: AN.tag(p.url, 'product_comparison'), target: '_blank', rel: 'noopener', text: p.shortName, onclick: function () { AN.track('product_cta_clicked', { product_id: p.id, cta_placement: 'product_comparison' }); } })]),
+            el('td', { text: p.useCase }),
+            el('td', { class: 'num', text: R.priceText(C, p, r.priceState) }),
+          ]);
+        })),
+      ]);
+      wrap.appendChild(table);
+      out.appendChild(wrap);
+    }
+    redraw();
+    return details;
+  }
+
+  function ctaLink(product, text, placement, quiet) {
+    /* A click from the worked example is not a click from someone's own plan,
+       so it gets its own placement and stays separable in the campaign report. */
+    if (state.isExample) placement = 'example_result';
+    return el('a', {
+      class: 'btn' + (quiet ? ' btn--ghost' : '') + ' btn--block',
+      href: AN.tag(product.url, placement),
+      target: '_blank', rel: 'noopener',
+      'data-cta': placement,
+      onclick: function () { AN.track('product_cta_clicked', { product_id: product.id, cta_placement: placement }); },
+    }, [text]);
+  }
+
+  function sectionFreeStep(r) {
+    if (!r.freeStep) return null;
+    var f = r.freeStep.resource;
+    return el('section', { class: 'section' }, [
+      el('h2', { class: 'h-2', text: 'A free next step' }),
+      el('p', { class: 'prose muted', text: r.freeStep.why }),
+      el('p', {}, [
+        el('a', {
+          class: 'btn btn--ghost', href: AN.tag(f.url, 'free_next_step'), target: '_blank', rel: 'noopener',
+          'data-free': f.id,
+          onclick: function () { AN.track('free_resource_clicked', { cta_placement: 'free_next_step' }); },
+        }, [f.title + ' →']),
+      ]),
+    ]);
+  }
+
+  function sectionControls(r) {
+    var acts = [
+      el('button', { class: 'btn btn--ghost btn--sm', type: 'button', id: 'copy-plan', onclick: function () { doCopy(R.toMarkdown(r, CAT), 'plan-status', null); } }, ['Copy action plan']),
+      el('button', { class: 'btn btn--ghost btn--sm', type: 'button', id: 'export-plan', hidden: !downloads, onclick: function () { doExport(r); } }, ['Export as Markdown']),
+      CFG.SHARE_URL ? el('button', { class: 'btn btn--ghost btn--sm', type: 'button', id: 'share', onclick: sharePlanner }, ['Share the planner']) : null,
+      el('button', { class: 'btn btn--quiet btn--sm', type: 'button', id: 'again', onclick: reset }, ['Start again']),
+    ];
+    var kids = [
+      el('h2', { class: 'h-2', text: 'Take it with you' }),
+      el('div', { class: 'toolbar' }, acts),
+      el('p', { class: 'status', id: 'plan-status', role: 'status', 'aria-live': 'polite' }),
+      el('div', { id: 'plan-fallback' }),
+    ];
+    if (!downloads) {
+      kids.push(el('p', { class: 'small dim', text: 'File export is not available in this view, so it is not offered. Copy the action plan instead — it is the same Markdown.' }));
+    }
+    if (r.primary) {
+      kids.push(el('div', { style: 'margin-top:1.25rem' }, [
+        el('p', { class: 'small muted', text: 'If the plan above is the work you are about to do, the ' + r.primary.product.shortName + ' is the complete version of it.' }),
+        el('p', { style: 'margin-top:.6rem' }, [
+          el('a', {
+            class: 'btn btn--ghost', href: AN.tag(r.primary.product.url, 'recommendation_repeat'), target: '_blank', rel: 'noopener',
+            onclick: function () { AN.track('product_cta_clicked', { product_id: r.primary.id, cta_placement: 'recommendation_repeat' }); },
+          }, [r.primary.cta]),
+        ]),
+      ]));
+    }
+    kids.push(measurementPanel());
+    return el('section', { class: 'section' }, kids);
+  }
+
+  function measurementPanel() {
+    return el('details', { class: 'more' }, [
+      el('summary', { text: 'What this page measures' }),
+      el('div', { class: 'more__body' }, [
+        el('p', { class: 'small muted', text: 'Nothing is transmitted. ' + AN.remoteReason }),
+        el('p', { class: 'small muted', text: 'Your answers, what you own and anything you copy stay in this browser tab and are not written anywhere. Reloading the page loses them, which is deliberate.' }),
+        el('p', { class: 'small muted', text: 'A local debug journal records event names only — ' + AN.EVENTS.length + ' possible names, with at most a product id and a link placement. It counts what this one browser did. It is not analytics and it is not a visitor count.' }),
+        el('p', { class: 'small dim', text: 'Links to sitebuilderstack.com carry campaign parameters (' + AN.CAMPAIGN.utm_campaign + ') and a fixed placement name, so the store can see that a visit came from this planner. No answer is ever put in a link.' }),
+        el('button', { class: 'btn btn--quiet btn--sm', type: 'button', onclick: function (e) {
+          var box = e.target.nextElementSibling;
+          box.hidden = !box.hidden;
+          if (!box.hidden) box.textContent = JSON.stringify(AN.journal(), null, 1);
+        } }, ['Show the local journal']),
+        el('pre', { class: 'promptbox__body small', hidden: true, style: 'border:1px solid var(--border);border-radius:10px' }),
+      ]),
+    ]);
+  }
+
+  function footerNote(r) {
+    return el('footer', { class: 'foot' }, [
+      el('div', { class: 'foot__in' }, [
+        el('p', { class: 'small dim', text: 'This plan is based on the answers you selected. Nothing about your website was scanned, crawled or measured, and none of it is a verified assessment.' }),
+        el('p', {}, [
+          el('a', {
+            href: AN.tag('https://sitebuilderstack.com/', 'footer_brand'), target: '_blank', rel: 'noopener', text: 'sitebuilderstack.com',
+          }),
+          el('span', { class: 'dim', text: '  ·  Independent product. Not affiliated with, sponsored by, or endorsed by Anthropic. “Claude” and “Claude Code” are trademarks of Anthropic, PBC.' }),
+        ]),
+      ]),
+    ]);
+  }
+
+  /* ---------------- copy / export / share ---------------- */
+  function setStatus(id, text, isErr) {
+    var n = document.getElementById(id);
+    if (!n) return;
+    n.textContent = text;
+    n.className = 'status' + (isErr ? ' status--err' : '');
+  }
+  function fallbackBox(id, text) {
+    var host = document.getElementById(id);
+    if (!host) return;
+    clear(host);
+    var ta = el('textarea', { readonly: true, 'aria-label': 'Text to copy' });
+    ta.value = text;
+    host.appendChild(el('div', { class: 'copyfallback' }, [
+      el('p', { class: 'small dim', text: 'Clipboard access was refused here. The text is selected below — press Ctrl+C (or ⌘C) to copy it.' }),
+      ta,
+    ]));
+    try { ta.focus(); ta.select(); } catch (e) { /* nothing more we can do */ }
+  }
+  function doCopy(text, statusId, eventName) {
+    var fbId = statusId === 'prompt-status' ? 'prompt-fallback' : 'plan-fallback';
+    var host = document.getElementById(fbId);
+    if (host) clear(host);
+    setStatus(statusId, '');
+    var done = function () {
+      setStatus(statusId, 'Copied.');
+      if (eventName) AN.track(eventName, {});
+    };
+    var failed = function () {
+      setStatus(statusId, 'Could not copy automatically.', true);
+      fallbackBox(fbId, text);
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, failed);
+      } else { failed(); }
+    } catch (e) { failed(); }
+  }
+  function doExport(r) {
+    if (!downloads) { setStatus('plan-status', 'File export is not available in this view.', true); return; }
+    AN.track('plan_export_requested', {});
+    setStatus('plan-status', 'Waiting for you to confirm the download…');
+    downloads.save({ filename: 'sitebuilderstack-action-plan.md', data: R.toMarkdown(r, CAT) }).then(function (res) {
+      if (res && res.status === 'saved') {
+        setStatus('plan-status', 'Saved.');
+        AN.track('plan_export_completed', {});
+      } else {
+        setStatus('plan-status', 'Sent to your device.');
+      }
+    }, function (err) {
+      var code = err && err.code;
+      setStatus('plan-status', code === 'declined' ? 'Download cancelled.' : 'The download could not be completed. Use “Copy action plan” instead.', true);
+    });
+  }
+  function sharePlanner() {
+    if (!CFG.SHARE_URL) return;
+    AN.track('planner_share_clicked', {});
+    doCopy(CFG.SHARE_URL, 'plan-status', null);
+    setTimeout(function () {
+      var n = document.getElementById('plan-status');
+      if (n && n.textContent === 'Copied.') n.textContent = 'Planner link copied. It opens the planner itself — your answers are not in it.';
+    }, 0);
+  }
+
+  /* expose for the browser test harness only */
+  window.__planner = { state: state, render: render, decide: function () { return R.decide(state.answers, CAT); } };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+  else mount();
+})();
+
+</script>

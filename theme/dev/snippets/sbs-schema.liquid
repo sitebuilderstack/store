@@ -1,0 +1,467 @@
+{% comment %}
+  Structured data for the landing layer.
+
+  Deliberately limited to types that genuinely describe the page:
+    · Organization + WebSite + Person on the homepage
+    · Product + Offer on the product page
+    · BlogPosting + BreadcrumbList on articles
+    · Blog + BreadcrumbList on the blog index
+    · ProfilePage + Person on the About page
+    · BreadcrumbList wherever there is a real hierarchy
+
+  There is no Review, Rating, or AggregateRating markup anywhere, because
+  there are no reviews. Adding it without real reviews is a guidelines
+  violation and a manual-action risk.
+
+  There is no MerchantReturnPolicy either. The refund policy is decided case
+  by case rather than by a fixed window, and none of schema.org's return
+  categories describes that honestly. Inventing a window to satisfy a
+  validator would put the markup in conflict with the published policy.
+
+  `sameAs` is emitted only from the theme settings under
+  "Site Builder Stack — SEO". Those settings ship empty: an unverified
+  profile URL in structured data is worse than no profile at all.
+{% endcomment %}
+
+{%- assign shop_url = shop.url -%}
+{%- assign org_id = shop_url | append: '/#organization' -%}
+{%- assign person_id = shop_url | append: '/pages/about#person' -%}
+{%- assign author_name = 'James Joyner IV' -%}
+{%- assign author_title = 'Senior Software Engineer' -%}
+{%- assign about_url = shop_url | append: '/pages/about' -%}
+
+{%- assign org_links = settings.org_sameas | default: '' | strip -%}
+{%- assign person_links = settings.author_sameas | default: '' | strip -%}
+
+{%- capture org_sameas_json -%}
+  {%- if org_links != blank -%}
+    "sameAs": [
+    {%- assign parts = org_links | strip | newline_to_br | split: '<br />' -%}
+    {%- assign first = true -%}
+    {%- for p in parts -%}{%- assign u = p | strip -%}{%- if u contains 'https://' -%}
+      {%- unless first -%},{%- endunless -%}{{ u | json }}{%- assign first = false -%}
+    {%- endif -%}{%- endfor -%}
+    ],
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture person_sameas_json -%}
+  {%- if person_links != blank -%}
+    "sameAs": [
+    {%- assign parts = person_links | strip | newline_to_br | split: '<br />' -%}
+    {%- assign first = true -%}
+    {%- for p in parts -%}{%- assign u = p | strip -%}{%- if u contains 'https://' -%}
+      {%- unless first -%},{%- endunless -%}{{ u | json }}{%- assign first = false -%}
+    {%- endif -%}{%- endfor -%}
+    ],
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- comment -%}
+  The Person node, reused wherever James is the author. Defined once here so
+  the @id, name, job title and description cannot drift between pages.
+{%- endcomment -%}
+{%- capture person_node -%}
+  {
+    "@type": "Person",
+    "@id": {{ person_id | json }},
+    "name": {{ author_name | json }},
+    "url": {{ about_url | json }},
+    "jobTitle": {{ author_title | json }},
+    "description": "Senior software engineer with 25 years in technology, working in platform and infrastructure engineering: Linux, Kubernetes, OpenStack, Ansible, Terraform, Docker, GitLab CI, Prometheus, Grafana and Python.",
+    {{ person_sameas_json }}
+    "worksFor": { "@id": {{ org_id | json }} }
+  }
+{%- endcapture -%}
+
+{%- if template.name == 'index' -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": {{ org_id | json }},
+        "name": {{ shop.name | json }},
+        "url": {{ shop_url | json }},
+        {%- comment -%}
+          The logo, as an ImageObject with real dimensions.
+
+          This pointed at `share_image` — og-share.png, a 1200x630 landscape
+          social card with marketing copy on it. That is a correct Open Graph
+          image and a wrong Organization logo, which is why audits reported the
+          logo as missing: a landscape card is not what consumers of this field
+          expect, and a bare string carries no dimensions.
+
+          `logo_image` is a separate setting so the social card and the logo can
+          never be confused again. It falls back to share_image rather than
+          emitting nothing, because a landscape logo is still better than a
+          missing property, and the fallback is visible here rather than silent.
+        {%- endcomment -%}
+        {%- assign org_logo = settings.logo_image | default: settings.share_image -%}
+        {%- if org_logo != blank %}
+        {%- comment -%}
+          Height is COMPUTED from the source image, not hard-coded. Hard-coding
+          600x600 was correct for the square logo and a false claim for the
+          landscape fallback, which is 1200x630 — the kind of error that is
+          invisible until something consumes the dimensions.
+        {%- endcomment -%}
+        {%- assign logo_h = org_logo.height | times: 600 | divided_by: org_logo.width -%}
+        "logo": {
+          "@type": "ImageObject",
+          "url": {{ org_logo | image_url: width: 600 | prepend: 'https:' | json }},
+          "width": 600,
+          "height": {{ logo_h }},
+          "caption": {{ shop.name | json }}
+        },
+        {%- endif %}
+        {{ org_sameas_json }}
+        "founder": { "@id": {{ person_id | json }} },
+        "description": {{ shop.description | default: 'Independent publisher of professional systems for building websites with Claude Code.' | json }}
+      },
+      {
+        "@type": "WebSite",
+        "@id": {{ shop_url | append: '/#website' | json }},
+        "url": {{ shop_url | json }},
+        "name": {{ shop.name | json }},
+        "publisher": { "@id": {{ org_id | json }} },
+        "inLanguage": {{ request.locale.iso_code | json }}
+      },
+      {{ person_node }}
+    ]
+  }
+  </script>
+{%- endif -%}
+
+{%- if template.name == 'product' and product != blank -%}
+  {%- assign variant = product.selected_or_first_available_variant -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": {{ product.title | json }},
+    "description": {{ product.description | strip_html | truncate: 500 | json }},
+    "sku": {{ variant.sku | json }},
+    "brand": { "@type": "Brand", "name": {{ product.vendor | json }} },
+    "url": {{ product.url | prepend: shop_url | json }},
+    {%- if product.featured_media -%}
+    "image": [{{ product.featured_media | image_url: width: 1200 | prepend: 'https:' | json }}],
+    {%- endif -%}
+    "offers": {
+      "@type": "Offer",
+      "url": {{ product.url | prepend: shop_url | json }},
+      "price": {{ variant.price | divided_by: 100.0 | json }},
+      "priceCurrency": {{ cart.currency.iso_code | json }},
+      "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+      "seller": { "@type": "Organization", "@id": {{ org_id | json }}, "name": {{ shop.name | json }} }
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+      { "@type": "ListItem", "position": 2, "name": {{ product.title | json }}, "item": {{ product.url | prepend: shop_url | json }} }
+    ]
+  }
+  </script>
+{%- endif -%}
+
+{%- if template.name == 'page' and page != blank -%}
+  {%- if page.handle == 'about' -%}
+    {%- comment -%}
+      ProfilePage rather than a bare Person: this page is about the person, so
+      the page type and its mainEntity say the same thing.
+    {%- endcomment -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ProfilePage",
+          "@id": {{ about_url | append: '#profilepage' | json }},
+          "url": {{ about_url | json }},
+          "name": {{ page.title | json }},
+          "isPartOf": { "@id": {{ shop_url | append: '/#website' | json }} },
+          "mainEntity": { "@id": {{ person_id | json }} }
+        },
+        {{ person_node }},
+        {
+          "@type": "Organization",
+          "@id": {{ org_id | json }},
+          "name": {{ shop.name | json }},
+          "url": {{ shop_url | json }}
+        }
+      ]
+    }
+    </script>
+  {%- endif -%}
+
+  {%- comment -%}
+    Long-form content that happens to live on a page rather than in the blog.
+
+    The case study and the five resource pages are articles by any reasonable
+    reading — 700 to 2,000 words, authored, dated, revised — and they were
+    carrying only a BreadcrumbList because Shopify calls them pages. Article
+    describes them honestly; TechArticle would be narrower but is not eligible
+    for anything extra, so the plain type is used.
+
+    Dates come from the page's own published_at and updated_at, so they cannot
+    drift from reality, and the author is the same Person node the guides use.
+  {%- endcomment -%}
+  {%- comment -%}
+    The benchmark is a dataset as well as an article, and Dataset is the type
+    that makes it findable in Google Dataset Search and citable by anyone
+    writing about it. That is the whole point of the page: it exists to be
+    linked to.
+
+    `distribution` points at the raw CSV in the public repository rather than a
+    copy on this domain, so there is exactly one file and it cannot go stale
+    against the analysis. `creativeWorkStatus` says plainly that no trials have
+    run, because a Dataset node implying results that do not exist would be the
+    most machine-readable possible lie.
+
+    Emitted only for this one page, keyed on its handle.
+  {%- endcomment -%}
+  {%- if page.handle == 'claude-code-website-development-benchmark-2026' -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "@id": {{ page.url | prepend: shop_url | append: '#dataset' | json }},
+      "name": {{ page.title | json }},
+      {%- if page.metafields.global.description_tag != blank -%}
+      "description": {{ page.metafields.global.description_tag | json }},
+      {%- endif -%}
+      "url": {{ page.url | prepend: shop_url | json }},
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "isAccessibleForFree": true,
+      "creativeWorkStatus": "Draft: methodology published, no trials run",
+      "datePublished": {{ page.published_at | date: '%Y-%m-%d' | json }},
+      "dateModified": {{ page.updated_at | default: page.published_at | date: '%Y-%m-%d' | json }},
+      "creator": {{ person_node }},
+      "publisher": {
+        "@type": "Organization",
+        "@id": {{ org_id | json }},
+        "name": {{ shop.name | json }},
+        "url": {{ shop_url | json }}
+      },
+      "measurementTechnique": "Repeated identical website tasks executed by Claude Code across five website platforms, with build, test, Lighthouse and axe results recorded per trial",
+      "variableMeasured": [
+        "success", "attempts", "human_interventions", "build_ok",
+        "lighthouse_performance", "lighthouse_accessibility", "lighthouse_seo",
+        "axe_violations", "deployment_ready"
+      ],
+      "distribution": [{
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://raw.githubusercontent.com/sitebuilderstack/store/main/research/benchmark/results.csv"
+      }],
+      "citation": "Joyner, J. (2026). Claude Code Website Development Benchmark 2026. Site Builder Stack."
+    }
+    </script>
+  {%- endif -%}
+
+  {%- if page.template_suffix == 'resource' or page.template_suffix == 'case-study' -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": {{ page.url | prepend: shop_url | append: '#article' | json }},
+      "headline": {{ page.title | json }},
+      {%- if page.metafields.global.description_tag != blank -%}
+      "description": {{ page.metafields.global.description_tag | json }},
+      {%- endif -%}
+      "datePublished": {{ page.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+      "dateModified": {{ page.updated_at | default: page.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+      "author": {{ person_node }},
+      "publisher": {
+        "@type": "Organization",
+        "@id": {{ org_id | json }},
+        "name": {{ shop.name | json }},
+        "url": {{ shop_url | json }}
+      },
+      {%- if settings.share_image != blank -%}
+      "image": [{{ settings.share_image | image_url: width: 1200 | prepend: 'https:' | json }}],
+      {%- endif -%}
+      "isAccessibleForFree": true,
+      "mainEntityOfPage": { "@type": "WebPage", "@id": {{ page.url | prepend: shop_url | json }} }
+    }
+    </script>
+  {%- endif -%}
+
+  {%- comment -%}
+    Topic hub pages.
+
+    CollectionPage rather than Article: the page's job is to organise a set of
+    guides, and the ItemList below is exactly the list a visitor can see and
+    click. Nothing here is markup for content that is not on the page — the
+    items are read from the same metafield the section renders from, so the
+    two cannot disagree.
+
+    No FAQPage anywhere on the site. Some hubs answer questions in prose, but
+    marking prose up as an FAQ to chase a rich result is describing the page as
+    something it is not.
+  {%- endcomment -%}
+  {%- if page.template_suffix == 'pillar' -%}
+    {%- assign hub_blog = blogs['guides'] -%}
+    {%- assign hub_cluster = page.metafields.sbs.cluster.value -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": {{ page.url | prepend: shop_url | append: '#collectionpage' | json }},
+      "url": {{ page.url | prepend: shop_url | json }},
+      "name": {{ page.title | json }},
+      {%- if page.metafields.global.description_tag != blank -%}
+      "description": {{ page.metafields.global.description_tag | json }},
+      {%- endif -%}
+      "isPartOf": { "@id": {{ shop_url | append: '/#website' | json }} },
+      "inLanguage": {{ request.locale.iso_code | json }},
+      "about": {{ page.title | json }},
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": {{ hub_cluster.size }},
+        "itemListElement": [
+          {%- assign n = 0 -%}
+          {%- for h in hub_cluster -%}
+            {%- assign hq = hub_blog.handle | append: '/' | append: h -%}
+            {%- assign ha = hub_blog.articles | where: 'handle', hq | first -%}
+            {%- unless ha -%}{%- assign ha = hub_blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+            {%- if ha != blank -%}
+              {%- assign n = n | plus: 1 -%}
+              {%- unless n == 1 -%},{%- endunless -%}
+              {
+                "@type": "ListItem",
+                "position": {{ n }},
+                "url": {{ ha.url | prepend: shop_url | json }},
+                "name": {{ ha.title | json }}
+              }
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+        { "@type": "ListItem", "position": 2, "name": {{ hub_blog.title | json }}, "item": {{ hub_blog.url | prepend: shop_url | json }} },
+        { "@type": "ListItem", "position": 3, "name": {{ page.title | json }}, "item": {{ page.url | prepend: shop_url | json }} }
+      ]
+    }
+    </script>
+
+  {%- elsif page.template_suffix == 'resource' -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+        { "@type": "ListItem", "position": 2, "name": "Free resources", "item": {{ shop_url | append: '/pages/resources' | json }} },
+        { "@type": "ListItem", "position": 3, "name": {{ page.title | json }}, "item": {{ page.url | prepend: shop_url | json }} }
+      ]
+    }
+    </script>
+  {%- else -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+        { "@type": "ListItem", "position": 2, "name": {{ page.title | json }}, "item": {{ page.url | prepend: shop_url | json }} }
+      ]
+    }
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
+{%- if template.name == 'blog' and blog != blank -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": {{ blog.url | prepend: shop_url | append: '#blog' | json }},
+    "url": {{ blog.url | prepend: shop_url | json }},
+    "name": {{ blog.title | json }},
+    "description": {{ blog.metafields.global.description_tag | default: 'In-depth guides to building production websites with Claude Code.' | json }},
+    "inLanguage": {{ request.locale.iso_code | json }},
+    "publisher": {
+      "@type": "Organization",
+      "@id": {{ org_id | json }},
+      "name": {{ shop.name | json }},
+      "url": {{ shop_url | json }}
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+      { "@type": "ListItem", "position": 2, "name": {{ blog.title | json }}, "item": {{ blog.url | prepend: shop_url | json }} }
+    ]
+  }
+  </script>
+{%- endif -%}
+
+{%- if template.name == 'article' and article != blank -%}
+  {%- comment -%}
+    BlogPosting built from real article data only. dateModified falls back to
+    published_at rather than being invented.
+
+    The author is a Person when the article's author field names James, and an
+    Organization otherwise — so an article genuinely written by someone else,
+    or by the house, is not attributed to a person who did not write it.
+  {%- endcomment -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": {{ article.url | prepend: shop_url | append: '#article' | json }},
+    "headline": {{ article.title | json }},
+    "description": {{ article.excerpt | default: article.content | strip_html | truncate: 300 | json }},
+    "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+    "dateModified": {{ article.updated_at | default: article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+    {%- if article.author == author_name -%}
+    "author": {{ person_node }},
+    {%- else -%}
+    "author": { "@type": "Organization", "@id": {{ org_id | json }}, "name": {{ article.author | default: shop.name | json }} },
+    {%- endif -%}
+    "publisher": {
+      "@type": "Organization",
+      "@id": {{ org_id | json }},
+      "name": {{ shop.name | json }},
+      "url": {{ shop_url | json }}
+    },
+    {%- if article.image -%}
+    "image": [{{ article.image | image_url: width: 1400 | prepend: 'https:' | json }}],
+    {%- endif -%}
+    "mainEntityOfPage": { "@type": "WebPage", "@id": {{ article.url | prepend: shop_url | json }} },
+    "isPartOf": { "@type": "Blog", "@id": {{ blog.url | prepend: shop_url | append: '#blog' | json }}, "name": {{ blog.title | json }} }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop_url | json }} },
+      { "@type": "ListItem", "position": 2, "name": {{ blog.title | json }}, "item": {{ blog.url | prepend: shop_url | json }} },
+      { "@type": "ListItem", "position": 3, "name": {{ article.title | json }}, "item": {{ article.url | prepend: shop_url | json }} }
+    ]
+  }
+  </script>
+{%- endif -%}

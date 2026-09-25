@@ -1,0 +1,145 @@
+<h2 id="headline">Move Your Website Without Losing What Matters.</h2>
+
+<p class="sbs-lede">Plan, execute and validate website migrations with Claude Code &mdash; WordPress to Astro, WordPress to Shopify, host and theme moves, Shopify replatforming, static sites, domain changes, URL-structure changes. Every URL inventoried, every page mapped, every redirect tested, metadata and structured data compared page by page, media and forms and analytics verified, DNS recorded before it is touched, and a scorecard that says GO, GO WITH WARNINGS or NO-GO from evidence. Not a prompt pack: 28 working scripts, 37 Claude Code commands, 20 modules including seven platform guides, 13 checklists, and a complete fictional migration to read before you run your own.</p>
+
+<h2 id="problem">The problem</h2>
+
+<p>A migration is not a copy. The new site builds, deploys, looks right &mdash; and three weeks later the search traffic is half what it was, a partner&rsquo;s link lands on a 404, the contact form has been posting to nothing, the images break when the old hosting is cancelled, and nobody can say which of the 1,400 old URLs were supposed to go where. The deployment succeeded. The migration failed. Most of what was lost was not on anyone&rsquo;s list, because nobody made the list.</p>
+
+<p>Ask a capable model to &ldquo;migrate the site&rdquo; and you get the other failure: content converted without its metadata, every missing page redirected to the homepage, production launched with staging&rsquo;s <code>noindex</code> still set, the DNS panel opened before anyone wrote down what was in it.</p>
+
+<h2 id="solution">The solution</h2>
+
+<p>A structured migration system that runs inside Claude Code and treats a migration as what it is &mdash; a mapping and validation exercise:</p>
+
+<pre><code>DISCOVER → INVENTORY → BASELINE → MAP → BUILD → MIGRATE → VALIDATE → CUT OVER → MONITOR → ROLL BACK IF NECESSARY</code></pre>
+
+<ul>
+  <li><strong>Working scripts</strong> for the parts a machine should do: a crawler that builds the URL inventory with status, metadata, canonicals, indexability, links, images, forms and structured data; a URL map drafter; an HTML&nbsp;&rarr;&nbsp;Markdown converter that flags what it could not convert; a redirect generator for nginx, Apache, Netlify, Vercel, Shopify and Cloudflare that refuses loops, chains and homepage dumps; a redirect tester that reports valid, missing, loop, chain, wrong destination and dead target; URL, metadata and schema comparison; canonical, robots and sitemap checks; an internal-link audit; an old-domain scan; a DNS inventory with before/after comparison; a critical-page validator; a rollback-readiness check; and the audit that scores it all. Python standard library only; nothing to install.</li>
+  <li><strong>Claude Code commands</strong> that run the scripts, read the results and explain them &mdash; each marked <strong>READ ONLY</strong>, <strong>MODIFIES FILES</strong> or <strong>PRODUCTION IMPACT POSSIBLE</strong>, each with its purpose, inputs, preconditions, safety rules, steps, expected output, validation and rollback written down.</li>
+  <li><strong>A clear line</strong> between what is automatable (inventory, compare, generate, test), semi-automatable (the map, the conversion &mdash; the scripts draft, a person decides) and manual (what a page becomes, DNS, forms, checkout, the go/no-go call). Per migration type, in a matrix.</li>
+  <li><strong>Seven platform guides</strong> with the facts that change the plan: what each platform exports and imports, where its redirects live, its URL conventions, and what always breaks.</li>
+</ul>
+
+<h2 id="included">What is included</h2>
+
+<p>190 files, 20 modules, 37 commands, 28 scripts, 7 platform guides, 13 checklists, 6 report templates &mdash; about 78,000 words plus working code. Every number here was counted from the bundle at build time.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Module</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td><code>01-migration-discovery</code></td><td>The facts before the plan: platforms, hosting, DNS, counts, forms, integrations, analytics, rollback; the questionnaire and the report</td></tr>
+<tr><td><code>02-url-inventory</code></td><td>Crawl + sitemap + Search Console + analytics + logs, merged and reconciled &mdash; the baseline every comparison is measured against</td></tr>
+<tr><td><code>03-content-inventory</code></td><td>Content types, thin/empty/duplicate/orphan flags, a migration method per row</td></tr>
+<tr><td><code>04-seo-baseline</code></td><td>Titles, descriptions, canonicals, robots, H1s, schema types frozen; the exports only a person can take</td></tr>
+<tr><td><code>05-analytics-baseline</code></td><td>Loaders and IDs on every page; events, consent, the numbers from before</td></tr>
+<tr><td><code>06-migration-mapping</code></td><td>The URL map as the contract: KEEP / MOVE / MERGE / REMOVE, by rule and by hand, never to the homepage</td></tr>
+<tr><td><code>07-content-migration</code></td><td>Convert, import or rebuild; HTML to Markdown with a review list; frontmatter and slugs from the map</td></tr>
+<tr><td><code>08-media-migration</code></td><td>Every image and file inventoried, moved, validated; the old host kept until references are zero</td></tr>
+<tr><td><code>09-metadata-migration</code></td><td>Metadata carried, then compared; the three failures that take sites out of the index</td></tr>
+<tr><td><code>10-structured-data</code></td><td>JSON-LD per type re-implemented and compared, subtypes recognised</td></tr>
+<tr><td><code>11-internal-links</code></td><td>Links rewritten from the map, audited for broken, old-domain, staging, redirect</td></tr>
+<tr><td><code>12-redirects</code></td><td>Map, validate, generate for six platforms, deploy where they belong, test on the real origin</td></tr>
+<tr><td><code>13-staging-validation</code></td><td>Everything provable before DNS, in one run; what staging cannot prove, listed</td></tr>
+<tr><td><code>14-performance</code></td><td>Timing facts before and after, like for like</td></tr>
+<tr><td><code>15-dns-cutover</code></td><td>Record, lower TTL, change only the web records, verify, never touch mail</td></tr>
+<tr><td><code>16-launch</code></td><td>Go / no-go rules, roles, the first hour, search engines told</td></tr>
+<tr><td><code>17-post-migration-validation</code></td><td>The full audit on the live domain; the scorecard and how it is computed</td></tr>
+<tr><td><code>18-rollback</code></td><td>Readiness verified as facts; the decision matrix; the procedure</td></tr>
+<tr><td><code>19-monitoring</code></td><td>24 hours, 7 days, 30 days; 404 triage; when to decommission</td></tr>
+<tr><td><code>20-platform-guides</code></td><td>WordPress &rarr; Astro, WordPress &rarr; Shopify, WordPress &rarr; WordPress, Shopify replatforming, Static &rarr; Astro, domain migration, URL-structure migration</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Plus <code>.claude/commands/</code> with 37 slash commands, <code>scripts/</code> with 28 scripts, <code>templates/</code> with <code>migration-config.yaml</code>, the inventory, map, redirect, critical-page, DNS and risk-register CSVs, the cutover plan, the launch-readiness sheet, a <code>CLAUDE.md</code> and six redirect configuration samples, 13 checklists, 6 report templates, a reference set (the automation matrix, go/no-go and rollback matrices, monitoring windows, troubleshooting) and <code>examples/wordpress-to-astro/</code> &mdash; a complete fictional migration with every inventory, map, comparison and report, produced by running the scripts.</p>
+
+<h2 id="commands">The commands</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Command</th><th>Mode</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>/migration-discovery</code> &middot; <code>/migration-plan</code></td><td>Read / Files</td><td>The facts, then the plan with gates, the automatable/manual split and a seeded risk register</td></tr>
+<tr><td><code>/url-inventory</code> &middot; <code>/target-url-inventory</code> &middot; <code>/url-map</code> &middot; <code>/url-coverage</code></td><td>Read / Files</td><td>Source and target inventories in one shape; the map; UNCHANGED / REDIRECTED / REMOVED / MISSING / BROKEN</td></tr>
+<tr><td><code>/content-inventory</code> &middot; <code>/media-inventory</code> &middot; <code>/media-validation</code></td><td>Read</td><td>What each URL is and what happens to it; every file, where used, whether it resolves</td></tr>
+<tr><td><code>/seo-baseline</code> &middot; <code>/analytics-baseline</code> &middot; <code>/performance-baseline</code> &middot; <code>/dns-inventory</code></td><td>Read</td><td>The &ldquo;before&rdquo;: metadata, tracking, timings, and every DNS record including the ones that must not change</td></tr>
+<tr><td><code>/content-migration</code> &middot; <code>/metadata-migration</code> &middot; <code>/content-normalize</code></td><td>Files</td><td>HTML to Markdown with a review list; metadata into the target&rsquo;s format; shortcodes, headings, paths tidied</td></tr>
+<tr><td><code>/redirect-map</code> &middot; <code>/redirect-config</code> &middot; <code>/redirect-validation</code></td><td>Files / Read</td><td>The validated map; the platform&rsquo;s configuration; PASS / CHAIN / WRONG-CODE / WRONG / MISSING / LOOP / DEAD</td></tr>
+<tr><td><code>/metadata-compare</code> &middot; <code>/schema-compare</code> &middot; <code>/internal-link-audit</code> &middot; <code>/old-domain-scan</code> &middot; <code>/tracking-validation</code></td><td>Read</td><td>Page-by-page comparisons; links; references to the old and staging hosts; expected IDs on every page</td></tr>
+<tr><td><code>/critical-page-validation</code> &middot; <code>/form-validation</code></td><td>Read</td><td>The pages the business cannot lose, strictly; forms proven by a submission, not by presence</td></tr>
+<tr><td><code>/staging-validation</code> &middot; <code>/performance-compare</code></td><td>Read</td><td>Everything checkable before DNS moves; timings after against before</td></tr>
+<tr><td><code>/rollback-readiness</code> &middot; <code>/cutover-plan</code> &middot; <code>/pre-launch-check</code> &middot; <code>/migration-go-no-go</code></td><td>Read / Files</td><td>Facts a rollback needs; the exact DNS changes; the last gate; the recorded decision</td></tr>
+<tr><td><code>/migration-cutover</code> &middot; <code>/migration-rollback</code></td><td>Production</td><td>Step by step, each change quoted and confirmed, the rollback path stated first</td></tr>
+<tr><td><code>/post-migration-audit</code> &middot; <code>/website-migration-audit</code> &middot; <code>/migration-report</code></td><td>Read / Files</td><td><strong>The master audit</strong> on the live domain: scorecard, findings by severity, GO / GO WITH WARNINGS / NO-GO; the client report</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="scorecard">The scorecard</h2>
+
+<pre><code>URL Coverage:            100%
+Redirect Integrity:       94%
+Metadata Preservation:    73%
+Canonical Integrity:     100%
+Internal Links:          100%
+Media Integrity:         100%
+Analytics:               PASS
+Forms:                   PASS
+Critical Pages:          PASS
+
+Overall Migration Health: 94/100
+LAUNCH RECOMMENDATION: GO WITH WARNINGS</code></pre>
+
+<p>That is the example migration&rsquo;s real output. The score is the mean of the six percentages, minus ten per failure among analytics, forms and critical pages; any blocker &mdash; a critical page down, checkout broken, redirect gaps, DNS unrecorded, a certificate failure, the target unreachable, no verified backup, analytics absent when the business depends on it, production noindexed, canonicals pointing at staging, forms broken &mdash; makes it NO-GO regardless of the number. Every line names the file it was computed from; anything not measured is reported as NOT CHECKED, not scored. The score orders the work. It does not predict rankings or traffic and it is not a guarantee.</p>
+
+<h2 id="usecases">Use cases</h2>
+
+<ul>
+  <li>Move a WordPress site to Astro on Netlify or Vercel with every post converted, every archive mapped, every redirect tested.</li>
+  <li>Replatform a content site to Shopify: products, blog and pages into Shopify&rsquo;s fixed URL structure, redirects as a CSV the admin accepts, checkout on the critical-page list.</li>
+  <li>Change a WordPress host or theme and prove the metadata and structured data survived the theme swap.</li>
+  <li>Change domains: every URL redirected in one hop, both zones recorded, mail untouched, Search Console told in the right order.</li>
+  <li>Flatten a URL structure and rewrite internal links from the map instead of relying on redirects.</li>
+  <li>Take a static HTML folder into Astro with the shared markup componentised and the <code>.html</code> URLs decided, not defaulted.</li>
+  <li>Validate a migration someone else did: crawl, compare, score, list what was lost.</li>
+  <li>Roll back deliberately, from the recorded DNS, when a blocker cannot be fixed forward.</li>
+</ul>
+
+<h2 id="who">Who it is for</h2>
+
+<p>Developers and agencies doing migrations for clients; site owners moving their own site; SEO practitioners who need the before, the after and the difference in a file; operators inheriting a migration that was never validated. It assumes you can run a command and read a CSV. It does not assume you have migrated a site before &mdash; the discovery module and the platform guides are written for a first one, and the example is a whole migration you can read end to end.</p>
+
+<h2 id="safety">Safety</h2>
+
+<p>Every command declares its mode. Read-only commands write only reports and inventories. File-modifying commands announce every path first. Production-impact commands &mdash; the cutover and the rollback &mdash; quote each DNS record, old value and new, and wait for a yes; the current zone is recorded before the panel is opened, and only the web records in the plan change. The system will not destroy the source before the target is validated, change DNS without the record, delete redirects without review, redirect missing pages to the homepage, launch without rollback preparation, or leave production noindexed or canonicalised to staging &mdash; those are its ten rules, in every command. Credentials for hosting, DNS and the CMS stay with you; the scripts never read, print or store them.</p>
+
+<h2 id="compare">How it fits with the other five</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Migration &amp; Replatforming</th><th>Website Launch System</th><th>SEO &amp; Website Audit</th><th>Conversion &amp; Revenue</th><th>Operations &amp; Maintenance</th><th>Shopify Automation</th></tr></thead>
+<tbody>
+<tr><td>Price</td><td>$29.99</td><td>$19.99</td><td>$19.99</td><td>$19.99</td><td>$39.99</td><td>$39.99</td></tr>
+<tr><td>Stage</td><td>Migrate</td><td>Build</td><td>Rank</td><td>Convert</td><td>Operate</td><td>Automate Shopify</td></tr>
+<tr><td>Best for</td><td>A site that is moving</td><td>A site you are building</td><td>A site that is not ranking</td><td>Traffic that under-converts</td><td>A live site to keep healthy</td><td>A Shopify catalogue at scale</td></tr>
+<tr><td>URL mapping, redirects, cutover, rollback</td><td>Complete</td><td>Launch-day checks only</td><td>Redirect audit only</td><td>Not covered</td><td>Redirect audit only</td><td>Shopify redirect list</td></tr>
+<tr><td>Before/after comparison of metadata, schema, links, media</td><td>Complete</td><td>Not covered</td><td>Site-wide audit, one point in time</td><td>Not covered</td><td>Baseline comparison</td><td>Catalogue only</td></tr>
+<tr><td>Working scripts</td><td>28, standard library</td><td>Not included</td><td>Not included</td><td>Not included</td><td>11, standard library</td><td>32, standard library</td></tr>
+<tr><td>Platform guides</td><td>7 migration guides</td><td>Build systems per platform</td><td>Not covered</td><td>Not covered</td><td>4 platform guides</td><td>Shopify only</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The first three are also sold together as the <a href="/products/complete-site-builder-stack">Complete Site Builder Stack</a>. This one is separate and specific: it is for the weeks a site is moving. Before the move, the <a href="/products/claude-code-seo-website-audit-toolkit">SEO &amp; Website Audit Toolkit</a> gives the baseline audit; after it, the <a href="/products/claude-code-website-operations-maintenance-system">Operations &amp; Maintenance System</a> keeps the new site healthy; a Shopify destination pairs with the <a href="/products/claude-code-shopify-automation-admin-api-toolkit">Shopify Automation Toolkit</a> for the catalogue import. Buying this one does not include the others, and there is no automatic upgrade credit.</p>
+
+<h2 id="delivery">Delivery and licence</h2>
+
+<p>A single ZIP, delivered by download immediately after purchase. 190 files, about 300&nbsp;KB &mdash; Markdown, Python, CSV, YAML and configuration samples; nothing to install beyond Python 3, which your machine almost certainly has. A published SHA-256 checksum accompanies the download so you can verify what you received.</p>
+
+<p>Licensed to one person for unlimited sites, including client work. You may not redistribute or resell it. Full terms are in <code>LICENSE.md</code> inside the archive. WordPress, Shopify, Astro, Netlify, Vercel and Cloudflare are trademarks of their owners; this product is independent and not affiliated with or endorsed by any of them.</p>
+
+<h2 id="notpromised">What is not promised</h2>
+
+<p>No ranking, no traffic figure, no guarantee that a migration loses nothing. The system inventories what there was, compares it with what there is, and lists the difference with a severity and a fix; the decisions &mdash; what a page becomes, when to cut over, whether to roll back &mdash; are yours, and it is built so that they stay yours and are recorded.</p>

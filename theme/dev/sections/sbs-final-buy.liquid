@@ -1,0 +1,150 @@
+{%- comment -%}
+  The closing purchase panel — for the product the visitor is actually reading.
+
+  Before this existed, the last thing on seven of the eight product pages was
+  `sbs-cta` pointing at a DIFFERENT product with a primary button, and on the
+  eighth it was a primary button to `/#buy` on the homepage. A visitor who read
+  to the bottom of the Migration System page was offered the Operations System
+  and nothing else. This section closes that gap: one implementation, driven by
+  the page's own `product`, on all eight pages.
+
+  The delivery, licence and refund lines live here rather than in eight product
+  descriptions, because that is how they drifted apart in the first place: the
+  bundle's description says "sales are final" while the store's refund policy
+  lists five circumstances in which a refund is given and preserves statutory
+  cancellation rights. One source, linked to the policy, cannot contradict
+  itself.
+
+  Requirements are printed, not folded into a disclosure. A buyer who needs
+  Claude Code, a terminal or Python 3 should not have to open anything to find
+  that out.
+{%- endcomment -%}
+
+{%- assign variant = product.selected_or_first_available_variant -%}
+
+{%- if product != blank -%}
+  <section class="sbs-section sbs-section--alt" id="{{ section.settings.anchor | default: 'get' | escape }}">
+    <div class="sbs-container">
+      <div class="sbs-final">
+        <div class="sbs-final__main">
+          <span class="sbs-eyebrow">{{ section.settings.eyebrow | default: 'Get it' | escape }}</span>
+          <h2>{{ section.settings.heading | default: product.title | escape }}</h2>
+
+          {%- if section.settings.body != blank -%}
+            <p class="sbs-lede" style="margin-top: var(--sp-4);">{{ section.settings.body | escape }}</p>
+          {%- endif -%}
+
+          {%- if section.blocks.size > 0 -%}
+            <ul class="sbs-buy__list" style="margin-top: var(--sp-5);">
+              {%- for block in section.blocks -%}
+                {%- if block.settings.item != blank -%}
+                  <li {{ block.shopify_attributes }}>
+                    <span class="sbs-buy__tick" aria-hidden="true">&#10003;</span>
+                    <span>{{ block.settings.item | escape }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
+
+        <div class="sbs-buy sbs-final__panel" data-sbs-buy>
+          <div class="sbs-buy__price">
+            {{ variant.price | money }}
+            <small>{{ cart.currency.iso_code }} · one payment</small>
+          </div>
+
+          {%- if variant.available -%}
+            {%- form 'product', product, id: 'sbs-final-form', data-sbs-buy-form: '' -%}
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" name="add"
+                      class="sbs-btn sbs-btn--primary sbs-btn--block"
+                      data-busy-label="Adding&hellip;"
+                      data-sbs-track="product_cta_clicked"
+                      data-sbs-placement="final_panel"
+                      data-sbs-product="{{ product.handle | escape }}"
+                      style="margin-top: var(--sp-5);">
+                {{ section.settings.button_label | default: 'Add to cart' | escape }}
+                &mdash; {{ variant.price | money_without_trailing_zeros }}
+              </button>
+              {{ form | payment_button }}
+            {%- endform -%}
+          {%- else -%}
+            <button type="button" class="sbs-btn sbs-btn--primary sbs-btn--block" disabled
+                    style="margin-top: var(--sp-5);">Currently unavailable</button>
+          {%- endif -%}
+
+          {%- if section.settings.secondary_label != blank and section.settings.secondary_url != blank -%}
+            {%- comment -%}
+              A secondary route — a team licence enquiry, the full comparison —
+              kept below the purchase action and styled as a link, so it never
+              competes with the individual purchase this page is for.
+            {%- endcomment -%}
+            <p style="margin-top: var(--sp-4); text-align: center;">
+              <a href="{{ section.settings.secondary_url }}"
+                 data-sbs-track="{{ section.settings.secondary_event | default: 'secondary_route_clicked' | escape }}"
+                 data-sbs-placement="final_panel_secondary"
+                 class="sbs-cta-note" style="display:inline;">{{ section.settings.secondary_label | escape }}</a>
+            </p>
+          {%- endif -%}
+
+          <dl class="sbs-final__facts">
+            <div>
+              <dt>Delivery</dt>
+              <dd>{{ section.settings.delivery | default: 'A download link on the confirmation page and in the confirmation email, immediately after checkout. Nothing is shipped.' | escape }}</dd>
+            </div>
+            {%- if section.settings.requirements != blank -%}
+              <div>
+                <dt>You need</dt>
+                <dd>{{ section.settings.requirements | escape }}</dd>
+              </div>
+            {%- endif -%}
+            <div>
+              <dt>Licence</dt>
+              <dd>{{ section.settings.licence | default: 'One person, unlimited projects including client work. Do not redistribute or resell the files. Full terms are in LICENSE.md inside the download.' | escape }}</dd>
+            </div>
+            <div>
+              <dt>Refunds</dt>
+              <dd>
+                All sales are final and we do not offer refunds.
+                <a href="{{ routes.root_url }}policies/refund-policy">Read the refund policy</a>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SBS — Final buy",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "get" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Get it" },
+    { "type": "text", "id": "heading", "label": "Heading", "info": "Defaults to the product title." },
+    { "type": "textarea", "id": "body", "label": "One-line restatement of the value" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "textarea", "id": "requirements", "label": "What the buyer must already have",
+      "info": "Printed, never folded into a disclosure. Name Claude Code, a terminal, Python, or platform access where they are genuinely required." },
+    { "type": "textarea", "id": "delivery", "label": "Delivery" },
+    { "type": "textarea", "id": "licence", "label": "Licence" },
+    { "type": "header", "content": "Secondary route (optional)" },
+    { "type": "text", "id": "secondary_label", "label": "Link label" },
+    { "type": "url", "id": "secondary_url", "label": "Link" },
+    { "type": "text", "id": "secondary_event", "label": "Event name", "default": "secondary_route_clicked",
+      "info": "Use team_license_inquiry_clicked for the team-licence route and product_comparison_opened for the catalogue comparison." },
+    { "type": "paragraph",
+      "content": "The refund summary is fixed and links to the store policy, so eight product pages cannot drift apart. Change the policy, not this section." }
+  ],
+  "blocks": [
+    { "type": "item", "name": "Included item",
+      "settings": [ { "type": "text", "id": "item", "label": "Item" } ] }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "SBS — Final buy" }]
+}
+{% endschema %}

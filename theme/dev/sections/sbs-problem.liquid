@@ -1,0 +1,48 @@
+<section class="sbs-section sbs-section--alt">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="sbs-grid sbs-grid--3">
+      {%- for block in section.blocks -%}
+        <li class="sbs-card" {{ block.shopify_attributes }}>
+          <h3>{{ block.settings.title | escape }}</h3>
+          <p>{{ block.settings.body | escape }}</p>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Problem",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The problem" },
+    { "type": "text", "id": "heading", "label": "Heading",
+      "default": "Claude Code is powerful. The hard part is knowing what to tell it." },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "The bottleneck was never the model's ability to write code. It is that most people have no repeatable process for directing it." }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Problem",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "body", "label": "Body" }
+      ]
+    }
+  ],
+  "max_blocks": 9,
+  "presets": [{ "name": "SBS — Problem" }]
+}
+{% endschema %}

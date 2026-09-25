@@ -1,0 +1,248 @@
+{
+  "id": "launch-readiness",
+  "handle": "lab-launch-readiness",
+  "title": "Launch Readiness Lab",
+  "eyebrow": "Lab A · 15 minutes",
+  "short": "Should this release go out?",
+  "summary": "Read a demonstration site's pre-launch evidence and decide whether the release proceeds or holds. Then see which single piece of evidence decides it — and which reassuring line in the summary was not evidence at all.",
+  "guide": {
+    "url": "/blogs/guides/claude-code-website-audit",
+    "title": "How to audit a website with Claude Code"
+  },
+  "product": {
+    "handle": "claude-code-website-launch-system",
+    "label": "Claude Code Website Launch System",
+    "note": "The launch checklist and the go/no-go report in the system are built so that a summary line like the one in this lab cannot be written without the evidence behind it."
+  },
+  "resource": {
+    "url": "/pages/claude-code-launch-checklist",
+    "title": "Website launch checklist"
+  },
+  "module": {
+    "url": "/blogs/guides/claude-code-landing-page-audit#try-landing-validation",
+    "title": "Generate a functional-validation checklist for your own page"
+  },
+  "scenario": "Harbourline Physio's redesigned site is scheduled to go live at 17:00 today. The agency has sent a release summary that says every check passed. You have twenty minutes, the summary, and the raw evidence it was written from. Decide: go, or hold.",
+  "sample": {
+    "label": "Declared sample data",
+    "note": "The summary, the responses and the logs below are fixtures written for this lab. No real site, agency or backup service is involved. The fixture bundle is a public download.",
+    "artifacts": [
+      {
+        "name": "lab-launch-readiness-fixture.zip",
+        "label": "Fixture: release summary, homepage response, backup log (zip)",
+        "url": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/lab-launch-readiness-fixture.zip?v=1789652961"
+      }
+    ]
+  },
+  "starting": "A release summary with six green ticks, and the evidence behind three of them. The other three have no evidence attached. Start with the summary, then read what it was built from.",
+  "evidence": [
+    {
+      "id": "summary",
+      "title": "release-summary.md (from the agency, 14:10 today)",
+      "kind": "text",
+      "content": "# Harbourline Physio — release summary\n\n- [x] Forms: contact form tested, submission received\n- [x] Redirects: 38/38 old URLs redirect correctly\n- [x] Indexing: robots and sitemap configured\n- [x] Backup: nightly backup succeeded (see log)\n- [x] Performance: LCP 1.9 s on the homepage\n- [x] Rollback: previous version available\n\nRecommendation: GO for 17:00."
+    },
+    {
+      "id": "home-head",
+      "title": "GET https://harbourline.example/ on the production host (release candidate, 14:02) — response head",
+      "kind": "html",
+      "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Harbourline Physio — Physiotherapy in Harbourline</title>\n  <meta name=\"robots\" content=\"noindex,nofollow\">\n  <link rel=\"canonical\" href=\"https://harbourline.example/\">\n  <link rel=\"sitemap\" type=\"application/xml\" href=\"/sitemap.xml\">\n</head>"
+    },
+    {
+      "id": "form-evidence",
+      "title": "Contact form test — inbox capture (13:48)",
+      "kind": "text",
+      "content": "From: website@harbourline.example\nTo: reception@harbourline.example\nSubject: New enquiry — RELEASE-TEST-2026-09-17-1348\n\nName: Release test\nMessage: RELEASE-TEST-2026-09-17-1348 — please ignore\n\nReceived 13:48:41. Marker matches the submission made at 13:48:12."
+    },
+    {
+      "id": "backup-log",
+      "title": "backup.log (last 3 nights)",
+      "kind": "text",
+      "content": "2026-09-15 02:00:04 backup job started\n2026-09-15 02:00:09 upload complete: 0 bytes (0 files)\n2026-09-15 02:00:09 STATUS: SUCCESS\n2026-09-16 02:00:03 backup job started\n2026-09-16 02:00:08 upload complete: 0 bytes (0 files)\n2026-09-16 02:00:08 STATUS: SUCCESS\n2026-09-17 02:00:05 backup job started\n2026-09-17 02:00:10 upload complete: 0 bytes (0 files)\n2026-09-17 02:00:10 STATUS: SUCCESS"
+    }
+  ],
+  "steps": [
+    {
+      "id": "decision",
+      "title": "Go or hold?",
+      "instruction": "Read the summary first, then the three pieces of evidence. Make the call you would make with twenty minutes and no one else to ask.",
+      "evidence": [
+        "summary",
+        "home-head",
+        "form-evidence",
+        "backup-log"
+      ],
+      "decision": {
+        "question": "What is your decision?",
+        "options": [
+          {
+            "id": "go",
+            "label": "Go — six checks passed and the form evidence is solid."
+          },
+          {
+            "id": "hold",
+            "label": "Hold — the production homepage is set to noindex,nofollow and the backup has been uploading nothing for three nights. Two of the six ticks are contradicted by their own evidence."
+          },
+          {
+            "id": "go-note",
+            "label": "Go, with a note to fix the robots meta tomorrow — indexing takes days anyway."
+          }
+        ],
+        "correct": "hold",
+        "explain": {
+          "correct": "The summary says 'robots and sitemap configured' — and they are, for staging. The release candidate on the production host carries noindex,nofollow, which is the staging value that was never switched. Launching it tells search engines to drop the site. The backup line is worse: three nights of STATUS: SUCCESS with 0 bytes uploaded. A backup job that succeeds at backing up nothing is the clearest example of why 'the job says success' is not evidence. Hold, fix the setting, verify on the production host, then go.",
+          "wrong": {
+            "go": "Read the homepage head again: noindex,nofollow on the production host. And read the byte counts in the backup log. The summary's ticks are not the evidence; the captures are.",
+            "go-note": "'Fix tomorrow' means launching a site that asks to be removed from the index and leaving it that way overnight, with no working backup behind it. A noindex is not a cosmetic issue to schedule; it is the one setting that undoes the launch."
+          }
+        }
+      }
+    },
+    {
+      "id": "decider",
+      "title": "Which piece of evidence decides it?",
+      "instruction": "If you could show the agency only one capture to justify the hold, which one?",
+      "evidence": [
+        "home-head",
+        "backup-log",
+        "form-evidence"
+      ],
+      "decision": {
+        "question": "Choose one.",
+        "options": [
+          {
+            "id": "head",
+            "label": "The homepage response head on the production host: noindex,nofollow is a launch-stopping fault by itself, and it is a live response — not a template, not a screenshot of settings."
+          },
+          {
+            "id": "backup",
+            "label": "The backup log: zero bytes for three nights."
+          },
+          {
+            "id": "form",
+            "label": "The form capture: it is the only evidence with a matching marker."
+          }
+        ],
+        "correct": "head",
+        "explain": {
+          "correct": "Both faults would each justify a hold, but the noindex is the one that makes launch itself harmful, and it is verifiable in one request by anyone. The backup fault is serious and must be fixed before go, but its consequence arrives later; the noindex's consequence starts at 17:00. The form capture is good evidence — of the form.",
+          "wrong": {
+            "backup": "A fair choice, and it must be fixed before launch — but its consequence is 'no restore if something goes wrong later'. The noindex's consequence is 'the launch removes the site from search'. Lead with the one that makes the launch itself the problem.",
+            "form": "That capture is the good news. It proves the form delivered at 13:48, with a marker — a model of what evidence looks like. It does not decide the hold."
+          }
+        }
+      }
+    },
+    {
+      "id": "next",
+      "title": "What is the next safe action?",
+      "instruction": "The agency accepts the hold. Choose the first thing that happens.",
+      "evidence": [
+        "home-head"
+      ],
+      "decision": {
+        "question": "First action:",
+        "options": [
+          {
+            "id": "staging-fix",
+            "label": "Change the robots setting on the release branch, deploy to the release candidate, fetch the production-host homepage again, and confirm index,follow in the live response — then look at the backup."
+          },
+          {
+            "id": "prod-edit",
+            "label": "Edit the meta tag directly on the production server so it is fixed before 17:00."
+          },
+          {
+            "id": "sitemap",
+            "label": "Submit the sitemap to Search Console so Google indexes the site as soon as it is live."
+          }
+        ],
+        "correct": "staging-fix",
+        "explain": {
+          "correct": "The fix goes through the same path every other change takes, and the verification is the same request that found the fault. Editing production directly creates a version nobody can reproduce and makes the 'rollback: previous version available' line false as well.",
+          "wrong": {
+            "prod-edit": "A hand edit on production is a change with no record and no rollback; the next deploy overwrites it and the noindex returns. Fix it where the release is built.",
+            "sitemap": "Submitting a sitemap for a site whose homepage says noindex asks Google to come and read the instruction to leave."
+          }
+        }
+      }
+    },
+    {
+      "id": "backup",
+      "title": "And the backup?",
+      "instruction": "The robots fix is verified. Twelve minutes left.",
+      "evidence": [
+        "backup-log"
+      ],
+      "decision": {
+        "question": "What does 'STATUS: SUCCESS' establish?",
+        "options": [
+          {
+            "id": "unknown",
+            "label": "Only that the job ran. With 0 bytes uploaded there is no backup; and even with bytes, nothing is known until a restore has been performed and opened."
+          },
+          {
+            "id": "ok",
+            "label": "That the site is backed up; the byte count is probably a logging quirk."
+          },
+          {
+            "id": "later",
+            "label": "That there is a backup — and the restore test can wait until after launch."
+          }
+        ],
+        "correct": "unknown",
+        "explain": {
+          "correct": "Success means the process exited without error. Backup means a restorable copy exists. The log shows the first and disproves the second. The pre-launch step is: take a manual backup now, restore it somewhere, open it, then fix the nightly job's source path.",
+          "wrong": {
+            "ok": "'Probably a quirk' is a guess about the one thing you cannot afford to guess. The number is right there: 0 bytes, 0 files, three nights.",
+            "later": "There is no backup to test. A restore test after launch would find that out at the moment it matters most."
+          }
+        }
+      }
+    }
+  ],
+  "after": [
+    {
+      "id": "after-head",
+      "title": "After: GET https://harbourline.example/ (release candidate, 16:21) — response head",
+      "kind": "html",
+      "content": "<meta name=\"robots\" content=\"index,follow\">\n<link rel=\"canonical\" href=\"https://harbourline.example/\">"
+    },
+    {
+      "id": "after-backup",
+      "title": "After: manual backup and restore (16:40)",
+      "kind": "text",
+      "content": "16:31 manual backup: upload complete: 148.2 MB (2,114 files)\n16:38 restore to scratch host: complete\n16:40 opened restored site: homepage 200, 3 service pages 200, media present\n16:40 nightly job source path corrected (was /var/www/htmll — typo)\nDecision: GO at 17:00, with the nightly job to be re-checked tomorrow."
+    }
+  ],
+  "closing": "The summary was not lying; it was written from ticks, not captures. The whole point of a launch checklist that demands evidence per line is that the line 'backup succeeded' cannot be written next to a log that says 0 bytes.",
+  "walkthrough": [
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-launch-readiness-1.png?v=1789654632",
+      "width": 1076,
+      "height": 2094,
+      "alt": "The lab opens on the scenario, the declared sample data with its download, the starting state, and step 1: the release summary and three pieces of evidence, with a four-option decision.",
+      "caption": "Step 1 of 4: read the release summary and the evidence, then decide go or hold."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-launch-readiness-2.png?v=1789654635",
+      "width": 1076,
+      "height": 2228,
+      "alt": "A deliberately wrong choice — Go — has been checked. The feedback box, outlined in red, explains that the homepage head shows noindex,nofollow and the backup log shows zero bytes; the Next button stays hidden.",
+      "caption": "A wrong decision is explained, not hidden. You can try again; the first answer is what the score records."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-launch-readiness-3.png?v=1789654638",
+      "width": 1076,
+      "height": 2284,
+      "alt": "The correct choice — Hold — has been checked. The feedback box, outlined in green, explains why, and the Next step button has appeared.",
+      "caption": "The matching decision unlocks the next step."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-launch-readiness-4.png?v=1789654641",
+      "width": 1076,
+      "height": 902,
+      "alt": "The end of the lab: 'The corrected version' with the first-attempt score, the after-state evidence (robots meta now index,follow; a manual backup restored and opened), Save to My Project, Reset, and the links to the guide, the generator and the product.",
+      "caption": "The corrected version, the score, and where to take it next."
+    }
+  ]
+}

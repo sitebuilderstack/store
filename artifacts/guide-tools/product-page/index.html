@@ -1,0 +1,440 @@
+<title>Digital Product Page Builder</title>
+<style>
+:root{
+  --bg:#0B0D12; --surface:#12151D; --surface-2:#171B26; --border:#232A38;
+  --border-strong:#7D8798; --text:#E9ECF3; --muted:#A7B0C0; --dim:#7D8798;
+  --accent:#8AA6FF; --accent-ink:#0B0D12; --accent-soft:rgba(138,166,255,.12);
+  --mono-accent:#5EEAD4; --ok:#6EE7A8; --warn:#F6C177; --bad:#F472B6;
+  --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;
+  --radius:10px; --radius-lg:16px; --gutter:16px;
+  --step--1:clamp(.82rem,.80rem + .10vw,.88rem);
+  --step-0:clamp(1rem,.97rem + .16vw,1.05rem);
+  --step-1:clamp(1.12rem,1.06rem + .30vw,1.28rem);
+  --step-2:clamp(1.3rem,1.16rem + .70vw,1.68rem);
+  --step-3:clamp(1.55rem,1.3rem + 1.2vw,2.2rem);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}}
+:root[data-theme="light"]{
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  font-size:var(--step-0);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}ul,ol{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-underline-offset:3px}
+:focus{outline:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1[tabindex="-1"]:focus-visible{outline:none}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding-inline:var(--gutter)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding-block:var(--sp-3);flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:var(--sp-2);font-weight:650;color:var(--text);text-decoration:none}
+.brand__mark{width:1.65rem;height:1.65rem;display:grid;place-items:center;border-radius:7px;
+  background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.9rem}
+.brand__sub{color:var(--dim);font-size:var(--step--1);font-weight:450}
+.eyebrow{font-size:var(--step--1);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.h1{font-size:var(--step-3);line-height:1.12;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.h2{font-size:var(--step-2);line-height:1.2;letter-spacing:-.015em;font-weight:650}
+.h3{font-size:var(--step-1);line-height:1.3;font-weight:640}
+.lede{font-size:var(--step-1);color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:var(--step--1)}
+/* No white-space:nowrap. A long product name in a call to action cannot wrap
+   under it, and it pushed a 390px viewport to 442px. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:.6rem 1.05rem;border-radius:var(--radius);border:1px solid transparent;
+  background:var(--accent);color:var(--accent-ink);font-weight:620;cursor:pointer;
+  text-decoration:none;line-height:1.25;min-height:2.6rem;max-width:100%;
+  text-align:center}
+.btn:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn--ghost{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn--ghost:hover{background:var(--surface-2);filter:none}
+.btn--quiet{background:transparent;color:var(--muted);border-color:transparent;padding-inline:.6rem}
+.btn--quiet:hover{color:var(--text);background:var(--surface-2);filter:none}
+.btn--sm{padding:.36rem .7rem;font-size:var(--step--1);min-height:2.1rem}
+.card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-4);min-width:0}
+.card>*{min-width:0}
+.row{display:grid;gap:var(--sp-4);min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;min-width:0}
+.toolbar>*{min-width:0}
+.field{display:grid;gap:var(--sp-2);min-width:0}
+.lbl{font-size:var(--step--1);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .7rem;min-width:0}
+textarea{resize:vertical;font-family:inherit;line-height:1.5}
+.count{font-family:var(--font-mono);font-size:var(--step--1);font-variant-numeric:tabular-nums;color:var(--dim)}
+.count.is-over{color:var(--warn)}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;
+  font-size:var(--step--1);font-weight:600;border:1px solid var(--border);background:var(--surface-2);color:var(--muted)}
+.chip--ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.chip--bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.chip--warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.chip--same{color:var(--dim)}
+.note{border-left:3px solid var(--warn);padding:var(--sp-3) var(--sp-4);background:var(--surface);
+  border-radius:0 var(--radius) var(--radius) 0;color:var(--muted);font-size:var(--step--1)}
+.out{margin:0;padding:var(--sp-4);overflow-x:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);font-family:var(--font-mono);font-size:.8rem;line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.status{font-size:var(--step--1);color:var(--ok);min-height:1.4em}
+.status--err{color:var(--warn)}
+.foot{border-top:1px solid var(--border);padding-block:var(--sp-6);margin-top:var(--sp-7);
+  color:var(--dim);font-size:var(--step--1);display:grid;gap:var(--sp-3)}
+.cta{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-3);min-width:0}
+.cta>*{min-width:0}
+details.more{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+details.more>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-size:var(--step--1);
+  font-weight:600;list-style:none;display:flex;gap:var(--sp-2);align-items:center}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+";color:var(--accent);font-weight:700;width:1ch}
+details.more[open]>summary::before{content:"−"}
+details.more>.more__body{padding:0 var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.split{display:grid;gap:var(--sp-6);align-items:start;min-width:0}
+@media (min-width:62em){.split{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--sp-7)}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 5rem)}}
+.split>*{min-width:0}
+.checks{display:grid;gap:var(--sp-2)}
+.checks li{display:grid;grid-template-columns:1.1rem minmax(0,1fr);gap:var(--sp-3);
+  font-size:var(--step--1);color:var(--muted);align-items:start}
+.checks li .mark{font-weight:700;line-height:1.5}
+.checks li.is-ok .mark{color:var(--ok)}
+.checks li.is-no .mark{color:var(--dim)}
+#preview{max-height:26rem;overflow:auto}
+
+</style>
+
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Digital Product Page Builder</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load the example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Shopify digital products</p>
+    <h1 class="h1" tabindex="-1" id="top">Twelve sections, in the order a buyer needs them.</h1>
+    <p class="lede">Fill in the sections on the left. The finished copy assembles on the right, and the checklist tells you what is still missing before the page is worth publishing.</p>
+    <p class="small dim">A copy-and-layout template &mdash; prose and structure. Not a Shopify theme, an app or a Liquid section. Nothing installs. Everything stays in this tab.</p>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="edit-h">
+      <h2 class="h2" id="edit-h">Sections</h2>
+      <div id="fields" class="row"></div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="score-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="score-h">Checklist</h2>
+          <span class="chip" id="score">0 / 0</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+        <p class="small dim">Every line is checkable by looking. None of them is an opinion about the design.</p>
+      </section>
+
+      <section class="card" aria-labelledby="out-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="out-h">The copy</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy Markdown</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the Markdown instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="preview"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">After the page is written</p>
+    <p class="muted">The template helps you structure the page. The next step is identifying what still gets in the buyer's way &mdash; which is a measurement problem before it is a writing problem.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/shopify-digital-product-page-template?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-conversion-revenue-optimization-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=primary_recommendation">Conversion &amp; Revenue Optimization Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=product_page_builder&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product, not affiliated with Shopify or Anthropic.</p>
+  </footer>
+</main>
+
+
+<script>
+/* Digital Product Page Builder — the twelve-section template, as a tool.
+ *
+ * Fill the sections, watch the copy assemble, and see which checks still fail.
+ * No network. Nothing is saved anywhere; that is stated on the page.
+ *
+ * The checks are deliberately the mechanical ones — is the section present,
+ * does it name a prerequisite, is there a preview — because those are the ones
+ * a tool can answer honestly. It does not grade prose.
+ */
+(function () {
+  'use strict';
+
+  var SECTIONS = [
+    { id: 'name', label: 'Product name', hint: 'The name as it appears on the page.', rows: 2 },
+    { id: 'headline', label: 'Outcome headline', rows: 2,
+      hint: 'What the buyer will be able to do. Not the file count, not "ultimate".' },
+    { id: 'summary', label: 'Short description', rows: 3,
+      hint: 'Who it is for, the problem in their words, and the mechanism.' },
+    { id: 'benefits', label: 'Three concrete benefits', rows: 4,
+      hint: 'One per line. Test: could a competitor paste the identical line on their page? Then it says nothing.' },
+    { id: 'preview', label: 'Genuine preview', rows: 3,
+      hint: 'The real artefact a stranger could judge in thirty seconds. An output, not a folder tree.' },
+    { id: 'deliverables', label: 'What you receive', rows: 3,
+      hint: 'File types, counts, formats, size. Counts belong HERE, with context — not in the headline.' },
+    { id: 'firstuse', label: 'First twenty minutes', rows: 4,
+      hint: 'What to open, what to supply, what to run, what to expect. If you cannot write step 4 concretely, the product is not ready to sell.' },
+    { id: 'requirements', label: 'What the buyer needs already', rows: 3,
+      hint: 'Software, runtime with a version, access, skill. "No dependencies" is almost always false.' },
+    { id: 'licence', label: 'Licence and delivery', rows: 3,
+      hint: 'When the file arrives, who may use it, whether client work is included, and a LINK to the refund policy rather than a paraphrase.' },
+    { id: 'limits', label: 'What this does not do', rows: 3,
+      hint: 'A page that names a limitation is more believable than one that does not.' },
+    { id: 'faqs', label: 'FAQs', rows: 4,
+      hint: 'Three to six. Each answers something a buyer asks before paying, not something invented to hold a keyword.' },
+    { id: 'close', label: 'Final purchase action', rows: 2,
+      hint: 'What it is, the live price, the same button label, THIS product.' }
+  ];
+
+  var EXAMPLE = {
+    name: 'Claude Code Conversion & Revenue Optimization Toolkit',
+    headline: 'Find where visitors get stuck, decide what to fix first, and check whether the fix worked.',
+    summary: 'For developers and founders who own a site that gets traffic and does not turn enough of it into revenue. The honest answer to "why" usually needs evidence nobody has collected. Thirteen modules that separate the audit from the plan, the plan from the change, and the change from the claim that it worked.',
+    benefits: 'Findings carry evidence and an honesty label: proven bug, strong heuristic, experiment opportunity, or insufficient data.\nThe experimentation module checks whether your traffic could detect the effect before it designs a test, and stops if it cannot.\nAudits never fix in the same run, so a finding leaves a report rather than an unreviewed diff across thirty files.',
+    preview: 'One complete finding from the master audit: the observed problem, the evidence line, the honesty label, the proposed change, and how the change would be validated. Rendered as readable text, not a screenshot.',
+    deliverables: 'One ZIP. 99 files, 213 KB, all plain Markdown. Thirteen modules, 70 workflows, 68 commands, six report templates and four worked examples. A published SHA-256 checksum accompanies the download.',
+    firstuse: '1. Open START-HERE.md.\n2. Supply the site URL and whatever analytics you already have.\n3. Run the master conversion audit in read-only mode.\n4. Expect a findings list with an evidence line and an honesty label on each.\n5. Review the labels before acting — "insufficient data" means exactly that.',
+    requirements: 'Claude Code, and a live site that already receives traffic. Plain Markdown; nothing to install. If nobody is arriving yet, this is the wrong product — fix distribution first.',
+    licence: 'Delivered as a download link immediately after checkout. Licensed to one person for unlimited projects including client work. Not to be redistributed or resold. Refunds: see the store policy, linked — not summarised here.',
+    limits: 'No workflow predicts a percentage lift, because nobody can know that in advance.\nIt refuses manipulative tactics — countdowns, fake stock warnings, invented scarcity — by name.\nIt will not help a site nobody has found yet.',
+    faqs: 'Do I need Claude Code? Yes. This is a set of workflows you run inside it.\nHow much traffic do I need? The experimentation module gives thresholds and says plainly when testing is not possible.\nCan I use it for client work? Yes, under a single-person licence.',
+    close: 'Thirteen modules for finding where the traffic goes and deciding what to fix first. One payment, instant download.'
+  };
+
+  var data = {};
+  var downloads = null;
+
+  function el(t, a, k) {
+    var n = document.createElement(t);
+    if (a) Object.keys(a).forEach(function (key) {
+      var v = a[key];
+      if (v === null || v === undefined || v === false) return;
+      if (key === 'class') n.className = v;
+      else if (key === 'text') n.textContent = v;
+      else if (key.slice(0, 2) === 'on') n.addEventListener(key.slice(2), v);
+      else n.setAttribute(key, v === true ? '' : String(v));
+    });
+    (k || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  var $ = function (i) { return document.getElementById(i); };
+  var val = function (id) { return (data[id] || '').trim(); };
+  var lines = function (id) { return val(id).split('\n').map(function (s) { return s.trim(); }).filter(Boolean); };
+
+  /* Mechanical checks only. A tool can tell you the requirements section is
+     empty; it cannot tell you the prose is any good, and pretending otherwise
+     would be the same fabrication the guide argues against. */
+  var CHECKS = [
+    ['Has an outcome headline', function () { return val('headline').length > 10; }],
+    ['Headline is not a file count', function () {
+      var h = val('headline');
+      return h.length > 10 && !/^\s*\d[\d,]*\s*(files?|words?|pages?|prompts?)/i.test(h) && !/\bultimate\b/i.test(h);
+    }],
+    ['Names who it is for', function () { return /\bfor\b/i.test(val('summary')) && val('summary').length > 40; }],
+    ['Exactly three benefits', function () { return lines('benefits').length === 3; }],
+    ['Has a genuine preview', function () { return val('preview').length > 30; }],
+    ['Preview is output, not packaging', function () {
+      var p = val('preview');
+      return p.length > 30 && !/^(a )?(folder|file) (tree|list)/i.test(p);
+    }],
+    ['States what the buyer receives', function () { return val('deliverables').length > 20; }],
+    ['Has a first-use walkthrough', function () { return lines('firstuse').length >= 3; }],
+    ['States prerequisites', function () { return val('requirements').length > 20; }],
+    ['Does not claim "no dependencies"', function () { return !/no dependencies/i.test(val('requirements')); }],
+    ['States licence and delivery', function () { return val('licence').length > 20; }],
+    ['Links the refund policy rather than paraphrasing', function () {
+      var l = val('licence');
+      return l.length > 20 && /polic/i.test(l);
+    }],
+    ['Names at least one limitation', function () { return val('limits').length > 20; }],
+    ['Has at least three FAQs', function () { return lines('faqs').length >= 3; }],
+    ['Has a closing purchase action', function () { return val('close').length > 15; }],
+    ['No unsupported guarantee', function () {
+      var all = Object.keys(data).map(function (k) { return data[k] || ''; }).join(' ');
+      return !/\b(we|this product|this toolkit) guarantees?\b|guaranteed (results|rankings?|revenue|increase)|\bis guaranteed to\b/i.test(all);
+    }],
+    ['No predicted percentage lift', function () {
+      var all = Object.keys(data).map(function (k) { return data[k] || ''; }).join(' ');
+      return !/\b\d+\s*% (increase|lift|more|uplift|improvement)/i.test(all);
+    }],
+    ['No price typed into the copy', function () {
+      var all = Object.keys(data).map(function (k) { return data[k] || ''; }).join(' ');
+      return !/[$£€]\s?\d+(\.\d{2})?/.test(all);
+    }]
+  ];
+
+  function markdown() {
+    var L = [];
+    if (val('name')) L.push('# ' + val('name'), '');
+    if (val('headline')) L.push('> ' + val('headline'), '');
+    if (val('summary')) L.push(val('summary'), '');
+    if (lines('benefits').length) {
+      L.push('## Why this one', '');
+      lines('benefits').forEach(function (b) { L.push('- ' + b); });
+      L.push('');
+    }
+    if (val('preview')) L.push('## What it produces', '', val('preview'), '');
+    if (val('deliverables')) L.push('## What you receive', '', val('deliverables'), '');
+    if (lines('firstuse').length) {
+      L.push('## Your first twenty minutes', '');
+      lines('firstuse').forEach(function (s) { L.push(s.replace(/^\d+[.)]\s*/, '- ')); });
+      L.push('');
+    }
+    if (val('requirements')) L.push('## What you need already', '', val('requirements'), '');
+    if (val('licence')) L.push('## Licence and delivery', '', val('licence'), '');
+    if (lines('limits').length) {
+      L.push('## What this does not do', '');
+      lines('limits').forEach(function (s) { L.push('- ' + s); });
+      L.push('');
+    }
+    if (lines('faqs').length) {
+      L.push('## Questions', '');
+      lines('faqs').forEach(function (s) {
+        var i = s.indexOf('?');
+        if (i > 0) L.push('**' + s.slice(0, i + 1) + '** ' + s.slice(i + 1).trim(), '');
+        else L.push(s, '');
+      });
+    }
+    if (val('close')) L.push('## Get it', '', val('close'), '');
+    L.push('---', '', 'Price and purchase action render from the live product — never typed into this copy.',
+      '', 'Drafted with the Digital Product Page Builder from SiteBuilderStack.',
+      'https://sitebuilderstack.com/blogs/guides/shopify-digital-product-page-template', '');
+    return L.join('\n');
+  }
+
+  function renderChecks() {
+    var host = clear($('checks')), pass = 0;
+    CHECKS.forEach(function (c) {
+      var ok = false;
+      try { ok = !!c[1](); } catch (e) { ok = false; }
+      if (ok) pass++;
+      host.appendChild(el('li', { class: ok ? 'is-ok' : 'is-no' }, [
+        el('span', { class: 'mark', 'aria-hidden': 'true', text: ok ? '✓' : '○' }),
+        el('span', { text: c[0] })
+      ]));
+    });
+    var chip = $('score');
+    chip.textContent = pass + ' / ' + CHECKS.length;
+    chip.className = 'chip' + (pass === CHECKS.length ? ' chip--ok' : pass > CHECKS.length / 2 ? ' chip--warn' : '');
+  }
+
+  function refresh() {
+    $('preview').textContent = markdown();
+    renderChecks();
+  }
+
+  function renderFields() {
+    var host = clear($('fields'));
+    SECTIONS.forEach(function (s, i) {
+      var ta = el('textarea', {
+        id: 'f-' + s.id, rows: s.rows,
+        oninput: function (e) { data[s.id] = e.target.value; refresh(); }
+      });
+      ta.value = data[s.id] || '';
+      host.appendChild(el('div', { class: 'card' }, [
+        el('div', { class: 'field' }, [
+          el('label', { class: 'lbl', for: 'f-' + s.id, text: (i + 1) + '. ' + s.label }),
+          el('p', { class: 'small dim', text: s.hint }),
+          ta
+        ])
+      ]));
+    });
+  }
+
+  function setStatus(m, err) {
+    var s = $('status'); s.textContent = m;
+    s.className = 'status' + (err ? ' status--err' : '');
+  }
+
+  $('example').addEventListener('click', function () {
+    data = JSON.parse(JSON.stringify(EXAMPLE));
+    renderFields(); refresh();
+    setStatus('Loaded a real product as a worked example. Every claim in it is verifiable on its product page.');
+  });
+  $('reset').addEventListener('click', function () {
+    data = {}; renderFields(); refresh(); setStatus('');
+    $('top').focus({ preventScroll: true }); window.scrollTo(0, 0);
+  });
+
+  $('copy').addEventListener('click', function () {
+    var text = markdown();
+    clear($('fallback'));
+    var fail = function () {
+      setStatus('Could not copy automatically.', true);
+      var ta = el('textarea', { readonly: true, rows: 10, 'aria-label': 'Markdown to copy', style: 'width:100%' });
+      ta.value = text;
+      $('fallback').appendChild(el('div', { class: 'field', style: 'margin-top:var(--sp-3)' }, [
+        el('p', { class: 'small dim', text: 'Clipboard access was refused here. The text is selected below — press Ctrl+C or ⌘C.' }), ta]));
+      try { ta.focus(); ta.select(); } catch (e) {}
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { setStatus('Copied.'); }, fail);
+      } else fail();
+    } catch (e) { fail(); }
+  });
+
+  $('download').addEventListener('click', function () {
+    if (!downloads) { setStatus('File download is not available in this view.', true); return; }
+    setStatus('Waiting for you to confirm the download…');
+    downloads.save({ filename: 'product-page-copy.md', data: markdown() }).then(
+      function (r) { setStatus(r && r.status === 'saved' ? 'Saved.' : 'Sent to your device.'); },
+      function (e) { setStatus(e && e.code === 'declined' ? 'Download cancelled.' : 'The download could not be completed. Use “Copy Markdown” instead.', true); });
+  });
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(function (d) {
+        downloads = d; $('download').hidden = !d; $('dl-note').hidden = !!d;
+      }).catch(function () { $('dl-note').hidden = false; });
+    } catch (e) { $('dl-note').hidden = false; }
+  } else { $('dl-note').hidden = false; }
+
+  /* Opens with the example filled in, so the first frame shows what the tool
+     does rather than twelve empty boxes. */
+  data = JSON.parse(JSON.stringify(EXAMPLE));
+  renderFields();
+  refresh();
+})();
+
+</script>

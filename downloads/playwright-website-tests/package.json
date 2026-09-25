@@ -1,0 +1,15 @@
+{
+  "name": "playwright-website-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small, runnable Playwright suite for a marketing site: form validation, a mocked submission, CTA destinations, mobile navigation and a regression check. Companion to sitebuilderstack.com/blogs/guides/claude-code-playwright-website-testing.",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0"
+  }
+}

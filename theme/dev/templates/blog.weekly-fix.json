@@ -1,0 +1,12 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-weekly-archive",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

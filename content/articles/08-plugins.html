@@ -1,0 +1,288 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What a plugin is</a></li>
+    <li><a href="#versus">Plugin or plain <code>.claude/</code>?</a></li>
+    <li><a href="#install">Installing one</a></li>
+    <li><a href="#build">Building one</a></li>
+    <li><a href="#structure">The directory structure, and the mistake everyone makes</a></li>
+    <li><a href="#components">What a plugin can carry</a></li>
+    <li><a href="#hooks">Hooks: the part that enforces</a></li>
+    <li><a href="#test">Testing while you build</a></li>
+    <li><a href="#marketplace">Distributing through a marketplace</a></li>
+    <li><a href="#convert">Converting what you already have</a></li>
+    <li><a href="#security">Trust</a></li>
+    <li><a href="#antipatterns">Where plugins go wrong</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What a plugin is</h2>
+
+<p>A plugin is a directory that bundles Claude Code extensions — skills, agents, hooks, MCP servers, and more — so they can be installed, versioned, and shared in one step.</p>
+
+<p>Everything a plugin contains, you could put loose in a <code>.claude/</code> directory. The difference is distribution. A plugin can be published to a marketplace, pinned to a version, installed by a teammate with one command, and updated when you release. Loose configuration has to be copied by hand and drifts the moment two people have it.</p>
+
+<h2 id="versus">Plugin or plain <code>.claude/</code>?</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>Standalone <code>.claude/</code></th><th>Plugin</th></tr></thead>
+<tbody>
+<tr><td>Skill name</td><td><code>/hello</code></td><td><code>/plugin-name:hello</code></td></tr>
+<tr><td>Best for</td><td>Personal workflows, project quirks, quick experiments</td><td>Sharing, distributing, versioned releases</td></tr>
+<tr><td>Install</td><td>Copy the files</td><td><code>/plugin install</code></td></tr>
+<tr><td>Updates</td><td>Manual, and it will drift</td><td>Version bump</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The sensible path is to start standalone. Iterate in <code>.claude/</code> where there is no packaging step between you and a change, and convert to a plugin when you actually want someone else to have it. Building a plugin for something only you will use is overhead with no return.</p>
+
+<p>The namespacing is worth noticing early: plugin skills are always prefixed, so <code>/my-plugin:deploy</code> and a project <code>/deploy</code> coexist instead of one shadowing the other. That is a real advantage of plugins over loose skills, which do shadow each other.</p>
+
+<h2 id="install">Installing one</h2>
+
+<p>Anthropic maintains two public marketplaces:</p>
+
+<ul>
+  <li><strong><code>claude-plugins-official</code></strong> — curated by Anthropic. Registered automatically the first time you start Claude Code interactively. If that never happened, add it yourself:
+    <pre><code>claude plugin marketplace add anthropics/claude-plugins-official</code></pre>
+  </li>
+  <li><strong><code>claude-community</code></strong> — third-party submissions that have passed review:
+    <pre><code>/plugin marketplace add anthropics/claude-plugins-community</code></pre>
+    and install from it as <code>@claude-community</code>.
+  </li>
+</ul>
+
+<p>The <code>/plugin</code> manager is where you browse, install, enable, and disable. Its <strong>Errors</strong> tab is the first place to look when a plugin appears to do nothing — a failed MCP or LSP server shows up there rather than announcing itself.</p>
+
+<h2 id="build">Building one</h2>
+
+<p>Three steps to something that runs.</p>
+
+<pre><code>mkdir -p my-first-plugin/.claude-plugin</code></pre>
+
+<p><code>my-first-plugin/.claude-plugin/plugin.json</code>:</p>
+
+<pre><code>{
+  "name": "my-first-plugin",
+  "description": "Web build audits and launch checks",
+  "version": "1.0.0",
+  "author": { "name": "Your Name" }
+}</code></pre>
+
+<p>Then a skill at <code>my-first-plugin/skills/audit/SKILL.md</code>:</p>
+
+<pre><code>---
+description: Technical SEO and accessibility audit. Use before shipping
+  any page change.
+---
+
+Audit the rendered output, not the template source.
+
+Report measured values: contrast ratios, scrollWidth against clientWidth
+at 320px, actual status codes. Cite file and line for source findings.
+
+Say what you could not verify.</code></pre>
+
+<p>Load it without installing anything:</p>
+
+<pre><code>claude --plugin-dir ./my-first-plugin</code></pre>
+
+<p>Then <code>/my-first-plugin:audit</code>.</p>
+
+<p>The <code>name</code> field is not cosmetic — it is the namespace every skill in the plugin is prefixed with. Changing it later changes every command your users type.</p>
+
+<p>There is also a scaffold that skips the manual setup:</p>
+
+<pre><code>claude plugin init my-tool</code></pre>
+
+<p>which creates <code>~/.claude/skills/my-tool/</code> with a manifest and a starter <code>SKILL.md</code>, loading as <code>my-tool@skills-dir</code> on the next session with no marketplace step at all.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>If you would rather start from a working set than design one, the Claude Code Website Launch System's prompts, audits, and checklists are structured to drop straight into a plugin's <code>skills/</code> and <code>agents/</code> directories &mdash; <a href="/products/claude-code-website-launch-system">see what is included</a>.</p>
+</aside>
+
+<h2 id="structure">The directory structure, and the mistake everyone makes</h2>
+
+<p>Here is the one that costs people an afternoon:</p>
+
+<p><strong>Only <code>plugin.json</code> goes inside <code>.claude-plugin/</code>.</strong> Everything else — <code>skills/</code>, <code>agents/</code>, <code>hooks/</code>, <code>commands/</code> — lives at the plugin <em>root</em>. Put them inside <code>.claude-plugin/</code> and they are silently not found. Nothing errors; the plugin simply does nothing.</p>
+
+<pre><code>my-plugin/
+├── .claude-plugin/
+│   └── plugin.json          ← only this
+├── skills/
+│   └── audit/SKILL.md
+├── agents/
+│   └── reviewer.md
+├── hooks/
+│   └── hooks.json
+├── .mcp.json
+└── settings.json</code></pre>
+
+<p>The plugin root is the plugin's own directory — the one you pass to <code>--plugin-dir</code>. It is never <code>~/.claude/</code>. A <code>.mcp.json</code> at <code>~/.claude/.mcp.json</code> is not read by anything.</p>
+
+<p>One shortcut: a plugin shipping exactly one skill can put <code>SKILL.md</code> at the plugin root and skip the <code>skills/</code> directory entirely. Use the folder layout for anything that might grow.</p>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-plugin-structure.png?v=1787892945" alt="Two plugin directory trees side by side. The correct one has plugin.json alone inside .claude-plugin, with skills, agents, hooks and .mcp.json at the plugin root. The broken one nests skills and agents inside .claude-plugin, where they are never found and no error is raised."
+       width="1000" height="520" loading="lazy" decoding="async">
+  <figcaption>The broken layout produces no error at all. The plugin loads and does nothing.</figcaption>
+</figure>
+
+<h2 id="components">What a plugin can carry</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Directory or file</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td><code>skills/</code></td><td>Skills as <code>&lt;name&gt;/SKILL.md</code></td></tr>
+<tr><td><code>commands/</code></td><td>Skills as flat Markdown files. Legacy — use <code>skills/</code> for new work</td></tr>
+<tr><td><code>agents/</code></td><td>Subagent definitions</td></tr>
+<tr><td><code>hooks/hooks.json</code></td><td>Event handlers</td></tr>
+<tr><td><code>.mcp.json</code></td><td>MCP server configuration</td></tr>
+<tr><td><code>.lsp.json</code></td><td>Language servers, for real code intelligence</td></tr>
+<tr><td><code>monitors/monitors.json</code></td><td>Background watchers that notify Claude as events arrive</td></tr>
+<tr><td><code>bin/</code></td><td>Executables added to the Bash tool's <code>PATH</code> while enabled</td></tr>
+<tr><td><code>settings.json</code></td><td>Defaults applied when enabled. Only <code>agent</code> and <code>subagentStatusLine</code> are supported</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two of these are more interesting than they look.</p>
+
+<p><strong><code>settings.json</code> with an <code>agent</code> key</strong> makes one of the plugin's own agents the main thread — its system prompt, its tool restrictions, its model. A plugin can therefore change how Claude Code behaves by default when enabled, not merely add commands to it.</p>
+
+<p><strong><code>monitors/monitors.json</code></strong> starts background watchers automatically. Each stdout line from the command reaches Claude as a notification:</p>
+
+<pre><code>[
+  {
+    "name": "error-log",
+    "command": "tail -F ./logs/error.log",
+    "description": "Application error log"
+  }
+]</code></pre>
+
+<p>For a web project this is the cheapest useful thing in the list — Claude finds out about a runtime error as it happens rather than when you paste it.</p>
+
+<p>The <code>.mcp.json</code> entry is worth understanding before you bundle one, since a plugin that ships an MCP server is shipping a capability grant — see <a href="/blogs/guides/claude-code-mcp">Claude Code and MCP</a>.</p>
+
+<h2 id="hooks">Hooks: the part that enforces</h2>
+
+<p>Skills and agents are followed. Hooks <em>run</em>. That difference is why a plugin carrying hooks is qualitatively different from one carrying only prompts.</p>
+
+<p>A hook is a shell command bound to a tool event. Put it in <code>hooks/hooks.json</code> at the plugin root:</p>
+
+<pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs npm run lint:fix"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+<p>Two details that cost people time. The hook receives its input as <strong>JSON on stdin</strong>, which is why the example pipes through <code>jq</code> to pull out the file path rather than reading an argument. And the format is identical to the <code>hooks</code> object in <code>settings.json</code>, so migrating existing hooks is a copy rather than a rewrite.</p>
+
+<p>The rule worth adopting: <strong>anything mechanical and unconditional should be a hook, not an instruction.</strong> A formatter that runs after every edit does not need anybody to remember it. Moving that class of rule out of <code>CLAUDE.md</code> also shortens the file, which makes everything left in it work better.</p>
+
+<p>Confirm a hook actually fired rather than assuming. Trigger the event it matches and check the effect; Claude Code records which hooks matched, their exit codes, and their output in the debug log. A hook with a typo in its matcher fails silently and looks exactly like a hook that ran and did nothing.</p>
+
+<h2 id="test">Testing while you build</h2>
+
+<pre><code>claude --plugin-dir ./my-plugin</code></pre>
+
+<p>The flag also takes a <code>.zip</code>, and can be repeated to load several plugins at once. If a <code>--plugin-dir</code> plugin shares a name with an installed one, the local copy wins for that session — so you can test changes without uninstalling.</p>
+
+<p>After edits, <code>/reload-plugins</code> picks them up without restarting. Then check each component actually loaded, because a plugin that half-works looks identical to one that works:</p>
+
+<ul>
+  <li>Skills: run <code>/plugin-name:skill-name</code></li>
+  <li>Agents: confirm they appear in <code>/context</code> under Custom Agents</li>
+  <li>Hooks: trigger the matching event and confirm the effect</li>
+  <li>Anything failing: check the <code>/plugin</code> manager's <strong>Errors</strong> tab</li>
+</ul>
+
+<p>Before publishing:</p>
+
+<pre><code>claude plugin validate ./my-plugin</code></pre>
+
+<p>Add <code>--strict</code> to treat warnings as errors. The review pipeline runs the same check, so passing locally is the cheapest way to avoid a rejection.</p>
+
+<h2 id="marketplace">Distributing through a marketplace</h2>
+
+<p>A marketplace is a repository with a catalogue of plugins. Point people at it and they install from it. Host it privately and it stays internal to your team — which is the usual case for company tooling, and needs no submission or review.</p>
+
+<p>For public distribution, submissions go through review via the in-app forms on claude.ai or the Console. Approved plugins are pinned to a specific commit SHA in the community catalogue, with CI bumping the pin as you push. The catalogue syncs nightly, so there is a delay between approval and installability.</p>
+
+<p>The official marketplace is curated separately, at Anthropic's discretion. There is no application process for it, and submitting to the community marketplace does not put you in it.</p>
+
+<h2 id="convert">Converting what you already have</h2>
+
+<p>If you have accumulated skills and hooks in <code>.claude/</code>, converting is mostly copying:</p>
+
+<pre><code>mkdir -p my-plugin/.claude-plugin
+cp -r .claude/skills   my-plugin/
+cp -r .claude/agents   my-plugin/
+cp -r .claude/commands my-plugin/</code></pre>
+
+<p>Hooks are the one genuine change: they move from the <code>hooks</code> object in <code>settings.json</code> into <code>my-plugin/hooks/hooks.json</code>. The format is the same, so it is a copy of that object.</p>
+
+<p>Then remove the originals, and know exactly what happens if you do not:</p>
+
+<ul>
+  <li><strong>Agents:</strong> project and user <code>.claude/agents/</code> definitions <em>override</em> same-named plugin agents. Leave the original and the plugin version never runs.</li>
+  <li><strong>Skills:</strong> plugin skills are namespaced, so <code>/deploy</code> and <code>/my-plugin:deploy</code> both exist. Nothing overrides anything — you just have two, and people will use whichever they type.</li>
+</ul>
+
+<h2 id="security">Trust</h2>
+
+<p>A plugin can add executables to your <code>PATH</code>, register MCP servers, run hooks on tool events, and start background processes. That is a lot of capability, and it is exactly why plugins are useful.</p>
+
+<p>Treat installing one as you would adding a dependency: from a source you trust, ideally read first. The same applies to <code>--plugin-url</code>, which fetches an archive at startup — point it only at archives you control or trust.</p>
+
+<p>For a project's own <code>.claude/skills/</code>, a skill folder that is also a plugin requires accepting the workspace trust dialogue before it loads. That prompt is doing real work; it is not a formality.</p>
+
+<h2 id="antipatterns">Where plugins go wrong</h2>
+
+<h3>Components inside <code>.claude-plugin/</code></h3>
+<p>The failure is silent. If your plugin loads but does nothing, check this first.</p>
+
+<h3>Packaging before it works</h3>
+<p>Iterate loose in <code>.claude/</code>, package when it is worth sharing.</p>
+
+<h3>Renaming after release</h3>
+<p><code>name</code> is the command namespace. Changing it breaks every command your users have learned.</p>
+
+<h3>Shipping without validating</h3>
+<p><code>claude plugin validate</code> takes seconds and catches what review would reject.</p>
+
+<h3>Leaving the originals behind after converting</h3>
+<p>Your project agents keep overriding the plugin's, and you conclude the plugin is broken.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>A plugin is only as good as what it carries. <a href="/products/claude-code-website-launch-system">Browse the contents</a> of the Launch System for a full set of audits and checklists worth packaging.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>Plugins are the distribution layer for <a href="/blogs/guides/claude-code-skills">skills</a> and <a href="/blogs/guides/claude-code-subagents">subagents</a> — read those first if you are deciding what to put inside one. The rules that apply regardless of packaging belong in <a href="/blogs/guides/production-claude-md-web-development">a production CLAUDE.md</a>. For rolling plugins out across an organisation with managed settings, see <a href="/blogs/guides/claude-code-enterprise">Claude Code for teams and enterprise</a>, and for what the packaged procedures should actually contain, the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a> and the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/plugins" rel="noopener">Claude Code: create plugins</a> — manifest, structure, components, and migration</li>
+  <li><a href="https://code.claude.com/docs/en/plugin-marketplaces" rel="noopener">Claude Code: plugin marketplaces</a></li>
+  <li><a href="https://code.claude.com/docs/en/discover-plugins" rel="noopener">Claude Code: discover and install plugins</a></li>
+  <li><a href="https://github.com/anthropics/claude-plugins-community" rel="noopener">anthropics/claude-plugins-community</a> — the public catalogue</li>
+</ul>

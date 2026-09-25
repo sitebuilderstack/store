@@ -1,0 +1,32 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-offer",
+      "blocks": {
+        "f1": { "type": "field", "settings": { "label": "Your name", "name": "Name", "type": "text", "required": true } },
+        "f2": { "type": "field", "settings": { "label": "Work email", "type": "email", "required": true, "hint": "Where the quote and the terms are sent." } },
+        "f3": { "type": "field", "settings": { "label": "Organisation", "name": "Organisation", "type": "text", "required": true } },
+        "f4": { "type": "field", "settings": { "label": "Named users (seats)", "name": "Seats", "type": "select", "options": "3, 5, 6-10, 11-25, more than 25", "required": true, "hint": "People who will open the files, not client websites." } },
+        "f5": { "type": "field", "settings": { "label": "Product or bundle", "name": "Product", "type": "select", "options": "Website Launch System, SEO & Website Audit Toolkit, Conversion & Revenue Optimization Toolkit, Complete Site Builder Stack (first three), Website Operations & Maintenance System, Shopify Automation & Admin API Toolkit, Website Migration & Replatforming System, Agency & Client Delivery System, Not sure yet", "required": true } },
+        "f6": { "type": "field", "settings": { "label": "Anything else", "name": "Question", "type": "textarea", "hint": "Optional. Invoicing requirements, timing, a question about the terms." } },
+        "c1": { "type": "consent", "settings": { "label": "Email me when new products are released", "hint": "Optional, unchecked, and separate from this request. Your quote is sent either way." } }
+      },
+      "block_order": ["f1", "f2", "f3", "f4", "f5", "f6", "c1"],
+      "settings": {
+        "offer_id": "team-licenses",
+        "mode": "inquiry",
+        "eyebrow": "Team and agency licensing",
+        "status_note": "<p><strong>This page takes requests, not payments.</strong> Multi-seat pricing is quoted per organisation; there is no team checkout and no self-service seat portal. Sending the form starts a conversation and commits you to nothing.</p>",
+        "form_heading": "Request team pricing",
+        "form_intro": "<p>Tell us the product and how many people need it. You get a written quote and the team terms to read before anything is invoiced.</p>",
+        "request_label": "Team licence enquiry",
+        "button_label": "Request team pricing",
+        "form_fineprint": "<p>No payment is taken here. Your message is emailed to Site Builder Stack. It is not added to any marketing list unless you tick the box above.</p>",
+        "success_message": "<p><strong>Request sent.</strong> We reply from admin@sitebuilderstack.com, usually within a few business days, with a quote and the team terms attached. Nothing has been charged.</p>",
+        "aside_note": "<p>Already bought for yourself and wondering whether you need this? If you are the only person opening the files, you do not — your licence already covers unlimited client projects.</p><p>Questions about an existing order go to <a href=\"/pages/contact\">the contact page</a> instead.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

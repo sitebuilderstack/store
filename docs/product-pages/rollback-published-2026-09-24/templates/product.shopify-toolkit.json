@@ -1,0 +1,481 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 API setup",
+            "meta": "3 files",
+            "highlight": true
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 GraphQL fundamentals",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 Store discovery",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 Products",
+            "meta": "4 files",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 Variants",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 Collections",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 Metafields",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 Metaobjects",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 Media",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 SEO",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 Inventory",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 Pricing",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 Redirects",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "14 Bulk operations",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "15 Import & export",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "16 Store auditing",
+            "meta": "2 files",
+            "highlight": true
+          }
+        },
+        "t17": {
+          "type": "tile",
+          "settings": {
+            "label": "17 Automation",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t18": {
+          "type": "tile",
+          "settings": {
+            "label": "Commands · scripts · GraphQL",
+            "meta": "34 commands · 32 scripts · 18 documents",
+            "highlight": true
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18"
+      ],
+      "settings": {
+        "summary": "Automate Shopify with Claude Code. Products, collections, SEO, metafields, inventory, redirects, bulk operations and catalogue auditing through the Admin GraphQL API — with a preview before every write, a backup, and a read-back after.",
+        "button_label": "Get the Shopify Automation Toolkit",
+        "note": "One payment. Instant download. Licensed to one person for unlimited stores, including client work. Not affiliated with Shopify."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Nineteen numbered modules, 34 slash commands, 32 scripts, 18 GraphQL documents, templates for every input, six report templates, seven checklists, ten worked examples and a real audit of our own store — about 65,000 words plus working code. Python 3 standard library only.",
+            "code": "claude-code-shopify-automation-admin-api-toolkit/\n  START-HERE.md\n  QUICK-START.md\n  01-shopify-api-setup/\n  02-graphql-fundamentals/\n  ...\n  19-reporting/\n  .claude/commands/\n  graphql/\n  scripts/\n  templates/\n  checklists/\n  reports/\n  reference/\n  examples/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "The first ten minutes",
+            "body": "A custom app in the store's admin gives you a token; it goes in .env and nowhere else. The connection check proves the domain, the token, the API version served and the scopes. Then the first audit.",
+            "code": "cp templates/.env.example .env      # SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_ACCESS_TOKEN, SHOPIFY_API_VERSION=2026-07\npython3 scripts/connection_check.py\n\nclaude\n> /shopify-connection-check\n> /shopify-store-audit"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "The store audit, scored",
+            "body": "Every area from one export: products, SEO, collections, media, variants, pricing, metafields, inventory, redirects. Each scored, an overall catalogue health score, the critical and high findings listed, the top five actions. Markdown for the owner, JSON for the record and for next month's comparison.",
+            "code": "$ python3 scripts/store_audit.py --input exports/products.json\nauditing Northwind Supply — 412 products\n  products      71/100  HIGH 9  MEDIUM 61  LOW 140\n  seo           64/100  HIGH 5  MEDIUM 88  LOW 210\n  collections   79/100  MEDIUM 6  LOW 9\n  media         58/100  HIGH 4  MEDIUM 131\n  variants      90/100  HIGH 1  MEDIUM 3\n  pricing       97/100  MEDIUM 2\n  metafields   100/100\n  inventory     92/100  HIGH 2  MEDIUM 4\n  redirects     94/100  MEDIUM 3\nOverall: 83/100   (0 critical, 21 high, 298 medium, 425 low)\nwrote shopify-audit.md and shopify-audit.json  (31 API calls)"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Every write is a dry run first",
+            "body": "A write script with no --confirm writes nothing. It fetches the live values, diffs them against your file, prints the counts and every change, and stops. --confirm applies, capped by --limit (default 25). A backup is written before the first mutation; every changed resource is read back.",
+            "code": "$ python3 scripts/product_update.py --input fixes.csv\nMODE: DRY RUN — nothing will be written. Add --confirm to apply.\n\nPLANNED CHANGES\n  rows read:          48\n  products affected:  41\n  rows skipped:       2\n  vendor changes:     40\n  seo_title changes:  34\n  WRITE OPERATION:    NO (dry run)\n\n  northwind-field-jacket\n      vendor      'northwind' -> 'Northwind Supply'\n      seo_title   '' -> 'Northwind Field Jacket | Waxed Cotton'"
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "SEO at scale, with a person in the middle",
+            "body": "Export a worksheet with the current title and description beside empty proposed columns. Fill it — by hand, or by Claude Code following the writing rules from the product's own fields. Review. Import: lengths and placeholders validated, rows whose live value changed since the export skipped rather than overwritten, every resource read back.",
+            "code": "seo_export.py --out seo.csv --collections\n(review the proposed_* columns)\nseo_import.py --input seo.csv                  # dry run: the diff\nseo_import.py --input seo.csv --confirm --limit 152\n\n  OK   collection field-jackets\n  OK   product northwind-field-jacket\n  SKIP product northwind-scarf   stale: live title changed since export\napplied 152, failed 0, skipped 2"
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Bulk operations for large catalogues",
+            "body": "A bulk query returns 40,000 products as one JSONL file in a few API calls. The JSONL utilities summarise it and flatten any object type to CSV. A bulk mutation runs one mutation per line of a variables file built from a reviewed export — and refuses to start unless --limit equals the line count you reviewed.",
+            "code": "bulk_query.py graphql/bulk-products.graphql --out products.jsonl\njsonl_summary.py products.jsonl\njsonl_to_csv.py products.jsonl --type ProductVariant --out variants.csv\n\ncsv_to_jsonl.py vendor-fix.csv --out vars.jsonl --shape 'input.id=id,input.vendor=vendor'\njsonl_validate.py vars.jsonl --require input.id --gid Product\nbulk_mutation.py --mutation graphql/product-update.graphql --input vars.jsonl --confirm --limit 9014"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Alt text only for images someone looked at",
+            "body": "The media audit writes a worksheet with the image URL on every row. Claude Code drafts alt text when it is shown the image, not the product description. A person reviews. The update script rejects text over 125 characters or equal to the product title, checks each image belongs to its product, and reads every one back.",
+            "code": "media_audit.py --input products.json --csv alt-text.csv\n(look at each image_url; fill the alt column)\nalt_text_update.py --input alt-text.csv --confirm --limit 40\n\n  OK   northwind-field-jacket (3 image(s))\napplied 40 image(s), failed 0, skipped 1"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "Admin GraphQL API 2026-07, validated live",
+            "body": "Every document in graphql/ and every query in the scripts was validated against a live 2026-07 schema, including the changes that version made to collections (sources instead of rules), product media (fileUpdate), bulk-operation status and several lookups. The validator ships, so you can run it after each quarterly release and see what the next version deprecates before it removes it.",
+            "code": "$ python3 scripts/validate_graphql.py\n  PASS  products.graphql             query executed (first: 1)\n  PASS  collection-update.graphql    mutation collectionUpdate(collection: CollectionUpdateInput) matches the schema\n  WARN  old-doc.graphql              argument input is deprecated: Use `collection` instead.\n18 document(s): 0 invalid, 1 deprecated  (API 2026-07)"
+          }
+        },
+        "s9": {
+          "type": "step",
+          "settings": {
+            "title": "What it refuses to do, and says so",
+            "body": "Delete products. Decide a price. Guess an inventory quantity. Publish or unpublish without an explicit instruction and the guard flag. Write alt text unseen. Read orders or customers. Run against a store you are not authorised to operate. Each refusal is a rule in the CLAUDE.md template, so Claude Code holds to it in every session.",
+            "code": "### Operating rules\n1. Default to read-only.\n2. Never expose access tokens.\n3. Never commit credentials.\n4. Preview all writes.\n5. Do not delete products unless explicitly instructed.\n6. Do not modify prices without explicit approval.\n7. Do not modify inventory quantities without explicit approval.\n8. Do not publish products without explicit approval.\n9. Export affected data before bulk writes.\n10. Validate every mutation by reading the resource back.\n11. Report Shopify userErrors.\n12. Stop bulk operations if unexpected scope or volume is detected."
+          }
+        },
+        "s10": {
+          "type": "step",
+          "settings": {
+            "title": "Agencies: one directory per store",
+            "body": "Each client store has its own .env, CLAUDE.md, exports, backups and reports. You work inside the client's directory, so the wrong store cannot be written by accident. Scheduled read-only audits from cron or GitHub Actions keep the token in a secret and the report in an artifact.",
+            "code": "clients/\n  northwind/   .env  CLAUDE.md  config.yaml  exports/  backups/  reports/\n  acme/        .env  CLAUDE.md  config.yaml  exports/  backups/  reports/\n\n.gitignore:  clients/*/.env  clients/*/exports  clients/*/backups"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the Shopify Automation & Admin API Toolkit",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to the first scored store audit.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real commands, and the real output the scripts produce.</p><p>The sample store audit inside the download is a real, unedited run against this store.</p>",
+        "sample_url": "",
+        "sample_label": ""
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it change my store without asking?",
+            "answer": "<p>No. Twenty-one of the 34 commands are read-only and never run a mutation. The twelve that write run a dry run first, show every planned change against the live value, ask a question that names the count, and apply only on an explicit yes with a limit equal to that count. A backup is written before the first mutation and every changed resource is read back. Some things it will not automate at all: deleting products, deciding prices, guessing inventory quantities, publishing or unpublishing without the guard flag.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Which Shopify API does it use?",
+            "answer": "<p>The Admin GraphQL API, version 2026-07, set in one place. No new workflow uses the legacy REST Admin API. Every GraphQL document and every query embedded in a script was validated against a live 2026-07 store, and the validator is included so you can repeat that after each quarterly release. The upgrade procedure and the list of what 2026-07 changed are in the reference module.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need a Shopify app or a developer?",
+            "answer": "<p>You need a custom app, which you create in the store's admin in about two minutes (Settings → Apps and sales channels → Develop apps); it gives you the access token. No code, no Partner account, no app store. Agencies can use a Partner app with client credentials instead; the setup module covers both.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "What about the access token?",
+            "answer": "<p>It goes in a .env file that the template .gitignore excludes, and nowhere else. The scripts read it through the client, never print it, and redact anything token-shaped from every error message. The test suite asserts no script output ever contains it. If a token is ever exposed, rotating it in the app's settings takes a minute and the setup module says so.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "Will it work on a large catalogue?",
+            "answer": "<p>Yes. The paged export handles a few thousand products in a minute or two; above that, bulk operations return any catalogue size as one JSONL file in a handful of API calls, and bulk mutations change thousands of resources as one job. The client handles Shopify's cost-based throttling on its own.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it handle inventory and prices?",
+            "answer": "<p>It audits both — sold-out variants, negative counts, items stocked at no location, zero prices, compare-at anomalies — and changes neither by script. Prices are a commercial decision and inventory quantities need a stock count the toolkit cannot see; the modules document the guarded pattern for the one-off case and the conditions that must be met first.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need to know GraphQL?",
+            "answer": "<p>No. The commands and scripts do the GraphQL. If you want to write your own queries, the fundamentals module teaches the dozen ideas that matter — connections, variables, global ids, userErrors, cost, bulk — with Shopify examples, and the eighteen documents in graphql/ are the starting points.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "What exactly do I get?",
+            "answer": "<p>One ZIP: 19 modules, 34 slash commands for .claude/commands/, 32 Python scripts (standard library only), 18 GraphQL documents, templates for products, collections, SEO, metafields, redirects, alt text, CLAUDE.md, .env.example and .gitignore, six report templates, seven checklists, ten worked examples, cron and GitHub Actions samples, and a real audit of our own store. Every count is generated from the bundle at build time.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "Is it affiliated with Shopify?",
+            "answer": "<p>No. It is an independent product that uses Shopify's public Admin API. Shopify is a trademark of Shopify Inc.</p>"
+          }
+        },
+        "q10": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it on client stores?",
+            "answer": "<p>Yes, without limit. The licence is one person, unlimited stores, including commercial and client work, and the agency layout in the setup module is written for exactly that. You may not redistribute or resell the toolkit itself.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9",
+        "q10"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The questions people ask about an automation product, answered plainly.",
+        "emit_schema": true
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Planning, platform build systems (Shopify included), a production CLAUDE.md, security and accessibility audits, 100 prompts and launch checklists.",
+            "flagship": false
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals and Search Console — the site-wide SEO this toolkit's catalogue metadata feeds into.",
+            "flagship": false
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "Find where the store loses conversions, with a Shopify module that reads the theme — 70 workflows and 68 commands.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Uptime, security, backups, deploys, incidents and monthly reporting — the storefront watched from the outside while this toolkit runs the catalogue from the inside.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Migrate",
+            "product": "claude-code-website-migration-replatforming-system",
+            "body": "Inventory every URL, map it, generate and test the redirects, compare metadata and structured data page by page, record DNS before it is touched, and get a GO / GO WITH WARNINGS / NO-GO from evidence. For the weeks a site is moving.",
+            "flagship": false
+          }
+        },
+        "p6": {
+          "type": "product",
+          "settings": {
+            "stage": "Deliver",
+            "product": "claude-code-agency-client-delivery-system",
+            "body": "Discover, scope, propose, onboard, build, review, launch, hand off and retain website clients — the engagement around the technical work, as commands that read one set of files per client. For freelancers and agencies.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The other six",
+        "heading": "The catalogue is one part of running a store",
+        "intro": "This toolkit automates the Shopify admin. Building the store, getting it found, converting the traffic and keeping the site healthy are the other four jobs.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Keeping the storefront healthy too?",
+        "body": "The Claude Code Website Operations & Maintenance System watches the site from the outside — uptime, TLS, security headers, links, redirects, deploys, incidents — with a scored health report. This toolkit runs the catalogue from the inside; that one keeps the site up.",
+        "cta_label": "See the Operations & Maintenance System",
+        "cta_url": "/products/claude-code-website-operations-maintenance-system",
+        "note": "A separate product. Buying this does not include it, and there is no automatic upgrade credit.",
+        "product": "claude-code-website-operations-maintenance-system"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

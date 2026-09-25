@@ -1,0 +1,231 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#what">What is answer engine optimization?</a></li>
+    <li><a href="#crawlers">Which crawlers actually matter, and what each one does</a></li>
+    <li><a href="#robots">Should you allow AI crawlers?</a></li>
+    <li><a href="#lift">What makes a passage quotable</a></li>
+    <li><a href="#extended">The Google-Extended misunderstanding</a></li>
+    <li><a href="#llms">Is llms.txt worth publishing?</a></li>
+    <li><a href="#schema">Does structured data get you cited?</a></li>
+    <li><a href="#check">How to check a page you have already published</a></li>
+    <li><a href="#cannot">What nobody can promise you</a></li>
+    <li><a href="#download">Download the readiness kit</a></li>
+    <li><a href="#faq">Questions</a></li>
+    <li><a href="#next">Next action</a></li>
+  </ol>
+</nav>
+
+<h2 id="what">What is answer engine optimization?</h2>
+
+<p>Answer engine optimization is the work of making a page's content easy for an AI assistant to find, extract and attribute. It differs from ordinary SEO in one specific way: a search engine ranks whole pages, while an answer engine lifts a passage out of a page and reproduces it inside its own answer. So the unit that matters stops being the page and becomes <strong>the paragraph that can stand on its own</strong>.</p>
+
+<p>Everything else follows from that. A sentence beginning "As we saw above, it does this by…" cannot be quoted, because the thing it points at will not be in the extract. A page whose answer only appears after JavaScript runs may never be read at all. A claim attributed to "we" gives a model nobody to cite.</p>
+
+<p>This guide is published by SiteBuilderStack and was written on 25 September 2026. Every crawler behaviour below is quoted from the vendor's own documentation, with the link next to the claim, because the field is full of confident assertions that were true for about a month.</p>
+
+<h2 id="crawlers">Which crawlers actually matter, and what each one does</h2>
+
+<p>Four vendors, ten user agents, and they do not all do the same job. Blocking the wrong one costs you citations; blocking the right one may be exactly what you want.</p>
+
+<div class="sbs-table">
+<table>
+  <thead>
+    <tr><th>User agent</th><th>Vendor</th><th>What it does</th><th>robots.txt</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>OAI-SearchBot</code></td><td>OpenAI</td><td>"used to surface websites in search results in ChatGPT's search features"</td><td>Respected</td></tr>
+    <tr><td><code>GPTBot</code></td><td>OpenAI</td><td>"used to crawl content that may be used in training our generative AI foundation models"</td><td>Respected</td></tr>
+    <tr><td><code>ChatGPT-User</code></td><td>OpenAI</td><td>User-initiated fetch. "not used for crawling the web in an automatic fashion"</td><td><strong>"may not apply"</strong></td></tr>
+    <tr><td><code>OAI-AdsBot</code></td><td>OpenAI</td><td>Validates pages submitted as ads. Its data "is not used to train generative AI foundation models"</td><td>Respected</td></tr>
+    <tr><td><code>Claude-SearchBot</code></td><td>Anthropic</td><td>"navigates the web to improve search result quality for users"</td><td>Respected</td></tr>
+    <tr><td><code>ClaudeBot</code></td><td>Anthropic</td><td>Collects content "that could potentially contribute to their training"</td><td>Respected</td></tr>
+    <tr><td><code>Claude-User</code></td><td>Anthropic</td><td>User-initiated fetch when someone asks Claude a question</td><td>Respected</td></tr>
+    <tr><td><code>PerplexityBot</code></td><td>Perplexity</td><td>"designed to surface and link websites in search results on Perplexity. It is not used to crawl content for AI foundation models"</td><td>Respected</td></tr>
+    <tr><td><code>Perplexity-User</code></td><td>Perplexity</td><td>Visits a page to answer a specific user question</td><td><strong>"generally ignores robots.txt rules"</strong></td></tr>
+    <tr><td><code>Google-Extended</code></td><td>Google</td><td>Not a crawler. A control token — see below</td><td>n/a</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Sources, each stating the behaviour quoted above: <a href="https://developers.openai.com/api/docs/bots" rel="noopener">OpenAI's bots documentation</a>, <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler" rel="noopener">Anthropic's crawler support article</a>, <a href="https://docs.perplexity.ai/guides/bots" rel="noopener">Perplexity's bot guide</a> and <a href="https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers" rel="noopener">Google's common crawlers reference</a>, all read on 25 September 2026.</p>
+
+<h3>The split worth noticing</h3>
+
+<p>Look at the last column. The three vendors handle <strong>user-initiated fetching</strong> differently, and the difference is documented rather than inferred.</p>
+
+<p>OpenAI says of <code>ChatGPT-User</code>: <em>"Because these actions are initiated by a user, robots.txt rules may not apply."</em> Perplexity is blunter about <code>Perplexity-User</code>: <em>"this fetcher generally ignores robots.txt rules."</em> Anthropic states that all three of its agents, <code>Claude-User</code> included, honour robots.txt.</p>
+
+<p>The practical consequence: <strong>a robots.txt disallow is not a reliable way to stop your content appearing in an AI answer.</strong> It stops the systematic crawlers. It does not necessarily stop a fetch that a person triggered by asking a question. If your requirement is genuinely "this must not be readable by an assistant", robots.txt is the wrong control and you need authentication.</p>
+
+<h2 id="robots">Should you allow AI crawlers?</h2>
+
+<p>It is a real decision with a real trade-off, and there is no answer that is correct for everyone.</p>
+
+<p><strong>Allow them</strong> if you want to be cited. A blocked crawler cannot quote you, and citation is how an answer engine sends a reader to your site at all.</p>
+
+<p><strong>Block the training agents, allow the search ones</strong> if you want the traffic without contributing to model training. The vendors have deliberately split these into separate tokens so that this is expressible: block <code>GPTBot</code> and <code>ClaudeBot</code>, allow <code>OAI-SearchBot</code>, <code>Claude-SearchBot</code> and <code>PerplexityBot</code>.</p>
+
+<pre>User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /</pre>
+
+<p>One thing to check before you write any of that: <strong>no directive at all is the same as allowed.</strong> A crawler with no matching <code>User-agent</code> group falls through to the <code>User-agent: *</code> group, and on most sites that group permits everything. If your robots.txt mentions none of these agents, they are already allowed, and adding an explicit <code>Allow</code> changes nothing except making the decision visible to the next person who reads the file. That is a decent reason to add it anyway.</p>
+
+<h2 id="lift">What makes a passage quotable</h2>
+
+<p>This is the part that actually moves, and it is writing rather than configuration.</p>
+
+<p><strong>Put a complete answer in the opening.</strong> Not a preamble about why the topic matters. The first hundred words are what gets read and lifted; treat them as the whole page if you have to.</p>
+
+<p><strong>Make sentences survive extraction.</strong> Read your opening and ask of each sentence: pulled out on its own, does it still mean anything? Sentences that fail usually start with a dependent word — <em>this, that, it, they, however, therefore, as mentioned</em> — because those point at something the extract will not contain.</p>
+
+<p><strong>Name the entity.</strong> "We rebuilt the workflow" attributes to nobody. "SiteBuilderStack rebuilt the workflow" gives a model something to cite. Use the name in the opening at least once, even where it reads slightly formally.</p>
+
+<p><strong>Be specific enough to be wrong.</strong> "Considerably faster" is not quotable; "cut the redirect chain from four hops to one" is. Counts, versions, dates and named things are what make your passage a better answer than the generic one three competitors also wrote.</p>
+
+<p><strong>Shape some headings as questions.</strong> Not all of them — a heading becomes a question when a reader would genuinely ask it in those words. But a page whose H2s are all noun phrases gives a model no obvious anchor for a specific query.</p>
+
+<p><strong>Keep the answer in the HTML.</strong> If the content only exists after JavaScript executes, assume it may not be read. This is the oldest technical-SEO rule and it applies with more force here, not less.</p>
+
+<h2 id="extended">The Google-Extended misunderstanding</h2>
+
+<p>This one is worth stating plainly because it is widely got wrong, including by people selling AEO services.</p>
+
+<p><strong><code>Google-Extended</code> is not a crawler.</strong> Google's documentation describes it as <em>"a standalone product token that web publishers can use to manage whether content Google crawls from their sites may be used for training future generations of Gemini models"</em>, and adds that it <em>"doesn't have a separate HTTP request user agent string. Crawling is done with existing Google user agent strings."</em></p>
+
+<p>Two consequences, both from the same source:</p>
+
+<ul>
+  <li><strong>Blocking it does not stop Google fetching your pages.</strong> Googlebot still crawls; the token only governs what happens to the content afterwards, in Gemini training and grounding.</li>
+  <li><strong>Blocking it costs you nothing in Search.</strong> Google states that <em>"Google-Extended does not impact a site's inclusion in Google Search nor is it used as a ranking signal in Google Search."</em></li>
+</ul>
+
+<p>So if your reason for allowing <code>Google-Extended</code> is "I do not want to hurt my rankings", that reason does not hold. Decide it on whether you want your content used for Gemini training and grounding, which is a different question and a legitimate one to answer either way.</p>
+
+<h2 id="llms">Is llms.txt worth publishing?</h2>
+
+<p>Probably yes, cheaply, without expecting much on its own.</p>
+
+<p><code>llms.txt</code> is a Markdown file at the site root that lists and describes a site's important pages for language models. It was <a href="https://llmstxt.org/" rel="noopener">proposed by Jeremy Howard in September 2024</a>, with a v2 revision in August 2026. Adoption is real: thousands of sites publish one, documentation platforms generate them automatically, Chrome's Lighthouse audits for one, and OpenAI, Anthropic and Google all publish llms.txt files for their own developer documentation.</p>
+
+<p>What it is <strong>not</strong> is a ratified standard. The specification is described as <em>"open for community input"</em>, and no search or answer engine documents using it as a ranking or citation input. Publish it because it is a genuinely useful index of your own site that costs an afternoon, not because you have been told it wins citations.</p>
+
+<p>The thing that makes one useful rather than decorative is the description under each link. A bare list of URLs tells a model nothing it could not get from a sitemap. One or two sentences per entry saying what that page answers is the whole value.</p>
+
+<h2 id="schema">Does structured data get you cited?</h2>
+
+<p>No, and it is worth being clear about why it is still worth having.</p>
+
+<p>Structured data does not cause a citation. What it does is remove ambiguity about the things a model would otherwise have to infer: who wrote this, when, what the headline is, what kind of page it is. <code>Article</code> or <code>BlogPosting</code> markup that matches the visible content is cheap insurance against being described wrongly.</p>
+
+<p>Two failure modes to avoid. Do not add <code>FAQPage</code> markup to a page that is not a list of questions and answers, and do not add <code>aggregateRating</code> or <code>review</code> markup for reviews that do not exist — that is fabricated structured data, and the risk is a manual action rather than a citation. And keep the dates in the markup consistent with the dates a reader can see; a <code>datePublished</code> that disagrees with the page is worse than none.</p>
+
+<h2 id="check">How to check a page you have already published</h2>
+
+<p>Four checks, in this order, each of which you can run in a few minutes.</p>
+
+<ol>
+  <li><strong>Fetch it as a crawler would.</strong> A plain HTTP request, no browser. If the answer is not in the response body, nothing else on this list matters.
+    <pre>curl -s -A "OAI-SearchBot" https://example.com/your-page | head -c 3000</pre>
+  </li>
+  <li><strong>Read your own robots.txt for each agent you care about.</strong> Not the whole file — the group that actually applies to that user agent, remembering that no group means the <code>*</code> group applies.</li>
+  <li><strong>Extract your own opening.</strong> Copy the first hundred words into a blank document and read them cold. If you cannot tell what the page answers, neither can a model.</li>
+  <li><strong>Test each opening sentence for self-containment.</strong> Take them one at a time, out of order. The ones that stop making sense are the ones that cannot be quoted.</li>
+</ol>
+
+<p>If you would rather not do the fourth check by hand, there is a free browser tool that does it: <a href="https://claude.ai/artifact/WzATH5FnyueC52uoGDVLCc" rel="noopener">the Answer Engine Optimization Checker</a>. Paste an opening and it reports which sentences survive extraction, shows the passage it would lift, and writes the <code>llms.txt</code> entry. It runs entirely in your browser, sends nothing anywhere and needs no account.</p>
+
+<p>It is worth noting what that tool <em>cannot</em> do, because it is the same point this guide makes. It is hosted on claude.ai, and <code>claude.ai/robots.txt</code> returns <code>Disallow: /</code> for <code>GPTBot</code>, <code>OAI-SearchBot</code>, <code>ChatGPT-User</code> and <code>Google-Extended</code>. So the tool itself can never be cited by an answer engine, however well written it is. Anything you want quoted has to live on a domain you control. That is why this guide is here and not there.</p>
+
+<p>A prompt that does the fourth check, and only that check:</p>
+
+<pre data-sbs-copy="prompt">Assess whether this page's opening can be quoted by an answer engine.
+Do not rewrite it yet. Report only.
+
+I will paste the first three paragraphs of a page, and the question the page
+is meant to answer.
+
+FOR EACH SENTENCE, report:
+- Could it be lifted out and still mean something on its own? Yes or no.
+- If no, name the exact word or phrase that depends on something outside the
+  sentence — a pronoun with no antecedent in the extract, a connective like
+  "however" or "therefore", a reference like "as described above".
+
+THEN report:
+- The single passage you would extract if you had to answer the question
+  using only this text. Quote it exactly. If there is no such passage, say
+  so plainly rather than assembling one from fragments.
+- Whether the passage names who is making the claim, or attributes it to
+  "we" / "our team" / nobody.
+- Which words from the question appear in the first hundred words.
+- Every specific, checkable detail in the opening: counts, versions, dates,
+  named products. List them. If there are none, say so.
+
+DO NOT
+- Do not score the page out of ten. There is no scale that means anything.
+- Do not tell me this will improve my rankings or get me cited. You cannot
+  know that, and no answer engine publishes its extraction rules.
+- Do not rewrite the text. I want the diagnosis first.
+
+Finish with the single change that would most improve extractability, and
+why.</pre>
+
+<h2 id="cannot">What nobody can promise you</h2>
+
+<p>No answer engine publishes its extraction or citation rules. There is no equivalent of a ranking-factors list, no tool that can verify you will be quoted, and no agency that can guarantee it. Anyone who tells you otherwise is describing a mechanism they cannot see.</p>
+
+<p>What is knowable is narrower and more useful: whether your page can be fetched, whether the answer is in the HTML, whether a passage survives extraction, and whether your claims are specific enough to be worth quoting over someone else's. Those are all checkable today, by you, without a tool. Everything past that is inference.</p>
+
+<p>Treat AEO as ordinary editorial discipline with a particular constraint — <em>write so that one paragraph can be removed and still be true</em> — rather than as a new channel with its own tricks. The pages that get quoted are, so far, mostly the pages that were clearly written.</p>
+
+<h2 id="download">Download the readiness kit</h2>
+
+<p>Two files. A commented <code>robots.txt</code> with all ten AI crawler user agents, each vendor's own description quoted and sourced, and three positions to choose between &mdash; allow everything, allow search but block training, or block what you can. Plus the per-page checklist from this article as a tick-list.</p>
+
+<div class="sbs-resource-download">
+  <a class="sbs-btn sbs-btn--ghost" href="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/answer-engine-readiness-kit.zip?v=1790356843" download>Download the answer engine readiness kit (zip)</a>
+</div>
+
+<p class="sbs-dim">Every crawler behaviour in it carries its source and the date it was read. This part of the web moves quickly; check the source rather than trusting a file you downloaded six months ago.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>None of this matters if the page cannot be crawled, indexed or rendered in the first place, which is ordinary technical SEO and is the audit underneath this one. The <a href="/products/claude-code-seo-website-audit-toolkit">Claude Code SEO &amp; Website Audit Toolkit</a> runs twenty audit prompts in dependency order &mdash; crawlability, indexability, canonicals and rendering before anything on-page &mdash; each demanding evidence rather than a summary, and each forbidden from fixing in the same run.</p>
+</aside>
+
+<div data-sbs-try-slot></div>
+
+<h2 id="faq">Questions</h2>
+
+<h3>Is AEO different from SEO?</h3>
+<p>It is a subset with a different unit. Technical SEO decides whether your page can be crawled, indexed and rendered; if it fails, AEO is irrelevant. AEO decides whether a passage inside a crawlable page can be lifted and attributed. Do the technical work first.</p>
+
+<h3>Will blocking AI crawlers hurt my search rankings?</h3>
+<p>Blocking <code>Google-Extended</code> does not, and Google says so explicitly. Blocking <code>GPTBot</code>, <code>ClaudeBot</code> or <code>PerplexityBot</code> has no bearing on Google Search either, because those are different companies' crawlers. What blocking costs you is visibility inside those assistants.</p>
+
+<h3>Can I stop AI assistants reading my content entirely?</h3>
+<p>Not with robots.txt alone. Two of the user-initiated fetchers documented above either may not apply robots.txt rules or generally ignore them, because a person triggered the request. If the requirement is absolute, the content needs authentication.</p>
+
+<h3>Does publishing llms.txt get me cited?</h3>
+<p>There is no published evidence that it does. It is widely adopted, Lighthouse audits for it, and it costs little — but no engine documents using it as a citation input, and a guide that tells you otherwise is guessing.</p>
+
+<h3>How long until I see an effect?</h3>
+<p>Unknown, and specific to each engine's refresh cycle. Nobody can give you a number here, and a number offered without evidence is worth exactly what it cost to produce.</p>
+
+<h2 id="next">Next action</h2>
+
+<p>Open the page you most want quoted and copy its first hundred words into a blank document. Read them with no context. If you cannot tell what question the page answers, or a sentence starts with a word pointing at something that is no longer there, you have found the work — and it is an editing job, not a technical one.</p>
+
+<p>Related reading: <a href="/blogs/guides/claude-code-technical-seo-audit">How to Run a Technical SEO Audit With Claude Code</a> covers the crawlability and rendering work that has to be right before any of this matters, and <a href="/blogs/guides/google-search-console-claude-code">Google Search Console With Claude Code</a> covers measuring what conventional search is already doing with your pages.</p>

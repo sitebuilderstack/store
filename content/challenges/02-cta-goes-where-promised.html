@@ -1,0 +1,66 @@
+<p class="sbs-lede">A button is a promise. “Book a free assessment” promises a booking form; “Download the guide” promises a file; “Start your trial” promises a trial, not a pricing page. When the destination is something else, the visitor who clicked at the moment of highest intent is asked to find their way — and many do not. This week: check every promise on the page that matters most, on a phone, and fix the ones that are not kept.</p>
+
+<h2 id="problem">The problem</h2>
+<p>Destinations drift. A booking page is retired and its link is pointed at the generic contact page “for now”. A campaign landing page is cloned from another and keeps the other's button. A redirect is added during a redesign and the button now lands on the homepage. None of these produce an error. The click works; the promise is broken; the analytics show a drop nobody can explain.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+  <li>The one page on your site that most needs to convert — a landing page, the homepage, a service page.</li>
+  <li>A phone, and a way to see the final URL after any redirects (the address bar is enough; a browser's network panel is better).</li>
+</ul>
+
+<h2 id="scope">Scope</h2>
+<p>One page, every element whose label is a promise: buttons, and links styled or worded as calls to action. Observation first: this week's workflow records destinations before anyone changes one. Changing a destination is a small edit, but it is a change to the page that earns money, so it gets the same treatment as any change: recorded, reversible, re-checked.</p>
+
+<h2 id="workflow">Safe inspection workflow</h2>
+<ol>
+  <li><strong>Identify the primary call to action by its label.</strong> Not the biggest button — the one whose label states the thing the visitor came for. Write the label down verbatim.</li>
+  <li><strong>Click it on a phone and record the final URL.</strong> After every redirect. If the address bar shows something different from the link's href, note both.</li>
+  <li><strong>Ask whether the destination keeps the promise.</strong> Is the promised thing — the form, the file, the calendar, the product — visible without scrolling or hunting? A booking button that lands on a page where the form is below three paragraphs is keeping the promise slowly.</li>
+  <li><strong>Repeat for every promise-shaped label.</strong> Book, Buy, Download, Get, Start, Try, Call, Email. Make a short table: label · href · final URL · promise kept? On a phone.</li>
+  <li><strong>Check the tel: and mailto: links.</strong> Tapping “Call us” should open the dialler with the right number. A surprising number of sites carry a number from a previous office.</li>
+  <li><strong>Fix, then re-check.</strong> For each mismatch, decide where the fault lives: the label (it promises the wrong thing) or the destination (it is the wrong page). Fix one, not both. Re-run step 2 for the fixed element. Record the before and after.</li>
+</ol>
+
+<h2 id="prompt">Copyable prompt</h2>
+<p>For a repository you can hand to Claude Code. It lists the promises and their hrefs from the source; the phone check is still yours, because rendered destinations, redirects and above-the-fold visibility are things only a real device shows.</p>
+<pre data-sbs-copy="prompt">Read-only. Do not edit any file.
+
+For the page at [PATH OR TEMPLATE], list every link and button whose visible text is a call to action — a verb that promises something (Book, Buy, Download, Get, Start, Try, Call, Email, Subscribe, Apply) — including those rendered by components, partials or CMS blocks.
+
+For each: the visible label (exactly), the href or action as written in the source, the file and line, and whether the target exists in this repository (a route, a page, a file). Flag any href that is "#", "/", a homepage, a generic contact page, a tel: or mailto: value, or a URL on a different host — with a one-line reason it deserves a look.
+
+Output a table. Do not fetch external URLs. Do not guess at what a destination contains: report what the source says and mark "verify on device" for the rest.</pre>
+
+<h2 id="evidence">Example evidence</h2>
+<p>An example record written for this page.</p>
+<pre>Weekly Fix #2 — CTA destinations — /free-assessment — 2026-09-24, phone (Android Chrome)
+| Label                          | href        | Final URL   | Promise kept?             |
+|--------------------------------|-------------|-------------|---------------------------|
+| Book a free 15-minute assessment | /contact  | /contact    | NO — generic contact page |
+| Call the clinic                | tel:+44...  | dialler     | yes                       |
+| See what to expect             | /faq        | /faq        | yes                       |
+Fix: href → /free-assessment#book (the form on the same page). Re-checked 14:20: lands on the form, visible without scrolling. Before/after screenshots kept.</pre>
+
+<h2 id="criteria">Completion criteria</h2>
+<ul>
+  <li>The primary call to action was identified by its label.</li>
+  <li>Its final destination after redirects was recorded and compared with the promise.</li>
+  <li>The destination was checked on a phone: the promised thing is visible without hunting.</li>
+  <li>Every other promise-shaped label on the page was listed with its destination.</li>
+  <li>Mismatches were fixed at the label or at the destination — and re-checked.</li>
+</ul>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+  <li><strong>Reading the href instead of following it.</strong> Redirects change destinations silently. The address bar after the click is the truth.</li>
+  <li><strong>Fixing the label to match a wrong destination.</strong> If the button says “Book” and the page has a booking form somewhere, point the button at the form; do not rename the button “Contact us”.</li>
+  <li><strong>Checking on a desktop.</strong> Above the fold is a different place on a phone.</li>
+  <li><strong>Changing several buttons at once with no record.</strong> When conversions move next week you will not know which change did it.</li>
+</ul>
+
+<h2 id="next">Go further</h2>
+<ul>
+  <li>The <a href="/pages/lab-conversion-functionality">Conversion Functionality Lab</a> has a button that promises a booking and lands on /contact — and the test that catches it.</li>
+  <li><a href="/blogs/guides/claude-code-landing-page-audit">How to audit a landing page with Claude Code</a> covers message match from ad to page to button, and includes a generator for a functional validation checklist for your page.</li>
+</ul>

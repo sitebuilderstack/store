@@ -1,0 +1,73 @@
+<p class="sbs-lede">The most common silent failure on a small business website is a contact form that shows “Thanks!” and delivers nothing. It breaks when a plugin updates, when the sending domain's mail settings change, when a spam filter learns a new rule, when a hosting migration drops an environment variable — and nobody notices, because the visitor sees success and the owner sees quiet. This week: prove yours delivers, from a phone, with a marker, and write down the evidence.</p>
+
+<h2 id="problem">The problem</h2>
+<p>A form has two halves. The half the visitor sees — the fields, the button, the confirmation — is tested every time someone fills it in. The half that matters — the message arriving where a human reads it — is tested only when someone deliberately checks. Between checks, it fails without a sound. You cannot tell from the page whether the last message got through, and the visitor cannot tell either: they were told it did.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+  <li>A website with a contact, enquiry or quote form that you own or are authorised to test.</li>
+  <li>Access to the inbox, CRM or channel the form is supposed to deliver to.</li>
+  <li>A phone on mobile data (not your office Wi-Fi), and ten minutes.</li>
+</ul>
+
+<h2 id="scope">Scope</h2>
+<p>One form: the one that produces revenue or appointments. If the site has several, the one on the page visitors land on from search or ads. Not the newsletter signup, not the login form. This is a read-only exercise: you submit a message the way a visitor would and observe. You do not change the form this week unless it fails — and if it fails, the fix is a separate, recorded change.</p>
+
+<h2 id="workflow">Safe inspection workflow</h2>
+<ol>
+  <li><strong>Choose a marker.</strong> A short unique string with today's date, for example <code>WF1-2026-09-17-1412</code>. It is what you will search for in the inbox, and what stops a test being mistaken for a real enquiry.</li>
+  <li><strong>Submit from the phone.</strong> Fill in every field the way a visitor would. Put the marker in the message and in the name. Note the time to the second. Photograph or screenshot the confirmation the page shows.</li>
+  <li><strong>Watch the inbox.</strong> Search for the marker. Note the time it arrived. If it is not there in five minutes, check spam and any filters, then check the form's own log if it has one (most form plugins and services keep submissions). A submission in the log but not the inbox is a delivery fault; nothing in the log is a submission fault.</li>
+  <li><strong>Try the failure case.</strong> Submit again with a required field empty. The page should show a visible error and should not show success. If it shows “Thanks!” for an empty message, the visitor who forgets their email address is being told everything is fine.</li>
+  <li><strong>Check the sender.</strong> Open the delivered message's headers or “from” line. If it claims to be from the visitor's own address (rather than from your domain with reply-to set to the visitor), it is on borrowed time with modern mail filters — worth a note, not a panic.</li>
+  <li><strong>Record it.</strong> Marker, send time, arrival time, what the page showed, what the failure case did, and where the evidence is. Put it where next month's you will find it — the project's task list in <a href="/pages/my-projects">My Projects</a>, a maintenance log, a calendar note.</li>
+</ol>
+
+<h2 id="prompt">Copyable prompt</h2>
+<p>If you use Claude Code on the site's repository, this asks it to inspect the form's delivery path without changing anything. It reads code and configuration; it does not submit the form, and it does not have your inbox — that part is yours.</p>
+<pre data-sbs-copy="prompt">Read-only inspection of the contact form's delivery path. Do not edit any file, run any mutation, or submit the form.
+
+1. Find the contact form: the template or component that renders it, and the handler that receives it (a plugin, a serverless function, a form service endpoint, a mailer).
+2. Trace the delivery path from submit to inbox: what sends the email or webhook, which configuration it reads (environment variables, plugin settings, API keys — report their NAMES only, never values), and what happens when sending fails.
+3. Report the confirmation logic: is the success message shown only after a successful response, or unconditionally?
+4. Report the validation: which fields are required, whether required is enforced in the markup, in a script, on the server, or not at all.
+5. List every place a failure could be silent (an unhandled promise, an ignored return code, a try/catch that swallows).
+6. Output a short table: step · file · what it does · evidence (file:line) · risk. End with "Not checked" for anything you could not read. Do not guess.</pre>
+
+<h2 id="evidence">Example evidence</h2>
+<p>This is the kind of record the challenge asks for. It is an example written for this page, not a real submission.</p>
+<pre>Weekly Fix #1 — contact form delivers — 2026-09-17
+Form: /contact (Contact Form 7 → SMTP plugin → reception@)
+Marker: WF1-2026-09-17-1412
+Sent from phone (mobile data) 14:12:07 · page showed "Thanks, we'll be in touch"
+Arrived reception@ 14:12:41 (34 s) · from: website@ourdomain, reply-to: visitor
+Failure case: empty email → red "Please enter your email" shown, no success message ✔
+Sender check: SPF/DKIM pass in headers ✔
+Result: PASS · evidence: screenshots in /maintenance/2026-09/
+Next check: 2026-10-15</pre>
+
+<h2 id="criteria">Completion criteria</h2>
+<p>The checklist below is the same list; tick it there to record your completion in My Projects. Ticking it records what <em>you</em> observed — the site does not check it, and the record says so.</p>
+<ul>
+  <li>A test submission with a unique marker was sent from a phone, not only from a desktop.</li>
+  <li>The marked message arrived where a human reads it, and the time between send and arrival was recorded.</li>
+  <li>The confirmation the visitor sees was checked against what actually happened.</li>
+  <li>The failure case was tried: an empty required field produced a visible error, not a success message.</li>
+  <li>The result, the evidence and the date are recorded somewhere you will find next month.</li>
+</ul>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+  <li><strong>Testing from the office.</strong> Office networks and logged-in browsers hide what a stranger on a phone experiences: cached scripts, allow-listed IPs, remembered form data.</li>
+  <li><strong>Testing only the happy path.</strong> “I filled it in and it worked” proves one state. The empty-field state is where false success lives.</li>
+  <li><strong>Trusting the confirmation.</strong> The page can only know that it sent a request. It cannot know the message arrived. Only the inbox knows.</li>
+  <li><strong>Fixing before recording.</strong> If it fails, write down what failed first. The fix is a separate change, and you will want to know whether the form was broken before you touched it.</li>
+  <li><strong>Deleting the test.</strong> Keep the marked message. It is the evidence, and next month you will compare against it.</li>
+</ul>
+
+<h2 id="next">Go further</h2>
+<ul>
+  <li>The <a href="/pages/lab-conversion-functionality">Conversion Functionality Lab</a> shows a form that says “Thanks!” without an email address, and the browser test that catches it.</li>
+  <li><a href="/blogs/guides/claude-code-playwright-website-testing">Playwright testing with Claude Code</a> builds the test that keeps this from regressing — including why a mocked submission proves the page posted and nothing more.</li>
+  <li>The maintenance guide's <a href="/blogs/guides/claude-code-website-maintenance">weekly checklist</a> puts this check on a schedule.</li>
+</ul>

@@ -1,0 +1,50 @@
+{
+ "label": "live-smoke-test",
+ "url": "https://sitebuilderstack.com/",
+ "final_url": "https://sitebuilderstack.com/",
+ "status": 200,
+ "x_robots_tag": null,
+ "captured": "2026-09-24T04:44:28+00:00",
+ "title": "Build Websites With Claude Code | Site Builder Stack",
+ "h1": [
+  "Build production-ready websites with Claude Code"
+ ],
+ "canonical": "https://sitebuilderstack.com/",
+ "robots_meta": null,
+ "h2": [
+  "Products",
+  "What are you trying to build?",
+  "Claude Code is powerful. The hard part is knowing what to tell it.",
+  "One prompt, or one process",
+  "See the Launch System in action",
+  "What are you trying to build?",
+  "Seventeen modules, one system",
+  "From idea to production",
+  "Dedicated build systems for the platforms people actually ship on",
+  "What the prompts actually look like",
+  "Built for people shipping real work",
+  "Everything, one price",
+  "Is this for you?",
+  "Seven products, seven different problems",
+  "Need the complete workflow?",
+  "The CLAUDE.md Starter Kit, free",
+  "The methodology, written up in full",
+  "Start with START-HERE.md",
+  "Products",
+  "Learn",
+  "Support",
+  "Legal"
+ ],
+ "forms": [
+  null,
+  "/cart/add",
+  "/contact#sbs-optin-form"
+ ],
+ "form_count": 3,
+ "cta": {
+  "text": "Get it — $19.99",
+  "href": "/#buy"
+ },
+ "content_sha256": "4f09c9fa1c356bea",
+ "content_words": 5658
+}

@@ -1,0 +1,500 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 migration discovery",
+            "meta": "3 files",
+            "highlight": false
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 url inventory",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 content inventory",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 seo baseline",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 analytics baseline",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 migration mapping",
+            "meta": "1 file",
+            "highlight": true
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 content migration",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 media migration",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 metadata migration",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 structured data",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 internal links",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 redirects",
+            "meta": "1 file",
+            "highlight": true
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 staging validation",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "14 performance",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "15 dns cutover",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "16 launch",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t17": {
+          "type": "tile",
+          "settings": {
+            "label": "17 post migration validation",
+            "meta": "1 file",
+            "highlight": true
+          }
+        },
+        "t18": {
+          "type": "tile",
+          "settings": {
+            "label": "18 rollback",
+            "meta": "2 files",
+            "highlight": false
+          }
+        },
+        "t19": {
+          "type": "tile",
+          "settings": {
+            "label": "19 monitoring",
+            "meta": "1 file",
+            "highlight": false
+          }
+        },
+        "t20": {
+          "type": "tile",
+          "settings": {
+            "label": "20 platform guides",
+            "meta": "8 files",
+            "highlight": false
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18",
+        "t19",
+        "t20"
+      ],
+      "settings": {
+        "summary": "Move your website without losing what matters. Plan, execute and validate migrations with Claude Code — every URL inventoried and mapped, every redirect tested, metadata and structured data compared page by page, DNS recorded before it is touched, and a scorecard that says GO, GO WITH WARNINGS or NO-GO from evidence.",
+        "button_label": "Get the Migration System",
+        "note": "One payment. Instant download. Licensed to one person for unlimited sites, including client work. Not affiliated with WordPress, Shopify, Astro or any host."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Twenty numbered modules including seven platform guides, 37 slash commands, 28 scripts, templates for every file the migration produces, 13 checklists, six report templates, a reference set and a complete fictional migration — about 78,000 words plus working code. Python 3 standard library only.",
+            "code": "claude-code-website-migration-replatforming-system/\n  START-HERE.md\n  QUICK-START.md\n  01-migration-discovery/\n  02-url-inventory/\n  ...\n  19-monitoring/\n  20-platform-guides/\n  .claude/commands/\n  scripts/\n  templates/\n  checklists/\n  reports/\n  reference/\n  examples/wordpress-to-astro/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "The first ten minutes",
+            "body": "Copy the commands and scripts into the project, fill source.url in migration.yaml, and run discovery: the platform, the URL count by type, the media, the forms, the analytics, the DNS records, and the open questions.",
+            "code": "cp .claude/commands/*.md your-site/.claude/commands/\ncp scripts/*.py your-site/migration/scripts/\ncp templates/migration-config.yaml your-site/migration/migration.yaml\n\nclaude\n> /migration-discovery https://old.example.com"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "The inventory, then the baseline",
+            "body": "The crawler builds one row per URL: status, final URL, title, description, canonical, robots, H1, indexability, word count, links in and out, images, forms, JSON-LD types, how it was discovered. Sitemap, Search Console and analytics exports are merged so nothing that ranks without a link is missed. Then the SEO baseline freezes it, and the DNS inventory records the zone.",
+            "code": "$ python3 migration/scripts/crawl_site.py https://old.example.com --out migration/source-url-inventory.csv --seed sitemap\ncrawling old.example.com (max 5000, depth 8, 19 seed URL(s))\ncrawled 21 URL(s): 20 ok, 1 redirect, 0 error/4xx/5xx\n\n$ python3 migration/scripts/seo_baseline.py migration/source-url-inventory.csv --out migration/seo-baseline\n$ python3 migration/scripts/dns_inventory.py old.example.com --dig migration/dig.txt --out migration/dns-before.csv\nDNS INVENTORY — old.example.com: 9 record(s) (web 2, mail 4, verification 1, ...)"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "The map is the contract",
+            "body": "One row per source URL, one decision per row: KEEP, MOVE, MERGE, REMOVE. The script drafts it from rules and slug matches; a person decides the rest. Every comparison and every redirect reads this file.",
+            "code": "$ python3 migration/scripts/url_map.py --source migration/source-url-inventory.csv --target migration/target-url-inventory.csv --rule '^/blog/(.+)=/posts/\\1' --out migration/url-map.csv\nURL MAP DRAFT — 21 source URL(s): KEEP 6  MOVE 12  REVIEW 3\n  REVIEW  /tag/fixings          nothing matched: MOVE, MERGE or REMOVE?\n  REVIEW  /author/admin         noindex on source\n  REVIEW  /blog/delivery-updates-2025"
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "Redirects: generated, validated, tested",
+            "body": "The redirect map comes from the URL map. The generator refuses loops, chains, duplicate sources and homepage dumps before it emits a line, then writes nginx, Apache, Netlify, Vercel, Shopify CSV or Cloudflare Bulk Redirects. The tester follows every rule on the real origin.",
+            "code": "$ python3 migration/scripts/generate_redirects.py migration/redirect-map.csv --format netlify > _redirects\nemitted 17 rule(s) as netlify\n\n$ python3 migration/scripts/test_redirects.py migration/redirect-map.csv --origin https://www.example.com\nREDIRECT VALIDATION — 17 rule(s) tested\n  PASS 16   WRONG-CODE 1\n  WRONG-CODE /feed    got 302, expected 301"
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "Page by page, before against after",
+            "body": "Titles, descriptions, canonicals, robots, H1s and schema types compared through the map: MATCH, CHANGED, MISSING, ADDED, REVIEW. A moved page whose canonical followed it is a match; a canonical pointing at staging is a review. Structured data subtypes are recognised — Article to BlogPosting is a change, not a loss.",
+            "code": "$ python3 migration/scripts/compare_metadata.py --source ... --target ... --map migration/url-map.csv --critical migration/critical-pages.csv\nfield                MATCH CHANGED MISSING ADDED REVIEW\ntitle                   16       4       0     0      0\nmeta_description        15       4       1     0      0\ncanonical               20       0       0     0      0\n  MISSING  /blog/torque-settings-guide  meta_description"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Staging: everything provable before DNS",
+            "body": "One run: target crawl seeded from the map, coverage, metadata, schema, critical pages, internal links, media, canonicals, robots, sitemap, tracking — and two staging-specific expectations: staging should be noindexed; canonicals must point at the production domain. What staging cannot prove is listed for cutover.",
+            "code": "$ python3 migration/scripts/staging_validation.py https://preview.example.com --dir migration\n  crawl                  exit 0\n  url coverage           exit 0\n  metadata               exit 2\n  critical pages         exit 0\n  internal links         exit 1\n  canonicals             exit 0\nwrote staging-validation.md"
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "The scorecard and the recommendation",
+            "body": "The audit scores nine areas from the files it finds, names the file behind every number, lists findings by severity and recommends GO, GO WITH WARNINGS or NO-GO. Any blocker is NO-GO regardless of the score. Anything not measured is NOT CHECKED, not scored.",
+            "code": "URL Coverage:            100%\nRedirect Integrity:       94%\nMetadata Preservation:    73%\nCanonical Integrity:     100%\nInternal Links:          100%\nMedia Integrity:         100%\nAnalytics:               PASS\nForms:                   PASS\nCritical Pages:          PASS\nRollback Readiness:      PASS\n\nOverall Migration Health: 94/100\nLAUNCH RECOMMENDATION: GO WITH WARNINGS"
+          }
+        },
+        "s9": {
+          "type": "step",
+          "settings": {
+            "title": "Cutover, with the record in front of you",
+            "body": "The DNS zone was recorded before the panel was opened. The cutover command quotes each record — name, type, old value, new value, TTL — and waits for a yes; only the web records in the plan change; mail, SPF, DKIM, DMARC and verification records are listed as unchanged. Minutes after, the critical pages, robots, canonicals, redirects and tracking are checked on the production domain.",
+            "code": "> /migration-cutover go\n  rollback_readiness.py     PASS (9/9)\n  DNS: example.com A 203.0.113.44 → 75.2.60.5 (TTL 300) — confirm? yes\n  DNS: www CNAME example.com. → site.netlify.app. — confirm? yes\n  T+5m  critical_pages.py    5/5 PASS  (Server: Netlify)\n  T+5m  check_robots.py      PASS\n  T+15m test_redirects.py    16 PASS 1 WRONG-CODE\n  T+15m tracking_check.py    G-… on 20/20"
+          }
+        },
+        "s10": {
+          "type": "step",
+          "settings": {
+            "title": "Rollback is a procedure, not a hope",
+            "body": "Readiness is checked as facts before launch: the source still answers, the backup exists and someone restored from it, the DNS record has MX rows, an owner and a window are named, the TTL was lowered. The rollback restores the recorded records one at a time, compares the zone, verifies the source pages, and writes the report.",
+            "code": "$ python3 migration/scripts/rollback_readiness.py --config migration.yaml --dir migration\n  PASS  source preserved       200; config source_preserved=True\n  PASS  backup restore tested  backup_restore_tested=True\n  PASS  DNS recorded           dns-before.csv: 9 records, types A,CAA,CNAME,MX,TXT\n  PASS  owner named            rollback.owner=M. Okafor\n  PASS  DNS TTL lowered\noverall: PASS"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the Website Migration & Replatforming System",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to the first scored migration audit.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real commands, and the real output the scripts produce.</p><p>The example migration inside the download was produced by running these scripts end to end against a fixture site; only the hosts were renamed.</p>",
+        "sample_url": "",
+        "sample_label": ""
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it change my site, my DNS or my hosting?",
+            "answer": "<p>Not without you. Read-only commands write only reports and inventories into the migration folder. File-modifying commands announce every path before writing. The two production-impact commands, cutover and rollback, quote each change and wait for a yes, and neither can change DNS itself: the operator makes the change in the provider and pastes the result. The scripts never hold hosting, DNS or CMS credentials.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Which migrations does it cover?",
+            "answer": "<p>WordPress to Astro, WordPress to Shopify, WordPress to WordPress (host, theme, permalinks), Shopify replatforming (theme change, store to store, or leaving Shopify), static HTML to Astro, domain changes and URL-structure changes, each with its own guide. The modules and scripts are platform-neutral; the guides carry the platform facts. A migration the guides do not name, Ghost to Hugo say, still uses every module and every script, and reads the closest guide for the shape.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "What is automated and what is not?",
+            "answer": "<p>Inventory, baseline, comparison, redirect generation and testing, link and media audits, the old-domain scan, the DNS record, the critical-page check and the audit are automated. The URL map and the content conversion are drafted by the scripts and decided by a person. Building the target, forms, checkout, the DNS change, Search Console and the go/no-go call are manual. The matrix per migration type is in the reference set and in the plan the system writes for your migration.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "Do I need Python or anything installed?",
+            "answer": "<p>Python 3.8 or newer, which almost every machine has. The scripts use only the standard library: nothing to install, no package manager, no virtual environment. Claude Code runs the commands; you can also run every script by hand.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "What does the health score mean?",
+            "answer": "<p>It is the mean of six percentages, URL coverage, redirect integrity, metadata preservation, canonical integrity, internal links and media integrity, minus ten for each failure among analytics, forms and critical pages. Any blocker makes the recommendation NO-GO whatever the number. Every line names the file it was computed from, and anything not measured is reported as not checked rather than scored. It orders the work. It is not a prediction of rankings or traffic and not a guarantee of anything.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Will my rankings survive?",
+            "answer": "<p>Nobody can promise that, and this product does not. What it does is make the losses visible before they happen: every URL accounted for, every redirect tested on the real origin, metadata and structured data compared page by page, production checked for noindex and staging canonicals minutes after cutover, and a monitoring plan at 24 hours, 7 days and 30 days that reads Search Console against the baseline. Migrations that lose rankings usually lost something nobody had listed.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it on client migrations?",
+            "answer": "<p>Yes. The licence is one person, unlimited sites, including client work, with no expiry. Inventories, maps, audit reports and migration reports you produce are yours to deliver. You may not redistribute or resell the system itself.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "How is it different from the Operations system or the SEO toolkit?",
+            "answer": "<p>The SEO toolkit audits a site at one point in time; the Operations system keeps a live site healthy. This one is for the weeks a site is moving: two inventories, a map between them, redirects generated and tested, and a before/after comparison with a go/no-go. They pair: the SEO toolkit for the pre-migration audit, this for the move, Operations afterwards. Buying one does not include the others.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "What is in the example?",
+            "answer": "<p>A complete fictional migration, a small WordPress trade site to Astro on Netlify, with every file the system produces: the discovery report, both inventories, the content and media inventories, the SEO baseline, the DNS record, the plan and risk register, the URL map, the redirect map and generated configuration, the redirect results, the metadata and schema comparisons, the link and media audits, the critical-page results, the audit with its scorecard, the launch checklist as filled, the cutover log and the client report. The CSVs and JSON are real script output against a fixture site; only the hosts were renamed.</p>"
+          }
+        },
+        "q10": {
+          "type": "qa",
+          "settings": {
+            "question": "What if something goes wrong after launch?",
+            "answer": "<p>The rollback module and command exist for exactly that. Readiness is verified as facts before cutover, so the source is untouched and the DNS record exists; the decision matrix names the triggers and how long to try fixing forward; the rollback restores the recorded records one at a time and verifies. A refund request is considered on its merits, as with every product here.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9",
+        "q10"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The questions people ask about a migration product, answered plainly.",
+        "emit_schema": true
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Planning, platform build systems, a production CLAUDE.md, security and accessibility audits, 100 prompts and launch checklists — for the site you are building the migration into.",
+            "flagship": false
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals and Search Console — the audit to run before a migration and again after it settles.",
+            "flagship": false
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "Find where the site loses conversions once it has moved — 70 workflows and 68 commands.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Uptime, security, backups, deploys, incidents and monthly reporting — keeping the new site healthy after the 30-day window closes.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Automate Shopify",
+            "product": "claude-code-shopify-automation-admin-api-toolkit",
+            "body": "Products, collections, SEO, metafields, redirects and bulk operations through the Admin GraphQL API — the catalogue side of a Shopify destination.",
+            "flagship": false
+          }
+        },
+        "p6": {
+          "type": "product",
+          "settings": {
+            "stage": "Build, rank, convert",
+            "product": "complete-site-builder-stack",
+            "body": "The first three systems together on one order — the same three products at the same versions, for less than buying them separately.",
+            "flagship": false
+          }
+        },
+        "p7": {
+          "type": "product",
+          "settings": {
+            "stage": "Deliver",
+            "product": "claude-code-agency-client-delivery-system",
+            "body": "Discover, scope, propose, onboard, build, review, launch, hand off and retain website clients — the engagement around the technical work, as commands that read one set of files per client. For freelancers and agencies.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "p7"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The other six",
+        "heading": "Moving is one part of a website's life",
+        "intro": "This system is for the weeks a site is moving. Building it, getting it found, converting the traffic, keeping it healthy and running a Shopify catalogue are the other five jobs.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Keeping the new site healthy afterwards?",
+        "body": "The Claude Code Website Operations & Maintenance System watches the site from the outside — uptime, TLS, security headers, links, redirects, deploys, incidents — with a scored health report. This system moves the site; that one keeps it up once the 30-day window closes.",
+        "cta_label": "See the Operations & Maintenance System",
+        "cta_url": "/products/claude-code-website-operations-maintenance-system",
+        "note": "A separate product. Buying this does not include it, and there is no automatic upgrade credit.",
+        "product": "claude-code-website-operations-maintenance-system"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

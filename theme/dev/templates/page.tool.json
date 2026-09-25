@@ -1,0 +1,19 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-tool",
+      "settings": {
+        "generate_label": "Generate",
+        "result_heading": "Your result",
+        "caveat": "Generated as a starting point. Read it, change what does not apply, and delete anything you cannot state honestly — an instruction you have not checked is worse than none.",
+        "related_heading": "Read next",
+        "show_cta": true,
+        "cta_heading": "Want this as a tested system?"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

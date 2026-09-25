@@ -1,0 +1,170 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#why">Why most CRO prompts fail</a></li>
+    <li><a href="#discovery">Discovery</a></li>
+    <li><a href="#analytics">Analytics verification</a></li>
+    <li><a href="#funnel">Funnel diagnosis</a></li>
+    <li><a href="#pages">Product and landing pages</a></li>
+    <li><a href="#forms">Forms</a></li>
+    <li><a href="#copy">Copy</a></li>
+    <li><a href="#experiments">Experiments</a></li>
+    <li><a href="#validation">Validation</a></li>
+    <li><a href="#reuse">Making them reusable</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">Why most CRO prompts fail</h2>
+
+<p>A prompt list is only useful if each prompt has a finish line. "Audit my landing page for conversion" does not — what comes back is plausible, comprehensive-looking and impossible to act on, because nothing in it is tied to evidence you can check.</p>
+
+<p>Every prompt below does three things the generic version does not. It states which mode it is in, so an audit cannot quietly become a refactor. It demands observation rather than inference. And it permits a short answer, because the alternative is padding.</p>
+
+<p>They are organised by the stage of the work rather than by page type, since the order is what makes them useful.</p>
+
+<p>They assume the method in <a href="/blogs/guides/claude-code-conversion-rate-optimization">the conversion workflow</a>, and the general prompt patterns in <a href="/blogs/guides/how-to-build-a-website-with-claude-code">how to build a website with Claude Code</a> apply here unchanged.</p>
+
+<h2 id="discovery">Discovery</h2>
+
+<p>Run first, once, and never skip it. Its output makes every later prompt shorter.</p>
+
+<pre class="sbs-prompt">This session is DISCOVERY. Change nothing.
+
+Report, from the site itself rather than from assumption:
+1. The primary conversion action, and the exact URL where it completes.
+2. Every step between arrival and that action, in order.
+3. Which steps have a measurement attached and which do not.
+4. The platform, and what it decides for us that we cannot change.
+5. What you could not determine, and what access you would need.
+
+Then stop and wait.</pre>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-cro-stages.png?v=1788908813" alt="Eight prompt stages in order: discovery, analytics, funnel, pages, forms, copy, experiments, validation. The first two are highlighted."
+       width="1000" height="332" loading="lazy" decoding="async">
+  <figcaption>The first two are not optional. Everything after them depends on the event count being one.</figcaption>
+</figure>
+
+<h2 id="analytics">Analytics verification</h2>
+
+<p>Before any number is trusted. This is the prompt that most often stops a project and saves it.</p>
+
+<pre class="sbs-prompt">Verify the measurement before analysing anything.
+
+For each conversion event: list every place it can fire, including
+theme code, tag managers and installed apps. Then load the page,
+complete the action, and report how many times it ACTUALLY fired.
+
+Report the observed count, not the intended one. If the primary
+conversion event fires zero times or more than once, stop and say
+so — no downstream analysis is valid until that is fixed.</pre>
+
+<h2 id="funnel">Funnel diagnosis</h2>
+
+<pre class="sbs-prompt">Map the funnel and find the worst step.
+
+For each step: the number entering, the number continuing, and the
+proportional drop. Segment by device before drawing any conclusion —
+report mobile and desktop separately and say if they disagree.
+
+Identify the largest PROPORTIONAL drop, not the largest absolute
+one, and name the page or component that owns it.
+
+If a step has no number attached, say so and treat it as the
+finding rather than estimating it.</pre>
+
+<p>That last instruction matters more than it looks. Asked to produce a funnel, a model will happily produce plausible numbers for steps that were never measured, and the result is indistinguishable from a real one.</p>
+
+<h2 id="pages">Product and landing pages</h2>
+
+<pre class="sbs-prompt">This is an AUDIT of <URL>. Change nothing.
+
+Complete the page's primary action yourself, as a new visitor with
+no cookies, at 375px and at 1280px. Report what you observed.
+
+Then produce findings, each with:
+  the URL and component, what you observed, the conditions,
+  why it costs conversions, and a label:
+    proven problem | strong heuristic | experiment opportunity |
+    insufficient data
+
+Order by impact and confidence over effort. Put proven problems
+first regardless of size.
+
+If there are only three findings, return three. Do not pad.</pre>
+
+<p>The four labels are the load-bearing part. Without them everything arrives in the same confident register and the reader cannot separate the reproduced bug from the hunch.</p>
+
+<h2 id="forms">Forms</h2>
+
+<pre class="sbs-prompt">Audit every form on the conversion path.
+
+For each field: is it required, and can you state what it is used
+for and what breaks without it? List any field that fails that test.
+
+Then test mechanically and report what happened:
+  submit with a valid value; submit with an invalid one;
+  submit with JavaScript disabled; navigate it by keyboard only.
+
+Specifically report: whether errors are associated with their
+fields programmatically, whether a failed submission preserves
+what was typed, and whether there is a visible success state.</pre>
+
+<h2 id="copy">Copy</h2>
+
+<pre class="sbs-prompt">Audit the copy on <URL> against what it must do.
+
+For each claim: is it specific enough to be falsifiable, or is it
+an adjective? Quote the ones that are adjectives.
+
+List the objections a sceptical buyer would raise, in the order
+they would arise, and say whether the page answers each one BEFORE
+that point.
+
+Do not write replacement copy in this pass. Do not propose adding
+testimonials, customer counts, ratings or any other proof that does
+not already exist — if the honest answer to an objection is "we
+have no evidence", that is the finding.</pre>
+
+<h2 id="experiments">Experiments</h2>
+
+<p>The most valuable output of this group is frequently "do not test this".</p>
+
+<pre class="sbs-prompt">Before designing any test, work out whether it can be powered.
+
+Given the baseline conversion rate and the weekly traffic to this
+step, calculate the sample size needed per arm to detect the
+smallest effect worth acting on, and how long that would take.
+
+If the answer is longer than about six weeks, say so plainly and
+recommend shipping the change on its reasoning instead, with the
+expected direction written down beforehand.
+
+Do not predict a percentage lift. If that could be known in
+advance there would be no reason to run the test.</pre>
+
+<h2 id="validation">Validation</h2>
+
+<pre class="sbs-prompt">This is VALIDATION of the change shipped on <date>.
+
+State what was expected to move, and what actually moved, over the
+same window before and after.
+
+If several changes shipped together, say that the effect cannot be
+attributed to any one of them, and do not attribute it.
+
+A verdict of "cannot tell from this data" is a valid and expected
+outcome. Prefer it to a confident answer the data does not support.</pre>
+
+<h2 id="reuse">Making them reusable</h2>
+
+<p>Prompts pasted from a page decay: the constraint you stated once gets forgotten twenty messages later, and the next session starts without it.</p>
+
+<p>Two things fix most of that. Put the standing rules — audit mode changes nothing, findings carry evidence, no predicted lifts, no manufactured urgency — in <code>CLAUDE.md</code>, where they apply to every session without being restated. And keep the per-task prompts as files in the repository rather than in a notes app, so improving one improves it everywhere.</p>
+
+<p>The <a href="/blogs/guides/production-claude-md-web-development">production CLAUDE.md guide</a> covers the first, and <a href="/blogs/guides/best-claude-code-prompts-for-web-development">the prompt patterns guide</a> covers why a constraint stated once in a long session stops being followed.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>The Claude Code Conversion &amp; Revenue Optimization Toolkit contains 68 commands across nine categories and 70 workflows &mdash; the full versions of these, with their expected output, validation steps and common mistakes. <a href="/products/claude-code-conversion-revenue-optimization-toolkit">See what is included</a>.</p>
+</aside>

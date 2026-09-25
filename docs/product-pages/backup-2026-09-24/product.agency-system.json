@@ -1,0 +1,509 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-product",
+      "blocks": {
+        "t1": {
+          "type": "tile",
+          "settings": {
+            "label": "01 lead qualification",
+            "meta": "/lead-qualification",
+            "highlight": false
+          }
+        },
+        "t2": {
+          "type": "tile",
+          "settings": {
+            "label": "02 client discovery",
+            "meta": "/client-discovery",
+            "highlight": false
+          }
+        },
+        "t3": {
+          "type": "tile",
+          "settings": {
+            "label": "03 client intake",
+            "meta": "/client-intake",
+            "highlight": false
+          }
+        },
+        "t4": {
+          "type": "tile",
+          "settings": {
+            "label": "04 website audits",
+            "meta": "/client-website-audit",
+            "highlight": false
+          }
+        },
+        "t5": {
+          "type": "tile",
+          "settings": {
+            "label": "05 project scoping",
+            "meta": "/client-scope",
+            "highlight": true
+          }
+        },
+        "t6": {
+          "type": "tile",
+          "settings": {
+            "label": "06 estimation pricing",
+            "meta": "/project-estimate",
+            "highlight": false
+          }
+        },
+        "t7": {
+          "type": "tile",
+          "settings": {
+            "label": "07 proposals",
+            "meta": "/generate-proposal",
+            "highlight": true
+          }
+        },
+        "t8": {
+          "type": "tile",
+          "settings": {
+            "label": "08 client onboarding",
+            "meta": "/client-onboarding",
+            "highlight": false
+          }
+        },
+        "t9": {
+          "type": "tile",
+          "settings": {
+            "label": "09 requirements",
+            "meta": "/requirements-document",
+            "highlight": false
+          }
+        },
+        "t10": {
+          "type": "tile",
+          "settings": {
+            "label": "10 project planning",
+            "meta": "/project-plan",
+            "highlight": false
+          }
+        },
+        "t11": {
+          "type": "tile",
+          "settings": {
+            "label": "11 claude code project setup",
+            "meta": "/setup-client-project",
+            "highlight": false
+          }
+        },
+        "t12": {
+          "type": "tile",
+          "settings": {
+            "label": "12 build delivery",
+            "meta": "/delivery-workflow",
+            "highlight": false
+          }
+        },
+        "t13": {
+          "type": "tile",
+          "settings": {
+            "label": "13 client communication",
+            "meta": "/weekly-client-report",
+            "highlight": false
+          }
+        },
+        "t14": {
+          "type": "tile",
+          "settings": {
+            "label": "14 change management",
+            "meta": "/change-request",
+            "highlight": false
+          }
+        },
+        "t15": {
+          "type": "tile",
+          "settings": {
+            "label": "15 qa",
+            "meta": "/client-project-qa",
+            "highlight": false
+          }
+        },
+        "t16": {
+          "type": "tile",
+          "settings": {
+            "label": "16 client review",
+            "meta": "/client-review-package",
+            "highlight": false
+          }
+        },
+        "t17": {
+          "type": "tile",
+          "settings": {
+            "label": "17 launch",
+            "meta": "/client-launch-readiness",
+            "highlight": true
+          }
+        },
+        "t18": {
+          "type": "tile",
+          "settings": {
+            "label": "18 handoff",
+            "meta": "/client-handoff",
+            "highlight": false
+          }
+        },
+        "t19": {
+          "type": "tile",
+          "settings": {
+            "label": "19 reporting",
+            "meta": "/monthly-client-report",
+            "highlight": false
+          }
+        },
+        "t20": {
+          "type": "tile",
+          "settings": {
+            "label": "20 maintenance retainers",
+            "meta": "/retainer-opportunity",
+            "highlight": false
+          }
+        },
+        "t21": {
+          "type": "tile",
+          "settings": {
+            "label": "21 client offboarding",
+            "meta": "/client-offboarding",
+            "highlight": false
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3",
+        "t4",
+        "t5",
+        "t6",
+        "t7",
+        "t8",
+        "t9",
+        "t10",
+        "t11",
+        "t12",
+        "t13",
+        "t14",
+        "t15",
+        "t16",
+        "t17",
+        "t18",
+        "t19",
+        "t20",
+        "t21"
+      ],
+      "settings": {
+        "summary": "Turn Claude Code into your client delivery system. Discover, scope, propose, onboard, build, review, launch, hand off and retain website clients with commands that read one set of files per client — evidence in every audit, counts in every scope, a range in every estimate, and a person between every draft and the client.",
+        "button_label": "Get the Agency & Client Delivery System",
+        "note": "One payment. Instant download. Licensed to one person for unlimited clients, including branding the client-facing documents as your own. Not legal or accounting advice."
+      }
+    },
+    "walkthrough": {
+      "type": "sbs-demo",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "What lands in your inbox",
+            "body": "One ZIP. Twenty-one numbered modules, 37 slash commands, 29 templates plus a client-project skeleton, 17 checklists, 12 report shapes, 3 worksheets, a reference set, four small scripts and a complete fictional engagement — about 56,000 words. Markdown, CSV, YAML; Python 3 standard library for the scripts.",
+            "code": "claude-code-agency-client-delivery-system/\n  START-HERE.md\n  QUICK-START.md\n  01-lead-qualification/\n  02-client-discovery/\n  ...\n  21-client-offboarding/\n  .claude/commands/\n  templates/  (incl. client-project/)\n  checklists/\n  reports/\n  worksheets/\n  reference/\n  scripts/\n  examples/example-client-project/"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "The first ten minutes",
+            "body": "Copy the commands, scripts and templates into your agency folder; create the client project with the script (it never overwrites); fill the config from what you know; run discovery.",
+            "code": "cp .claude/commands/*.md your-agency/.claude/commands/\ncp -r scripts templates your-agency/\ncd your-agency\npython3 scripts/new_client.py \"Northwind Supply\" --project \"Website Redesign\" --platform wordpress --type redesign\n  created clients/northwind-supply (28 files). Next: fill client-config.yaml, then /lead-qualification or /client-discovery\n\ncd clients/northwind-supply && claude\n> /client-discovery"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Qualify before you spend unpaid hours",
+            "body": "The intake is quoted, not paraphrased; a budget the prospect did not state stays blank. The score comes with reasons, the unknowns become the next call's questions, and WEAK means \"not on these terms\", not \"no\".",
+            "code": "LEAD QUALIFICATION\n\nClient:   Harbourline Physio (director)\nProject:  Website redesign, WordPress, same domain\n\nFIT SCORE: STRONG\n\nProject Type:          Redesign; SEO preservation; booking conversion\nEstimated Complexity:  M\n\nUnknowns:\n- Which pages carry the organic traffic (Search Console)\n- Who holds hosting and registrar access\n\nRecommended Next Step:\nBook discovery; request Search Console/GA4 access first."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Audit with evidence, then scope from it",
+            "body": "Every finding has an issue, evidence, business impact, recommendation, effort and a priority from CRITICAL to OPPORTUNITY. The priority actions become the candidate scope; the executive summary is two pages the client reads.",
+            "code": "## Priority actions\n| # | Action                                        | Priority | Effort |\n| 1 | Booking CTA on every page; widget above fold  | HIGH     | build  |\n| 2 | Preserve the two URLs with 61% of clicks      | HIGH     | S      |\n| 3 | Rebuild templates for mobile (LCP 5.8 s)      | HIGH     | M      |\n| 4 | Unique titles; merge 4 thin pages with 301s   | HIGH     | S      |\n\nNot checked: server logs; the booking widget's own analytics."
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "A scope with counts and an out-of-scope list",
+            "body": "In scope is counted (pages, templates, rounds, forms). Out of scope names what the client will think of later. Client responsibilities carry dates and the day-for-day rule. Every deliverable has a criterion someone can test.",
+            "code": "IN SCOPE\n3. Design for the five page templates, desktop and mobile, 2 revision rounds\n4. Build as a child theme: 11 pages plus the profile template\n\nOUT OF SCOPE\n1. Copywriting beyond light drafts of titles/descriptions\n4. Online payments, deposits, or a client portal\n9. Maintenance beyond the 30-day defect window\n\nCLIENT RESPONSIBILITIES\n- Final copy for all 11 pages by 30 Oct; each business day\n  late moves launch by one business day"
+          }
+        },
+        "s6": {
+          "type": "step",
+          "settings": {
+            "title": "An estimate that is a range",
+            "body": "Work items with low, expected and high hours and a note per row saying what each assumes. The script totals by phase, applies contingency as a line, and prints the assumptions. The proposal quotes the range or the high — never the low alone.",
+            "code": "$ python3 scripts/estimate.py project-estimation.csv --contingency 15 --rate 90\nPROJECT ESTIMATE — 18 work item(s)\nphase              low  expected   high\nDesign            29.5      33.0   49.5\nDevelopment       30.0      34.5   50.0\n...\nTOTAL             95.5     135.8  205.2   hours before contingency\n                  95.5     156.1  236.0   with 15% contingency\nat 90.00/hour:    8595     14050  21243\n\nASSUMPTIONS (from the worksheet notes):\n  - Page assembly: 11 pages; assumes copy on time"
+          }
+        },
+        "s7": {
+          "type": "step",
+          "settings": {
+            "title": "Scope creep, classified in a minute",
+            "body": "Every new request is checked against the scope text — quoted, not remembered — and classified IN SCOPE, AMBIGUOUS or OUT OF SCOPE with the four impacts and the reply drafted. Not every change costs money; every change is logged.",
+            "code": "REQUEST: \"Could clients pay for the assessment when they book?\"\nORIGINAL SCOPE: out-of-scope item 4 \"Online payments, deposits,\n  or a patient/client portal\"\n\nCLASSIFICATION: OUT OF SCOPE\n\nESTIMATED IMPACT: +10 to +15 business days before launch;\n  vendor add-on (client's) + 8–14h configuration; none if phase 2\nRECOMMENDED RESPONSE: /change-request CR-02; recommend phase 2\n  so the 9 December date holds."
+          }
+        },
+        "s8": {
+          "type": "step",
+          "settings": {
+            "title": "The Friday report, from the tracker",
+            "body": "Overall status with the one-sentence reason; completed, in progress, next week; the client's actions in their own section with dates and consequences; risks; decisions needed; the launch date and why it moved. Ten minutes from the files.",
+            "code": "PROJECT STATUS — week of 2 November\nOverall Status: AT RISK — copy for three service pages is\n  outstanding since 30 October\n\nClient Actions Needed:\n  Approve design round 2            Fri 6 Nov   build starts Monday\n  Copy for the three service pages  Fri 7 Nov   launch 9 Dec holds\n\nLaunch target: 4 December → 9 December if the copy\narrives by 7 November (day-for-day rule)."
+          }
+        },
+        "s9": {
+          "type": "step",
+          "settings": {
+            "title": "Launch on evidence",
+            "body": "Thirteen checks with the file, the log entry or the test that proves each: scope, requirements, QA on the production build, written approval, backup, DNS, SSL, redirects, SEO, analytics, forms, environment, rollback. Any blocker is NO-GO regardless of the date.",
+            "code": "LAUNCH RECOMMENDATION: GO WITH WARNINGS\nDecided by RL (recommendation) and the director (approval 8 Dec 16:20)\n\n| Client approval   | PASS | decision-log 2026-12-03; 8 Dec email |\n| Backup            | PASS | host 8 Dec 09:00; restore tested 2 Dec |\n| Redirects         | WARN | 4 rules staged; verified at T+15m |\n| Rollback plan     | PASS | previous theme kept; 15 minutes; RL |\n\nBlockers: none"
+          }
+        },
+        "s10": {
+          "type": "step",
+          "settings": {
+            "title": "The whole engagement in one block",
+            "body": "From the config, the tracker, the action items, the risks and the change log: phase, status, every stage, blockers, client actions, risks, the next five actions — and project-status.json for whatever you build on top.",
+            "code": "$ python3 scripts/project_status.py --dir clients/harbourline\nCLIENT PROJECT STATUS\nClient:   Harbourline Physio\nProject:  Website Redesign\nCurrent Phase:   build\nOverall Status:  BLOCKED\n\nBLOCKERS:\n1. Copy for 11 pages (Content) is blocked on the client: 8 of 11 received\n\nCLIENT ACTIONS REQUIRED:\n1. Copy for Sports; Post-surgical; Workplace pages (due 2026-10-30) — overdue by 7 day(s)\n2. Approve design round 2 (due 2026-11-06)\n\nwrote project-status.json"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "s9",
+        "s10"
+      ],
+      "settings": {
+        "anchor": "walkthrough",
+        "heading": "Inside the Agency & Client Delivery System",
+        "body": "No video is published yet. Below is the same walkthrough it will narrate, in a form that works today.",
+        "video_url": "",
+        "video_description": "A three-minute walkthrough of the download, from START-HERE to the first proposal.",
+        "pending_note": "<p>The recorded walkthrough is not published yet. Rather than put a play button over a still image, the steps above are the same tour in writing &mdash; the real folder names, the real commands, and real output from the example engagement inside the download.</p><p>The example client is fictional; its status and estimate outputs are reproduced by running the scripts on its files.</p>",
+        "sample_url": "",
+        "sample_label": ""
+      }
+    },
+    "questions": {
+      "type": "sbs-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Is this a folder of proposal prompts?",
+            "answer": "<p>No. It is one set of files per client that every command reads and writes — the config, the scope, four logs — with 37 commands that turn them into discovery reports, audits, scopes, estimates, proposals, plans, QA reports, review packages, readiness decisions, handoffs, monthly reports and retainer recommendations. The proposal templates are six of 29 templates, and each is filled from the scope and the estimate rather than from thin air.</p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "Does it send anything to my clients?",
+            "answer": "<p>Never. Every command that produces client-facing text produces a draft, marked as such, for a person to read, edit and send. The communication rules it follows — concise, factual, no blame, no promises the evidence does not support, client actions with dates — are in the reference set and in every command.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "Is it legal advice? Are the proposals contracts?",
+            "answer": "<p>No, and no. Proposals describe the work and the price and say so in their last line; scope documents do not replace an agreement; the retainer templates describe services, not terms; the pricing guidance is reasoning with hypothetical figures, not rates or accounting advice. Use your own agreements and your own advisers for the legal and financial side.</p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "What does it need from me?",
+            "answer": "<p>Claude Code, Python 3.8 or newer for the four small scripts (standard library only), and a client. It assumes you can build the website; it does not assume you have run an engagement before — the modules are written for a first one and the example is a whole engagement to read.</p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "How does it handle client passwords and access?",
+            "answer": "<p>It does not hold them. Access is granted by each platform's own invitation — collaborator, user, editor — per person, least privilege, removed at offboarding. The access inventory records that access exists or is missing, never a value. The client data policy, the .gitignore template and the validation script enforce it; a credential-shaped string in a project file fails validation.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Will it invent requirements or budgets to fill gaps?",
+            "answer": "<p>No. A requirement has a source — discovery notes, an email, a meeting date — or it is marked TBD with a question and an owner. A budget appears only if the prospect stated one, quoted. A report's number has a source or it says unavailable. Those are operating rules in CLAUDE.md and in every command's business rules.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "What platforms does it cover?",
+            "answer": "<p>The engagement is platform-neutral; the reference set has workflows for Shopify (collaborator access, unpublished themes, apps, checkout limits, the test order), WordPress (admin per person, staging, plugins, backups, updates) and static/Astro (repository, preview deploys, forms, CI) — and overlays for ten project types from a landing page to a migration to a maintenance engagement.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "How does it fit with the other SiteBuilderStack products?",
+            "answer": "<p>This is the engagement layer; the others are the technical layers it sells and delivers with — the Launch System to build, the SEO and Conversion toolkits for audit engagements, the Operations system to deliver maintenance retainers, the Migration system for migration projects, the Shopify toolkit for catalogue retainers. Each is separate; none is required; the modules say \"if you own it\" where one would help.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "What is in the example?",
+            "answer": "<p>A fictional physiotherapy clinic's website redesign from the enquiry form to the retainer recommendation: intake, qualification, discovery, audit and executive summary, scope, estimate (two options), proposal, onboarding, kickoff summary, access inventory, requirements and traceability, plan, tracker, risk register, scope checks, a change request, a weekly report, QA, a review package and triage, launch readiness and report, handoff, retainer recommendation, estimate review and retrospective. The CSVs are real script input; the status and estimate outputs are reproduced by running the scripts on them.</p>"
+          }
+        },
+        "q10": {
+          "type": "qa",
+          "settings": {
+            "question": "Can I use it for client work and brand the documents?",
+            "answer": "<p>Yes: one person, unlimited clients, no expiry, and the client-facing documents you produce may carry your name and brand. You may not resell or redistribute the system, or sell its templates as a competing product.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9",
+        "q10"
+      ],
+      "settings": {
+        "anchor": "faq",
+        "eyebrow": "Questions",
+        "heading": "Before you buy",
+        "intro": "The questions people ask about a delivery system for client work, answered plainly.",
+        "emit_schema": true
+      }
+    },
+    "ecosystem": {
+      "type": "sbs-ecosystem",
+      "blocks": {
+        "p1": {
+          "type": "product",
+          "settings": {
+            "stage": "Build & launch",
+            "product": "claude-code-website-launch-system",
+            "body": "Platform build systems, a production CLAUDE.md, security and accessibility audits, 100 prompts and launch checklists — the build inside your delivery workflow.",
+            "flagship": false
+          }
+        },
+        "p2": {
+          "type": "product",
+          "settings": {
+            "stage": "Get found",
+            "product": "claude-code-seo-website-audit-toolkit",
+            "body": "Crawlability, indexation, structured data, Core Web Vitals and Search Console — the deep audit behind an SEO engagement.",
+            "flagship": false
+          }
+        },
+        "p3": {
+          "type": "product",
+          "settings": {
+            "stage": "Convert",
+            "product": "claude-code-conversion-revenue-optimization-toolkit",
+            "body": "70 workflows and 68 commands for finding where a client's site loses conversions — the conversion optimisation engagement.",
+            "flagship": false
+          }
+        },
+        "p4": {
+          "type": "product",
+          "settings": {
+            "stage": "Operate & maintain",
+            "product": "claude-code-website-operations-maintenance-system",
+            "body": "Uptime, security, backups, deploys, incidents and monthly reporting — the delivery side of the maintenance retainer you design here.",
+            "flagship": false
+          }
+        },
+        "p5": {
+          "type": "product",
+          "settings": {
+            "stage": "Migrate",
+            "product": "claude-code-website-migration-replatforming-system",
+            "body": "Inventory, map, redirects, comparison, DNS recorded, GO / NO-GO — the technical work behind a migration project.",
+            "flagship": false
+          }
+        },
+        "p6": {
+          "type": "product",
+          "settings": {
+            "stage": "Automate Shopify",
+            "product": "claude-code-shopify-automation-admin-api-toolkit",
+            "body": "Products, collections, SEO, metafields and bulk operations through the Admin GraphQL API — a Shopify catalogue retainer's delivery side.",
+            "flagship": false
+          }
+        },
+        "p7": {
+          "type": "product",
+          "settings": {
+            "stage": "Build, rank, convert",
+            "product": "complete-site-builder-stack",
+            "body": "The first three systems together on one order — the same three products at the same versions, for less than buying them separately.",
+            "flagship": false
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "p7"
+      ],
+      "settings": {
+        "anchor": "also",
+        "eyebrow": "The technical layers",
+        "heading": "This is the engagement; these are the tools it delivers with",
+        "intro": "The delivery system sells and runs the engagement. Building, ranking, converting, operating, migrating and automating Shopify are the six technical products it pairs with — each separate, none required.",
+        "note": "<p>Each solves a different stage. <a href=\"/pages/build-rank-convert\">The whole lifecycle is explained here</a> if you are not sure which you are in.</p>"
+      }
+    },
+    "cta": {
+      "type": "sbs-cta",
+      "settings": {
+        "heading": "Selling maintenance retainers?",
+        "body": "The Claude Code Website Operations & Maintenance System is the delivery side of the retainer this system designs — scheduled checks, standard-library scripts, and a monthly health report your client can read in five minutes.",
+        "cta_label": "See the Operations & Maintenance System",
+        "cta_url": "/products/claude-code-website-operations-maintenance-system",
+        "note": "A separate product. Buying this does not include it, and there is no automatic upgrade credit.",
+        "product": "claude-code-website-operations-maintenance-system"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "walkthrough",
+    "questions",
+    "ecosystem",
+    "cta"
+  ]
+}

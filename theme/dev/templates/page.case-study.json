@@ -1,0 +1,18 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-resource",
+      "settings": {
+        "crumb_parent": false,
+        "wide": false,
+        "show_cta": true,
+        "product": "claude-code-website-launch-system",
+        "cta_heading": "Build your own production workflow",
+        "cta_body": "Everything described on this page — the thirteen-stage workflow, the platform modules, the audits and the launch checklists — is one download.",
+        "cta_label": "Get the Launch System"
+      }
+    }
+  },
+  "order": ["main"]
+}

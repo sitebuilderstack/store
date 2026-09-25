@@ -1,0 +1,27 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-offer",
+      "blocks": {
+        "f1": { "type": "field", "settings": { "label": "Email", "type": "email", "required": true, "hint": "The only field. Used once, if this opens." } },
+        "f2": { "type": "field", "settings": { "label": "What would you want a release to cover?", "name": "Topic interest", "type": "textarea", "hint": "Optional. It decides what gets written first." } }
+      },
+      "block_order": ["f1", "f2"],
+      "settings": {
+        "offer_id": "workflow-club",
+        "mode": "waitlist",
+        "eyebrow": "Proposed membership",
+        "status_note": "<p><strong>This is an interest list, not a product.</strong> No payment is taken, no price has been set, no launch date has been promised, and joining does not reserve anything. If it opens, you get one email.</p>",
+        "form_heading": "Join the interest list",
+        "form_intro": "<p>One email if this launches. Nothing else is sent to this list, and it is not merged with the guides list.</p>",
+        "request_label": "Workflow Club interest list",
+        "button_label": "Join the interest list",
+        "form_fineprint": "<p>No payment. No price reserved. Your address is emailed to Site Builder Stack and used for this one purpose; ask at any time and it is deleted.</p>",
+        "success_message": "<p><strong>You are on the list.</strong> Nothing has been charged and no price is held. If the Workflow Club opens you will get one email about it.</p>",
+        "aside_note": "<p>The pilot release is readable on this page in full detail — you do not need to join the list to see what a release looks like.</p><p>Already bought a product? Your updates are unaffected by any of this.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

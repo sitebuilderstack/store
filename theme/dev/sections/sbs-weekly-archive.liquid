@@ -1,0 +1,51 @@
+{%- comment -%}
+  Weekly Website Fix archive (/blogs/weekly-fix): every published challenge,
+  newest first, with its number and date. Scheduled articles are not in
+  blog.articles until their publish time, so nothing here can link to a
+  challenge that is not live yet. The hub page carries the schedule.
+{%- endcomment -%}
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/pages/weekly-fix">Weekly Website Fix</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">Archive</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Archive</span>
+      <h1>{{ blog.title | escape }}</h1>
+      <p class="sbs-lede">Every challenge published so far, newest first. One a week, each a fifteen-minute check you can run on your own site and record in <a href="/pages/my-projects">My Projects</a>.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container sbs-wf">
+  {%- paginate blog.articles by 24 -%}
+    {%- if blog.articles.size == 0 -%}
+      <p>No challenges published yet. The <a href="/pages/weekly-fix">hub</a> has the schedule.</p>
+    {%- endif -%}
+    <ol class="sbs-wf__archive">
+      {%- for a in blog.articles -%}
+        <li class="sbs-card sbs-wf__entry">
+          <p class="sbs-eyebrow">{% if a.metafields.sbs.number != blank %}#{{ a.metafields.sbs.number }} · {% endif %}{{ a.published_at | date: '%-d %B %Y' }}</p>
+          <h2><a href="{{ a.url }}">{{ a.title | escape }}</a></h2>
+          <p>{{ a.excerpt | default: a.content | strip_html | truncatewords: 40 }}</p>
+        </li>
+      {%- endfor -%}
+    </ol>
+    {%- if paginate.pages > 1 -%}
+      <nav class="sbs-wf__pages" aria-label="Archive pages">{{ paginate | default_pagination }}</nav>
+    {%- endif -%}
+  {%- endpaginate -%}
+  <p class="sbs-wf__meta"><a href="/pages/weekly-fix">Back to the hub and schedule</a> · <a href="{{ blog.url }}.atom">RSS / Atom feed</a></p>
+</div>
+
+{% schema %}
+{
+  "name": "Weekly Fix archive",
+  "settings": [],
+  "presets": [{ "name": "Weekly Fix archive" }]
+}
+{% endschema %}

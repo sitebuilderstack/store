@@ -1,0 +1,25 @@
+<section class="sbs-section sbs-center">
+  <div class="sbs-container">
+    <span class="sbs-eyebrow">404</span>
+    <h1>{{ section.settings.heading | default: "That page doesn't exist" | escape }}</h1>
+    <p class="sbs-lede" style="margin-top: var(--sp-4);">
+      {{ section.settings.body | default: "The link may be out of date, or the address may have a typo." | escape }}
+    </p>
+    <div style="margin-top: var(--sp-6); display:flex; gap:var(--sp-3); justify-content:center; flex-wrap:wrap;">
+      <a class="sbs-btn sbs-btn--primary" href="{{ routes.root_url }}">Go to the homepage</a>
+      <a class="sbs-btn sbs-btn--ghost" href="{{ routes.root_url }}#faq">Read the FAQ</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — 404",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "That page doesn't exist" },
+    { "type": "textarea", "id": "body", "label": "Body" }
+  ],
+  "presets": [{ "name": "SBS — 404" }]
+}
+{% endschema %}

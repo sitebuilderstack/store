@@ -1,0 +1,110 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-blog",
+      "settings": {},
+      "blocks": {
+        "h1": {
+          "type": "hub",
+          "settings": {
+            "label": "Web development",
+            "url": "/pages/claude-code-web-development"
+          }
+        },
+        "h2": {
+          "type": "hub",
+          "settings": {
+            "label": "SEO",
+            "url": "/pages/claude-code-seo"
+          }
+        },
+        "h3": {
+          "type": "hub",
+          "settings": {
+            "label": "Shopify",
+            "url": "/pages/claude-code-shopify"
+          }
+        },
+        "h4": {
+          "type": "hub",
+          "settings": {
+            "label": "Production",
+            "url": "/pages/claude-code-production"
+          }
+        },
+        "h5": {
+          "type": "hub",
+          "settings": {
+            "label": "WordPress",
+            "url": "/pages/claude-code-wordpress"
+          }
+        },
+        "h6": {
+          "type": "hub",
+          "settings": {
+            "label": "Astro",
+            "url": "/pages/claude-code-astro"
+          }
+        }
+      },
+      "block_order": [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6"
+      ]
+    },
+    "optin": {
+      "type": "sbs-optin",
+      "blocks": {
+        "b1": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a static marketing site"
+          }
+        },
+        "b2": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a web application, with security and migration rules"
+          }
+        },
+        "b3": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a Shopify theme, including the gotchas that cost hours"
+          }
+        },
+        "b4": {
+          "type": "item",
+          "settings": {
+            "item": "CLAUDE.md for a shared package in a monorepo"
+          }
+        },
+        "b5": {
+          "type": "item",
+          "settings": {
+            "item": "A one-page checklist, and how to test the file is actually working"
+          }
+        }
+      },
+      "block_order": [
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+      ],
+      "settings": {
+        "file_url": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/claude-md-starter-kit.zip?v=1788049914"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "optin"
+  ]
+}

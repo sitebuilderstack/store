@@ -1,0 +1,33 @@
+{
+  "layout": "landing",
+  "sections": {
+    "main": {
+      "type": "sbs-offer",
+      "blocks": {
+        "f1": { "type": "field", "settings": { "label": "Your name", "name": "Name", "type": "text", "required": true } },
+        "f2": { "type": "field", "settings": { "label": "Email", "type": "email", "required": true } },
+        "f3": { "type": "field", "settings": { "label": "Website URL", "name": "Website", "type": "url", "required": true, "hint": "Public pages only. Nothing behind a login." } },
+        "f4": { "type": "field", "settings": { "label": "Platform", "name": "Platform", "type": "select", "options": "Shopify, WordPress, Astro, Next.js or React, Static HTML, Custom application, Other or unsure", "required": true } },
+        "f5": { "type": "field", "settings": { "label": "Main business goal for the site", "name": "Goal", "type": "textarea", "required": true, "hint": "What the site is meant to achieve. One or two sentences." } },
+        "f6": { "type": "field", "settings": { "label": "Main concern", "name": "Concern", "type": "textarea", "required": true, "hint": "What made you ask. Be specific if you can." } },
+        "f7": { "type": "field", "settings": { "label": "Pages to review (up to five)", "name": "Requested URLs", "type": "textarea", "hint": "One URL per line. Leave blank and we will propose five." } },
+        "c1": { "type": "consent", "settings": { "label": "Email me when new guides are published", "hint": "Optional, unchecked, and separate from this request. Your reply comes either way." } }
+      },
+      "block_order": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "c1"],
+      "settings": {
+        "offer_id": "website-review",
+        "mode": "inquiry",
+        "eyebrow": "Fixed-scope service",
+        "status_note": "<p><strong>This page takes requests, not bookings.</strong> No payment is taken here and no date is promised. You get either an offer — price, agreed pages, exclusions, delivery date — or a decline with the reason. The offer is the booking.</p>",
+        "form_heading": "Request availability",
+        "form_intro": "<p>Tell us the site and what worries you about it. Never send passwords, API keys or payment details; this form does not ask for them and they are not needed.</p>",
+        "request_label": "Website review request",
+        "button_label": "Request availability",
+        "form_fineprint": "<p>No payment is taken. Your request is emailed to Site Builder Stack. We do not crawl the site you name as a result of this form; the review begins only after you accept an offer.</p>",
+        "success_message": "<p><strong>Request received — this is not a booking.</strong> We reply from admin@sitebuilderstack.com, usually within a few business days, with either an offer or a decline and the reason. Nothing has been charged and no date is reserved.</p>",
+        "aside_note": "<p>Would rather do it yourself? The <a href=\"/blogs/guides\">guides</a>, <a href=\"/pages/labs\">labs</a> and <a href=\"/pages/tools\">tools</a> cover the same method free, and the two audit toolkits package it.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

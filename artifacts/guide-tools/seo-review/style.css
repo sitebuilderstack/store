@@ -1,0 +1,4 @@
+.grid2{display:grid;gap:var(--sp-4);min-width:0}
+@media (min-width:44em){.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}}
+.grid2>*{min-width:0}
+#rows{gap:var(--sp-5)}

@@ -1,0 +1,137 @@
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Answer Engine Optimization Checker</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load an example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Clear</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Answer engine optimization</p>
+    <h1 class="h1" tabindex="-1" id="top">Will an answer engine quote this page?</h1>
+    <p class="lede">Paste a page's text. This checks the things that decide whether a model can find a self-contained answer in it, shows you the block it would most likely lift, and writes the <code>llms.txt</code> entry for it.</p>
+
+    <div class="cardish">
+      <p class="small"><strong>What this is based on.</strong> No answer engine publishes its extraction rules. These eighteen checks come from what is observable and uncontroversial: crawlability, whether the answer is in the HTML, whether a claim survives being lifted out of its paragraph, and whether the page names its own facts. Treat them as informed practice, not mechanics. <strong>Nothing here predicts a citation</strong>, and anyone selling you a guaranteed one is selling something that does not exist.</p>
+    </div>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="in-h">
+      <h2 class="h2" id="in-h">The page</h2>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="q">The question this page answers</label>
+          <p class="small dim">In the words someone would type or say. If you cannot write it as a question, an answer engine will struggle to match it to one.</p>
+          <input type="text" id="q" placeholder="How do I bulk edit Shopify SEO titles?">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="title">Page title</label>
+          <input type="text" id="title" placeholder="How to Bulk Edit Shopify SEO Titles and Meta Descriptions">
+        </div>
+        <div class="field">
+          <label class="lbl" for="entity">Who publishes it</label>
+          <p class="small dim">The name a model should attribute the claim to. "We" is not attributable.</p>
+          <input type="text" id="entity" placeholder="SiteBuilderStack">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <div class="toolbar" style="justify-content:space-between">
+            <label class="lbl" for="body">The opening — first two or three paragraphs</label>
+            <span class="count" id="wc">0 words</span>
+          </div>
+          <p class="small dim">This is the part that gets lifted. Everything below the fold matters less than these few sentences.</p>
+          <textarea id="body" rows="10" placeholder="Paste the opening of the page…"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="headings">Your H2 headings</label>
+          <p class="small dim">One per line, as they appear on the page.</p>
+          <textarea id="headings" rows="6" placeholder="One heading per line"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <fieldset class="field" style="border:0;padding:0;margin:0">
+          <legend class="lbl" style="padding:0">About the page itself</legend>
+          <div class="q__opts" id="flags"></div>
+        </fieldset>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="res-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="res-h">Checks</h2>
+          <span class="chip" id="score">&nbsp;</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="lift-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="lift-h">The block it would lift</h2>
+        <p class="small dim">The first passage that reads as a complete answer on its own. If this is empty or wrong, that is the finding.</p>
+        <pre class="out" id="lift"></pre>
+      </section>
+
+      <section class="card" aria-labelledby="gen-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="gen-h">Generated</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy the report</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the report instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="out"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="row" style="margin-top:var(--sp-7)">
+    <h2 class="h2">Two things worth knowing</h2>
+    <div class="cards2">
+      <div class="card">
+        <h3 class="h3">Does this page itself get cited?</h3>
+        <p class="small muted">No — and it is worth understanding why, because it applies to anything you publish on a platform rather than your own domain. <code>claude.ai/robots.txt</code> returns <code>Disallow: /</code> for <code>GPTBot</code>, <code>OAI-SearchBot</code>, <code>ChatGPT-User</code> and <code>Google-Extended</code>, and the artifact origin sits behind a bot challenge. Checked 25 September 2026.</p>
+        <p class="small muted">A tool like this earns traffic by being shared, not by being crawled. <strong>The content you want cited has to live on a domain you control, in HTML, that AI crawlers are allowed to fetch.</strong></p>
+      </div>
+      <div class="card">
+        <h3 class="h3">Why the opening matters more than the length</h3>
+        <p class="small muted">A model extracting an answer reads for a passage that stands alone. A sentence starting "As mentioned above, it does this by…" cannot be lifted, because the thing it refers to is not in the extract.</p>
+        <p class="small muted">That is why the checks below care about self-containment, resolved pronouns and named entities far more than about word count. Long does not help. Quotable does.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" style="margin-top:var(--sp-6)">
+    <p class="eyebrow">The rest of the work</p>
+    <p class="muted">Answer-engine visibility sits on top of ordinary technical SEO: if a page cannot be crawled, indexed or rendered without JavaScript, none of the above matters. That is the audit underneath this one.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener"
+         href="https://sitebuilderstack.com/blogs/guides/claude-code-technical-seo-audit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=guide_link">The technical SEO audit</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener"
+         href="https://sitebuilderstack.com/products/claude-code-seo-website-audit-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=primary_recommendation">SEO &amp; Website Audit Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, sends nothing anywhere, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product. Not affiliated with Google, OpenAI, Perplexity or Anthropic.</p>
+  </footer>
+</main>

@@ -1,0 +1,242 @@
+{
+  "id": "website-operations",
+  "handle": "lab-website-operations",
+  "title": "Website Operations Lab",
+  "eyebrow": "Lab D · 15 minutes",
+  "short": "Read the health report, then pick the next safe diagnostic",
+  "summary": "A weekly health report for a small business site with six findings. Decide what comes first, what a 'successful' backup really tells you, and which next step is a read-only diagnostic rather than a change.",
+  "guide": {
+    "url": "/blogs/guides/claude-code-website-maintenance",
+    "title": "Claude Code website maintenance: a safe weekly checklist"
+  },
+  "product": {
+    "handle": "claude-code-website-operations-maintenance-system",
+    "label": "Claude Code Website Operations & Maintenance System",
+    "note": "The weekly inspection workflow and the incident runbook in the system are the operational version of the choices you make in this lab."
+  },
+  "resource": {
+    "url": "/pages/claude-code-security-checklist",
+    "title": "Website security checklist"
+  },
+  "module": {
+    "url": "/blogs/guides/claude-code-website-maintenance#try-maintenance-checklist",
+    "title": "Generate a recurring inspection checklist for your own site"
+  },
+  "scenario": "It is Monday morning. The weekly health report for Harbourline Physio's WordPress site has arrived. Everything in it was produced by read-only checks. You have an hour before the clinic opens and the receptionist starts relying on the contact form.",
+  "sample": {
+    "label": "Declared sample data",
+    "note": "The report and the log excerpts are fixtures written for this lab. No real host, certificate authority or plugin is being described. The report template is a public download.",
+    "artifacts": [
+      {
+        "name": "lab-website-operations-fixture.zip",
+        "label": "Fixture: weekly health report and log excerpts (zip)",
+        "url": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/lab-website-operations-fixture.zip?v=1789652968"
+      }
+    ]
+  },
+  "starting": "Six findings, one hour, and a rule: observe before you change. Two of the six are urgent for different reasons; one of the green lines is not what it looks like.",
+  "evidence": [
+    {
+      "id": "report",
+      "title": "weekly-health-report.md (generated 06:00 today)",
+      "kind": "text",
+      "content": "# Harbourline Physio — weekly health report — 2026-09-14\n\n| Check | Result | Evidence |\n|---|---|---|\n| Uptime (7 d) | 100% | monitor: 2,016/2,016 checks 200 |\n| TLS certificate | expires in 4 days | issuer R11; auto-renew: enabled |\n| Backup (nightly) | 7/7 SUCCESS | see backup.log |\n| Contact form | last test 47 days ago | last marker received 2026-07-29 |\n| Plugin updates | 6 pending (1 flagged security) | forms plugin 3.4.1 → 3.4.2 (security) |\n| 404s (7 d) | 312 (up from 9) | 298 of them: /blog/feed |"
+    },
+    {
+      "id": "renew-log",
+      "title": "/var/log/letsencrypt/letsencrypt.log — last renewal attempts (excerpt)",
+      "kind": "text",
+      "content": "2026-09-05 03:14:02 Attempting to renew cert (harbourline.example)\n2026-09-05 03:14:05 Challenge failed for domain harbourline.example\n2026-09-05 03:14:05 http-01 challenge: Fetching http://harbourline.example/.well-known/acme-challenge/…: Timeout during connect (likely firewall problem)\n2026-09-09 03:14:03 Attempting to renew cert (harbourline.example)\n2026-09-09 03:14:06 Challenge failed for domain harbourline.example\n2026-09-13 03:14:04 Attempting to renew cert (harbourline.example)\n2026-09-13 03:14:07 Challenge failed for domain harbourline.example"
+    },
+    {
+      "id": "backup-log",
+      "title": "backup.log (last 2 nights)",
+      "kind": "text",
+      "content": "2026-09-13 02:00:02 job started\n2026-09-13 02:00:41 files: 2,114 uploaded (148.1 MB)\n2026-09-13 02:00:41 database: skipped (mysqldump: command not found)\n2026-09-13 02:00:41 STATUS: SUCCESS\n2026-09-14 02:00:03 job started\n2026-09-14 02:00:40 files: 2,114 uploaded (148.1 MB)\n2026-09-14 02:00:40 database: skipped (mysqldump: command not found)\n2026-09-14 02:00:40 STATUS: SUCCESS"
+    }
+  ],
+  "steps": [
+    {
+      "id": "priority",
+      "title": "What comes first?",
+      "instruction": "Two findings are urgent. Decide the order and be able to say why.",
+      "evidence": [
+        "report",
+        "renew-log"
+      ],
+      "decision": {
+        "question": "First, in the hour you have:",
+        "options": [
+          {
+            "id": "tls",
+            "label": "The certificate. It expires in four days, auto-renew is 'enabled' but the log shows three consecutive failed renewals — so in four days the site goes down for every visitor, on a known date. The security update is second, today."
+          },
+          {
+            "id": "security",
+            "label": "The security update to the forms plugin. Security always comes first."
+          },
+          {
+            "id": "404",
+            "label": "The 404 spike — 312 errors is the biggest number on the page."
+          },
+          {
+            "id": "form",
+            "label": "The contact form — 47 days untested."
+          }
+        ],
+        "correct": "tls",
+        "explain": {
+          "correct": "Priority is consequence × certainty × time. An expired certificate is a total outage for every visitor, and the renewal log makes it near-certain: three failures, four days left, 'enabled' meaning nothing. The security patch is genuinely urgent too and gets done in the same hour — but a vulnerability is a possibility and the expiry is a date.",
+          "wrong": {
+            "security": "Do it today — but a plugin vulnerability is a risk; a certificate expiring in four days with three failed renewals is a scheduled outage. Order by what fails hardest, soonest, most certainly.",
+            "404": "298 of 312 are one URL, /blog/feed — almost certainly a feed reader polling a URL that moved. Worth a redirect this week; nobody's site goes down over it.",
+            "form": "Untested is not broken. It is the most valuable check on the list and takes two minutes — do it in this hour — but it is a diagnostic, not the emergency."
+          }
+        }
+      }
+    },
+    {
+      "id": "diagnostic",
+      "title": "What is the next safe diagnostic for the certificate?",
+      "instruction": "Observe before you change. The log says the http-01 challenge times out.",
+      "evidence": [
+        "renew-log"
+      ],
+      "decision": {
+        "question": "Next step:",
+        "options": [
+          {
+            "id": "observe",
+            "label": "From outside the server, fetch http://harbourline.example/.well-known/acme-challenge/test and note what happens (timeout, redirect to https, 404). Then a dry run: certbot renew --dry-run. Nothing changes; both tell you exactly what is blocking the challenge."
+          },
+          {
+            "id": "force",
+            "label": "Run certbot renew --force-renewal now and see if it works."
+          },
+          {
+            "id": "disable",
+            "label": "Switch the site to HTTP until the certificate is sorted out."
+          },
+          {
+            "id": "reboot",
+            "label": "Reboot the server; renewals often fix themselves."
+          }
+        ],
+        "correct": "observe",
+        "explain": {
+          "correct": "The log already names the symptom (timeout on the http-01 fetch, 'likely firewall'). The cheapest next fact is whether port 80 answers from outside at all. A dry run repeats the real challenge without touching the certificate. Both are read-only, both take a minute, and the answer tells you which change to make — usually a firewall rule or a redirect that fires before the challenge path.",
+          "wrong": {
+            "force": "A forced renewal repeats the same failing challenge and, with rate limits, can lock you out of retries for a week. You would be spending attempts to learn what the log already says.",
+            "disable": "That converts a possible outage in four days into a certain security regression now, and breaks every https link to the site.",
+            "reboot": "Nothing in the log points at the server being wedged. A reboot is a change with a visible outage and no diagnostic value here."
+          }
+        }
+      }
+    },
+    {
+      "id": "backup",
+      "title": "What does '7/7 SUCCESS' mean?",
+      "instruction": "Read the log the report links to.",
+      "evidence": [
+        "backup-log"
+      ],
+      "decision": {
+        "question": "The backup line establishes that:",
+        "options": [
+          {
+            "id": "files-only",
+            "label": "The files are being copied and the database is not — mysqldump is missing, so every 'SUCCESS' is a backup of the theme and uploads with no posts, pages, bookings or settings. Nothing is known about restorability until one is restored."
+          },
+          {
+            "id": "ok",
+            "label": "Backups are healthy: seven successes, 148 MB each."
+          },
+          {
+            "id": "restore",
+            "label": "The site can be restored to any of the last seven nights."
+          }
+        ],
+        "correct": "files-only",
+        "explain": {
+          "correct": "The line 'database: skipped' is inside a job that reports SUCCESS. On WordPress the database is the site; the files are furniture. This is the second lab on this site where a green backup line hides the fault, and it is not a coincidence — 'the job ran' is the most common thing a backup check actually measures. Fix: install mysqldump (or the platform's export), then restore one backup somewhere and open it.",
+          "wrong": {
+            "ok": "148 MB of files and no database. Read the third line of each night.",
+            "restore": "Restorability is established by restoring. Nothing here has been restored, and half of what would need restoring was never saved."
+          }
+        }
+      }
+    },
+    {
+      "id": "form",
+      "title": "The contact form, untested for 47 days",
+      "instruction": "The receptionist arrives in forty minutes.",
+      "evidence": [
+        "report"
+      ],
+      "decision": {
+        "question": "What is the check?",
+        "options": [
+          {
+            "id": "marker",
+            "label": "Submit the form from a phone with a marker (a date-stamped string) and confirm the marked message arrives in the inbox it is supposed to reach. Record the time both ways."
+          },
+          {
+            "id": "http",
+            "label": "Fetch the page and confirm it returns 200 with the form in the HTML."
+          },
+          {
+            "id": "plugin",
+            "label": "Update the forms plugin first; the update is a security fix, and it will fix the form if anything is wrong."
+          }
+        ],
+        "correct": "marker",
+        "explain": {
+          "correct": "A form check is a delivery check. The page returning 200 and the plugin being current both leave the actual question open: does a message sent now arrive where a human reads it? A marked submission answers it, takes two minutes, and — if it fails — is the most important finding of the week.",
+          "wrong": {
+            "http": "That proves the form renders. Forms that render and deliver nothing are the most common silent failure on small business sites.",
+            "plugin": "Update it today — after the test. Testing first tells you whether the form was working before the update, which you need to know if it is not working after."
+          }
+        }
+      }
+    }
+  ],
+  "after": [
+    {
+      "id": "after-actions",
+      "title": "After: what happened in the hour",
+      "kind": "text",
+      "content": "07:12 external fetch of /.well-known/acme-challenge/test: 301 → https (a blanket redirect rule fires before the challenge path)\n07:14 certbot renew --dry-run: same failure, confirmed cause\n07:20 redirect rule given an exception for /.well-known/acme-challenge/ (one line, reverted if needed)\n07:22 certbot renew --dry-run: success · 07:23 certbot renew: certificate renewed, expires in 90 days\n07:30 contact form: marker OPS-2026-09-14-0730 sent from phone; received in reception inbox 07:30:48\n07:35 forms plugin 3.4.1 → 3.4.2 on staging, form re-tested, then production; re-tested (marker …-0741)\n07:50 mysqldump installed; manual backup with database; restore to scratch host opened: posts and settings present\n08:00 /blog/feed → /feed redirect added; 404s to be re-read next week\nReport updated with evidence for each line."
+    }
+  ],
+  "closing": "Every change in that hour was preceded by a read-only look that made the change small and reversible. That is what the maintenance guide's weekly checklist is for, and what the report template's Evidence column enforces.",
+  "walkthrough": [
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-website-operations-1.png?v=1789654657",
+      "width": 1076,
+      "height": 1534,
+      "alt": "Step 1 of 4 of the Website Operations Lab: the weekly health report table and the certificate renewal log, with the question of what comes first in the hour.",
+      "caption": "Step 1: six findings, one hour, order them."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-website-operations-2.png?v=1789654660",
+      "width": 1076,
+      "height": 1667,
+      "alt": "The wrong option 'the security update first' is checked; the red feedback explains why a certificate expiring in four days with three failed renewals is a scheduled outage.",
+      "caption": "A wrong answer, explained by consequence, certainty and time."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-website-operations-3.png?v=1789654663",
+      "width": 1076,
+      "height": 1695,
+      "alt": "The correct option — the certificate first — is checked, with the green explanation and the Next step button.",
+      "caption": "The matching answer unlocks the next step."
+    },
+    {
+      "image": "https://cdn.shopify.com/s/files/1/0987/3925/7636/files/walkthrough-website-operations-4.png?v=1789654667",
+      "width": 1076,
+      "height": 848,
+      "alt": "The end of the lab: what happened in the hour, from the external fetch of the challenge path to the restored backup, the score, Save to My Project and the links onward.",
+      "caption": "Every change preceded by a read-only look."
+    }
+  ]
+}

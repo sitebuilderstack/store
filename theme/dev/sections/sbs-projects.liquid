@@ -1,0 +1,174 @@
+{%- comment -%}
+  My Projects: a browser-local workspace for the reader's own site(s).
+
+  The server renders the landmarks, every form, the empty states and the
+  no-JavaScript explanation; assets/sbs-workspace.js (loaded on demand by
+  sbs.js because [data-sbs-projects] is present) fills the lists from the
+  browser-local store in assets/sbs-projects.js.
+
+  Nothing here is transmitted. There is no account, no identifier, and the
+  analytics events carry only coarse kinds ("project_created" with the
+  platform), never a name, URL or objective. The page copy below says what
+  the store can and cannot do — including that it is not encrypted and is
+  not the place for credentials.
+
+  My Learning (/pages/my-learning) keeps working unchanged; on first visit
+  here its saved and completed guides are copied into a default project and
+  the original key is left as it was.
+{%- endcomment -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/pages/my-learning">My Learning</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Your workspace</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container sbs-pw" data-sbs-projects>
+  <p class="sbs-pw__notice" data-pw-nojs>
+    This workspace runs in your browser and needs JavaScript. Nothing you save is sent anywhere; without JavaScript there is nothing to show, because there is no server copy.
+  </p>
+  <p class="sbs-pw__notice" data-sbs-load-error hidden>The workspace script could not be loaded. Reload the page. Your saved projects are still in this browser's storage.</p>
+  <p class="sbs-pw__notice sbs-pw__notice--warn" data-pw-storage hidden></p>
+  <p class="sbs-pw__status" data-pw-status role="status" hidden></p>
+
+  <div class="sbs-pw__bar">
+    <div class="sbs-field sbs-pw__switch" data-pw-switch hidden>
+      <label for="pw-select">Project</label>
+      <select id="pw-select" data-pw-select></select>
+    </div>
+    <div class="sbs-pw__bar-actions">
+      <button type="button" class="sbs-btn sbs-btn--primary" data-pw-new>New project</button>
+      <span class="sbs-pw__meta" data-pw-count></span>
+    </div>
+  </div>
+
+  <form class="sbs-pw__form sbs-card" data-pw-create hidden aria-labelledby="pw-create-h">
+    <h2 id="pw-create-h" class="sbs-pw__h">New project</h2>
+    {% render 'sbs-field', id: 'pw-c-name', name: 'name', label: 'Project name', ph: 'e.g. Harbourline Physio site' %}
+    {% render 'sbs-field', id: 'pw-c-platform', name: 'platform', type: 'select', options: 'wordpress,shopify,astro,static,nextjs,other', label: 'Platform' %}
+    {% render 'sbs-field', id: 'pw-c-objective', name: 'objective', label: 'Objective', ph: 'e.g. more quote requests from the contact form', hint: 'One sentence. It becomes the fallback "continue" action.' %}
+    {% render 'sbs-field', id: 'pw-c-url', name: 'url', label: 'Site URL (optional)', hint: 'http(s) only. Stays in this browser.' %}
+    <div class="sbs-pw__actions">
+      <button type="submit" class="sbs-btn sbs-btn--primary">Create project</button>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-create-cancel>Cancel</button>
+    </div>
+  </form>
+
+  <div class="sbs-card sbs-pw__empty-state" data-pw-empty>
+    <h2 class="sbs-pw__h">No projects in this browser yet</h2>
+    <p>Create one for the site you are working on. Then every guide with a “Try this on your project” module, every lab and every Weekly Website Fix can save its result here, and this page tells you what to do next.</p>
+    <p class="sbs-pw__meta">Have a JSON export from another browser? Import it below.</p>
+  </div>
+
+  <div data-pw-current hidden>
+    <section class="sbs-pw__block" id="project" aria-labelledby="pw-project-h">
+      <div class="sbs-pw__head">
+        <h2 id="pw-project-h" class="sbs-pw__h" data-pw-name></h2>
+        <p class="sbs-pw__meta" data-pw-meta></p>
+        <p data-pw-objective></p>
+        <p class="sbs-pw__meta" data-pw-migrated hidden>Your saved and completed guides from My Learning were copied into this project. My Learning still works on its own.</p>
+      </div>
+      <div class="sbs-card sbs-pw__continue">
+        <p class="sbs-eyebrow">Continue your project</p>
+        <div data-pw-next></div>
+      </div>
+      <details class="sbs-pw__details">
+        <summary>Edit project details</summary>
+        <form class="sbs-pw__form" data-pw-edit>
+          {% render 'sbs-field', id: 'pw-e-name', name: 'name', label: 'Project name' %}
+          {% render 'sbs-field', id: 'pw-e-platform', name: 'platform', type: 'select', options: 'wordpress,shopify,astro,static,nextjs,other', label: 'Platform' %}
+          {% render 'sbs-field', id: 'pw-e-objective', name: 'objective', label: 'Objective' %}
+          {% render 'sbs-field', id: 'pw-e-url', name: 'url', label: 'Site URL (optional)', hint: 'http(s) only.' %}
+          <div class="sbs-pw__actions">
+            <button type="submit" class="sbs-btn sbs-btn--primary">Save details</button>
+            <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-delete>Delete this project</button>
+          </div>
+        </form>
+      </details>
+    </section>
+
+    <section class="sbs-pw__block" id="tasks" aria-labelledby="pw-tasks-h">
+      <h2 id="pw-tasks-h" class="sbs-pw__h">Tasks</h2>
+      <ul class="sbs-pw__list" data-pw-tasks></ul>
+      <form class="sbs-pw__inline" data-pw-task-form>
+        <label for="pw-task" class="sbs-visually-hidden">New task</label>
+        <input type="text" id="pw-task" name="task" maxlength="200" placeholder="Next thing to check on this site" autocomplete="off">
+        <button type="submit" class="sbs-btn sbs-btn--ghost">Add task</button>
+      </form>
+    </section>
+
+    <section class="sbs-pw__block" id="artifacts" aria-labelledby="pw-artifacts-h">
+      <h2 id="pw-artifacts-h" class="sbs-pw__h">Saved results</h2>
+      <p class="sbs-pw__meta">Generated checklists, prompts and plans. “Generated” means written from your answers — it is not evidence that anything was checked.</p>
+      <ul class="sbs-pw__list" data-pw-artifacts></ul>
+    </section>
+
+    <section class="sbs-pw__block" id="activity" aria-labelledby="pw-activity-h">
+      <h2 id="pw-activity-h" class="sbs-pw__h">Guides, labs and challenges</h2>
+      <h3 class="sbs-pw__h3">Guides</h3>
+      <ul class="sbs-pw__list" data-pw-guides></ul>
+      <h3 class="sbs-pw__h3">Labs</h3>
+      <ul class="sbs-pw__list" data-pw-labs></ul>
+      <h3 class="sbs-pw__h3">Weekly Website Fix</h3>
+      <ul class="sbs-pw__list" data-pw-challenges></ul>
+      <h3 class="sbs-pw__h3">Self-assessments</h3>
+      <ul class="sbs-pw__list" data-pw-assessments></ul>
+      <p class="sbs-pw__meta">States: <em>self-reported</em> is what you told the page; <em>verified against example</em> means you matched a lab’s known-answer fixture — it says nothing about your own site.</p>
+    </section>
+  </div>
+
+  <section class="sbs-pw__block" id="export" aria-labelledby="pw-export-h">
+    <h2 id="pw-export-h" class="sbs-pw__h">Export and import</h2>
+    <p>Exports are the only backup. Nothing here syncs between browsers or devices, and clearing site data clears it.</p>
+    <div class="sbs-pw__actions">
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-export-json>Export this project (JSON)</button>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-export-md>Export this project (Markdown)</button>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-export-all>Export all projects (JSON)</button>
+    </div>
+    <form class="sbs-pw__form sbs-pw__import" data-pw-import>
+      <div class="sbs-field">
+        <label for="pw-file">Import a JSON export</label>
+        <p class="sbs-field__hint" id="pw-file-hint">Only files exported by this page. The file is checked before anything changes; a Markdown export cannot be imported.</p>
+        <input type="file" id="pw-file" name="file" accept="application/json,.json" aria-describedby="pw-file-hint">
+      </div>
+      <fieldset class="sbs-pw__mode">
+        <legend>How to import</legend>
+        <label><input type="radio" name="mode" value="merge" checked> Merge — add to what is here; the newer copy of a project wins</label>
+        <label><input type="radio" name="mode" value="replace"> Replace — delete everything in this browser first</label>
+      </fieldset>
+      <div class="sbs-pw__actions">
+        <button type="submit" class="sbs-btn sbs-btn--ghost">Import</button>
+        <button type="button" class="sbs-btn sbs-btn--ghost" data-pw-clear>Delete all projects</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+{%- if page.content != blank -%}
+  <div class="sbs-section sbs-section--tight">
+    <div class="sbs-container">
+      <div class="sbs-rte sbs-article__body">{{ page.content }}</div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "My Projects workspace",
+  "settings": [],
+  "presets": [{ "name": "My Projects workspace" }]
+}
+{% endschema %}

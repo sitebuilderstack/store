@@ -1,0 +1,57 @@
+{%- comment -%}
+  One practical lab (/pages/lab-*). The lab id is the page handle without
+  its "lab-" prefix; the fixture (JSON for the engine + a full static
+  version) comes from snippets/sbs-lab-fixtures.liquid, generated from
+  content/labs/*.json.
+
+  Order of the page is deliberate: scenario and declared sample data first,
+  the lab itself, then the walkthrough, and only then the links to the
+  guide, the module, the checklist and the product — the reader gets the
+  value before the offer. The product link is also revealed inside the
+  engine on completion, with the same wording.
+
+  Everything the engine writes to the page is textContent; the fixture is
+  data, not markup. Fixture wording throughout says "example verified":
+  matching the lab's known answer verifies the reader against the example,
+  never their own site.
+{%- endcomment -%}
+{%- assign lab_id = page.handle | remove_first: 'lab-' -%}
+{%- assign meta_desc = page.metafields.global.description_tag -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/pages/labs">Labs</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow" data-lab-eyebrow>Practical lab</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if meta_desc != blank -%}<p class="sbs-lede">{{ meta_desc }}</p>{%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container sbs-lab" data-sbs-lab="{{ lab_id | escape }}">
+  {%- if page.content != blank -%}
+    <div class="sbs-rte sbs-article__body sbs-lab__intro">{{ page.content }}</div>
+  {%- endif -%}
+
+  <p class="sbs-lab__notice" data-sbs-load-error hidden>The interactive version could not be loaded. The complete lab, including every answer, is on this page below.</p>
+
+  {%- comment -%} Engine mount. The static version is hidden once the engine has rendered. {%- endcomment -%}
+  <div class="sbs-lab__app" data-lab-app hidden aria-live="polite"></div>
+
+  {% render 'sbs-lab-fixtures', lab: lab_id %}
+</div>
+
+{% schema %}
+{
+  "name": "Practical lab",
+  "settings": [],
+  "presets": [{ "name": "Practical lab" }]
+}
+{% endschema %}

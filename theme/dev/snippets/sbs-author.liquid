@@ -1,0 +1,33 @@
+{%- comment -%}
+  Author box for long-form guides.
+
+  Renders only when the article's author field names the site's author, so an
+  article genuinely written by someone else does not get attributed to him.
+  The claims here are the ones the About page supports; nothing is added that
+  is not already stated and verifiable there.
+
+  Usage: {% render 'sbs-author', author: article.author %}
+{%- endcomment -%}
+
+{%- assign known_author = 'James Joyner IV' -%}
+
+{%- if author == known_author -%}
+  <aside class="sbs-author" aria-labelledby="sbs-author-h">
+    <p class="sbs-author__eyebrow">Written by</p>
+    <h2 class="sbs-author__name" id="sbs-author-h">
+      <a href="/pages/about" rel="author">{{ known_author }}</a>
+    </h2>
+    <p class="sbs-author__role">Senior Software Engineer &middot; 25 years in technology</p>
+    <p class="sbs-author__bio">
+      Platform and infrastructure engineering &mdash; Linux, Kubernetes, OpenStack, Ansible,
+      Terraform, Docker, GitLab CI, Prometheus and Grafana &mdash; now applied to directing
+      Claude Code through real production work. Site Builder Stack was built with the method
+      it documents, including the parts that went wrong.
+    </p>
+    <p class="sbs-author__more">
+      <a href="/pages/about">More about James</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/pages/contact">Get in touch</a>
+    </p>
+  </aside>
+{%- endif -%}

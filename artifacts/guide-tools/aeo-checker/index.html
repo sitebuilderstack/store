@@ -1,0 +1,576 @@
+<title>Answer Engine Readiness</title>
+<style>
+:root{
+  --bg:#0B0D12; --surface:#12151D; --surface-2:#171B26; --border:#232A38;
+  --border-strong:#7D8798; --text:#E9ECF3; --muted:#A7B0C0; --dim:#7D8798;
+  --accent:#8AA6FF; --accent-ink:#0B0D12; --accent-soft:rgba(138,166,255,.12);
+  --mono-accent:#5EEAD4; --ok:#6EE7A8; --warn:#F6C177; --bad:#F472B6;
+  --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;
+  --radius:10px; --radius-lg:16px; --gutter:16px;
+  --step--1:clamp(.82rem,.80rem + .10vw,.88rem);
+  --step-0:clamp(1rem,.97rem + .16vw,1.05rem);
+  --step-1:clamp(1.12rem,1.06rem + .30vw,1.28rem);
+  --step-2:clamp(1.3rem,1.16rem + .70vw,1.68rem);
+  --step-3:clamp(1.55rem,1.3rem + 1.2vw,2.2rem);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}}
+:root[data-theme="light"]{
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  font-size:var(--step-0);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}ul,ol{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-underline-offset:3px}
+:focus{outline:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1[tabindex="-1"]:focus-visible{outline:none}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding-inline:var(--gutter)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding-block:var(--sp-3);flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:var(--sp-2);font-weight:650;color:var(--text);text-decoration:none}
+.brand__mark{width:1.65rem;height:1.65rem;display:grid;place-items:center;border-radius:7px;
+  background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.9rem}
+.brand__sub{color:var(--dim);font-size:var(--step--1);font-weight:450}
+.eyebrow{font-size:var(--step--1);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.h1{font-size:var(--step-3);line-height:1.12;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.h2{font-size:var(--step-2);line-height:1.2;letter-spacing:-.015em;font-weight:650}
+.h3{font-size:var(--step-1);line-height:1.3;font-weight:640}
+.lede{font-size:var(--step-1);color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:var(--step--1)}
+/* No white-space:nowrap. A long product name in a call to action cannot wrap
+   under it, and it pushed a 390px viewport to 442px. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:.6rem 1.05rem;border-radius:var(--radius);border:1px solid transparent;
+  background:var(--accent);color:var(--accent-ink);font-weight:620;cursor:pointer;
+  text-decoration:none;line-height:1.25;min-height:2.6rem;max-width:100%;
+  text-align:center}
+.btn:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn--ghost{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn--ghost:hover{background:var(--surface-2);filter:none}
+.btn--quiet{background:transparent;color:var(--muted);border-color:transparent;padding-inline:.6rem}
+.btn--quiet:hover{color:var(--text);background:var(--surface-2);filter:none}
+.btn--sm{padding:.36rem .7rem;font-size:var(--step--1);min-height:2.1rem}
+.card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-4);min-width:0}
+.card>*{min-width:0}
+.row{display:grid;gap:var(--sp-4);min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;min-width:0}
+.toolbar>*{min-width:0}
+.field{display:grid;gap:var(--sp-2);min-width:0}
+.lbl{font-size:var(--step--1);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .7rem;min-width:0}
+textarea{resize:vertical;font-family:inherit;line-height:1.5}
+.count{font-family:var(--font-mono);font-size:var(--step--1);font-variant-numeric:tabular-nums;color:var(--dim)}
+.count.is-over{color:var(--warn)}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;
+  font-size:var(--step--1);font-weight:600;border:1px solid var(--border);background:var(--surface-2);color:var(--muted)}
+.chip--ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.chip--bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.chip--warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.chip--same{color:var(--dim)}
+.note{border-left:3px solid var(--warn);padding:var(--sp-3) var(--sp-4);background:var(--surface);
+  border-radius:0 var(--radius) var(--radius) 0;color:var(--muted);font-size:var(--step--1)}
+.out{margin:0;padding:var(--sp-4);overflow-x:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);font-family:var(--font-mono);font-size:.8rem;line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.status{font-size:var(--step--1);color:var(--ok);min-height:1.4em}
+.status--err{color:var(--warn)}
+.foot{border-top:1px solid var(--border);padding-block:var(--sp-6);margin-top:var(--sp-7);
+  color:var(--dim);font-size:var(--step--1);display:grid;gap:var(--sp-3)}
+.cta{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-3);min-width:0}
+.cta>*{min-width:0}
+details.more{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+details.more>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-size:var(--step--1);
+  font-weight:600;list-style:none;display:flex;gap:var(--sp-2);align-items:center}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+";color:var(--accent);font-weight:700;width:1ch}
+details.more[open]>summary::before{content:"−"}
+details.more>.more__body{padding:0 var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.split{display:grid;gap:var(--sp-6);align-items:start;min-width:0}
+@media (min-width:64em){.split{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-7)}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 5rem);max-height:calc(100vh - 6rem);overflow:auto}}
+.split>*{min-width:0}
+.cards2{display:grid;gap:var(--sp-4);min-width:0}
+@media (min-width:52em){.cards2{grid-template-columns:1fr 1fr}}
+.cardish{border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:0 var(--radius) var(--radius) 0;background:var(--surface);
+  padding:var(--sp-4);color:var(--muted);max-width:70ch}
+.checks{display:grid;gap:var(--sp-3)}
+.checks li{display:grid;grid-template-columns:1.1rem minmax(0,1fr);gap:var(--sp-3);
+  font-size:var(--step--1);color:var(--muted);align-items:start}
+.checks li .mark{font-weight:700;line-height:1.5}
+.checks li.is-ok .mark{color:var(--ok)}
+.checks li.is-no .mark{color:var(--warn)}
+.checks li.is-na .mark{color:var(--dim)}
+.checks .why{display:block;color:var(--dim);margin-top:.15rem}
+.q__opts{display:grid;gap:var(--sp-2)}
+.opt{display:grid;grid-template-columns:1.1rem minmax(0,1fr);gap:var(--sp-3);align-items:start;
+  padding:.6rem .75rem;border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--bg);cursor:pointer;min-width:0}
+.opt:hover{border-color:var(--border-strong)}
+.opt input{margin:.2rem 0 0;accent-color:var(--accent);width:1rem;height:1rem}
+.opt span{font-size:var(--step--1)}
+#lift,#out{max-height:20rem;overflow:auto}
+#lift:empty::before{content:"Paste an opening to see what would be lifted.";color:var(--dim)}
+
+</style>
+
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">Answer Engine Optimization Checker</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="example">Load an example</button>
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Clear</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Answer engine optimization</p>
+    <h1 class="h1" tabindex="-1" id="top">Will an answer engine quote this page?</h1>
+    <p class="lede">Paste a page's text. This checks the things that decide whether a model can find a self-contained answer in it, shows you the block it would most likely lift, and writes the <code>llms.txt</code> entry for it.</p>
+
+    <div class="cardish">
+      <p class="small"><strong>What this is based on.</strong> No answer engine publishes its extraction rules. These eighteen checks come from what is observable and uncontroversial: crawlability, whether the answer is in the HTML, whether a claim survives being lifted out of its paragraph, and whether the page names its own facts. Treat them as informed practice, not mechanics. <strong>Nothing here predicts a citation</strong>, and anyone selling you a guaranteed one is selling something that does not exist.</p>
+    </div>
+  </section>
+
+  <div class="split">
+    <section class="row" aria-labelledby="in-h">
+      <h2 class="h2" id="in-h">The page</h2>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="q">The question this page answers</label>
+          <p class="small dim">In the words someone would type or say. If you cannot write it as a question, an answer engine will struggle to match it to one.</p>
+          <input type="text" id="q" placeholder="How do I bulk edit Shopify SEO titles?">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="title">Page title</label>
+          <input type="text" id="title" placeholder="How to Bulk Edit Shopify SEO Titles and Meta Descriptions">
+        </div>
+        <div class="field">
+          <label class="lbl" for="entity">Who publishes it</label>
+          <p class="small dim">The name a model should attribute the claim to. "We" is not attributable.</p>
+          <input type="text" id="entity" placeholder="SiteBuilderStack">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <div class="toolbar" style="justify-content:space-between">
+            <label class="lbl" for="body">The opening — first two or three paragraphs</label>
+            <span class="count" id="wc">0 words</span>
+          </div>
+          <p class="small dim">This is the part that gets lifted. Everything below the fold matters less than these few sentences.</p>
+          <textarea id="body" rows="10" placeholder="Paste the opening of the page…"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label class="lbl" for="headings">Your H2 headings</label>
+          <p class="small dim">One per line, as they appear on the page.</p>
+          <textarea id="headings" rows="6" placeholder="One heading per line"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <fieldset class="field" style="border:0;padding:0;margin:0">
+          <legend class="lbl" style="padding:0">About the page itself</legend>
+          <div class="q__opts" id="flags"></div>
+        </fieldset>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <section class="card" aria-labelledby="res-h">
+        <div class="toolbar" style="justify-content:space-between">
+          <h2 class="h3" id="res-h">Checks</h2>
+          <span class="chip" id="score">&nbsp;</span>
+        </div>
+        <ul id="checks" class="checks"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="lift-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="lift-h">The block it would lift</h2>
+        <p class="small dim">The first passage that reads as a complete answer on its own. If this is empty or wrong, that is the finding.</p>
+        <pre class="out" id="lift"></pre>
+      </section>
+
+      <section class="card" aria-labelledby="gen-h" style="margin-top:var(--sp-5)">
+        <h2 class="h3" id="gen-h">Generated</h2>
+        <div class="toolbar">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy">Copy the report</button>
+          <button class="btn btn--sm" type="button" id="download" hidden>Download</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the report instead.</p>
+        <div id="fallback"></div>
+        <pre class="out" id="out"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <section class="row" style="margin-top:var(--sp-7)">
+    <h2 class="h2">Two things worth knowing</h2>
+    <div class="cards2">
+      <div class="card">
+        <h3 class="h3">Does this page itself get cited?</h3>
+        <p class="small muted">No — and it is worth understanding why, because it applies to anything you publish on a platform rather than your own domain. <code>claude.ai/robots.txt</code> returns <code>Disallow: /</code> for <code>GPTBot</code>, <code>OAI-SearchBot</code>, <code>ChatGPT-User</code> and <code>Google-Extended</code>, and the artifact origin sits behind a bot challenge. Checked 25 September 2026.</p>
+        <p class="small muted">A tool like this earns traffic by being shared, not by being crawled. <strong>The content you want cited has to live on a domain you control, in HTML, that AI crawlers are allowed to fetch.</strong></p>
+      </div>
+      <div class="card">
+        <h3 class="h3">Why the opening matters more than the length</h3>
+        <p class="small muted">A model extracting an answer reads for a passage that stands alone. A sentence starting "As mentioned above, it does this by…" cannot be lifted, because the thing it refers to is not in the extract.</p>
+        <p class="small muted">That is why the checks below care about self-containment, resolved pronouns and named entities far more than about word count. Long does not help. Quotable does.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" style="margin-top:var(--sp-6)">
+    <p class="eyebrow">The rest of the work</p>
+    <p class="muted">Answer-engine visibility sits on top of ordinary technical SEO: if a page cannot be crawled, indexed or rendered without JavaScript, none of the above matters. That is the audit underneath this one.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener"
+         href="https://sitebuilderstack.com/blogs/guides/claude-code-technical-seo-audit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=guide_link">The technical SEO audit</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener"
+         href="https://sitebuilderstack.com/products/claude-code-seo-website-audit-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=primary_recommendation">SEO &amp; Website Audit Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, sends nothing anywhere, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=aeo_checker&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product. Not affiliated with Google, OpenAI, Perplexity or Anthropic.</p>
+  </footer>
+</main>
+
+
+<script>
+/* Answer Engine Optimization Checker.
+ *
+ * The honest framing, which the page states rather than hides: no answer
+ * engine publishes its extraction rules, so nothing here is a mechanic. The
+ * checks are the observable, uncontroversial things — is it crawlable, is the
+ * answer in the HTML, does a claim survive being lifted out of its paragraph,
+ * does the page name its own facts. None of it predicts a citation.
+ *
+ * No network. Nothing is stored. Everything runs in the tab.
+ */
+(function () {
+  'use strict';
+
+  var FLAGS = [
+    ['html', 'The opening text is in the HTML source, not rendered by JavaScript', true],
+    ['crawlers', 'robots.txt allows the AI crawlers you want to be cited by (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended)', true],
+    ['nogate', 'No cookie wall, paywall or interstitial covers the answer', true],
+    ['llms', 'The site publishes llms.txt or agents.md listing this page', false],
+    ['schema', 'The page carries Article or BlogPosting structured data', false],
+    ['dated', 'A visible publication or updated date appears on the page', false],
+    ['canonical', 'The page is self-canonical and is not a near-duplicate of another page', true]
+  ];
+
+  var EXAMPLE = {
+    q: 'How do I bulk edit Shopify SEO titles and meta descriptions?',
+    title: 'How to Bulk Edit Shopify SEO Titles and Meta Descriptions With Claude Code',
+    entity: 'SiteBuilderStack',
+    body: 'Editing SEO titles and meta descriptions across a catalogue is five steps, and only one of them involves a machine writing anything: export the current values, draft replacements from facts the product already states, review them one by one and record a decision, apply only the approved rows, then verify what is stored and what renders.\n\nBefore any of that: you may not need an API workflow at all. Shopify’s own bulk editor handles the SEO title and description columns directly, and for thirty products on a quiet afternoon it is the right tool. An API workflow earns its place when the batch is large, recurring, or needs a record of who approved what.\n\nIn the Shopify Admin API, the SEO title and meta description are the two members of the seo field on a product. They are separate from the product title, the body description and the handle, which is why a metadata job should send seo and nothing else.',
+    headings: 'Pick the method before you pick the tool\nFour fields that are easy to confuse\nExport, and take a small batch\nDrafting from facts you already have\nThe review, with three real decisions\nApplying only what was approved\nVerifying, and what Google actually promises\nWhen it goes wrong',
+    flags: { html: true, crawlers: true, nogate: true, llms: true, schema: true, dated: true, canonical: true }
+  };
+
+  var state = { q: '', title: '', entity: '', body: '', headings: '', flags: {} };
+  var downloads = null;
+
+  function el(t, a, k) {
+    var n = document.createElement(t);
+    if (a) Object.keys(a).forEach(function (key) {
+      var v = a[key];
+      if (v === null || v === undefined || v === false) return;
+      if (key === 'class') n.className = v;
+      else if (key === 'text') n.textContent = v;
+      else if (key.slice(0, 2) === 'on') n.addEventListener(key.slice(2), v);
+      else n.setAttribute(key, v === true ? '' : String(v));
+    });
+    (k || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  var $ = function (i) { return document.getElementById(i); };
+  var T = function (s) { return (s || '').trim(); };
+  var words = function (s) { return T(s).split(/\s+/).filter(Boolean); };
+  var sentences = function (s) {
+    return T(s).replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).map(T).filter(function (x) { return x.length > 2; });
+  };
+  var headingList = function () {
+    return T(state.headings).split('\n').map(T).filter(Boolean);
+  };
+
+  /* A claim that cannot be lifted out of its paragraph cannot be quoted. These
+     are the openers that make a sentence depend on something not in the
+     extract. */
+  var DEPENDENT = /^(this|that|these|those|it|they|he|she|there)\b|^(as (mentioned|described|noted|above|we saw))|^(however|therefore|so|but|and|also|then|next|first|second|finally)\b|^(here|below|above)\b/i;
+
+  function firstSelfContained() {
+    var ss = sentences(state.body);
+    for (var i = 0; i < ss.length; i++) {
+      var s = ss[i];
+      if (words(s).length < 8) continue;
+      if (DEPENDENT.test(s)) continue;
+      /* Two sentences read better as an extract than one, when the second does
+         not itself depend on something earlier. */
+      var next = ss[i + 1];
+      if (next && !DEPENDENT.test(next) && words(s).length + words(next).length < 80) return s + ' ' + next;
+      return s;
+    }
+    return '';
+  }
+
+  function questionish(h) {
+    return /^(how|what|why|when|where|which|who|can|do|does|is|are|should|will)\b/i.test(h) || /\?\s*$/.test(h);
+  }
+
+  function checks() {
+    var b = T(state.body), q = T(state.q), ttl = T(state.title), ent = T(state.entity);
+    var ss = sentences(b), hs = headingList();
+    var first120 = words(b).slice(0, 120).join(' ').toLowerCase();
+    var qTerms = words(q).map(function (w) { return w.toLowerCase().replace(/[^a-z0-9]/g, ''); })
+      .filter(function (w) { return w.length > 3; });
+    var lift = firstSelfContained();
+    var out = [];
+
+    function add(id, ok, label, why) { out.push({ id: id, ok: ok, label: label, why: why }); }
+
+    add('q', !!q, 'The page has a stated question',
+      q ? '' : 'Write the question first. Everything else is judged against it.');
+
+    add('answer-early', !!lift && b.indexOf(lift.slice(0, 40)) < 400,
+      'A self-contained answer appears in the opening',
+      lift ? '' : 'No sentence in the opening stands on its own. Every one either is too short or starts with a word that points at something the extract will not contain.');
+
+    add('match', qTerms.length > 0 && qTerms.filter(function (w) { return first120.indexOf(w) !== -1; }).length >= Math.ceil(qTerms.length * 0.5),
+      'The opening uses the question’s own words',
+      'A model matching a query to a passage is matching language. Terms from the question should appear in the first hundred words, naturally.');
+
+    var dependents = ss.slice(0, 6).filter(function (s) { return DEPENDENT.test(s); });
+    add('selfcontained', ss.length > 0 && dependents.length <= Math.max(1, Math.floor(ss.length * 0.34)),
+      'Most opening sentences survive being lifted',
+      dependents.length ? dependents.length + ' of the first sentences start with a dependent word ("' + T(dependents[0]).split(' ')[0] + '…"). Those cannot be quoted without the sentence before them.' : '');
+
+    add('entity', !!ent && (b.toLowerCase().indexOf(ent.toLowerCase()) !== -1 || ttl.toLowerCase().indexOf(ent.toLowerCase()) !== -1),
+      'The publisher is named in the text, not just "we"',
+      ent ? 'Name the publisher somewhere a model can attribute the claim to. "We" attributes to nobody.' : 'Say who publishes this.');
+
+    /* Specificity is not only digits. "five steps" is exactly as checkable as
+       "5 steps", and a named field or product is more specific than either.
+       Counting digits alone marked genuinely precise prose as vague. */
+    var WORDNUM = /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty|thirty|forty|fifty|hundred|thousand)\b/gi;
+    var specifics =
+      (b.match(/\b\d[\d,.]*\b/g) || []).length +
+      (b.match(WORDNUM) || []).length +
+      (b.match(/`[^`]+`|\b[a-z]+[A-Z][a-zA-Z]+\b/g) || []).length;
+    add('specific', specifics >= 3, 'The opening contains specific, checkable detail',
+      specifics >= 3 ? '' : 'Counts, versions, dates and named things are what make a passage worth quoting over a competitor\u2019s. Found ' + specifics + '. Vague prose is not extractable.');
+
+    var hedges = (b.match(/\b(might|maybe|possibly|perhaps|arguably|some (?:people|say)|it depends|generally speaking)\b/gi) || []).length;
+    add('direct', hedges <= 2, 'The answer is stated, not hedged into vapour',
+      hedges > 2 ? hedges + ' hedging phrases in the opening. Qualify where it is honest to, but a passage that never commits to anything gives a model nothing to quote.' : '');
+
+    add('title-q', !!ttl && (questionish(ttl) || (qTerms.length > 0 && qTerms.filter(function (w) { return ttl.toLowerCase().indexOf(w) !== -1; }).length >= 2)),
+      'The title reflects the question',
+      ttl ? 'The title is where a model first decides whether the page is about the query at all.' : 'Add the page title.');
+
+    var qh = hs.filter(questionish).length;
+    add('headings-q', hs.length > 0 && qh >= 1,
+      'At least one heading is shaped like a question',
+      hs.length ? 'None of your ' + hs.length + ' headings reads as a question. Question-shaped headings give a model a place to anchor a specific answer.' : 'Add your H2 headings.');
+
+    add('headings-n', hs.length >= 3, 'The page has enough structure to navigate',
+      hs.length >= 3 ? '' : 'Fewer than three headings. A long passage with no internal structure is hard to extract a specific answer from.');
+
+    var lw = words(lift).length;
+    add('lift-length', lw >= 20 && lw <= 90, 'The liftable block is a usable length',
+      !lift ? '' : lw < 20 ? 'The strongest self-contained passage is only ' + lw + ' words. Too short to answer anything.' :
+        'The strongest passage runs ' + lw + ' words. Long extracts get truncated mid-thought.');
+
+    FLAGS.forEach(function (f) {
+      var on = !!state.flags[f[0]];
+      var why = '';
+      if (!on) {
+        if (f[0] === 'html') why = 'If the answer only exists after JavaScript runs, assume it will not be read.';
+        else if (f[0] === 'crawlers') why = 'A blocked crawler cannot cite you. Check robots.txt for each agent you care about, and decide deliberately — blocking them is a legitimate choice, but then citation is not a goal.';
+        else if (f[0] === 'nogate') why = 'Content behind a consent wall is content a crawler did not see.';
+        else if (f[0] === 'llms') why = 'llms.txt and agents.md are an emerging convention, not a standard, and no engine guarantees it reads them. Cheap to publish; do not expect much on its own.';
+        else if (f[0] === 'schema') why = 'Structured data does not cause a citation, but it removes ambiguity about author, date and headline.';
+        else if (f[0] === 'dated') why = 'A visible date is how a model judges whether the answer is still current.';
+        else if (f[0] === 'canonical') why = 'Two near-identical pages compete with each other, and neither wins clearly.';
+      }
+      add(f[0], on, f[1].replace(/ \(.*\)$/, ''), why);
+    });
+
+    return out;
+  }
+
+  function slug(s) {
+    return T(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  }
+
+  function report() {
+    var cs = checks(), lift = firstSelfContained();
+    var pass = cs.filter(function (c) { return c.ok; }).length;
+    var L = [];
+    L.push('# Answer engine readiness — ' + (T(state.title) || 'untitled page'), '');
+    L.push('Question: ' + (T(state.q) || '(not stated)'));
+    L.push('Publisher: ' + (T(state.entity) || '(not stated)'));
+    L.push('Checks passed: ' + pass + ' of ' + cs.length, '');
+    L.push('These checks are informed practice, not published mechanics. No answer');
+    L.push('engine discloses its extraction rules, and nothing here predicts a citation.', '');
+    L.push('## The block most likely to be lifted', '');
+    L.push(lift ? '> ' + lift : '> (none — no sentence in the opening stands on its own)', '');
+    var failed = cs.filter(function (c) { return !c.ok; });
+    if (failed.length) {
+      L.push('## What is in the way', '');
+      failed.forEach(function (c) { L.push('- **' + c.label + '**' + (c.why ? ' — ' + c.why : '')); });
+      L.push('');
+    }
+    var passed = cs.filter(function (c) { return c.ok; });
+    if (passed.length) {
+      L.push('## Already true', '');
+      passed.forEach(function (c) { L.push('- ' + c.label); });
+      L.push('');
+    }
+    if (T(state.title)) {
+      L.push('## Suggested llms.txt entry', '');
+      L.push('- **' + T(state.title) + '** — https://your-domain.example/' + (slug(state.title) || 'page'), '');
+      L.push('  ' + (lift ? lift.slice(0, 220) : '(one or two sentences describing what the page answers)'), '');
+    }
+    var hs = headingList().filter(function (h) { return !/^(how|what|why|when|where|which|who|can|do|does|is|are|should|will)\b/i.test(h) && !/\?$/.test(h); });
+    if (hs.length) {
+      L.push('## Headings that could be shaped as questions', '');
+      hs.slice(0, 6).forEach(function (h) { L.push('- ' + h); });
+      L.push('', 'Not all of them should be. A heading becomes a question when a reader would');
+      L.push('actually ask it in those words.', '');
+    }
+    L.push('---', '', 'Checked with the Answer Engine Optimization Checker from SiteBuilderStack.');
+    L.push('https://sitebuilderstack.com/blogs/guides/claude-code-technical-seo-audit', '');
+    return L.join('\n');
+  }
+
+  function render() {
+    var cs = checks();
+    var host = clear($('checks'));
+    cs.forEach(function (c) {
+      host.appendChild(el('li', { class: c.ok ? 'is-ok' : 'is-no' }, [
+        el('span', { class: 'mark', 'aria-hidden': 'true', text: c.ok ? '✓' : '!' }),
+        el('span', {}, [
+          el('span', { text: c.label }),
+          !c.ok && c.why ? el('span', { class: 'why', text: c.why }) : null
+        ])
+      ]));
+    });
+    var pass = cs.filter(function (c) { return c.ok; }).length;
+    var chip = $('score');
+    chip.textContent = pass + ' / ' + cs.length;
+    chip.className = 'chip' + (pass === cs.length ? ' chip--ok' : pass >= cs.length * 0.6 ? ' chip--warn' : ' chip--bad');
+    $('lift').textContent = firstSelfContained();
+    $('out').textContent = report();
+    $('wc').textContent = words(state.body).length + ' words';
+  }
+
+  function bindText(id) {
+    var n = $(id);
+    n.addEventListener('input', function (e) { state[id] = e.target.value; render(); });
+  }
+  ['q', 'title', 'entity', 'body', 'headings'].forEach(bindText);
+
+  function renderFlags() {
+    var host = clear($('flags'));
+    FLAGS.forEach(function (f) {
+      var cb = el('input', { type: 'checkbox', id: 'flag-' + f[0], checked: !!state.flags[f[0]] || null,
+        onchange: function (e) { state.flags[f[0]] = e.target.checked; render(); } });
+      host.appendChild(el('label', { class: 'opt', for: 'flag-' + f[0] }, [cb, el('span', { text: f[1] })]));
+    });
+  }
+
+  function fill(o) {
+    state = { q: o.q || '', title: o.title || '', entity: o.entity || '',
+      body: o.body || '', headings: o.headings || '', flags: Object.assign({}, o.flags || {}) };
+    ['q', 'title', 'entity', 'body', 'headings'].forEach(function (k) { $(k).value = state[k]; });
+    renderFlags(); render();
+  }
+
+  function setStatus(m, err) {
+    var s = $('status'); s.textContent = m;
+    s.className = 'status' + (err ? ' status--err' : '');
+  }
+
+  $('example').addEventListener('click', function () {
+    fill(EXAMPLE);
+    setStatus('Loaded a real published page. Its opening was written to be liftable.');
+  });
+  $('reset').addEventListener('click', function () {
+    fill({ flags: {} }); setStatus('');
+    $('top').focus({ preventScroll: true }); window.scrollTo(0, 0);
+  });
+
+  $('copy').addEventListener('click', function () {
+    var text = report(); clear($('fallback'));
+    var fail = function () {
+      setStatus('Could not copy automatically.', true);
+      var ta = el('textarea', { readonly: true, rows: 10, 'aria-label': 'Report to copy', style: 'width:100%' });
+      ta.value = text;
+      $('fallback').appendChild(el('div', { class: 'field', style: 'margin-top:var(--sp-3)' }, [
+        el('p', { class: 'small dim', text: 'Clipboard access was refused here. The text is selected below — press Ctrl+C or ⌘C.' }), ta]));
+      try { ta.focus(); ta.select(); } catch (e) {}
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { setStatus('Copied.'); }, fail);
+      } else fail();
+    } catch (e) { fail(); }
+  });
+
+  $('download').addEventListener('click', function () {
+    if (!downloads) { setStatus('File download is not available in this view.', true); return; }
+    setStatus('Waiting for you to confirm the download…');
+    downloads.save({ filename: 'answer-engine-readiness.md', data: report() }).then(
+      function (r) { setStatus(r && r.status === 'saved' ? 'Saved.' : 'Sent to your device.'); },
+      function (e) { setStatus(e && e.code === 'declined' ? 'Download cancelled.' : 'The download could not be completed. Use “Copy the report” instead.', true); });
+  });
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(function (d) {
+        downloads = d; $('download').hidden = !d; $('dl-note').hidden = !!d;
+      }).catch(function () { $('dl-note').hidden = false; });
+    } catch (e) { $('dl-note').hidden = false; }
+  } else { $('dl-note').hidden = false; }
+
+  fill(EXAMPLE);
+})();
+
+</script>

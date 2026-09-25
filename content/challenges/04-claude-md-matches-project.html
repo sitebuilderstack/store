@@ -1,0 +1,69 @@
+<p class="sbs-lede">A CLAUDE.md is a set of claims about a project: these commands work, these paths exist, these things must never be done, this is what finished means. Projects move; the file does not move with them unless someone makes it. A file that says <code>npm test</code> when the project switched to <code>pnpm</code> costs the agent a turn; a file that prohibits editing a directory that no longer exists teaches it that the rules are decorative. This week: read yours as an auditor, run what it says, and cut what is no longer true.</p>
+
+<h2 id="problem">The problem</h2>
+<p>The file is read by the agent at the start of every session and trusted completely. Drift is invisible from inside a session: the agent does not know the command it was told to run has been renamed; it runs it, it fails, it guesses. Every stale line is a small tax on every task, and every rule the agent sees ignored (because the thing it prohibits cannot happen any more) lowers the weight of the rules that matter.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+  <li>A project with a CLAUDE.md (or AGENTS.md) that has existed for more than a month.</li>
+  <li>A shell in that project and the ability to run its commands.</li>
+  <li>A scratch branch you can throw away.</li>
+</ul>
+
+<h2 id="scope">Scope</h2>
+<p>One file, its imports, and the rules in it. The exercise is verification, then pruning. Adding new rules is out of scope this week — the point is to find out what is no longer true, not to write more things that might stop being true.</p>
+
+<h2 id="workflow">Safe inspection workflow</h2>
+<ol>
+  <li><strong>Run every command as written.</strong> Copy each command out of the file and run it. It works, or it does not. For each failure, find the current command and fix the line — or delete the line if the command is gone for good.</li>
+  <li><strong>Check every path and name.</strong> Directories, files, tools, versions, environment names. <code>ls</code> each path. A mention of <code>src/legacy/</code> when there is no such directory is a line to delete.</li>
+  <li><strong>Read every prohibition and ask “can this still happen?”</strong> “Never edit the parent theme” in a project that no longer has one is noise. “Never write to the production database” in a project that still can is the most important line in the file. Keep the second kind; delete the first.</li>
+  <li><strong>Test one rule.</strong> On a scratch branch, ask the agent to do the prohibited thing — plainly, as a user might by accident. Record what happened: it refused with a reason, it asked, or it did it. A rule that is not followed needs to be moved from prose to enforcement (a hook, a settings deny rule, a pre-commit check). See the guide's section on rules that get followed.</li>
+  <li><strong>Check the definition of done.</strong> Does the file say what must be true before a task is finished? If it does, is it still what you want? If it does not, this is the one addition allowed this week: one line, in your words.</li>
+  <li><strong>Measure.</strong> Line count before and after. Shorter is the usual outcome. If it is not shorter, write down why in the commit message.</li>
+</ol>
+
+<h2 id="prompt">Copyable prompt</h2>
+<p>Ask the agent to audit its own instructions. It reads and runs check commands; it does not edit the file — the edits are yours, because the file is a statement of what you want.</p>
+<pre data-sbs-copy="prompt">Audit CLAUDE.md (and any files it imports with @) against the repository as it is today. Do not edit CLAUDE.md or any other file.
+
+1. Commands: extract every command the file tells you to run. Run each one exactly as written (read-only commands and test/lint/build commands are fine; skip anything that deploys, publishes, or writes outside the working tree, and say so). Report: command · exit status · first line of output or error.
+2. Paths and names: for every file path, directory, tool or version the file mentions, check whether it exists in the repository or on this machine. Report each as present / missing / different.
+3. Prohibitions: list each "do not" / "never" rule and say whether the thing it prohibits is still possible in this project, with one line of evidence.
+4. Definition of done: quote what the file says must be true before a task is finished, or say that it does not say.
+5. Length: line count, and which sections could be removed without losing a rule that is still true.
+Output a table per section. Do not propose new rules; report what is stale.</pre>
+
+<h2 id="evidence">Example evidence</h2>
+<p>An example written for this page.</p>
+<pre>Weekly Fix #4 — CLAUDE.md audit — 2026-10-08 — repo: shop-theme
+Commands: 6 run · 4 ok · 2 fixed (npm test → npm run test:unit; theme check path)
+Paths: 9 checked · 1 missing (sections/legacy-hero.liquid — removed in June; line deleted)
+Prohibitions: 5 · 4 still apply · 1 stale ("never edit assets/vendor.js" — file gone; deleted)
+Rule test: asked "push this to the live theme" on scratch branch → agent refused, cited the rule, offered the dev theme ✔
+Definition of done: present; kept
+Length: 142 → 118 lines
+Commit: "CLAUDE.md: remove stale paths and one dead rule; fix test command"</pre>
+
+<h2 id="criteria">Completion criteria</h2>
+<ul>
+  <li>Every command in CLAUDE.md was run as written and either worked or was corrected.</li>
+  <li>Every path, file name and tool version it mentions exists today.</li>
+  <li>Every prohibition still describes something the project needs prohibited; stale ones removed.</li>
+  <li>One rule was tested on a scratch branch and the outcome recorded.</li>
+  <li>The file is shorter, or the same length with a reason.</li>
+</ul>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+  <li><strong>Reading instead of running.</strong> A command looks right until it is executed.</li>
+  <li><strong>Adding while auditing.</strong> Every addition is a future stale line. This week removes.</li>
+  <li><strong>Keeping rules for sentiment.</strong> “Never touch the old checkout” from a project that replaced its checkout is history, not a rule.</li>
+  <li><strong>Testing a rule with a hint.</strong> Ask for the prohibited thing the way a distracted user would, not with “I know this is against the rules, but”.</li>
+</ul>
+
+<h2 id="next">Go further</h2>
+<ul>
+  <li><a href="/blogs/guides/production-claude-md-web-development">A production CLAUDE.md for web development</a> covers what belongs in the file, why length is the main failure mode, and how to write a rule that gets followed — with a generator for a project-specific section.</li>
+  <li>The <a href="/pages/lab-website-operations">Website Operations Lab</a> is the same discipline applied to a health report: verify before you act.</li>
+</ul>

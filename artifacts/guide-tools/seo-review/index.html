@@ -1,0 +1,463 @@
+<title>Shopify SEO Review Worksheet</title>
+<style>
+:root{
+  --bg:#0B0D12; --surface:#12151D; --surface-2:#171B26; --border:#232A38;
+  --border-strong:#7D8798; --text:#E9ECF3; --muted:#A7B0C0; --dim:#7D8798;
+  --accent:#8AA6FF; --accent-ink:#0B0D12; --accent-soft:rgba(138,166,255,.12);
+  --mono-accent:#5EEAD4; --ok:#6EE7A8; --warn:#F6C177; --bad:#F472B6;
+  --font-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sp-1:.25rem;--sp-2:.5rem;--sp-3:.75rem;--sp-4:1rem;--sp-5:1.5rem;--sp-6:2rem;--sp-7:3rem;
+  --radius:10px; --radius-lg:16px; --gutter:16px;
+  --step--1:clamp(.82rem,.80rem + .10vw,.88rem);
+  --step-0:clamp(1rem,.97rem + .16vw,1.05rem);
+  --step-1:clamp(1.12rem,1.06rem + .30vw,1.28rem);
+  --step-2:clamp(1.3rem,1.16rem + .70vw,1.68rem);
+  --step-3:clamp(1.55rem,1.3rem + 1.2vw,2.2rem);
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}}
+:root[data-theme="light"]{
+  --bg:#F6F7FB;--surface:#FFF;--surface-2:#EEF1F7;--border:#DCE1EC;--border-strong:#5C6579;
+  --text:#131722;--muted:#515A70;--dim:#6C7589;--accent:#2F4FC7;--accent-ink:#FFF;
+  --accent-soft:rgba(47,79,199,.10);--mono-accent:#0B6B5C;--ok:#0F7A4A;--warn:#8A5A00;--bad:#B5306F;}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);
+  font-size:var(--step-0);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}ul,ol{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-underline-offset:3px}
+:focus{outline:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1[tabindex="-1"]:focus-visible{outline:none}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding-inline:var(--gutter)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border)}
+.bar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding-block:var(--sp-3);flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:var(--sp-2);font-weight:650;color:var(--text);text-decoration:none}
+.brand__mark{width:1.65rem;height:1.65rem;display:grid;place-items:center;border-radius:7px;
+  background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.9rem}
+.brand__sub{color:var(--dim);font-size:var(--step--1);font-weight:450}
+.eyebrow{font-size:var(--step--1);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.h1{font-size:var(--step-3);line-height:1.12;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+.h2{font-size:var(--step-2);line-height:1.2;letter-spacing:-.015em;font-weight:650}
+.h3{font-size:var(--step-1);line-height:1.3;font-weight:640}
+.lede{font-size:var(--step-1);color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.small{font-size:var(--step--1)}
+/* No white-space:nowrap. A long product name in a call to action cannot wrap
+   under it, and it pushed a 390px viewport to 442px. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);
+  padding:.6rem 1.05rem;border-radius:var(--radius);border:1px solid transparent;
+  background:var(--accent);color:var(--accent-ink);font-weight:620;cursor:pointer;
+  text-decoration:none;line-height:1.25;min-height:2.6rem;max-width:100%;
+  text-align:center}
+.btn:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn--ghost{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn--ghost:hover{background:var(--surface-2);filter:none}
+.btn--quiet{background:transparent;color:var(--muted);border-color:transparent;padding-inline:.6rem}
+.btn--quiet:hover{color:var(--text);background:var(--surface-2);filter:none}
+.btn--sm{padding:.36rem .7rem;font-size:var(--step--1);min-height:2.1rem}
+.card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-4);min-width:0}
+.card>*{min-width:0}
+.row{display:grid;gap:var(--sp-4);min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;min-width:0}
+.toolbar>*{min-width:0}
+.field{display:grid;gap:var(--sp-2);min-width:0}
+.lbl{font-size:var(--step--1);color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .7rem;min-width:0}
+textarea{resize:vertical;font-family:inherit;line-height:1.5}
+.count{font-family:var(--font-mono);font-size:var(--step--1);font-variant-numeric:tabular-nums;color:var(--dim)}
+.count.is-over{color:var(--warn)}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;
+  font-size:var(--step--1);font-weight:600;border:1px solid var(--border);background:var(--surface-2);color:var(--muted)}
+.chip--ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.chip--bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.chip--warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.chip--same{color:var(--dim)}
+.note{border-left:3px solid var(--warn);padding:var(--sp-3) var(--sp-4);background:var(--surface);
+  border-radius:0 var(--radius) var(--radius) 0;color:var(--muted);font-size:var(--step--1)}
+.out{margin:0;padding:var(--sp-4);overflow-x:auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);font-family:var(--font-mono);font-size:.8rem;line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere;color:var(--text)}
+.status{font-size:var(--step--1);color:var(--ok);min-height:1.4em}
+.status--err{color:var(--warn)}
+.foot{border-top:1px solid var(--border);padding-block:var(--sp-6);margin-top:var(--sp-7);
+  color:var(--dim);font-size:var(--step--1);display:grid;gap:var(--sp-3)}
+.cta{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);
+  padding:var(--sp-5);display:grid;gap:var(--sp-3);min-width:0}
+.cta>*{min-width:0}
+details.more{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+details.more>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-size:var(--step--1);
+  font-weight:600;list-style:none;display:flex;gap:var(--sp-2);align-items:center}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+";color:var(--accent);font-weight:700;width:1ch}
+details.more[open]>summary::before{content:"−"}
+details.more>.more__body{padding:0 var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.grid2{display:grid;gap:var(--sp-4);min-width:0}
+@media (min-width:44em){.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}}
+.grid2>*{min-width:0}
+#rows{gap:var(--sp-5)}
+
+</style>
+
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">SEO Review Worksheet</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Shopify product metadata</p>
+    <h1 class="h1" tabindex="-1" id="top">Review before you write.</h1>
+    <p class="lede">Draft SEO titles and meta descriptions, record a decision on each, and export the worksheet. Nothing here connects to your store &mdash; it holds the review, which is the part worth keeping.</p>
+    <ul class="facts small dim" style="display:grid;gap:.35rem">
+      <li>Everything stays in this browser tab. No store connection, no account, nothing transmitted.</li>
+      <li>Length guidance is advisory. Google truncates by pixel width, not character count, and may show its own text.</li>
+      <li>Exports in the same column order as the worksheet in the guide.</li>
+    </ul>
+  </section>
+
+  <section class="row" aria-labelledby="rows-h">
+    <div class="toolbar" style="justify-content:space-between">
+      <h2 class="h2" id="rows-h">Rows</h2>
+      <div class="toolbar">
+        <span class="chip" id="tally">0 rows</span>
+        <button class="btn btn--ghost btn--sm" type="button" id="add">Add a product</button>
+      </div>
+    </div>
+    <div id="rows" class="row"></div>
+  </section>
+
+  <section class="row" style="margin-top:var(--sp-6)" aria-labelledby="exp-h">
+    <h2 class="h2" id="exp-h">Export</h2>
+    <p class="small muted">The CSV carries every row and its decision, quoted, UTF-8, in the worksheet's column order. It is a <strong>review document</strong>, not a Shopify import file &mdash; approved values go into Shopify through the native bulk editor, a product CSV export, or the Admin API.</p>
+    <div class="toolbar">
+      <button class="btn" type="button" id="download" hidden>Download CSV</button>
+      <button class="btn btn--ghost" type="button" id="copy">Copy CSV</button>
+      <button class="btn btn--ghost btn--sm" type="button" id="toggle-preview">Show the CSV</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the CSV instead &mdash; it is identical.</p>
+    <div id="fallback"></div>
+    <pre class="out" id="preview" hidden></pre>
+  </section>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">The full workflow</p>
+    <p class="muted">This tool is the review step. The guide covers the whole sequence &mdash; export, draft, review, apply only approved rows, verify what renders &mdash; including the staleness check that stops a two-day-old draft overwriting a colleague's fix.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/bulk-edit-shopify-seo-claude-code?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-shopify-automation-admin-api-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=primary_recommendation">Shopify Automation &amp; Admin API Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product, not affiliated with Shopify, Google or Anthropic.</p>
+  </footer>
+</main>
+
+
+<script>
+/* Shopify SEO Review Worksheet — the review step from the guide, as a tool.
+ *
+ * No network of any kind: no store connection, no analytics, no fetch. Rows
+ * live in memory for the life of the tab, which is stated on the page rather
+ * than implied. The CSV it exports uses the worksheet's exact column order so
+ * it drops into the same process.
+ */
+(function () {
+  'use strict';
+
+  var FIELDS = ['product_id', 'handle', 'product_url', 'current_seo_title',
+    'current_seo_description', 'proposed_seo_title', 'proposed_seo_description',
+    'approval_status', 'reviewer_notes'];
+
+  var STATUSES = [
+    ['needs review', 'Needs review', 'chip'],
+    ['approved', 'Approved', 'chip chip--ok'],
+    ['rejected', 'Rejected', 'chip chip--bad'],
+    ['no change', 'No change', 'chip chip--same'],
+    ['needs info', 'Needs info', 'chip chip--warn']
+  ];
+
+  /* Opens with the guide's worked example so the tool shows what it does
+     rather than an empty shell. Fictional store, stated as such. */
+  var SEED = [
+    { product_id: 'gid://shopify/Product/2222222222222', handle: 'linen-tea-towel-set',
+      product_url: 'https://example-store.myshopify.com/products/linen-tea-towel-set',
+      current_seo_title: 'Linen Tea Towel Set',
+      current_seo_description: 'Linen tea towel set. Buy now. Best prices. Free shipping on all orders.',
+      proposed_seo_title: 'Linen Tea Towel Set of 3 | Example Store',
+      proposed_seo_description: 'Three washed-linen tea towels, 50 x 70 cm, with hanging loops. Sold as a set.',
+      approval_status: 'approved',
+      reviewer_notes: 'Replaced unverifiable claims. Free shipping is a policy, not a product fact. Count and dimensions come from the body copy.' },
+    { product_id: 'gid://shopify/Product/3333333333333', handle: 'enamel-mug-navy',
+      product_url: 'https://example-store.myshopify.com/products/enamel-mug-navy',
+      current_seo_title: 'Navy Enamel Mug 350ml | Example Store',
+      current_seo_description: 'A 350 ml navy enamel camping mug with a rolled rim. Dishwasher safe.',
+      proposed_seo_title: 'Navy Enamel Mug 350ml | Example Store',
+      proposed_seo_description: 'A 350 ml navy enamel camping mug with a rolled rim. Dishwasher safe.',
+      approval_status: 'no change',
+      reviewer_notes: 'Already specific and accurate. Rewriting would churn the field for no reader benefit.' },
+    { product_id: 'gid://shopify/Product/4444444444444', handle: 'cast-iron-skillet-26cm',
+      product_url: 'https://example-store.myshopify.com/products/cast-iron-skillet-26cm',
+      current_seo_title: 'Cast Iron Skillet 26cm | Example Store',
+      current_seo_description: 'A 26 cm pre-seasoned cast iron skillet with a helper handle.',
+      proposed_seo_title: 'Cast Iron Skillet 26cm - Lifetime Guarantee | Example Store',
+      proposed_seo_description: 'Our lifetime-guaranteed 26 cm skillet is the last pan you will ever buy. Oven safe to 260 C.',
+      approval_status: 'rejected',
+      reviewer_notes: 'No lifetime guarantee exists. "The last pan you will ever buy" is unsupportable and the 260 C figure is nowhere in the product data. Three inventions in one row.' }
+  ];
+
+  var rows = JSON.parse(JSON.stringify(SEED));
+  var downloads = null;
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v === null || v === undefined || v === false) return;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : String(v));
+    });
+    (kids || []).forEach(function (k) { if (k) n.appendChild(typeof k === 'string' ? document.createTextNode(k) : k); });
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Guidance, not a rule. Google truncates on pixel width and may substitute
+     its own text entirely, which the page says out loud. */
+  var LIMITS = { proposed_seo_title: 60, proposed_seo_description: 155 };
+
+  function counter(field, value) {
+    var lim = LIMITS[field], n = (value || '').length;
+    var c = el('span', { class: 'count' + (n > lim ? ' is-over' : ''),
+      text: n + ' / ~' + lim });
+    c.title = n > lim ? 'Longer than the guidance. Not an error — Google truncates by width, not characters.' : '';
+    return c;
+  }
+
+  function textField(row, field, label, multiline) {
+    var wrap = el('div', { class: 'field' });
+    var head = el('div', { class: 'toolbar', style: 'justify-content:space-between;gap:var(--sp-2)' });
+    head.appendChild(el('label', { class: 'lbl', for: field + '-' + row._id, text: label }));
+    var cnt = LIMITS[field] ? counter(field, row[field]) : null;
+    if (cnt) head.appendChild(cnt);
+    wrap.appendChild(head);
+    var input = el(multiline ? 'textarea' : 'input', {
+      id: field + '-' + row._id,
+      type: multiline ? null : 'text',
+      rows: multiline ? 2 : null,
+      oninput: function (e) {
+        row[field] = e.target.value;
+        if (cnt) { var nw = counter(field, row[field]); cnt.className = nw.className; cnt.textContent = nw.textContent; cnt.title = nw.title; }
+        refreshOutputs();
+      }
+    });
+    input.value = row[field] || '';
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  function statusPicker(row) {
+    var wrap = el('div', { class: 'field' });
+    wrap.appendChild(el('span', { class: 'lbl', text: 'Decision' }));
+    var bar = el('div', { class: 'toolbar' });
+    STATUSES.forEach(function (s) {
+      var active = row.approval_status === s[0];
+      var b = el('button', {
+        type: 'button',
+        class: 'btn btn--sm ' + (active ? '' : 'btn--ghost'),
+        'aria-pressed': String(active),
+        onclick: function () { row.approval_status = s[0]; render(); }
+      }, [s[1]]);
+      bar.appendChild(b);
+    });
+    wrap.appendChild(bar);
+    return wrap;
+  }
+
+  function rowCard(row, i) {
+    var st = STATUSES.filter(function (s) { return s[0] === row.approval_status; })[0] || STATUSES[0];
+    var head = el('div', { class: 'toolbar', style: 'justify-content:space-between' }, [
+      el('div', { class: 'toolbar' }, [
+        el('span', { class: st[2], text: st[1] }),
+        el('strong', { text: row.handle || 'untitled row' })
+      ]),
+      el('button', { class: 'btn btn--quiet btn--sm', type: 'button',
+        onclick: function () { rows.splice(i, 1); render(); } }, ['Remove'])
+    ]);
+
+    var ident = el('div', { class: 'grid2' }, [
+      textField(row, 'product_id', 'Product id'),
+      textField(row, 'handle', 'Handle')
+    ]);
+    var cur = el('div', { class: 'grid2' }, [
+      textField(row, 'current_seo_title', 'Current SEO title'),
+      textField(row, 'current_seo_description', 'Current meta description', true)
+    ]);
+    var prop = el('div', { class: 'grid2' }, [
+      textField(row, 'proposed_seo_title', 'Proposed SEO title'),
+      textField(row, 'proposed_seo_description', 'Proposed meta description', true)
+    ]);
+
+    var same = row.proposed_seo_title === row.current_seo_title &&
+               row.proposed_seo_description === row.current_seo_description;
+    var hint = same && row.approval_status !== 'no change'
+      ? el('p', { class: 'note', text: 'The proposed values are identical to the current ones. If nothing should change, mark it "No change" — that is a decision, and it belongs in the record.' })
+      : null;
+
+    return el('div', { class: 'card' }, [
+      head, ident, cur, prop, hint,
+      statusPicker(row),
+      textField(row, 'reviewer_notes', 'Why (the column that makes the sheet worth keeping)', true)
+    ]);
+  }
+
+  function blank() {
+    var r = { _id: 'r' + Math.random().toString(36).slice(2, 8) };
+    FIELDS.forEach(function (f) { r[f] = ''; });
+    r.approval_status = 'needs review';
+    return r;
+  }
+
+  function csv() {
+    var q = function (v) { return '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"'; };
+    var lines = [FIELDS.map(q).join(',')];
+    rows.forEach(function (r) {
+      lines.push(FIELDS.map(function (f) {
+        var v = String(r[f] || '');
+        /* A non-empty value starting with = + - @ is executed as a formula by
+           Excel and Sheets. Prefix it, exactly as the worksheet README says. */
+        if (v && '=+-@'.indexOf(v[0]) !== -1) v = "'" + v;
+        return q(v);
+      }).join(','));
+    });
+    return lines.join('\n') + '\n';
+  }
+
+  function refreshOutputs() {
+    var counts = {};
+    rows.forEach(function (r) { counts[r.approval_status] = (counts[r.approval_status] || 0) + 1; });
+    var parts = STATUSES.filter(function (s) { return counts[s[0]]; })
+      .map(function (s) { return counts[s[0]] + ' ' + s[0]; });
+    $('tally').textContent = rows.length + (rows.length === 1 ? ' row' : ' rows') +
+      (parts.length ? ' — ' + parts.join(', ') : '');
+    var pv = $('preview');
+    if (!pv.hidden) pv.textContent = csv();
+    $('copy').disabled = rows.length === 0;
+    $('download').disabled = rows.length === 0;
+  }
+
+  function render() {
+    var host = clear($('rows'));
+    rows.forEach(function (r, i) {
+      if (!r._id) r._id = 'r' + Math.random().toString(36).slice(2, 8);
+      host.appendChild(rowCard(r, i));
+    });
+    if (!rows.length) {
+      host.appendChild(el('div', { class: 'card' }, [
+        el('p', { class: 'muted', text: 'No rows. Add a product to start a review.' })
+      ]));
+    }
+    refreshOutputs();
+  }
+
+  /* ---- controls ---- */
+  $('add').addEventListener('click', function () {
+    rows.push(blank()); render();
+    var cards = document.querySelectorAll('#rows .card');
+    var last = cards[cards.length - 1];
+    if (last) { var f = last.querySelector('input'); if (f) f.focus(); }
+  });
+
+  $('reset').addEventListener('click', function () {
+    rows = JSON.parse(JSON.stringify(SEED));
+    render();
+    $('status').textContent = '';
+    $('top').focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  });
+
+  $('toggle-preview').addEventListener('click', function () {
+    var pv = $('preview');
+    pv.hidden = !pv.hidden;
+    this.textContent = pv.hidden ? 'Show the CSV' : 'Hide the CSV';
+    refreshOutputs();
+  });
+
+  function setStatus(msg, err) {
+    var s = $('status');
+    s.textContent = msg;
+    s.className = 'status' + (err ? ' status--err' : '');
+  }
+
+  $('copy').addEventListener('click', function () {
+    var text = csv();
+    clear($('fallback'));
+    var fail = function () {
+      setStatus('Could not copy automatically.', true);
+      var ta = el('textarea', { readonly: true, 'aria-label': 'CSV to copy', rows: 8, style: 'width:100%' });
+      ta.value = text;
+      $('fallback').appendChild(el('div', { class: 'field', style: 'margin-top:var(--sp-3)' }, [
+        el('p', { class: 'small dim', text: 'Clipboard access was refused here. The text is selected below — press Ctrl+C or ⌘C.' }), ta
+      ]));
+      try { ta.focus(); ta.select(); } catch (e) {}
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { setStatus('Copied.'); }, fail);
+      } else { fail(); }
+    } catch (e) { fail(); }
+  });
+
+  $('download').addEventListener('click', function () {
+    if (!downloads) { setStatus('File download is not available in this view.', true); return; }
+    setStatus('Waiting for you to confirm the download…');
+    downloads.save({ filename: 'shopify-seo-review-worksheet.csv', data: csv() })
+      .then(function (r) { setStatus(r && r.status === 'saved' ? 'Saved.' : 'Sent to your device.'); },
+            function (err) {
+              setStatus(err && err.code === 'declined' ? 'Download cancelled.'
+                : 'The download could not be completed. Use “Copy CSV” instead.', true);
+            });
+  });
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(function (d) {
+        downloads = d;
+        $('download').hidden = !d;
+        $('dl-note').hidden = !!d;
+      }).catch(function () { $('dl-note').hidden = false; });
+    } catch (e) { $('dl-note').hidden = false; }
+  } else {
+    $('dl-note').hidden = false;
+  }
+
+  render();
+})();
+
+</script>

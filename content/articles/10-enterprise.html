@@ -1,0 +1,235 @@
+<nav class="sbs-toc" aria-labelledby="toc-h">
+  <h2 id="toc-h">On this page</h2>
+  <ol>
+    <li><a href="#decide">The decision that comes first</a></li>
+    <li><a href="#options">Deployment options compared</a></li>
+    <li><a href="#teams">Teams and Enterprise plans</a></li>
+    <li><a href="#cloud">Running through a cloud provider</a></li>
+    <li><a href="#pin">Pin your model versions</a></li>
+    <li><a href="#network">Proxies and LLM gateways</a></li>
+    <li><a href="#managed">Managed settings and policy</a></li>
+    <li><a href="#memory">Organisation-wide CLAUDE.md</a></li>
+    <li><a href="#mcp">Central MCP configuration</a></li>
+    <li><a href="#security">What a security review will ask</a></li>
+    <li><a href="#cost">Keeping cost predictable</a></li>
+    <li><a href="#rollout">Rolling it out without it stalling</a></li>
+    <li><a href="#pitfalls">Pitfalls</a></li>
+  </ol>
+</nav>
+
+<h2 id="decide">The decision that comes first</h2>
+
+<p>Most organisations overthink this. The question that matters is narrow: <strong>where does model inference run, and who is billed for it?</strong> Everything else — permissions, standards, rollout — is the same regardless of the answer.</p>
+
+<p>For most organisations the answer is Claude for Teams or Claude for Enterprise. It requires no infrastructure, includes Claude on the web alongside Claude Code in one subscription, and centralises billing. You only need a cloud provider deployment if you have a specific reason: data residency, existing committed spend, or a procurement process that will not accept a new vendor.</p>
+
+<p>If nobody can articulate that reason, take the simple option.</p>
+
+<h2 id="options">Deployment options compared</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Option</th><th>Best for</th><th>Auth</th><th>Cost tracking</th></tr></thead>
+<tbody>
+<tr><td><strong>Claude for Teams / Enterprise</strong></td><td>Most organisations</td><td>Claude.ai SSO or email</td><td>Usage dashboard</td></tr>
+<tr><td>Anthropic Console</td><td>Individual developers</td><td>API key</td><td>Usage dashboard</td></tr>
+<tr><td>Amazon Bedrock</td><td>AWS-native deployments</td><td>API key or AWS credentials</td><td>AWS Cost Explorer</td></tr>
+<tr><td>Claude Platform on AWS</td><td>AWS Marketplace billing</td><td>API key or AWS credentials</td><td>AWS Cost Explorer</td></tr>
+<tr><td>Google Cloud's Agent Platform</td><td>GCP-native deployments</td><td>GCP credentials</td><td>GCP Billing</td></tr>
+<tr><td>Microsoft Foundry</td><td>Azure-native deployments</td><td>API key or Microsoft Entra ID</td><td>Azure Cost Management</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>One line in that table decides it for many teams: <strong>only Teams and Enterprise include Claude on the web.</strong> Every cloud provider option is Claude Code alone. If your people also want the chat interface, a provider deployment means buying it separately.</p>
+
+<p>Prompt caching is enabled by default everywhere, so that is not a differentiator.</p>
+
+<h2 id="teams">Teams and Enterprise plans</h2>
+
+<p><strong>Claude for Teams</strong> is self-service, with collaboration features, admin tools, and billing management. Right for smaller teams that want to start this week.</p>
+
+<p><strong>Claude for Enterprise</strong> adds the things a security review asks about: SSO and domain capture, role-based permissions, compliance API access, and <strong>managed policy settings</strong> for pushing configuration organisation-wide.</p>
+
+<p>That last item is usually the deciding factor rather than SSO. Managed settings are how you enforce a permission rule that a developer cannot switch off locally, and until you have them, every security standard you write is a convention.</p>
+
+<h2 id="cloud">Running through a cloud provider</h2>
+
+<p>If you do need one, the setup is genuinely straightforward. For Amazon Bedrock and Google Cloud's Agent Platform, run <code>claude</code> and choose <strong>3rd-party platform</strong> at the login prompt for an interactive wizard.</p>
+
+<p>Verify what a session is actually using rather than assuming:</p>
+
+<pre><code>/status</code></pre>
+
+<p>which shows the provider, base URL, and proxy in effect. Worth running on a colleague's machine during rollout — configuration that is set organisation-wide and silently not applied is a common and expensive surprise.</p>
+
+<h2 id="pin">Pin your model versions</h2>
+
+<p>This is the single most overlooked item on this page.</p>
+
+<p>On any cloud provider deployment, pin specific model versions:</p>
+
+<pre><code>ANTHROPIC_DEFAULT_OPUS_MODEL
+ANTHROPIC_DEFAULT_SONNET_MODEL
+ANTHROPIC_DEFAULT_HAIKU_MODEL
+ANTHROPIC_DEFAULT_FABLE_MODEL</code></pre>
+
+<p>Without pinning, model aliases resolve to Claude Code's built-in default for that provider. That default can lag the newest release, and it may not be enabled in your account at all — which produces a failure that looks like a Claude Code bug and is a provisioning gap.</p>
+
+<p>Pinning also means <em>you</em> decide when people move to a new model, rather than finding out because someone's results changed on a Tuesday.</p>
+
+<h2 id="network">Proxies and LLM gateways</h2>
+
+<p>Two different things that are often confused, and can be used together.</p>
+
+<p>A <strong>corporate proxy</strong> routes traffic through an HTTP/HTTPS proxy, for security monitoring or network policy. Configure with <code>HTTPS_PROXY</code> or <code>HTTP_PROXY</code>.</p>
+
+<p>An <strong>LLM gateway</strong> sits between Claude Code and the provider, handling authentication and routing. Use it for centralised usage tracking across teams, custom rate limits or budgets, or central auth. Configure with <code>ANTHROPIC_BASE_URL</code>, or the provider-specific variants — <code>ANTHROPIC_BEDROCK_BASE_URL</code>, <code>ANTHROPIC_AWS_BASE_URL</code>, <code>ANTHROPIC_VERTEX_BASE_URL</code>, <code>ANTHROPIC_FOUNDRY_BASE_URL</code>.</p>
+
+<p>If your finance team wants per-team attribution, the gateway is the answer, not the provider's billing console.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>Rollout stalls on standards more often than infrastructure. The Claude Code Website Launch System supplies the shared layer &mdash; production CLAUDE.md templates, security and accessibility audits, and launch checklists a team can adopt as-is. <a href="/products/claude-code-website-launch-system">See what is included</a>.</p>
+</aside>
+
+<figure>
+  <img src="https://cdn.shopify.com/s/files/1/0987/3925/7636/files/diagram-enforcement-layers.png?v=1787892951" alt="Three mechanisms compared. CLAUDE.md holds instructions in context and is followed but not guaranteed. Managed settings hold permission rules and configuration and are enforced by the tool. Hooks are shell commands on tool events, enforced by your own code."
+       width="1000" height="456" loading="lazy" decoding="async">
+  <figcaption>If being missed would be serious, the rule belongs in managed settings — and the reason belongs in CLAUDE.md.</figcaption>
+</figure>
+
+<h2 id="managed">Managed settings and policy</h2>
+
+<p>Security teams can configure managed permissions that <strong>local configuration cannot override</strong>. This is the mechanism that turns a policy into a control.</p>
+
+<p>The distinction is worth being precise about, because it decides where each of your rules belongs:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Mechanism</th><th>Enforcement</th><th>Right for</th></tr></thead>
+<tbody>
+<tr><td><code>CLAUDE.md</code></td><td>Followed, not guaranteed</td><td>Conventions, reasons, standards</td></tr>
+<tr><td>Managed settings</td><td>Enforced, cannot be overridden</td><td>Anything where being missed is serious</td></tr>
+<tr><td>Hooks</td><td>Enforced by your own code</td><td>Mechanical, unconditional actions</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Managed settings also carry <a href="/blogs/guides/claude-code-subagents">subagent definitions</a> at the highest precedence, and can force-enable or force-disable <a href="/blogs/guides/claude-code-plugins">plugins</a> — a <code>--plugin-dir</code> cannot override those. So an approved plugin set is enforceable, not merely recommended.</p>
+
+<p>Keep the human-readable version in <code>CLAUDE.md</code> alongside the enforced version. A developer who hits a wall and cannot see why will work around it; one who can read the reason usually will not.</p>
+
+<h2 id="memory">Organisation-wide CLAUDE.md</h2>
+
+<p>Company-wide standards can be deployed to a system path:</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>OS</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>macOS</td><td><code>/Library/Application Support/ClaudeCode/CLAUDE.md</code></td></tr>
+<tr><td>Linux and WSL</td><td><code>/etc/claude-code/CLAUDE.md</code></td></tr>
+<tr><td>Windows</td><td><code>C:\Program Files\ClaudeCode\CLAUDE.md</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>These load alongside repository-level and personal files rather than replacing them, so scope each layer deliberately.</p>
+
+<p>The mistake to avoid is putting too much here. An enterprise file is loaded into every session of every developer on every project, forever. It should contain only what is true everywhere: security requirements, licensing constraints, review requirements. Anything project-specific belongs in that project's file, and anything that reads as a procedure belongs in a <a href="/blogs/guides/claude-code-skills">skill</a>. The <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md guide</a> covers why length is the main failure mode — and the enterprise file is where that failure compounds fastest.</p>
+
+<h2 id="mcp">Central MCP configuration</h2>
+
+<p>MCP connects Claude Code to your ticketing system, error logs, and internal services. Anthropic's own recommendation is that <strong>one central team configures the servers and commits a <code>.mcp.json</code> into the codebase</strong>, so everyone benefits without each developer wiring it up.</p>
+
+<p>This is good advice for a reason beyond convenience: an MCP server is a capability grant. Centralising the configuration means one team reviews what is connected, rather than a long tail of individual setups nobody has audited. <a href="/blogs/guides/claude-code-mcp">Claude Code and MCP</a> covers the scopes and the security position in detail.</p>
+
+<p>The other org-wide surface worth standardising early is CI. <a href="/blogs/guides/claude-code-github-actions">Claude Code and GitHub</a> covers organisation-level app installation, shared secrets, and reusable workflows.</p>
+
+<h2 id="security">What a security review will ask</h2>
+
+<p>Five questions come up almost every time. Having answers ready shortens the process considerably.</p>
+
+<p><strong>"Where does our code go?"</strong> Depends entirely on the deployment you chose, which is why that decision comes first. A Bedrock or Foundry deployment keeps inference inside your existing cloud relationship and its data agreements; a Teams or Enterprise plan is covered by Anthropic's terms. Pick one and be able to name it.</p>
+
+<p><strong>"What can it do to our systems?"</strong> Whatever your permissions allow. This is where managed settings matter: the answer should be a policy file you can show, not a description of what developers have been asked to do.</p>
+
+<p><strong>"Can a developer turn the controls off?"</strong> Not if they are in managed settings. That is the entire point of the distinction, and it is usually the answer that ends the conversation.</p>
+
+<p><strong>"What about secrets?"</strong> Your ordinary controls apply, and the specific new risk is worth naming: an agent will happily write a working script that hard-codes a token, because that is the shortest path to what was asked. State the rule explicitly in your organisation-wide <code>CLAUDE.md</code> — read credentials at runtime, never hard-code, never print in full, never commit.</p>
+
+<p><strong>"Can we audit usage?"</strong> Yes, and the mechanism depends on deployment: the usage dashboard on Teams and Enterprise, CloudTrail on AWS, Cloud Audit Logs on GCP, Azure Monitor on Azure. An LLM gateway gives you a single view across all of them, which is usually what the question is really asking for.</p>
+
+<h2 id="cost">Keeping cost predictable</h2>
+
+<p>The pattern that surprises finance teams is that spend is uneven. A developer doing a large refactor costs many times one answering questions, and neither is wrong.</p>
+
+<p>Three levers, in order of effectiveness:</p>
+
+<p><strong>An LLM gateway with budgets and rate limits.</strong> The only mechanism that gives you central control and per-team attribution rather than after-the-fact reporting.</p>
+
+<p><strong>Model routing by task.</strong> A <a href="/blogs/guides/claude-code-subagents">subagent</a> set to <code>model: haiku</code> for mechanical passes costs a fraction of the session model, and the routing is per agent so nobody has to think about it. This is the cheapest real saving available and most teams never configure it.</p>
+
+<p><strong>Prompt caching, which is already on.</strong> Enabled by default across every deployment option. Worth knowing so nobody spends a sprint implementing it.</p>
+
+<p>One thing not to do: cap usage so tightly that people stop using the tool for real work. The failure mode of an over-restricted rollout is quiet abandonment, which costs the whole investment rather than a slice of it.</p>
+
+<h2 id="rollout">Rolling it out without it stalling</h2>
+
+<p>Anthropic's guidance here matches what actually works.</p>
+
+<p><strong>Invest in documentation first.</strong> The tool is only as good as the context it has. A repository with no <code>CLAUDE.md</code> gives every developer the same bad first experience, and first experiences decide adoption.</p>
+
+<p><strong>Make installation one click.</strong> If your environment is custom, a scripted install is the difference between adoption and a pilot that quietly ends.</p>
+
+<p><strong>Start people on guided usage.</strong> Codebase questions, small bug fixes, asking for a plan before code. Let people build judgement about when to trust it before they run it agentically. Developers who start with "build the whole feature" and get a bad diff often conclude the tool does not work.</p>
+
+<p><strong>Configure permissions before broad rollout,</strong> not after an incident.</p>
+
+<p>On building skills across the team: Anthropic runs a role-based certification programme, and some organisations use it to give a rollout structure and a shared vocabulary. It is worth knowing what it does and does not cover before budgeting for it — see <a href="/blogs/guides/claude-code-certification">is there a Claude Code certification?</a></p>
+
+<p>One thing to add from experience: <strong>pick a first project with a verifiable outcome.</strong> A migration you can test, an audit you can measure, a bug with a reproduction. Adoption arguments are won by evidence, and "it felt faster" is not evidence.</p>
+
+<h2 id="pitfalls">Pitfalls</h2>
+
+<h3>Unpinned models on a cloud provider</h3>
+<p>Aliases resolve to a provider default that can lag or be unavailable in your account. Pin them.</p>
+
+<h3>An enterprise CLAUDE.md that becomes a wiki</h3>
+<p>Every line is paid for by every developer on every request. Keep it to what is true everywhere.</p>
+
+<h3>Policy that exists only as documentation</h3>
+<p>If it matters, it belongs in managed settings. A rule in a document is a suggestion with formatting.</p>
+
+<h3>Choosing a cloud provider by default</h3>
+<p>It is more work and drops Claude on the web. Choose it for a reason you can state.</p>
+
+<h3>Assuming configuration applied</h3>
+<p>Run <code>/status</code> on a real machine. Silently unapplied settings are the expensive kind.</p>
+
+<h3>Rolling out with no shared standards</h3>
+<p>Ten developers with ten conventions produce a codebase that reads like ten codebases. Agree the standards before the volume arrives, not after.</p>
+
+<aside class="sbs-inline-cta">
+  <span class="sbs-inline-cta__label">From the toolkit</span>
+  <p>If you need that shared layer ready rather than designed from scratch, <a href="/products/claude-code-website-launch-system">browse the contents</a> of the Launch System.</p>
+</aside>
+
+<h2>Where to go next</h2>
+
+<p>For auditing a codebase rather than governing a rollout, <a href="/blogs/guides/claude-code-website-security-audit">the Claude Code security audit workflow</a> is the practical companion to this section.</p>
+
+<p>Two free companions to the policy layer: the <a href="/pages/claude-code-security-checklist">security checklist</a>, which includes a section on what changes when an assistant can read your repository, and the <a href="/pages/claude-code-website-audit-checklist">website audit checklist</a> for reviewing what a team has already shipped. Both are ungated and downloadable as Markdown from the <a href="/pages/resources">free resources</a> page.</p>
+
+<p>The organisation-wide layer sits on top of the same building blocks everyone uses: <a href="/blogs/guides/production-claude-md-web-development">CLAUDE.md</a> for persistent context &mdash; the free <a href="/pages/production-claude-md-starter">production CLAUDE.md starter</a> is a reasonable base for a team file &mdash; <a href="/blogs/guides/claude-code-skills">skills</a> for procedures, <a href="/blogs/guides/claude-code-subagents">subagents</a> for isolation and tool limits, and <a href="/blogs/guides/claude-code-plugins">plugins</a> for distributing an approved set. For what teams should actually be doing with it, see the <a href="/blogs/guides/how-to-build-a-website-with-claude-code">complete website workflow</a> and the <a href="/blogs/guides/best-claude-code-prompts-for-web-development">prompt library</a>.</p>
+
+<h2>Sources and further reading</h2>
+
+<ul>
+  <li><a href="https://code.claude.com/docs/en/third-party-integrations" rel="noopener">Claude Code: enterprise deployment overview</a> — provider comparison, best practices, model pinning</li>
+  <li><a href="https://code.claude.com/docs/en/security" rel="noopener">Claude Code: security</a> — managed permissions</li>
+  <li><a href="https://code.claude.com/docs/en/memory" rel="noopener">Claude Code: memory</a> — the enterprise CLAUDE.md paths</li>
+  <li><a href="https://code.claude.com/docs/en/llm-gateway" rel="noopener">Claude Code: LLM gateways</a></li>
+  <li><a href="https://code.claude.com/docs/en/mcp" rel="noopener">Claude Code: MCP</a></li>
+</ul>

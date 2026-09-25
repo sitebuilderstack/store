@@ -1,0 +1,61 @@
+<section class="sbs-section">
+  <div class="sbs-container">
+    <div class="sbs-section-head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h2>{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.intro != blank -%}
+        <p class="sbs-lede">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="sbs-grid sbs-grid--2">
+      {%- for block in section.blocks -%}
+        <figure class="sbs-terminal" {{ block.shopify_attributes }}>
+          <figcaption class="sbs-terminal__bar">
+            <span class="sbs-terminal__dot" aria-hidden="true"></span>
+            <span class="sbs-terminal__dot" aria-hidden="true"></span>
+            <span class="sbs-terminal__dot" aria-hidden="true"></span>
+            <span class="sbs-terminal__title">{{ block.settings.filename | escape }}</span>
+          </figcaption>
+          <pre class="sbs-terminal__body">{{ block.settings.excerpt | escape }}</pre>
+        </figure>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.footnote != blank -%}
+      <p class="sbs-dim" style="margin-top: var(--sp-6); max-width: var(--measure);">
+        {{ section.settings.footnote | escape }}
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SBS — Prompt examples",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Samples" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What the prompts actually look like" },
+    { "type": "textarea", "id": "intro", "label": "Intro",
+      "default": "Short excerpts from four of the files. Each full prompt runs to several pages and carries its own objective, variables, constraints, validation, and completion criteria." },
+    { "type": "textarea", "id": "footnote", "label": "Footnote",
+      "default": "The constraints and completion criteria are doing most of the work: they define what done means before Claude starts, so done is not something the model decides afterwards." }
+  ],
+  "blocks": [
+    {
+      "type": "example",
+      "name": "Example",
+      "settings": [
+        { "type": "text", "id": "filename", "label": "Filename shown" },
+        { "type": "textarea", "id": "excerpt", "label": "Excerpt",
+          "info": "Keep this a genuine excerpt. Do not give away a complete prompt." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "SBS — Prompt examples" }]
+}
+{% endschema %}

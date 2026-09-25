@@ -1,0 +1,123 @@
+{%- comment -%}
+  "Try this on your project" — a contextual, browser-local generator placed
+  inside a guide after the section it turns into action.
+
+  Parameters:
+    module  — id from content/content-graph.json → modules (also the
+              article.metafields.sbs.try value)
+    guide   — the article handle (public identifier, used for analytics and
+              for the project record)
+
+  Everything the reader types stays in the page: the generator runs in
+  assets/sbs-engage.js, the result is editable, and Save writes to the
+  browser-local My Projects store. The form is hidden until that script has
+  loaded, because a form that submits without JavaScript would put the
+  reader's answers into a query string. The no-JS text says so plainly.
+
+  Next steps point at labs (/pages/lab-*), the Weekly Fix hub or a guide;
+  scripts/test-engagement.js checks that the ids here match the graph.
+{%- endcomment -%}
+{%- assign m = module -%}
+{%- case m -%}
+  {%- when 'claude-md-section' -%}
+    {%- assign t_title = 'Generate a project-specific CLAUDE.md section' -%}
+    {%- assign t_result = "A starter section built from your real commands and constraints — nothing invented for what you leave blank." -%}
+    {%- assign t_next_url = '/pages/weekly-fix' -%}
+    {%- assign t_next_label = 'Then check it against the real project in a Weekly Website Fix' -%}
+  {%- when 'seo-audit-prompt' -%}
+    {%- assign t_title = 'Build a scoped, read-only audit prompt' -%}
+    {%- assign t_result = 'An audit prompt for the pages you name, with evidence requirements and a rule that nothing is fixed in the same run.' -%}
+    {%- assign t_next_url = '/pages/lab-technical-seo' -%}
+    {%- assign t_next_label = 'Then run the same audit on a fixture with a known fault in the Technical SEO Lab' -%}
+  {%- when 'shopify-next-workflow' -%}
+    {%- assign t_title = 'Generate the next safe Shopify workflow' -%}
+    {%- assign t_result = 'A step-by-step workflow for theme, catalogue or SEO work: observe first, change where it can be undone, verify, know the rollback.' -%}
+    {%- assign t_next_url = '/pages/lab-launch-readiness' -%}
+    {%- assign t_next_label = 'Then decide whether a release should go out in the Launch Readiness Lab' -%}
+  {%- when 'landing-validation' -%}
+    {%- assign t_title = 'Generate a functional-validation checklist' -%}
+    {%- assign t_result = 'A checklist for the one page that has to convert: link destinations, form states, the tracking event, on the devices you name.' -%}
+    {%- assign t_next_url = '/pages/lab-conversion-functionality' -%}
+    {%- assign t_next_label = 'Then find the form that only looks like it works in the Conversion Functionality Lab' -%}
+  {%- when 'maintenance-checklist' -%}
+    {%- assign t_title = 'Generate a recurring inspection checklist and report template' -%}
+    {%- assign t_result = 'A daily/weekly/monthly checklist for your platform and a report template with a place for evidence, not just ticks.' -%}
+    {%- assign t_next_url = '/pages/lab-website-operations' -%}
+    {%- assign t_next_label = 'Then read a health report and pick the next safe diagnostic in the Website Operations Lab' -%}
+  {%- when 'migration-verification' -%}
+    {%- assign t_title = 'Prepare a migration verification checklist and URL-mapping starter' -%}
+    {%- assign t_result = 'A verification checklist for your kind of move and a URL-mapping CSV starter with the columns a redirect check needs.' -%}
+    {%- assign t_next_url = '/pages/lab-technical-seo' -%}
+    {%- assign t_next_label = 'Then catch a redirect that lands in the wrong place in the Technical SEO Lab' -%}
+  {%- when 'regression-plan' -%}
+    {%- assign t_title = 'Prepare a regression-test plan' -%}
+    {%- assign t_result = 'A plan naming the flows that must keep working, what each test asserts, and what stays out of scope for a browser test.' -%}
+    {%- assign t_next_url = '/pages/lab-conversion-functionality' -%}
+    {%- assign t_next_label = 'Then watch a check fail and pass in the Conversion Functionality Lab' -%}
+{%- endcase -%}
+{%- if t_title != blank -%}
+{%- assign fid = 'try-' | append: m -%}
+{%- comment -%} Field ids are static (try-name, try-pages…): one module renders per article, and render arguments cannot carry filters. {%- endcomment -%}
+<aside class="sbs-try" id="{{ fid }}" data-sbs-try="{{ m }}" data-sbs-guide="{{ guide | escape }}" data-sbs-try-title="{{ t_title | escape }}" aria-labelledby="{{ fid }}-h">
+  <p class="sbs-eyebrow">Try this on your project</p>
+  <h3 id="{{ fid }}-h" class="sbs-try__title">{{ t_title }}</h3>
+  <p class="sbs-try__result-desc">{{ t_result }}</p>
+  <p class="sbs-try__fallback" data-try-fallback>
+    This generator runs in your browser and needs JavaScript. Nothing you type is sent anywhere. Without JavaScript, the workflow in the section above is the same one the generator writes out — follow it by hand.
+  </p>
+  <p class="sbs-try__fallback" data-sbs-load-error hidden>The generator could not be loaded. Reload the page, or follow the section above by hand.</p>
+  <form class="sbs-try__form" hidden novalidate>
+    {%- case m -%}
+      {%- when 'claude-md-section' -%}
+        {% render 'sbs-field', id: 'try-name', name: 'name', label: 'Project name', ph: 'e.g. Northgate Physio site' %}
+        {% render 'sbs-field', id: 'try-commands', name: 'commands', type: 'textarea', rows: 3, label: 'Commands that run, build and test it (one per line)', hint: 'Only commands that exist. Leave blank rather than guess — the section will say so.' %}
+        {% render 'sbs-field', id: 'try-prohibitions', name: 'prohibitions', type: 'textarea', rows: 3, label: 'Things that must never be done in this project (one per line)', ph: 'never edit the parent theme' %}
+        {% render 'sbs-field', id: 'try-done', name: 'done', type: 'textarea', rows: 2, label: 'What must be true before a task is finished (one per line)' %}
+      {%- when 'seo-audit-prompt' -%}
+        {% render 'sbs-field', id: 'try-platform', name: 'platform', type: 'select', options: 'WordPress,Shopify,Astro or static,Next.js,Other', label: 'Platform' %}
+        {% render 'sbs-field', id: 'try-pages', name: 'pages', type: 'textarea', rows: 4, label: 'Pages to audit (one URL or path per line)', hint: 'Stays in this page. Name the pages that carry traffic or revenue.' %}
+        {% render 'sbs-field', id: 'try-access', name: 'access', type: 'select', options: 'Public pages only,Repository + public pages,Repository + Search Console export', label: 'What the audit can read' %}
+      {%- when 'shopify-next-workflow' -%}
+        {% render 'sbs-field', id: 'try-kind', name: 'kind', type: 'select', options: 'theme,catalogue,seo', label: 'Kind of work' %}
+        {% render 'sbs-field', id: 'try-goal', name: 'goal', label: 'What the change should achieve', ph: 'e.g. add a size guide to product pages' %}
+        {% render 'sbs-field', id: 'try-risk', name: 'risk', label: 'What must not break', ph: 'e.g. add to cart on the best-selling product' %}
+      {%- when 'landing-validation' -%}
+        {% render 'sbs-field', id: 'try-url', name: 'url', label: 'Page URL (optional, staging or your own site)', hint: 'Kept in this page only.' %}
+        {% render 'sbs-field', id: 'try-cta', name: 'cta', label: 'Primary call-to-action label', ph: 'e.g. Book a free consultation' %}
+        {% render 'sbs-field', id: 'try-destination', name: 'destination', label: 'Where that button must land', ph: 'e.g. the booking form, not the homepage' %}
+        {% render 'sbs-field', id: 'try-devices', name: 'devices', label: 'Devices to check', ph: 'e.g. iPhone Safari, Android Chrome, desktop' %}
+      {%- when 'maintenance-checklist' -%}
+        {% render 'sbs-field', id: 'try-name', name: 'name', label: 'Site name' %}
+        {% render 'sbs-field', id: 'try-platform', name: 'platform', type: 'select', options: 'wordpress,shopify,astro,static,nextjs,other', label: 'Platform' %}
+        {% render 'sbs-field', id: 'try-forms', name: 'forms', type: 'textarea', rows: 2, label: 'Forms that must deliver (one per line)', ph: 'Contact form' %}
+      {%- when 'migration-verification' -%}
+        {% render 'sbs-field', id: 'try-kind', name: 'kind', type: 'select', options: 'redesign,urls,platform,domain', label: 'Kind of move' %}
+        {% render 'sbs-field', id: 'try-source', name: 'source', label: 'Current site URL (optional)', hint: 'Kept in this page only.' %}
+        {% render 'sbs-field', id: 'try-target', name: 'target', label: 'New site URL (optional)' %}
+        {% render 'sbs-field', id: 'try-pages', name: 'pages', type: 'textarea', rows: 3, label: 'Pages that must survive (one path or URL per line)' %}
+      {%- when 'regression-plan' -%}
+        {% render 'sbs-field', id: 'try-flows', name: 'flows', type: 'textarea', rows: 4, label: 'Flows that must keep working (one per line)', ph: 'Contact form submits with a marker' %}
+        {% render 'sbs-field', id: 'try-target', name: 'target', label: 'Environment the tests run against', ph: 'e.g. staging.example, local build' %}
+        {% render 'sbs-field', id: 'try-tool', name: 'tool', type: 'select', options: 'Playwright,Cypress,Other', label: 'Test tool' %}
+    {%- endcase -%}
+    <div class="sbs-try__actions">
+      <button type="submit" class="sbs-btn sbs-btn--primary">Generate</button>
+    </div>
+    <p class="sbs-try__status" data-try-status role="status" hidden></p>
+  </form>
+  <div class="sbs-try__out" data-try-result hidden>
+    <label for="{{ fid }}-output" class="sbs-try__out-label">Your result — edit it before you use it</label>
+    <textarea id="{{ fid }}-output" class="sbs-try__output" data-try-output rows="14" spellcheck="false"></textarea>
+    <div class="sbs-try__actions">
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-try-copy>Copy</button>
+      <button type="button" class="sbs-btn sbs-btn--ghost" data-try-download>Download</button>
+      <button type="button" class="sbs-btn sbs-btn--primary" data-try-save>Save to My Project</button>
+    </div>
+    <p class="sbs-try__next" data-try-next hidden>
+      <a href="{{ t_next_url }}" data-sbs-track="next_step_clicked">{{ t_next_label }} →</a>
+      <span class="sbs-try__next-alt">or <a href="/pages/my-projects">open My Projects</a></span>
+    </p>
+  </div>
+  <p class="sbs-try__note">Generated text is a starting point written from your answers, not evidence that anything was checked. Saved results stay in this browser only.</p>
+</aside>
+{%- endif -%}

@@ -1,0 +1,2 @@
+{'lcp': 712, 'cls': 0, 'transferBytes': 1125401, 'requests': 176, 'verdict': {'lcp': 'good', 'cls': 'good', 'inp': 'not measured — requires a real interaction'}}
+['lcp', 'cls', 'shifts', 'ttfb', 'domContentLoaded', 'requests', 'scripts', 'thirdParty', 'imagesLazy', 'imagesTotal', 'imagesNoDims', 'imagesNoAlt']

@@ -1,0 +1,120 @@
+<h2 id="who">Who this is for</h2>
+
+<p>Developers, technical marketers and agencies who own a website that exists and is not performing in search. It assumes you can read a diff, run a command, and reach the live site. It does not assume you are an SEO specialist &mdash; most of it is aimed at the competent generalist who has inherited responsibility for how a site does in search.</p>
+
+<p>If you are building a site from nothing, the <a href="/products/claude-code-website-launch-system">Claude Code Website Launch System</a> is the better starting point. This toolkit is for the site you already have.</p>
+
+<h2 id="problem">What it is for</h2>
+
+<p>The failure mode in agent-assisted SEO work is not bad advice. It is a check that reports success because it never actually ran, in a report that reads as authoritative. You get a confident list, act on it, and nothing changes &mdash; because the crawler stripped query strings and never saw page two, or the checker was pointed at the source rather than the built output, or the audit fixed the findings in the same run and left no report.</p>
+
+<p>Every prompt in here is written against that. They demand evidence rather than summaries. They forbid fixing in the same run, because an audit whose findings disappear into a commit is not an audit. And they insist that every check is proved capable of failing before it is trusted.</p>
+
+<h2 id="included">What is included</h2>
+
+<p>Fourteen modules, twenty prompts, four report templates and three checklists &mdash; 26,000 words of plain Markdown. Nothing to install, no account, no subscription.</p>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th>Module</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td><code>01-technical-seo</code></td><td>Crawlability, indexability, robots, sitemaps, canonicals, redirects, status codes, pagination</td></tr>
+<tr><td><code>02-on-page-seo</code></td><td>Titles, descriptions, heading hierarchy, alt text, content structure, duplicate metadata</td></tr>
+<tr><td><code>03-indexation</code></td><td>Why pages are not indexed, and what actually helps</td></tr>
+<tr><td><code>04-structured-data</code></td><td>Schema that describes what is visibly on the page, by page type</td></tr>
+<tr><td><code>05-internal-linking</code></td><td>Orphan pages, crawl distance, anchor text, cluster-to-hub structure</td></tr>
+<tr><td><code>06-core-web-vitals</code></td><td>LCP, INP and CLS diagnosed one variable at a time</td></tr>
+<tr><td><code>07-accessibility-seo</code></td><td>The overlap, with the two halves reported separately</td></tr>
+<tr><td><code>08-content-auditing</code></td><td>Decay, thin content, intent mismatch, cannibalisation, consolidation</td></tr>
+<tr><td><code>09-google-search-console</code></td><td>Coverage, URL inspection, performance analysis, and the API's traps</td></tr>
+<tr><td><code>10-bing-indexnow</code></td><td>Bing Webmaster Tools and IndexNow, including what submission does not do</td></tr>
+<tr><td><code>11-platform-workflows</code></td><td>Shopify, WordPress, Astro, static sites, custom applications</td></tr>
+<tr><td><code>12-launch-validation</code></td><td>Pre-launch, post-launch and migration</td></tr>
+<tr><td><code>13-competitor-research</code></td><td>Ethical research from public information</td></tr>
+<tr><td><code>14-reporting</code></td><td>Executive summary, technical findings, remediation backlog, severity matrix</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="prompts">The prompt library</h2>
+
+<p>Twenty prompts, each with a stated role, objective, discovery phase, constraints, evidence requirements, analysis, implementation, validation and deliverables. They are the part you will use most.</p>
+
+<ul>
+  <li>Complete website SEO audit</li>
+  <li>Technical SEO audit</li>
+  <li>Shopify, WordPress and Astro SEO audits</li>
+  <li>Search Console analysis, and Bing / IndexNow</li>
+  <li>Indexation troubleshooting</li>
+  <li>Sitemap, robots and canonical audits</li>
+  <li>Internal link audit</li>
+  <li>Structured data audit</li>
+  <li>Core Web Vitals audit</li>
+  <li>Accessibility and SEO overlap</li>
+  <li>Content gap and content decay audits</li>
+  <li>Competitor research</li>
+  <li>Launch and migration SEO audits</li>
+</ul>
+
+<p>They are not variations on one another. Each addresses a genuinely different question and carries the platform-specific facts that make an audit right or wrong &mdash; that a Shopify sitemap cannot be hand-edited, that a WordPress SEO plugin owns canonicals, that an Astro site with no <code>site</code> in its config silently emits relative canonicals.</p>
+
+<h2 id="workflow">What using it looks like</h2>
+
+<ol>
+  <li>Open <code>START-HERE.md</code>. It routes you to one file based on your situation.</li>
+  <li>Open that prompt, replace the bracketed values, and hand it to Claude Code.</li>
+  <li>It runs a discovery phase and changes nothing. You approve what it found.</li>
+  <li>It produces findings with evidence &mdash; the URL, the response, the exact markup.</li>
+  <li>You fix things, in a separate session, with the validation command it gave you.</li>
+  <li>You break each check deliberately and confirm it goes red before trusting it.</li>
+</ol>
+
+<h2 id="platforms">Supported platforms</h2>
+
+<p>Shopify, WordPress, Astro, static sites and custom applications each have their own workflow, because the things that go wrong differ. The general modules apply everywhere.</p>
+
+<h2 id="compare">How the three products differ</h2>
+
+<div class="sbs-table">
+<table>
+<thead><tr><th></th><th>SEO &amp; Website Audit</th><th>Conversion &amp; Revenue</th><th>Website Launch System</th></tr></thead>
+<tbody>
+<tr><td>Price</td><td>$19.99</td><td>$19.99</td><td>$19.99</td></tr>
+<tr><td>Best for</td><td>A site that is not ranking</td><td>Traffic that under-converts</td><td>A site you are building</td></tr>
+<tr><td>Technical SEO</td><td>Complete</td><td>Not covered</td><td>Included</td></tr>
+<tr><td>Search Console and Bing</td><td>Complete</td><td>Not covered</td><td>Summary level</td></tr>
+<tr><td>Content auditing for search</td><td>Complete</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Competitor research</td><td>Included</td><td>Not covered</td><td>Not covered</td></tr>
+<tr><td>Conversion auditing</td><td>Not covered</td><td>Primary</td><td>One landing-page workflow</td></tr>
+<tr><td>Funnels and drop-off analysis</td><td>Not covered</td><td>Complete</td><td>Not covered</td></tr>
+<tr><td>Experimentation</td><td>Not covered</td><td>Complete</td><td>Not covered</td></tr>
+<tr><td>Analytics and measurement</td><td>Search data only</td><td>Complete</td><td>Setup level</td></tr>
+<tr><td>Conversion copy</td><td>Not covered</td><td>Complete</td><td>Not covered</td></tr>
+<tr><td>Reporting templates</td><td>Included</td><td>Included</td><td>Not covered</td></tr>
+<tr><td>Accessibility</td><td>SEO overlap only</td><td>Conversion path only</td><td>Complete</td></tr>
+<tr><td>Performance</td><td>Core Web Vitals in full</td><td>Conversion effect only</td><td>Included</td></tr>
+<tr><td>Planning and architecture</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+<tr><td>Platform build prompts</td><td>SEO workflows only</td><td>Not covered</td><td>Full build systems</td></tr>
+<tr><td>Security audits</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+<tr><td>Git, CI/CD, deployment</td><td>Not covered</td><td>Not covered</td><td>Complete</td></tr>
+</tbody>
+</table>
+</div>
+<p>All three are also sold together as the <a href="/products/complete-site-builder-stack">Complete Site Builder Stack</a>, at less than buying them separately. Both figures are shown on that page. There is also a fourth product for the stage after launch: the <a href="/products/claude-code-website-operations-maintenance-system">Website Operations &amp; Maintenance System</a> covers monitoring, security, backups, updates, deploys and incidents, and is sold on its own. If only one column above describes your problem, buy that one &mdash; there is no advantage to owning a system you are not going to open.</p>
+
+
+<p>They sit end to end: the Launch System builds the site, this toolkit gets it found, and the <a href="/products/claude-code-conversion-revenue-optimization-toolkit">Conversion &amp; Revenue Optimization Toolkit</a> turns the traffic into outcomes. They overlap deliberately in two narrow places &mdash; the SEO material, where this one goes considerably deeper, and landing-page conversion, where the conversion toolkit does.</p>
+
+<p>Buying one does not include the others, and there is no automatic upgrade credit. If you want more than one, buy more than one.</p>
+
+<h2 id="delivery">Delivery and licence</h2>
+
+<p>A single ZIP, delivered by download immediately after purchase. 55 files, 88&nbsp;KB, all plain Markdown &mdash; nothing to install and nothing that expires. A published SHA-256 checksum accompanies the download so you can verify what you received.</p>
+
+<p>Licensed to one person for unlimited projects, including client work. You may not redistribute or resell it. Full terms are in <code>LICENSE.md</code> inside the archive.</p>
+
+<h2 id="honest">What it does not do</h2>
+
+<p>It does not access Search Console, Bing or any analytics platform on your behalf &mdash; Claude Code has no credentials for your properties and cannot get them. Where a workflow needs that data, it tells you exactly what to export.</p>
+
+<p>It does not promise a ranking. Nobody can. And where the honest conclusion about a site is that the constraint is authority rather than optimisation, these prompts are written to say so rather than supply a list of small changes that would not move anything.</p>

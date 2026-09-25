@@ -1,0 +1,744 @@
+{
+  "_comment": [
+    "Roadmaps for the homepage learning-path engine.",
+    "",
+    "Every url must resolve on the live site. scripts/validate-selector.py checks",
+    "each one against the article, resource and pillar manifests and is part of",
+    "tests/run-all.sh, so an invented URL cannot ship.",
+    "",
+    "A roadmap is seven steps: step 1 varies by experience level, steps 2-7 are",
+    "fixed per goal. The stage answer decides which step the visitor starts on,",
+    "so someone who is already live is not told to read the getting-started guide.",
+    "Step ids are derived from the goal and index and are what progress is keyed",
+    "on in localStorage, so reordering a roadmap resets only that roadmap."
+  ],
+  "levels": [
+    {
+      "value": "beginner",
+      "label": "New to Claude Code",
+      "hint": "Little or no experience"
+    },
+    {
+      "value": "intermediate",
+      "label": "Comfortable with it",
+      "hint": "Used it on a few projects"
+    },
+    {
+      "value": "experienced",
+      "label": "Advanced developer",
+      "hint": "Shipping with it already"
+    }
+  ],
+  "stages": [
+    {
+      "value": "planning",
+      "label": "Planning",
+      "entry": 1
+    },
+    {
+      "value": "building",
+      "label": "Building",
+      "entry": 2
+    },
+    {
+      "value": "optimizing",
+      "label": "Optimizing",
+      "entry": 4
+    },
+    {
+      "value": "launching",
+      "label": "Launching",
+      "entry": 6
+    },
+    {
+      "value": "live",
+      "label": "Already live",
+      "entry": 5
+    }
+  ],
+  "goals": [
+    {
+      "value": "new-website",
+      "label": "Build a new website",
+      "hub": {
+        "url": "/pages/claude-code-web-development",
+        "label": "Claude Code for Web Development"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-terminal-setup",
+          "label": "Getting Started With Claude Code in the Terminal"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+          "label": "How to Build a Website With Claude Code"
+        },
+        "experienced": {
+          "url": "/blogs/guides/production-claude-md-web-development",
+          "label": "How to Create a Production CLAUDE.md"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+          "label": "How to Build a Website With Claude Code",
+          "note": "The fifteen-step build, definition to deployment."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-launch-checklist",
+          "label": "Claude Code website launch checklist",
+          "note": "Free, tickable, saved in your browser."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/best-claude-code-prompts-for-web-development",
+          "label": "Best Claude Code Prompts for Web Development",
+          "note": "Scoped requests with an observable finish line."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "Fifteen sections of inspection before anyone sees it."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "Gates, previews, smoke tests, rollback."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-seo-website-optimization",
+          "label": "Claude Code SEO Workflow",
+          "note": "Now make it findable."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "shopify-store",
+      "label": "Build a Shopify store",
+      "hub": {
+        "url": "/pages/claude-code-shopify",
+        "label": "Claude Code Shopify Development"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/build-shopify-store-with-claude-code",
+          "label": "How to Build a Shopify Store With Claude Code"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/build-shopify-store-with-claude-code",
+          "label": "How to Build a Shopify Store With Claude Code"
+        },
+        "experienced": {
+          "url": "/blogs/guides/shopify-seo-with-claude-code",
+          "label": "Shopify SEO With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/build-shopify-store-with-claude-code",
+          "label": "How to Build a Shopify Store With Claude Code",
+          "note": "Theme, catalogue, delivery, and the silent failures."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-launch-checklist",
+          "label": "Claude Code website launch checklist",
+          "note": "Eighteen sections between finished and live."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-mcp",
+          "label": "Claude Code and MCP: Connecting External Tools",
+          "note": "When the data is not in your repository."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "Inspect what you built before launch."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/shopify-seo-with-claude-code",
+          "label": "Shopify SEO With Claude Code",
+          "note": "The platform decisions that are yours and the ones that are not."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "A bought theme is where the weight is."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "wordpress-site",
+      "label": "Build a WordPress website",
+      "hub": {
+        "url": "/pages/claude-code-wordpress",
+        "label": "Claude Code WordPress Development"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-terminal-setup",
+          "label": "Getting Started With Claude Code in the Terminal"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-wordpress",
+          "label": "How to Build a WordPress Website With Claude Code"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-wordpress",
+          "label": "How to Build a WordPress Website With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-wordpress",
+          "label": "How to Build a WordPress Website With Claude Code",
+          "note": "Three sources of truth, and the rules that keep it safe."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-security-checklist",
+          "label": "Claude Code security audit checklist",
+          "note": "Custom handlers are where WordPress fails review."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/production-claude-md-web-development",
+          "label": "How to Create a Production CLAUDE.md",
+          "note": "Never edit the parent. Never write to the database."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit",
+          "note": "Escaping, nonces, capabilities, in that order."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "Code up, content down, database never automatic."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-accessibility-audit",
+          "label": "Claude Code Accessibility Audit",
+          "note": "Themes routinely undo core's defaults."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "astro-site",
+      "label": "Build an Astro website",
+      "hub": {
+        "url": "/pages/claude-code-astro",
+        "label": "Claude Code Astro Development"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+          "label": "How to Build a Website With Claude Code"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-astro",
+          "label": "How to Build an Astro Website With Claude Code"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-astro",
+          "label": "How to Build an Astro Website With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-astro",
+          "label": "How to Build an Astro Website With Claude Code",
+          "note": "Collections, islands, and a build that can fail."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-launch-checklist",
+          "label": "Claude Code website launch checklist",
+          "note": "Everything between finished and live."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code",
+          "note": "Checked against dist/, not against source."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-accessibility-audit",
+          "label": "Claude Code Accessibility Audit",
+          "note": "Islands are where the semantics go missing."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "Workers static assets, previews, smoke tests."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "Fonts and third-party scripts dominate here."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "saas-app",
+      "label": "Build a SaaS application",
+      "hub": {
+        "url": "/pages/claude-code-production",
+        "label": "Claude Code Production Engineering"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-terminal-setup",
+          "label": "Getting Started With Claude Code in the Terminal"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/production-claude-md-web-development",
+          "label": "How to Create a Production CLAUDE.md"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-hooks",
+          "label": "Claude Code Hooks"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/production-claude-md-web-development",
+          "label": "How to Create a Production CLAUDE.md",
+          "note": "Application rules a marketing site never needs."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-security-checklist",
+          "label": "Claude Code security audit checklist",
+          "note": "Secrets, auth, sessions, dependencies."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-hooks",
+          "label": "Claude Code Hooks",
+          "note": "Rules that hold whether or not they were read."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit",
+          "note": "A defensive review of code you own."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions",
+          "label": "Claude Code and GitHub: Actions, PR Review, and CI",
+          "note": "Review in CI, not on your laptop."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-enterprise",
+          "label": "Claude Code for Teams and Enterprise",
+          "note": "When more than one person is doing this."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "improve-existing",
+      "label": "Improve an existing website",
+      "hub": {
+        "url": "/pages/claude-code-production",
+        "label": "Claude Code Production Engineering"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "Inspecting a site you did not build."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-website-audit-checklist",
+          "label": "Claude Code website audit checklist",
+          "note": "Severity scale and a write-up format."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code",
+          "note": "Checks that can actually fail."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-accessibility-audit",
+          "label": "Claude Code Accessibility Audit",
+          "note": "Machine-answerable versus person-answerable."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "One variable at a time."
+        },
+        {
+          "kind": "next",
+          "url": "/pages/claude-code-failure-library",
+          "label": "Web Development Failure Library",
+          "note": "Twenty ways sites break quietly."
+        }
+      ],
+      "product": "seo-toolkit"
+    },
+    {
+      "value": "improve-rankings",
+      "label": "Improve Google rankings",
+      "hub": {
+        "url": "/pages/claude-code-seo",
+        "label": "Claude Code SEO"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-seo-website-optimization",
+          "label": "Claude Code SEO Workflow"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-seo-website-optimization",
+          "label": "Claude Code SEO Workflow"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-seo-website-optimization",
+          "label": "Claude Code SEO Workflow",
+          "note": "Thirteen audits in dependency order."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-seo-checklist",
+          "label": "Claude Code SEO checklist",
+          "note": "Technical SEO, in the order that matters."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/google-search-console-claude-code",
+          "label": "Google Search Console With Claude Code",
+          "note": "What the API will and will not tell you."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code",
+          "note": "Crawl, canonicals, indexing decisions."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "At the 75th percentile, split by device."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/shopify-seo-with-claude-code",
+          "label": "Shopify SEO With Claude Code",
+          "note": "If the platform decides some of this for you."
+        }
+      ],
+      "product": "seo-toolkit"
+    },
+    {
+      "value": "improve-performance",
+      "label": "Improve website performance",
+      "hub": {
+        "url": "/pages/claude-code-production",
+        "label": "Claude Code Production Engineering"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-technical-seo-audit",
+          "label": "Technical SEO Audit With Claude Code"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "LCP, INP, CLS, and the one-variable rule."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-seo-checklist",
+          "label": "Claude Code SEO checklist",
+          "note": "Performance sits inside the SEO order."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "Measure before you change anything."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-accessibility-audit",
+          "label": "Claude Code Accessibility Audit",
+          "note": "Layout shift is an accessibility problem too."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "Caching, and why HTML must revalidate."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-seo-website-optimization",
+          "label": "Claude Code SEO Workflow",
+          "note": "Speed is one input among thirteen."
+        }
+      ],
+      "product": "seo-toolkit"
+    },
+    {
+      "value": "audit-security",
+      "label": "Audit website security",
+      "hub": {
+        "url": "/pages/claude-code-production",
+        "label": "Claude Code Production Engineering"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-hooks",
+          "label": "Claude Code Hooks"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit",
+          "note": "Defensive review, not penetration testing."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-security-checklist",
+          "label": "Claude Code security audit checklist",
+          "note": "Secrets, headers, input, auth, dependencies."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-hooks",
+          "label": "Claude Code Hooks",
+          "note": "Enforce what should not be requested."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "The wider inspection around it."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions",
+          "label": "Claude Code and GitHub: Actions, PR Review, and CI",
+          "note": "Scoped tokens and approval gates."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-enterprise",
+          "label": "Claude Code for Teams and Enterprise",
+          "note": "Org-wide policy and credentials."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "landing-page",
+      "label": "Build a landing page",
+      "hub": {
+        "url": "/pages/claude-code-web-development",
+        "label": "Claude Code for Web Development"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+          "label": "How to Build a Website With Claude Code"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/best-claude-code-prompts-for-web-development",
+          "label": "Best Claude Code Prompts for Web Development"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/how-to-build-a-website-with-claude-code",
+          "label": "How to Build a Website With Claude Code",
+          "note": "One page, the same discipline."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-launch-checklist",
+          "label": "Claude Code website launch checklist",
+          "note": "The parts that apply to a single page."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/best-claude-code-prompts-for-web-development",
+          "label": "Best Claude Code Prompts for Web Development",
+          "note": "Requests with a checkable finish line."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-accessibility-audit",
+          "label": "Claude Code Accessibility Audit",
+          "note": "Forms and contrast, mostly."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "Preview URLs make review real."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/claude-code-performance-core-web-vitals",
+          "label": "Core Web Vitals Optimization",
+          "note": "A landing page lives or dies on LCP."
+        }
+      ],
+      "product": "launch-system"
+    },
+    {
+      "value": "deploy-production",
+      "label": "Deploy a production website",
+      "hub": {
+        "url": "/pages/claude-code-production",
+        "label": "Claude Code Production Engineering"
+      },
+      "start": {
+        "beginner": {
+          "url": "/blogs/guides/claude-code-github-actions",
+          "label": "Claude Code and GitHub: Actions, PR Review, and CI"
+        },
+        "intermediate": {
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare"
+        },
+        "experienced": {
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare"
+        }
+      },
+      "steps": [
+        {
+          "kind": "guide",
+          "url": "/blogs/guides/claude-code-github-actions-cloudflare",
+          "label": "Deploy With GitHub Actions and Cloudflare",
+          "note": "The whole pipeline, gate by gate."
+        },
+        {
+          "kind": "resource",
+          "url": "/pages/claude-code-launch-checklist",
+          "label": "Claude Code website launch checklist",
+          "note": "Pre-launch and post-launch, separated."
+        },
+        {
+          "kind": "workflow",
+          "url": "/blogs/guides/claude-code-github-actions",
+          "label": "Claude Code and GitHub: Actions, PR Review, and CI",
+          "note": "Review that runs whether or not anyone asked."
+        },
+        {
+          "kind": "audit",
+          "url": "/blogs/guides/claude-code-website-audit",
+          "label": "Claude Code Website Audit",
+          "note": "Before the first deploy, not after."
+        },
+        {
+          "kind": "deploy",
+          "url": "/blogs/guides/claude-code-website-security-audit",
+          "label": "Claude Code Website Security Audit",
+          "note": "Secrets and scopes before you ship."
+        },
+        {
+          "kind": "next",
+          "url": "/blogs/guides/google-search-console-claude-code",
+          "label": "Google Search Console With Claude Code",
+          "note": "Find out what production is actually doing."
+        }
+      ],
+      "product": "launch-system"
+    }
+  ],
+  "products": {
+    "launch-system": {
+      "handle": "claude-code-website-launch-system",
+      "label": "Claude Code Website Launch System",
+      "note": "The complete build-to-launch workflow: platform build prompts, a production CLAUDE.md, SEO, security, accessibility, deployment and launch checklists."
+    },
+    "seo-toolkit": {
+      "handle": "claude-code-seo-website-audit-toolkit",
+      "label": "Claude Code SEO & Website Audit Toolkit",
+      "note": "Audit, optimise and validate a production website for search: technical SEO, indexation, structured data, internal linking, Core Web Vitals and Search Console workflows."
+    }
+  }
+}

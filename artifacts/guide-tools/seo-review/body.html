@@ -1,0 +1,66 @@
+<header class="bar">
+  <div class="wrap bar__in">
+    <a class="brand" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=header_brand" target="_blank" rel="noopener">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span>SiteBuilderStack</span>
+      <span class="brand__sub">SEO Review Worksheet</span>
+    </a>
+    <div class="toolbar">
+      <button class="btn btn--quiet btn--sm" type="button" id="reset">Start again</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="row" style="padding-block:var(--sp-6) var(--sp-5)">
+    <p class="eyebrow">Shopify product metadata</p>
+    <h1 class="h1" tabindex="-1" id="top">Review before you write.</h1>
+    <p class="lede">Draft SEO titles and meta descriptions, record a decision on each, and export the worksheet. Nothing here connects to your store &mdash; it holds the review, which is the part worth keeping.</p>
+    <ul class="facts small dim" style="display:grid;gap:.35rem">
+      <li>Everything stays in this browser tab. No store connection, no account, nothing transmitted.</li>
+      <li>Length guidance is advisory. Google truncates by pixel width, not character count, and may show its own text.</li>
+      <li>Exports in the same column order as the worksheet in the guide.</li>
+    </ul>
+  </section>
+
+  <section class="row" aria-labelledby="rows-h">
+    <div class="toolbar" style="justify-content:space-between">
+      <h2 class="h2" id="rows-h">Rows</h2>
+      <div class="toolbar">
+        <span class="chip" id="tally">0 rows</span>
+        <button class="btn btn--ghost btn--sm" type="button" id="add">Add a product</button>
+      </div>
+    </div>
+    <div id="rows" class="row"></div>
+  </section>
+
+  <section class="row" style="margin-top:var(--sp-6)" aria-labelledby="exp-h">
+    <h2 class="h2" id="exp-h">Export</h2>
+    <p class="small muted">The CSV carries every row and its decision, quoted, UTF-8, in the worksheet's column order. It is a <strong>review document</strong>, not a Shopify import file &mdash; approved values go into Shopify through the native bulk editor, a product CSV export, or the Admin API.</p>
+    <div class="toolbar">
+      <button class="btn" type="button" id="download" hidden>Download CSV</button>
+      <button class="btn btn--ghost" type="button" id="copy">Copy CSV</button>
+      <button class="btn btn--ghost btn--sm" type="button" id="toggle-preview">Show the CSV</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <p class="small dim" id="dl-note" hidden>File download is not available in this view, so it is not offered. Copy the CSV instead &mdash; it is identical.</p>
+    <div id="fallback"></div>
+    <pre class="out" id="preview" hidden></pre>
+  </section>
+
+  <section class="cta" style="margin-top:var(--sp-7)">
+    <p class="eyebrow">The full workflow</p>
+    <p class="muted">This tool is the review step. The guide covers the whole sequence &mdash; export, draft, review, apply only approved rows, verify what renders &mdash; including the staleness check that stops a two-day-old draft overwriting a colleague's fix.</p>
+    <div class="toolbar">
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="guide"
+         href="https://sitebuilderstack.com/blogs/guides/bulk-edit-shopify-seo-claude-code?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=guide_link">Read the guide</a>
+      <a class="btn btn--ghost" target="_blank" rel="noopener" data-cta="product"
+         href="https://sitebuilderstack.com/products/claude-code-shopify-automation-admin-api-toolkit?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=primary_recommendation">Shopify Automation &amp; Admin API Toolkit</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Made by SiteBuilderStack, which sells Claude Code workflow products. This tool is free, needs no email address, and works on its own.</p>
+    <p><a target="_blank" rel="noopener" href="https://sitebuilderstack.com/?utm_source=claude_artifact&amp;utm_medium=interactive_tool&amp;utm_campaign=seo_review_worksheet&amp;utm_content=footer_brand">sitebuilderstack.com</a> &nbsp;&middot;&nbsp; Independent product, not affiliated with Shopify, Google or Anthropic.</p>
+  </footer>
+</main>

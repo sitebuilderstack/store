@@ -1,0 +1,1 @@
+Fifteen minutes, four decisions. A release summary with six green ticks, the raw evidence behind three of them, and a launch scheduled for 17:00. Decide whether it goes — and then see which single capture should have stopped it, and why "STATUS: SUCCESS" in a backup log established nothing at all.

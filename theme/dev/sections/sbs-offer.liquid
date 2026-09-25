@@ -1,0 +1,209 @@
+{%- comment -%}
+  One section for the commercial-offer pages: team licences, the membership
+  interest list, and the website review service.
+
+  The page body (Markdown, authored in content/pages/) is the offer copy; this
+  section adds the status banner and the intake form. The form is Shopify's
+  native {% form 'contact' %}, so a submission is emailed to the address in
+  Settings → Store details (admin@sitebuilderstack.com) — a real, owner-
+  accessible destination with no app and no third-party processor. Custom
+  fields are named contact[Label] and appear in that email under their label.
+
+  Deliberately NOT the customer form: that creates a customer record with a
+  marketing state, and an inquiry is not a subscription. The one marketing
+  question on these pages is a separate, unchecked opt-in whose answer is sent
+  as an ordinary field for the owner to action by hand.
+
+  `mode` drives the wording and the analytics: inquiry (team licences,
+  service requests) or waitlist (membership). Neither takes payment; the
+  banner says so in the page itself rather than in small print.
+
+  Fields are declared in blocks so a new offer needs no new code. A block of
+  type `field` renders text/email/select/textarea; `consent` renders the
+  unchecked marketing opt-in.
+{%- endcomment -%}
+
+{%- assign offer_id = section.settings.offer_id | default: 'offer' -%}
+{%- assign mode = section.settings.mode | default: 'inquiry' -%}
+{%- assign form_id = 'sbs-offer-form' -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="sbs-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      {%- endif -%}
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<div class="sbs-container sbs-offer"
+     data-sbs-offer="{{ offer_id | escape }}"
+     data-sbs-offer-mode="{{ mode | escape }}">
+
+  {%- if section.settings.status_note != blank -%}
+    <div class="sbs-offer__status sbs-offer__status--{{ mode | escape }}">
+      {{ section.settings.status_note }}
+    </div>
+  {%- endif -%}
+
+  <div class="sbs-offer__grid">
+    <div class="sbs-rte sbs-article__body sbs-offer__copy">
+      {{ page.content }}
+    </div>
+
+    <div class="sbs-offer__aside">
+      <div class="sbs-card sbs-offer__form-card" id="request">
+        <h2>{{ section.settings.form_heading | default: 'Make a request' | escape }}</h2>
+        {%- if section.settings.form_intro != blank -%}
+          <div class="sbs-offer__form-intro">{{ section.settings.form_intro }}</div>
+        {%- endif -%}
+
+        {%- form 'contact', id: form_id, class: 'sbs-offer__form' -%}
+          {%- if form.posted_successfully? -%}
+            <div class="sbs-offer__ok" role="status" tabindex="-1" id="{{ offer_id }}-done"
+                 data-sbs-offer-success="{{ offer_id | escape }}">
+              {{ section.settings.success_message
+                 | default: '<p>Thanks — your request has been sent. We reply from admin@sitebuilderstack.com, usually within a few business days.</p>' }}
+            </div>
+          {%- else -%}
+            {%- if form.errors -%}
+              <div role="alert" class="sbs-offer__error">
+                <p><strong>That did not send.</strong> Please check:</p>
+                <ul>
+                  {%- for field in form.errors -%}
+                    <li>{{ form.errors.messages[field] }}{% if field != 'form' %} ({{ field }}){% endif %}</li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- comment -%} Subject line, so the owner can filter these in the inbox. {%- endcomment -%}
+            <input type="hidden" name="contact[Request type]" value="{{ section.settings.request_label | default: 'Offer enquiry' | escape }}">
+
+            {%- for block in section.blocks -%}
+              {%- assign fid = form_id | append: '-' | append: forloop.index -%}
+              {%- case block.type -%}
+                {%- when 'field' -%}
+                  <div class="sbs-field" {{ block.shopify_attributes }}>
+                    <label for="{{ fid }}">
+                      {{ block.settings.label | escape }}
+                      {%- if block.settings.required %} <span class="sbs-req" aria-hidden="true">*</span>{% endif -%}
+                    </label>
+                    {%- if block.settings.hint != blank -%}
+                      <span class="sbs-dim" id="{{ fid }}-hint">{{ block.settings.hint | escape }}</span>
+                    {%- endif -%}
+                    {%- assign fname = block.settings.name | default: block.settings.label -%}
+                    {%- if block.settings.type == 'select' -%}
+                      <select id="{{ fid }}" name="contact[{{ fname | escape }}]"
+                              {% if block.settings.required %}required{% endif %}
+                              {% if block.settings.hint != blank %}aria-describedby="{{ fid }}-hint"{% endif %}>
+                        <option value="">Choose…</option>
+                        {%- assign opts = block.settings.options | split: ',' -%}
+                        {%- for o in opts -%}
+                          <option value="{{ o | strip | escape }}">{{ o | strip }}</option>
+                        {%- endfor -%}
+                      </select>
+                    {%- elsif block.settings.type == 'textarea' -%}
+                      <textarea id="{{ fid }}" name="contact[{{ fname | escape }}]" rows="4"
+                                maxlength="1200"
+                                {% if block.settings.required %}required{% endif %}
+                                {% if block.settings.hint != blank %}aria-describedby="{{ fid }}-hint"{% endif %}></textarea>
+                    {%- else -%}
+                      <input id="{{ fid }}"
+                             type="{{ block.settings.type | default: 'text' }}"
+                             name="{% if block.settings.type == 'email' %}contact[email]{% else %}contact[{{ fname | escape }}]{% endif %}"
+                             {% if block.settings.type == 'email' %}autocomplete="email"{% endif %}
+                             maxlength="200"
+                             {% if block.settings.required %}required{% endif %}
+                             {% if block.settings.hint != blank %}aria-describedby="{{ fid }}-hint"{% endif %}>
+                    {%- endif -%}
+                  </div>
+                {%- when 'consent' -%}
+                  <div class="sbs-field sbs-offer__consent" {{ block.shopify_attributes }}>
+                    <label for="{{ fid }}">
+                      {%- comment -%} Unchecked by default, and never a condition of the request. {%- endcomment -%}
+                      <input type="checkbox" id="{{ fid }}" name="contact[Marketing opt-in]" value="yes">
+                      <span>{{ block.settings.label | escape }}</span>
+                    </label>
+                    <span class="sbs-dim">{{ block.settings.hint | escape }}</span>
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+
+
+            <button type="submit" class="sbs-btn sbs-btn--primary sbs-btn--block"
+                    data-sbs-offer-submit="{{ offer_id | escape }}">
+              {{ section.settings.button_label | default: 'Send request' | escape }}
+            </button>
+
+            <div class="sbs-offer__fineprint">
+              {{ section.settings.form_fineprint
+                 | default: '<p>No payment is taken here. Your message is emailed to Site Builder Stack and is not added to any marketing list.</p>' }}
+            </div>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+
+      {%- if section.settings.aside_note != blank -%}
+        <div class="sbs-offer__note">{{ section.settings.aside_note }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "SBS — Offer",
+  "settings": [
+    { "type": "text", "id": "offer_id", "label": "Offer id (analytics)", "default": "offer",
+      "info": "Lowercase, hyphenated. Sent with monetization events; never free text from a visitor." },
+    { "type": "select", "id": "mode", "label": "Mode", "default": "inquiry",
+      "options": [
+        { "value": "inquiry", "label": "Inquiry — a request, not a booking" },
+        { "value": "waitlist", "label": "Waitlist — interest list, no payment" },
+        { "value": "purchase", "label": "Purchase — a working checkout exists" }
+      ] },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "richtext", "id": "status_note", "label": "Status banner",
+      "info": "State plainly what this page does and does not do (no payment, not a booking)." },
+    { "type": "header", "content": "Form" },
+    { "type": "text", "id": "form_heading", "label": "Form heading", "default": "Make a request" },
+    { "type": "richtext", "id": "form_intro", "label": "Form intro" },
+    { "type": "text", "id": "request_label", "label": "Request type (email subject line)", "default": "Offer enquiry" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Send request" },
+    { "type": "richtext", "id": "form_fineprint", "label": "Fine print under the button" },
+    { "type": "richtext", "id": "success_message", "label": "Success message" },
+    { "type": "richtext", "id": "aside_note", "label": "Note under the form" }
+  ],
+  "blocks": [
+    { "type": "field", "name": "Field", "settings": [
+      { "type": "text", "id": "label", "label": "Label" },
+      { "type": "text", "id": "name", "label": "Field name in the email", "info": "Defaults to the label." },
+      { "type": "select", "id": "type", "label": "Type", "default": "text",
+        "options": [
+          { "value": "text", "label": "Text" }, { "value": "email", "label": "Email" },
+          { "value": "url", "label": "URL" }, { "value": "select", "label": "Select" },
+          { "value": "textarea", "label": "Textarea" } ] },
+      { "type": "text", "id": "options", "label": "Select options (comma separated)" },
+      { "type": "text", "id": "hint", "label": "Hint" },
+      { "type": "checkbox", "id": "required", "label": "Required", "default": false }
+    ] },
+    { "type": "consent", "name": "Marketing opt-in", "settings": [
+      { "type": "text", "id": "label", "label": "Label", "default": "Email me when this launches" },
+      { "type": "text", "id": "hint", "label": "Hint", "default": "Optional, unchecked by default, and separate from your request." }
+    ] }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "SBS — Offer" }]
+}
+{% endschema %}

@@ -1,0 +1,149 @@
+{%- comment -%}
+  My learning: progress across every track, saved guides, and what to read next.
+
+  Every track and every lesson is rendered server-side, read from the hub pages'
+  own `sbs.steps` metafields. Nothing about the site's structure is duplicated
+  into JavaScript — reorder a path on its hub and this page follows, because it
+  is reading the same list the hub renders.
+
+  What JavaScript adds is only the per-visitor part: which lessons are ticked,
+  which are saved, and the resulting counts. That is the only information this
+  page holds that the server does not have, and it never leaves the browser.
+
+  Without JavaScript this is still a complete, crawlable index of every track
+  and every lesson in it, which is a genuinely useful page. The progress
+  furniture is hidden until the script confirms storage actually works —
+  `localStorage` throws on access in some privacy modes, so "available" has to
+  be tested rather than assumed.
+{%- endcomment -%}
+
+<section class="sbs-section sbs-section--tight">
+  <div class="sbs-container">
+    <nav class="sbs-crumbs" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | escape }}</span>
+    </nav>
+    <div class="sbs-article__head">
+      <span class="sbs-eyebrow">Your progress</span>
+      <h1>{{ page.title | escape }}</h1>
+      {%- if page.metafields.global.description_tag != blank -%}
+        <p class="sbs-lede">{{ page.metafields.global.description_tag }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- if page.content != blank -%}
+  <div class="sbs-section sbs-section--tight">
+    <div class="sbs-container">
+      <div class="sbs-rte sbs-article__body">{{ page.content }}</div>
+    </div>
+  </div>
+{%- endif -%}
+
+<div class="sbs-container" data-sbs-learning>
+
+  {%- comment -%} Overall summary, filled in by the script. {%- endcomment -%}
+  <div class="sbs-learn__summary" data-sbs-learn-summary hidden>
+    <p class="sbs-learn__big"><strong data-sbs-learn-done>0</strong><span> guides completed</span></p>
+    <p class="sbs-learn__sub" data-sbs-learn-sub></p>
+  </div>
+
+  {%- comment -%}
+    Saved guides. The list itself is built by the script from storage, because
+    the server has no way to know which guides this visitor saved.
+  {%- endcomment -%}
+  <section class="sbs-learn__block" data-sbs-learn-saved-block hidden aria-labelledby="sbs-saved-h">
+    <h2 id="sbs-saved-h">Saved for later</h2>
+    <ul class="sbs-learn__saved" data-sbs-learn-saved></ul>
+  </section>
+
+  <section class="sbs-learn__block" aria-labelledby="sbs-tracks-h">
+    <h2 id="sbs-tracks-h">{{ section.settings.tracks_heading | default: 'Learning tracks' | escape }}</h2>
+
+    {%- comment -%} Liquid rejects a filter inside a bracket lookup. {%- endcomment -%}
+    {%- assign blog_handle = section.settings.blog | default: 'guides' -%}
+    {%- assign blog = blogs[blog_handle] -%}
+    {%- assign rendered = 0 -%}
+    <ul class="sbs-learn__tracks">
+      {%- for block in section.blocks -%}
+        {%- assign hub = pages[block.settings.hub] -%}
+        {%- assign steps = hub.metafields.sbs.steps.value -%}
+        {%- if hub != blank and steps.size > 0 -%}
+          {%- assign rendered = rendered | plus: 1 -%}
+          <li class="sbs-learn__track" data-sbs-learn-track="{{ hub.handle | escape }}" {{ block.shopify_attributes }}>
+            <div class="sbs-learn__track-head">
+              <h3><a href="{{ hub.url }}" data-sbs-track="pillar_view">{{ hub.title | escape }}</a></h3>
+              <p class="sbs-learn__track-count" data-sbs-learn-count hidden></p>
+            </div>
+            <p class="sbs-cl__bar sbs-learn__bar" data-sbs-learn-bar hidden aria-hidden="true">
+              <span class="sbs-cl__fill" data-sbs-learn-fill style="width:0%"></span>
+            </p>
+            <ol class="sbs-learn__lessons">
+              {%- for h in steps -%}
+                {%- assign qualified = blog.handle | append: '/' | append: h -%}
+                {%- assign a = blog.articles | where: 'handle', qualified | first -%}
+                {%- unless a -%}{%- assign a = blog.articles | where: 'handle', h | first -%}{%- endunless -%}
+                {%- if a != blank -%}
+                  <li class="sbs-learn__lesson" data-sbs-lesson="{{ h | escape }}">
+                    <a href="{{ a.url }}" data-sbs-track="learning_path_step">{{ a.title | escape }}</a>
+                    <span class="sbs-learn__tick" data-sbs-learn-tick aria-hidden="true"></span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ol>
+            <p class="sbs-learn__next" data-sbs-learn-next hidden></p>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+    {%- if rendered == 0 -%}
+      <p class="sbs-muted">No learning tracks are configured yet.</p>
+    {%- endif -%}
+  </section>
+
+  {%- comment -%}
+    Reset. Shown only when there is something to reset, so the page does not
+    offer to clear progress that does not exist.
+  {%- endcomment -%}
+  <div class="sbs-learn__reset" data-sbs-learn-reset-block hidden>
+    <button type="button" class="sbs-btn sbs-btn--ghost" data-sbs-learn-reset>
+      Reset progress
+    </button>
+    <p class="sbs-learn__note">
+      Clears everything this page remembers, in this browser. It cannot be undone,
+      and there is nothing stored anywhere else to restore it from.
+    </p>
+  </div>
+
+  <p class="sbs-learn__privacy">
+    All of this is kept in your browser using <code>localStorage</code>. It is
+    never transmitted, there is no account, and it does not follow you to another
+    device or another browser. Clearing site data clears it.
+  </p>
+</div>
+
+{% schema %}
+{
+  "name": "SBS — My learning",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "tracks_heading", "label": "Tracks heading", "default": "Learning tracks" },
+    { "type": "text", "id": "blog", "label": "Blog handle", "default": "guides" }
+  ],
+  "blocks": [
+    {
+      "type": "track",
+      "name": "Track",
+      "settings": [
+        { "type": "text", "id": "hub", "label": "Hub page handle",
+          "info": "Its sbs.steps metafield supplies the lessons. Omitted if the hub has no path." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "SBS — My learning" }]
+}
+{% endschema %}
